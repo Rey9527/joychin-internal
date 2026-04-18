@@ -62,6 +62,12 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .modal-bd { padding: 16px 20px 20px; }
 .modal-close { background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; padding: 0; flex-shrink: 0; line-height: 1; }
 @media (max-width: 680px) { .sidebar { width: 48px; } .sidebar-logo p, .nav-item span, .nav-section, .sidebar-footer { display: none; } .content { padding: 14px; } .grid-2 { grid-template-columns: 1fr; } }
+#toast-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
+.toast { padding: 10px 14px; border-radius: 9px; font-size: 12px; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,0.12); display: flex; align-items: flex-start; gap: 10px; animation: toast-in 0.18s ease; }
+.toast-success { background: #E1F5EE; color: #085041; border: 1px solid #0F6E56; }
+.toast-error { background: #FCEBEB; color: #791F1F; border: 1px solid #F09595; }
+.toast-close { background: none; border: none; cursor: pointer; font-size: 16px; color: inherit; opacity: 0.6; padding: 0; flex-shrink: 0; line-height: 1; }
+@keyframes toast-in { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
 </style>
 </head>
 <body>
@@ -94,6 +100,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-footer">rey@joy-paper.com</div>
 </div>
 
+<div id="toast-container"></div>
 <div class="main">
   <div class="topbar">
     <div class="topbar-title" id="topbar-title">詢價管理</div>
@@ -203,6 +210,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <div><label>LINE ID</label><input id="ns-line" placeholder="wang_yufeng" /></div>
           <div><label>WhatsApp</label><input id="ns-whatsapp" placeholder="+886912345678" /></div>
           <div><label>專長產品</label><input id="ns-specialty" placeholder="矽油離型紙" /></div>
+          <div><label>郵件稱謂</label><input id="ns-salutation" placeholder="例：王哥、李總、David" /></div>
         </div>
         <div style="display:flex;gap:8px">
           <button class="btn btn-primary" onclick="createSupplier()">新增</button>
@@ -259,6 +267,15 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 </div>
 
 <script>
+function showToast(msg,type='success'){
+  const c=document.getElementById('toast-container')
+  const t=document.createElement('div')
+  t.className='toast toast-'+type
+  t.innerHTML='<span style="flex:1">'+msg+'</span>'+(type==='error'?'<button class="toast-close" onclick="this.parentElement.remove()">×</button>':'')
+  c.appendChild(t)
+  if(type==='success')setTimeout(()=>t.remove(),3000)
+}
+
 const SB_URL='https://ckgjcwhlusksqbqvvbma.supabase.co'
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZ2pjd2hsdXNrc3FicXZ2Ym1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MDMzNzUsImV4cCI6MjA5MjA3OTM3NX0.GQtWWNP_Gd4Zx6S3nNoukVIY8cUXCiGmIe_G9Lyy7fc'
 const sb=supabase.createClient(SB_URL,SB_KEY)
@@ -273,6 +290,7 @@ const INQ_STATUS=[
 const QUO_STATUS=[
   {id:'pending',label:'待報價',color:'#854F0B',bg:'#FAEEDA'},
   {id:'drafted',label:'已草稿',color:'#185FA5',bg:'#E6F1FB'},
+  {id:'quoted',label:'已報價',color:'#0F6E56',bg:'#E1F5EE'},
   {id:'sent',label:'已報客戶',color:'#534AB7',bg:'#EEEDFE'},
   {id:'accepted',label:'客戶接受',color:'#3B6D11',bg:'#EAF3DE'},
   {id:'rejected',label:'客戶拒絕',color:'#A32D2D',bg:'#FCEBEB'},
@@ -381,20 +399,20 @@ async function createInquiry(){
   const customer=document.getElementById('nf-customer').value
   const product=document.getElementById('nf-product').value.trim()
   const supplier=document.getElementById('nf-supplier').value
-  if(!customer){alert('請選擇客戶');return}
-  if(!product){alert('請填寫產品需求');return}
-  if(!supplier){alert('請選擇供應商');return}
+  if(!customer){showToast('請選擇客戶','error');return}
+  if(!product){showToast('請填寫產品需求','error');return}
+  if(!supplier){showToast('請選擇供應商','error');return}
   const newInq={id:genInqId(),customer,product,supplier,
     spec:document.getElementById('nf-spec').value.trim(),
     supplier_deadline:document.getElementById('nf-deadline').value||null,
     status:'pending',can_make:'待確認',margin:'20'}
   const{error}=await sb.from('inquiries').insert(newInq)
-  if(error){alert('建立失敗：'+error.message);return}
+  if(error){showToast('建立失敗：'+error.message,'error');return}
   await loadInquiries();hideNewInqForm();populateFilterCustomers();renderInquiries()
   selectedInqId=newInq.id;openInqModal(newInq.id)
 }
 
-function openInqModal(id){selectedInqId=id;showTpl=false;renderInqModalHd();renderInqModalBd();document.getElementById('modal-inq').classList.add('open')}
+async function openInqModal(id){selectedInqId=id;showTpl=false;await loadSuppliers();renderInqModalHd();renderInqModalBd();document.getElementById('modal-inq').classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 function closeModalOnBg(e,id){if(e.target===document.getElementById(id))closeModal(id)}
 
@@ -410,6 +428,7 @@ function renderInqModalHd(){
 function renderInqModalBd(){
   const i=inquiries.find(x=>x.id===selectedInqId);if(!i)return
   const sup=suppliers.filter(s=>s.company===i.supplier)
+  console.log('sup:', JSON.stringify(sup))
   document.getElementById('modal-inq-bd').innerHTML=
     '<div style="margin-bottom:10px">'+badge(i.status)+'</div>'+
     '<div style="font-size:11px;font-weight:500;color:#666;margin-bottom:6px">更新狀態</div>'+
@@ -432,7 +451,8 @@ function renderInqModalBd(){
 }
 
 function buildTpl(i,sup){
-  const supName=sup.length?sup[0].name:'您好'
+  const _s=sup[0]||{}
+  const supName=sup.length?(_s.salutation||(_s.name+(_s.role?' '+_s.role:''))):'您好'
   const deadline=i.supplier_deadline||'2天內'
   const text=supName+' 您好，\n\n我司客戶有以下離型紙需求，請協助確認並報價：\n\n【產品規格】\n'+i.product+'\n'+(i.spec||'（規格待補充）')+'\n\n請提供以下資訊：\n1. 貴司是否可以生產此規格？\n2. 生產交期（從確認訂單起算）\n3. 最低起訂量（MOQ）\n4. 原料由貴司提供，請確認原料條件\n5. 報價（含包裝及運至工廠條件，FOB / CIF 請註明）\n6. 如需打樣，打樣費及時間\n\n請於 '+deadline+' 前回覆，謝謝。\n\n此致\nJOY CHIN PSA INCORPORATION CO LTD'
   window._tpl=text
@@ -465,7 +485,7 @@ async function sendToQuote(inqId){
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
     apply_customs:true,margin_pct:parseFloat(settings.default_margin_pct||20),status:'pending'
   })
-  if(error){alert('送去報價失敗：'+error.message);return}
+  if(error){showToast('送去報價失敗：'+error.message,'error');return}
   await sb.from('inquiries').update({status:'sent_to_quote'}).eq('id',inqId)
   await Promise.all([loadInquiries(),loadQuotes()])
   renderInquiries();closeModal('modal-inq');switchTab('quotes')
@@ -514,7 +534,8 @@ async function updQ(id,field,value){
   renderQuotes()
 }
 async function updQStatus(id,status){
-  await sb.from('quotes').update({status}).eq('id',id)
+  const{error}=await sb.from('quotes').update({status}).eq('id',id)
+  if(error){showToast('更新狀態失敗：'+error.message,'error');return}
   await loadQuotes();renderQuotes()
 }
 
@@ -538,7 +559,7 @@ async function saveSettings(){
     {key:'default_quote_currency',value:document.getElementById('set-quote-cur').value,label:'預設報價幣別'},
   ]
   await Promise.all(rows.map(r=>sb.from('settings').upsert({...r,updated_at:new Date().toISOString()})))
-  await loadSettings();closeModal('modal-settings');alert('設定已儲存')
+  await loadSettings();closeModal('modal-settings');showToast('設定已儲存')
 }
 
 function renderCustomers(){
@@ -572,14 +593,14 @@ function hideNewCustomerForm(){
 async function createCustomer(){
   const name=document.getElementById('nc-name').value.trim()
   const company=document.getElementById('nc-company').value.trim()
-  if(!name||!company){alert('請填寫姓名和公司');return}
+  if(!name||!company){showToast('請填寫姓名和公司','error');return}
   const{error}=await sb.from('customers').insert({name,company,
     email:document.getElementById('nc-email').value.trim()||null,
     phone:document.getElementById('nc-phone').value.trim()||null,
     country:document.getElementById('nc-country').value,
     industry:document.getElementById('nc-industry').value.trim()||null,
     notes:document.getElementById('nc-notes').value.trim()||null})
-  if(error){alert('新增失敗：'+error.message);return}
+  if(error){showToast('新增失敗：'+error.message,'error');return}
   await loadCustomers();hideNewCustomerForm();renderCustomers()
 }
 
@@ -608,7 +629,7 @@ function openEditCustomer(id){
 async function saveCustomer(id){
   const name=document.getElementById('ec-name').value.trim()
   const company=document.getElementById('ec-company').value.trim()
-  if(!name||!company){alert('請填寫姓名和公司');return}
+  if(!name||!company){showToast('請填寫姓名和公司','error');return}
   await sb.from('customers').update({name,company,
     email:document.getElementById('ec-email').value.trim()||null,
     phone:document.getElementById('ec-phone').value.trim()||null,
@@ -643,21 +664,22 @@ function renderSupplierMgmt(){
 function showNewSupplierForm(){document.getElementById('new-supplier-form').style.display='block'}
 function hideNewSupplierForm(){
   document.getElementById('new-supplier-form').style.display='none'
-  ;['ns-name','ns-company','ns-role','ns-email','ns-phone','ns-line','ns-whatsapp','ns-specialty'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  ;['ns-name','ns-company','ns-role','ns-email','ns-phone','ns-line','ns-whatsapp','ns-specialty','ns-salutation'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
 }
 
 async function createSupplier(){
   const name=document.getElementById('ns-name').value.trim()
   const company=document.getElementById('ns-company').value.trim()
   const email=document.getElementById('ns-email').value.trim()
-  if(!name||!company||!email){alert('請填寫姓名、公司和 Email');return}
+  if(!name||!company||!email){showToast('請填寫姓名、公司和 Email','error');return}
   const{error}=await sb.from('suppliers').insert({name,company,email,
     role:document.getElementById('ns-role').value.trim()||null,
     phone:document.getElementById('ns-phone').value.trim()||null,
     line_id:document.getElementById('ns-line').value.trim()||null,
     whatsapp:document.getElementById('ns-whatsapp').value.trim()||null,
-    specialty:document.getElementById('ns-specialty').value.trim()||null})
-  if(error){alert('新增失敗：'+error.message);return}
+    specialty:document.getElementById('ns-specialty').value.trim()||null,
+    salutation:document.getElementById('ns-salutation').value.trim()||null})
+  if(error){showToast('新增失敗：'+error.message,'error');return}
   await loadSuppliers();hideNewSupplierForm();renderSupplierMgmt()
 }
 
@@ -680,6 +702,7 @@ function openEditSupplier(id){
     '<div><label>LINE ID</label><input id="es-line" value="'+(s.line_id||'')+'" /></div>'+
     '<div><label>WhatsApp</label><input id="es-whatsapp" value="'+(s.whatsapp||'')+'" /></div>'+
     '<div><label>專長產品</label><input id="es-specialty" value="'+(s.specialty||'')+'" /></div>'+
+    '<div><label>郵件稱謂</label><input id="es-salutation" value="'+(s.salutation||'')+'" placeholder="例：王哥、李總、David" /></div>'+
     '</div><button class="btn btn-primary" onclick="saveSupplier('+id+')">儲存</button>'
   document.getElementById('modal-supplier').classList.add('open')
 }
@@ -688,14 +711,15 @@ async function saveSupplier(id){
   const name=document.getElementById('es-name').value.trim()
   const company=document.getElementById('es-company').value.trim()
   const email=document.getElementById('es-email').value.trim()
-  if(!name||!company||!email){alert('請填寫姓名、公司和 Email');return}
+  if(!name||!company||!email){showToast('請填寫姓名、公司和 Email','error');return}
   await sb.from('suppliers').update({name,company,email,
     role:document.getElementById('es-role').value.trim()||null,
     phone:document.getElementById('es-phone').value.trim()||null,
     line_id:document.getElementById('es-line').value.trim()||null,
     whatsapp:document.getElementById('es-whatsapp').value.trim()||null,
-    specialty:document.getElementById('es-specialty').value.trim()||null}).eq('id',id)
-  await loadSuppliers();closeModal('modal-supplier');renderSupplierMgmt()
+    specialty:document.getElementById('es-specialty').value.trim()||null,
+    salutation:document.getElementById('es-salutation').value.trim()||null}).eq('id',id).then(res=>console.log('save result:',JSON.stringify(res)))
+  await loadSuppliers();closeModal('modal-supplier');renderSupplierMgmt();showToast('供應商資料已儲存')
 }
 
 function renderDocs(){
