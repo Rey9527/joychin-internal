@@ -37,16 +37,19 @@ textarea { resize: vertical; min-height: 72px; }
 label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .req { color: #A32D2D; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 500; }
 .overdue-tag { color: #A32D2D; font-size: 11px; font-weight: 500; }
 .row { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid #e5e5e0; border-radius: 10px; cursor: pointer; margin-bottom: 7px; background: #fff; transition: all 0.12s; }
 .row:hover { border-color: #0F6E56; background: #f8fffc; }
 .row.overdue { border-color: #F09595; background: #FCEBEB; }
+.row.warning { border-color: #F5C842; background: #FFFBEA; }
 .status-btns { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
 .status-btn { padding: 3px 10px; border-radius: 7px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid; }
 .divider { height: 1px; background: #e5e5e0; margin: 14px 0; }
 .section-title { font-size: 12px; font-weight: 500; color: #444; margin-bottom: 8px; }
 .alert-info { background: #E6F1FB; border: 1px solid #B5D4F4; color: #0C447C; padding: 9px 13px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; }
+.alert-warn { background: #FFFBEA; border: 1px solid #F5C842; color: #7A5B00; padding: 9px 13px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; }
 .loading { text-align: center; padding: 40px; color: #aaa; font-size: 13px; }
 .tag { display: inline-block; padding: 1px 7px; border-radius: 7px; font-size: 10px; background: #f0f0eb; color: #666; border: 1px solid #e5e5e0; margin: 1px; }
 .doc-row { display: flex; align-items: center; gap: 10px; padding: 9px 13px; border: 1px solid #e5e5e0; border-radius: 8px; background: #fff; margin-bottom: 5px; }
@@ -58,10 +61,20 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .modal-overlay.open { display: flex; }
 .modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 600px; max-height: 88vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
 .modal-box.sm { max-width: 440px; }
+.modal-box.lg { max-width: 720px; }
 .modal-hd { display: flex; justify-content: space-between; align-items: flex-start; padding: 18px 20px 12px; position: sticky; top: 0; background: #fff; border-bottom: 1px solid #e5e5e0; border-radius: 14px 14px 0 0; z-index: 1; }
 .modal-bd { padding: 16px 20px 20px; }
 .modal-close { background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; padding: 0; flex-shrink: 0; line-height: 1; }
-@media (max-width: 680px) { .sidebar { width: 48px; } .sidebar-logo p, .nav-item span, .nav-section, .sidebar-footer { display: none; } .content { padding: 14px; } .grid-2 { grid-template-columns: 1fr; } }
+/* 產品選擇 dropdown */
+.product-picker { position: relative; }
+.product-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #e5e5e0; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 100; max-height: 220px; overflow-y: auto; display: none; }
+.product-dropdown.open { display: block; }
+.product-option { padding: 9px 12px; font-size: 12px; cursor: pointer; border-bottom: 1px solid #f0f0eb; }
+.product-option:hover { background: #f8fffc; }
+.product-option:last-child { border-bottom: none; }
+.product-option .po-name { font-weight: 500; color: #1a1a1a; }
+.product-option .po-meta { font-size: 10px; color: #aaa; margin-top: 1px; }
+@media (max-width: 680px) { .sidebar { width: 48px; } .sidebar-logo p, .nav-item span, .nav-section, .sidebar-footer { display: none; } .content { padding: 14px; } .grid-2 { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr; } }
 #toast-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
 .toast { padding: 10px 14px; border-radius: 9px; font-size: 12px; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,0.12); display: flex; align-items: flex-start; gap: 10px; animation: toast-in 0.18s ease; }
 .toast-success { background: #E1F5EE; color: #085041; border: 1px solid #0F6E56; }
@@ -93,6 +106,9 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <span class="nav-icon">🏭</span><span>供應商管理</span>
     </button>
     <div class="nav-section">產品</div>
+    <button class="nav-item" id="nav-products" onclick="switchTab('products')">
+      <span class="nav-icon">📦</span><span>產品目錄</span>
+    </button>
     <button class="nav-item" id="nav-docs" onclick="switchTab('docs')">
       <span class="nav-icon">📁</span><span>技術文件庫</span>
     </button>
@@ -157,7 +173,10 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-quotes" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div id="quote-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-ghost btn-sm" onclick="openSettingsModal()">⚙ 報價預設值</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="openSettingsModal()">⚙ 報價預設值</button>
+          <button class="btn btn-primary" onclick="openNewQuoteModal()">+ 直接新增報價單</button>
+        </div>
       </div>
       <div id="quote-list"></div>
     </div>
@@ -220,6 +239,28 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div id="supplier-mgmt-list"></div>
     </div>
 
+    <!-- 產品目錄 -->
+    <div id="tab-products" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div id="product-summary" style="font-size:12px;color:#888"></div>
+        <button class="btn btn-primary" onclick="openProductModal()">+ 新增產品</button>
+      </div>
+      <div id="product-overdue-alert" style="display:none" class="alert-warn"></div>
+      <div class="filter-bar">
+        <input id="fp-search" type="text" placeholder="搜尋產品名稱、料號..." oninput="renderProducts()" style="max-width:200px" />
+        <select id="fp-supplier" onchange="renderProducts()"><option value="">全部供應商</option></select>
+        <select id="fp-status" onchange="renderProducts()">
+          <option value="">全部狀態</option>
+          <option value="ok">正常</option>
+          <option value="warn">即將到期</option>
+          <option value="overdue">需更新</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="clearProductFilters()">清除</button>
+      </div>
+      <div id="product-list"></div>
+    </div>
+
     <!-- 技術文件庫 -->
     <div id="tab-docs" style="display:none">
       <div style="margin-bottom:12px"><input id="doc-search" placeholder="搜尋產品、文件類型、標籤..." oninput="renderDocs()" /></div>
@@ -255,6 +296,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   </div>
 </div>
 
+<!-- 報價詳情 Modal -->
+<div class="modal-overlay" id="modal-quote" onclick="closeModalOnBg(event,'modal-quote')">
+  <div class="modal-box">
+    <div class="modal-hd" id="modal-quote-hd"></div>
+    <div class="modal-bd" id="modal-quote-bd"></div>
+  </div>
+</div>
+
 <!-- 報價設定 Modal -->
 <div class="modal-overlay" id="modal-settings" onclick="closeModalOnBg(event,'modal-settings')">
   <div class="modal-box sm">
@@ -263,6 +312,25 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <button class="modal-close" onclick="closeModal('modal-settings')">×</button>
     </div>
     <div class="modal-bd" id="modal-settings-bd"></div>
+  </div>
+</div>
+
+<!-- 產品目錄 Modal -->
+<div class="modal-overlay" id="modal-product" onclick="closeModalOnBg(event,'modal-product')">
+  <div class="modal-box sm">
+    <div class="modal-hd" id="modal-product-hd"></div>
+    <div class="modal-bd" id="modal-product-bd"></div>
+  </div>
+</div>
+
+<!-- 直接新增報價單 Modal -->
+<div class="modal-overlay" id="modal-new-quote" onclick="closeModalOnBg(event,'modal-new-quote')">
+  <div class="modal-box lg">
+    <div class="modal-hd">
+      <div style="font-size:14px;font-weight:600">直接新增報價單</div>
+      <button class="modal-close" onclick="closeModal('modal-new-quote')">×</button>
+    </div>
+    <div class="modal-bd" id="modal-new-quote-bd"></div>
   </div>
 </div>
 
@@ -288,28 +356,39 @@ const INQ_STATUS=[
   {id:'closed',label:'已結案',color:'#5F5E5A',bg:'#F1EFE8'},
 ]
 const QUO_STATUS=[
-  {id:'pending',label:'待報價',color:'#854F0B',bg:'#FAEEDA'},
-  {id:'drafted',label:'已草稿',color:'#185FA5',bg:'#E6F1FB'},
-  {id:'quoted',label:'已報價',color:'#0F6E56',bg:'#E1F5EE'},
-  {id:'sent',label:'已報客戶',color:'#534AB7',bg:'#EEEDFE'},
+  {id:'draft',label:'草稿',color:'#854F0B',bg:'#FAEEDA'},
+  {id:'sent',label:'已送客戶',color:'#534AB7',bg:'#EEEDFE'},
   {id:'accepted',label:'客戶接受',color:'#3B6D11',bg:'#EAF3DE'},
   {id:'rejected',label:'客戶拒絕',color:'#A32D2D',bg:'#FCEBEB'},
-  {id:'closed',label:'已結案',color:'#5F5E5A',bg:'#F1EFE8'},
 ]
 
-let inquiries=[],documents=[],suppliers=[],customers=[],quotes=[],settings={}
-let selectedInqId=null,activeTab='inquiry',showTpl=false
+let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteItems=[],settings={},products=[]
+let selectedInqId=null,selectedQuoteId=null,activeTab='inquiry',showTpl=false
+let _qPendingItems={},_qPendingHeader={}
+// 直接新增報價單的暫存
+let _nqItems=[] // [{product,spec,cost_price,cost_currency,customs_fee_pct,apply_customs,margin_pct,moq,lead_time,from_product_id}]
 
 async function init(){
-  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadSettings()])
+  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadSettings(),loadProducts()])
   renderInquiries(); renderDocs(); populateFilterCustomers()
 }
 async function loadInquiries(){const{data}=await sb.from('inquiries').select('*').order('created_at',{ascending:false});inquiries=data||[];updateOverdueAlert()}
 async function loadDocuments(){const{data}=await sb.from('documents').select('*').order('product');documents=data||[]}
 async function loadSuppliers(){const{data}=await sb.from('suppliers').select('*').order('company');suppliers=data||[]}
 async function loadCustomers(){const{data}=await sb.from('customers').select('*').order('company');customers=data||[]}
-async function loadQuotes(){const{data}=await sb.from('quotes').select('*').order('created_at',{ascending:false});quotes=data||[]}
+async function loadQuotes(){
+  const[{data:h},{data:it}]=await Promise.all([
+    sb.from('quote_headers').select('*').order('created_at',{ascending:false}),
+    sb.from('quote_items').select('*')
+  ])
+  quoteHeaders=h||[];quoteItems=it||[]
+}
 async function loadSettings(){const{data}=await sb.from('settings').select('*');settings={};(data||[]).forEach(r=>settings[r.key]=r.value)}
+async function loadProducts(){
+  const{data}=await sb.from('products').select('*').order('product_name')
+  products=data||[]
+  updateProductOverdueAlert()
+}
 
 function updateOverdueAlert(){
   const n=inquiries.filter(i=>isOverdue(i)&&!['sent_to_quote','closed'].includes(i.status)).length
@@ -317,11 +396,39 @@ function updateOverdueAlert(){
   if(n>0){el.style.display='inline-block';el.setAttribute('style','display:inline-block;background:#FCEBEB;color:#A32D2D;border:1px solid #F09595;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:500');el.textContent='⚠ '+n+' 筆超時'}
   else el.style.display='none'
 }
+function updateProductOverdueAlert(){
+  const now=new Date()
+  const overdue=products.filter(p=>productStatus(p)==='overdue').length
+  const warn=products.filter(p=>productStatus(p)==='warn').length
+  const el=document.getElementById('product-overdue-alert')
+  if(!el)return
+  if(overdue>0||warn>0){
+    el.style.display='block'
+    el.textContent=(overdue?'⚠ '+overdue+' 個產品成本需要更新  ':'')+( warn?' 🕐 '+warn+' 個即將到期':'')
+  } else {
+    el.style.display='none'
+  }
+}
+function productStatus(p){
+  if(!p.last_reviewed_at||!p.review_days)return 'ok'
+  const last=new Date(p.last_reviewed_at)
+  const daysSince=Math.floor((new Date()-last)/(1000*60*60*24))
+  if(daysSince>=p.review_days)return 'overdue'
+  if(daysSince>=p.review_days*0.8)return 'warn'
+  return 'ok'
+}
+function productDaysLeft(p){
+  if(!p.last_reviewed_at||!p.review_days)return null
+  const last=new Date(p.last_reviewed_at)
+  const daysSince=Math.floor((new Date()-last)/(1000*60*60*24))
+  return p.review_days-daysSince
+}
+
 function isOverdue(i){return i.supplier_deadline&&new Date(i.supplier_deadline)<new Date()}
 function sObj(id,arr){return (arr||INQ_STATUS).find(s=>s.id===id)||{label:id,color:'#888',bg:'#f0f0f0'}}
 function badge(status,arr){const s=sObj(status,arr);return '<span class="badge" style="background:'+s.bg+';color:'+s.color+';border:1px solid '+s.color+'">'+s.label+'</span>'}
 
-const TAB_LABELS={inquiry:'詢價管理',quotes:'報價管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',docs:'技術文件庫'}
+const TAB_LABELS={inquiry:'詢價管理',quotes:'報價管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫'}
 function switchTab(tab){
   activeTab=tab
   Object.keys(TAB_LABELS).forEach(t=>{
@@ -332,6 +439,7 @@ function switchTab(tab){
   if(tab==='customers')renderCustomers()
   if(tab==='suppliers_mgmt')renderSupplierMgmt()
   if(tab==='quotes')renderQuotes()
+  if(tab==='products'){populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()}
 }
 
 function populateFilterCustomers(){
@@ -341,7 +449,7 @@ function populateFilterCustomers(){
 }
 function clearFilters(){
   ['f-status','f-customer'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
-  ['f-product','f-date-from','f-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  ;['f-product','f-date-from','f-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
   renderInquiries()
 }
 
@@ -428,7 +536,6 @@ function renderInqModalHd(){
 function renderInqModalBd(){
   const i=inquiries.find(x=>x.id===selectedInqId);if(!i)return
   const sup=suppliers.filter(s=>s.company===i.supplier)
-  console.log('sup:', JSON.stringify(sup))
   document.getElementById('modal-inq-bd').innerHTML=
     '<div style="margin-bottom:10px">'+badge(i.status)+'</div>'+
     '<div style="font-size:11px;font-weight:500;color:#666;margin-bottom:6px">更新狀態</div>'+
@@ -445,9 +552,74 @@ function renderInqModalBd(){
     '<div style="margin-bottom:14px"><label>備註</label><textarea onchange="updateInqField(\'remarks\',this.value)">'+(i.remarks||'')+'</textarea></div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+
     '<button class="btn btn-ghost btn-sm" onclick="toggleTpl()">'+(showTpl?'收起範本':'產生詢問供應商訊息')+'</button>'+
+    (i.supplier_price?'<button class="btn btn-ghost btn-sm" onclick="openAddInqToProduct(\''+i.id+'\')">📦 加入產品目錄</button>':'')+ 
     (i.supplier_price?'<button class="btn btn-primary btn-sm" onclick="sendToQuote(\''+i.id+'\')">收到成本 → 送去報價</button>':'')+
     '</div>'+
     (showTpl?buildTpl(i,sup):'')
+}
+
+function openAddInqToProduct(inqId){
+  const i=inquiries.find(x=>x.id===inqId);if(!i)return
+  const existing=document.getElementById('add-to-product-overlay')
+  if(existing)existing.remove()
+  const rawCost=parseFloat((i.supplier_price||'').match(/[\d.]+/)?.[0]||0)||''
+  const rawCur=(i.supplier_price||'').replace(/[\d.,]+/,'').trim()||settings.default_cost_currency||'USD'
+  const supCo=suppliers.filter(s=>s.company===i.supplier)
+  const supId=supCo.length?supCo[0].id:''
+  const supOpts=suppliers.map(s=>'<option value="'+s.id+'"'+(s.id==supId?' selected':'')+'>'+s.company+' — '+s.name+'</option>').join('')
+  const overlay=document.createElement('div')
+  overlay.id='add-to-product-overlay'
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px'
+  overlay.innerHTML=
+    '<div style="background:#fff;border-radius:14px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
+    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0">'+
+    '<div><div style="font-size:14px;font-weight:600">加入產品目錄</div><div style="font-size:11px;color:#aaa;margin-top:2px">來自詢價：'+i.product+'</div></div>'+
+    '<button onclick="document.getElementById(\'add-to-product-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
+    '</div>'+
+    '<div style="padding:16px 20px 20px">'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>產品名稱 <span class="req">*</span></label><input id="atp-name" value="'+escHtmlInq(i.product||'')+'" /></div>'+
+    '<div><label>料號</label><input id="atp-code" placeholder="例：PSA-45G-01" /></div>'+
+    '<div><label>供應商</label><select id="atp-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
+    '<div><label>單位</label><input id="atp-unit" placeholder="例：m²、roll、kg" /></div>'+
+    '<div><label>成本價 <span class="req">*</span></label><input type="number" id="atp-cost" value="'+rawCost+'" step="0.0001" /></div>'+
+    '<div><label>幣別</label><select id="atp-currency">'+['USD','THB','TWD','CNY','EUR','JPY'].map(c=>'<option '+(c===rawCur?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div><label>更新週期（天）</label><input type="number" id="atp-days" value="90" min="7" /></div>'+
+    '<div><label>狀態</label><select id="atp-active"><option value="true">Active（現行產品）</option><option value="false">Inactive（暫不使用）</option></select></div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px"><label>備註 / 規格說明</label><textarea id="atp-notes">'+escHtmlInq(i.spec||'')+'</textarea></div>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn btn-primary" onclick="saveInqToProduct(\''+inqId+'\')">加入目錄</button>'+
+    '<button class="btn btn-ghost" onclick="document.getElementById(\'add-to-product-overlay\').remove()">取消</button>'+
+    '</div></div></div>'
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
+}
+
+function escHtmlInq(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+async function saveInqToProduct(inqId){
+  const name=document.getElementById('atp-name')?.value.trim()
+  if(!name){showToast('請填寫產品名稱','error');return}
+  const costVal=document.getElementById('atp-cost')?.value
+  if(!costVal){showToast('請填寫成本價','error');return}
+  const data={
+    product_name:name,
+    product_code:document.getElementById('atp-code')?.value.trim()||null,
+    supplier_id:parseInt(document.getElementById('atp-supplier')?.value)||null,
+    unit:document.getElementById('atp-unit')?.value.trim()||null,
+    cost_price:parseFloat(costVal),
+    currency:document.getElementById('atp-currency')?.value||'USD',
+    review_days:parseInt(document.getElementById('atp-days')?.value)||90,
+    last_reviewed_at:new Date().toISOString().slice(0,10),
+    notes:document.getElementById('atp-notes')?.value.trim()||null,
+    is_active:document.getElementById('atp-active')?.value==='true'
+  }
+  const{error}=await sb.from('products').insert(data)
+  if(error){showToast('新增失敗：'+error.message,'error');return}
+  await loadProducts()
+  document.getElementById('add-to-product-overlay')?.remove()
+  showToast('已加入產品目錄')
 }
 
 function buildTpl(i,sup){
@@ -478,65 +650,163 @@ async function updateInqField(field,value){
 
 async function sendToQuote(inqId){
   const i=inquiries.find(x=>x.id===inqId);if(!i)return
-  const qId='QUO-'+inqId.replace('INQ-','')
-  const{error}=await sb.from('quotes').insert({
-    id:qId,inquiry_id:inqId,customer:i.customer,product:i.product,
-    spec:i.spec,supplier:i.supplier,cost_price:i.supplier_price,
-    customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
-    apply_customs:true,margin_pct:parseFloat(settings.default_margin_pct||20),status:'pending'
+  const hId='QUO-'+inqId.replace('INQ-','')+'-v1'
+  const{error}=await sb.from('quote_headers').insert({
+    id:hId,inquiry_id:inqId,customer:i.customer,supplier:i.supplier,version:1,status:'draft'
   })
   if(error){showToast('送去報價失敗：'+error.message,'error');return}
+  const rawCost=parseFloat((i.supplier_price||'').match(/[\d.]+/)?.[0]||0)||null
+  const rawCur=(i.supplier_price||'').replace(/[\d.]+/,'').trim()||'USD'
+  const{error:e2}=await sb.from('quote_items').insert({
+    header_id:hId,product:i.product,spec:i.spec||null,
+    cost_price:rawCost,cost_currency:rawCur,
+    customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
+    apply_customs:true,margin_pct:parseFloat(settings.default_margin_pct||20),
+    moq:i.moq||null,lead_time:i.lead_time||null
+  })
+  if(e2){showToast('品項建立失敗：'+e2.message,'error');return}
   await sb.from('inquiries').update({status:'sent_to_quote'}).eq('id',inqId)
   await Promise.all([loadInquiries(),loadQuotes()])
   renderInquiries();closeModal('modal-inq');switchTab('quotes')
+  showToast('已送去報價')
 }
 
+// ===== 報價管理 =====
 function renderQuotes(){
   const el=document.getElementById('quote-list')
   const sum=document.getElementById('quote-summary')
   if(!el)return
-  if(sum)sum.textContent=quotes.filter(q=>q.status!=='closed').length+' 筆待處理'
-  if(!quotes.length){el.innerHTML='<div class="loading">尚無報價，從詢價頁按「收到成本 → 送去報價」開始</div>';return}
-  el.innerHTML=quotes.map(q=>{
-    const cp=parseFloat((q.cost_price||'').match(/[\d.]+/)?.[0]||0)
-    const cus=q.apply_customs?(cp*(parseFloat(q.customs_fee_pct||0)/100)):0
-    const base=cp+cus
-    const final=base*(1+(parseFloat(q.margin_pct||0)/100))
-    const unit=(q.cost_price||'').replace(/[\d.]+/,'').trim()||'USD'
-    const hasP=cp>0
-    return '<div class="card">'+
-      '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">'+
-      '<div style="flex:1"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
-      '<span style="font-size:10px;color:#aaa;font-family:monospace">'+q.id+'</span>'+
-      '<span style="font-size:13px;font-weight:500">'+q.customer+'</span></div>'+
-      '<div style="font-size:12px;color:#666">'+q.product+'</div>'+
-      '<div style="font-size:11px;color:#aaa">供應商：'+(q.supplier||'—')+'</div></div>'+
-      badge(q.status,QUO_STATUS)+'</div>'+
-      '<div class="grid-2" style="margin-bottom:10px">'+
-      '<div><label>供應商成本</label><input value="'+(q.cost_price||'')+'" placeholder="例：USD 2.50/m²" onchange="updQ(\''+q.id+'\',\'cost_price\',this.value)" /></div>'+
-      '<div><label style="display:flex;justify-content:space-between"><span>清關手續費 %</span>'+
-      '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
-      '<input type="checkbox" '+(q.apply_customs?'checked':'')+' onchange="updQ(\''+q.id+'\',\'apply_customs\',this.checked)" style="width:auto"> 套用</label></label>'+
-      '<input type="number" value="'+(q.customs_fee_pct||7.5)+'" min="0" max="50" step="0.5" '+(q.apply_customs?'':'disabled style="opacity:0.4"')+' onchange="updQ(\''+q.id+'\',\'customs_fee_pct\',parseFloat(this.value))" /></div>'+
-      '<div><label>加成利潤 %</label><input type="number" value="'+(q.margin_pct||20)+'" min="0" max="200" step="1" onchange="updQ(\''+q.id+'\',\'margin_pct\',parseFloat(this.value))" /></div>'+
-      '<div><label>計算結果</label><div style="padding:8px 12px;border-radius:8px;border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';background:'+(hasP?'#E1F5EE':'#f8f8f5')+'">'+
-      (hasP?'<span style="font-size:15px;font-weight:600;color:#0F6E56">'+final.toFixed(2)+' '+unit+'</span>'+
-      '<div style="font-size:10px;color:#0F6E56;margin-top:2px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</div>':
-      '<span style="font-size:12px;color:#aaa">請先填入成本</span>')+'</div></div></div>'+
-      '<div style="margin-bottom:10px"><label>備註</label><textarea onchange="updQ(\''+q.id+'\',\'notes\',this.value)">'+(q.notes||'')+'</textarea></div>'+
-      '<div class="status-btns">'+QUO_STATUS.map(s=>'<button class="status-btn" style="background:'+(q.status===s.id?s.bg:'transparent')+';color:'+(q.status===s.id?s.color:'#aaa')+';border-color:'+(q.status===s.id?s.color:'#e5e5e0')+'" onclick="updQStatus(\''+q.id+'\',\''+s.id+'\')">'+s.label+'</button>').join('')+'</div></div>'
+  const active=quoteHeaders.filter(h=>!['accepted','rejected'].includes(h.status))
+  if(sum)sum.textContent=active.length+' 筆進行中 / 共 '+quoteHeaders.length+' 筆'
+  if(!quoteHeaders.length){el.innerHTML='<div class="loading">尚無報價，從詢價頁按「收到成本 → 送去報價」，或點「直接新增報價單」</div>';return}
+  el.innerHTML=quoteHeaders.map(h=>{
+    const items=quoteItems.filter(it=>it.header_id===h.id)
+    const d=new Date(h.created_at).toLocaleDateString('zh-TW')
+    return '<div class="row" onclick="openQuoteModal(\''+h.id+'\')">'+
+      '<div style="flex:1;min-width:0">'+
+      '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
+      '<span style="font-size:10px;color:#aaa;font-family:monospace">'+h.id+'</span>'+
+      '<span style="font-size:13px;font-weight:500">'+h.customer+'</span>'+
+      '<span style="font-size:10px;color:#aaa;background:#f0f0eb;padding:1px 6px;border-radius:5px">v'+h.version+'</span>'+
+      (h.source==='direct'?'<span style="font-size:10px;color:#185FA5;background:#E6F1FB;padding:1px 6px;border-radius:5px;border:1px solid #B5D4F4">直接建立</span>':'')+
+      '</div>'+
+      '<div style="font-size:12px;color:#666">'+(items.length?items.map(it=>it.product).join('、'):'—')+'</div>'+
+      '<div style="font-size:11px;color:#aaa">'+d+' · 供應商：'+(h.supplier||'—')+'</div>'+
+      '</div>'+badge(h.status,QUO_STATUS)+'</div>'
   }).join('')
 }
 
-async function updQ(id,field,value){
-  await sb.from('quotes').update({[field]:value}).eq('id',id)
-  const q=quotes.find(x=>x.id===id);if(q)q[field]=value
-  renderQuotes()
+async function openQuoteModal(id){
+  selectedQuoteId=id;_qPendingItems={};_qPendingHeader={}
+  await loadQuotes()
+  renderQuoteModalHd();renderQuoteModalBd()
+  document.getElementById('modal-quote').classList.add('open')
 }
-async function updQStatus(id,status){
-  const{error}=await sb.from('quotes').update({status}).eq('id',id)
-  if(error){showToast('更新狀態失敗：'+error.message,'error');return}
-  await loadQuotes();renderQuotes()
+
+function renderQuoteModalHd(){
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
+  document.getElementById('modal-quote-hd').innerHTML=
+    '<div style="flex:1"><div style="font-size:15px;font-weight:600;margin-bottom:2px">'+h.customer+
+    ' <span style="font-size:11px;color:#aaa;font-weight:400;background:#f0f0eb;padding:1px 7px;border-radius:5px">v'+h.version+'</span></div>'+
+    '<div style="font-size:12px;color:#666">'+h.id+' · 供應商：'+(h.supplier||'—')+'</div></div>'+
+    '<button class="modal-close" onclick="closeModal(\'modal-quote\')">×</button>'
+}
+
+function renderQuoteModalBd(){
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
+  const items=quoteItems.filter(it=>it.header_id===h.id)
+  const itemsHtml=items.map((it,idx)=>{
+    const cp=parseFloat(it.cost_price||0)
+    const cus=it.apply_customs!==false?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
+    const base=cp+cus
+    const final=base*(1+(parseFloat(it.margin_pct||0)/100))
+    const cur=it.cost_currency||'USD'
+    const hasP=cp>0
+    return '<div style="border:1px solid #e5e5e0;border-radius:10px;padding:14px 16px;margin-bottom:10px">'+
+      '<div style="font-size:12px;font-weight:500;margin-bottom:8px;color:#444">品項 '+(idx+1)+'：'+it.product+'</div>'+
+      (it.spec?'<div style="font-size:11px;color:#aaa;margin-bottom:8px">'+it.spec+'</div>':'')+
+      '<div class="grid-2" style="margin-bottom:8px">'+
+      '<div><label>供應商成本</label><input type="number" value="'+(it.cost_price||'')+'" placeholder="0.00" step="0.01" onchange="qItemChange(\''+it.id+'\',\'cost_price\',parseFloat(this.value)||0)" /></div>'+
+      '<div><label>幣別</label><select onchange="qItemChange(\''+it.id+'\',\'cost_currency\',this.value)">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option '+(it.cost_currency===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+      '<div><label style="display:flex;justify-content:space-between"><span>清關手續費 %</span>'+
+      '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
+      '<input type="checkbox" '+(it.apply_customs!==false?'checked':'')+' onchange="qItemChange(\''+it.id+'\',\'apply_customs\',this.checked)" style="width:auto"> 套用</label></label>'+
+      '<input type="number" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" onchange="qItemChange(\''+it.id+'\',\'customs_fee_pct\',parseFloat(this.value))" /></div>'+
+      '<div><label>利潤 %</label><input type="number" value="'+(it.margin_pct??20)+'" min="0" max="200" step="1" onchange="qItemChange(\''+it.id+'\',\'margin_pct\',parseFloat(this.value))" /></div>'+
+      '<div><label>MOQ</label><input value="'+(it.moq||'')+'" placeholder="例：1000m²" onchange="qItemChange(\''+it.id+'\',\'moq\',this.value)" /></div>'+
+      '<div><label>交期</label><input value="'+(it.lead_time||'')+'" placeholder="例：30天" onchange="qItemChange(\''+it.id+'\',\'lead_time\',this.value)" /></div>'+
+      '</div>'+
+      '<div style="padding:8px 12px;border-radius:8px;border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';background:'+(hasP?'#E1F5EE':'#f8f8f5')+'">'+
+      (hasP?'<span style="font-size:15px;font-weight:600;color:#0F6E56">'+final.toFixed(2)+' '+cur+'</span>'+
+      '<span style="font-size:10px;color:#0F6E56;margin-left:10px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</span>':
+      '<span style="font-size:12px;color:#aaa">請先填入成本</span>')+'</div></div>'
+  }).join('')
+
+  document.getElementById('modal-quote-bd').innerHTML=
+    '<div style="margin-bottom:10px">'+badge(h.status,QUO_STATUS)+'</div>'+
+    '<div class="section-title" style="margin-bottom:8px">品項明細</div>'+
+    itemsHtml+
+    '<div class="divider"></div>'+
+    '<div style="margin-bottom:12px"><label>備註</label><textarea onchange="qHeaderChange(\'notes\',this.value)">'+(h.notes||'')+'</textarea></div>'+
+    '<div class="section-title" style="margin-bottom:6px">更新狀態</div>'+
+    '<div class="status-btns" style="margin-bottom:16px">'+QUO_STATUS.map(s=>'<button class="status-btn" style="background:'+(h.status===s.id?s.bg:'transparent')+';color:'+(h.status===s.id?s.color:'#aaa')+';border-color:'+(h.status===s.id?s.color:'#e5e5e0')+'" onclick="qStatusChange(\''+s.id+'\')">'+s.label+'</button>').join('')+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+    '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="newQuoteVersion()">產生新版本</button>'+
+    (h.status==='accepted'?'<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">送去訂單</button>':'')+
+    '</div>'
+}
+
+function qItemChange(id,field,value){
+  if(!_qPendingItems[id])_qPendingItems[id]={}
+  _qPendingItems[id][field]=value
+  const it=quoteItems.find(x=>x.id===id);if(it)it[field]=value
+  renderQuoteModalBd()
+}
+function qHeaderChange(field,value){
+  _qPendingHeader[field]=value
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(h)h[field]=value
+}
+function qStatusChange(status){
+  _qPendingHeader.status=status
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(h)h.status=status
+  renderQuoteModalBd()
+}
+
+async function saveQuote(){
+  if(Object.keys(_qPendingHeader).length){
+    const{error}=await sb.from('quote_headers').update(_qPendingHeader).eq('id',selectedQuoteId)
+    if(error){showToast('儲存失敗：'+error.message,'error');return}
+  }
+  const results=await Promise.all(Object.entries(_qPendingItems).map(([id,changes])=>sb.from('quote_items').update(changes).eq('id',id)))
+  const fail=results.find(r=>r.error)
+  if(fail){showToast('品項儲存失敗：'+fail.error.message,'error');return}
+  _qPendingItems={};_qPendingHeader={}
+  await loadQuotes();renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
+  showToast('報價已儲存')
+}
+
+async function newQuoteVersion(){
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
+  const items=quoteItems.filter(it=>it.header_id===h.id)
+  const newV=h.version+1
+  const newId=h.id.replace(/-v\d+$/,'')+'-v'+newV
+  const{error}=await sb.from('quote_headers').insert({
+    id:newId,inquiry_id:h.inquiry_id||null,customer:h.customer,supplier:h.supplier,version:newV,status:'draft',notes:h.notes,source:h.source||null
+  })
+  if(error){showToast('建立新版本失敗：'+error.message,'error');return}
+  if(items.length){
+    const newItems=items.map(({id:_,...rest})=>({...rest,header_id:newId}))
+    const{error:e2}=await sb.from('quote_items').insert(newItems)
+    if(e2){showToast('品項複製失敗：'+e2.message,'error');return}
+  }
+  await loadQuotes();selectedQuoteId=newId;_qPendingItems={};_qPendingHeader={}
+  renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
+  showToast('新版本 v'+newV+' 已建立')
+}
+
+async function sendQuoteToOrder(){
+  showToast('送去訂單功能即將開放')
 }
 
 async function openSettingsModal(){
@@ -562,6 +832,423 @@ async function saveSettings(){
   await loadSettings();closeModal('modal-settings');showToast('設定已儲存')
 }
 
+// ===== 直接新增報價單 =====
+function openNewQuoteModal(){
+  _nqItems=[]
+  const bd=document.getElementById('modal-new-quote-bd')
+  const custOpts=customers.map(c=>'<option value="'+c.company+'">'+c.company+'（'+c.name+'）</option>').join('')
+  const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
+  const supOpts=supCos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
+  bd.innerHTML=
+    '<div class="grid-2" style="margin-bottom:14px">'+
+    '<div><label>客戶 <span class="req">*</span></label><select id="nq-customer"><option value="">— 選擇客戶 —</option>'+custOpts+'</select></div>'+
+    '<div><label>供應商</label><select id="nq-supplier"><option value="">— 選擇供應商（可選）—</option>'+supOpts+'</select></div>'+
+    '</div>'+
+    '<div class="divider"></div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+    '<div class="section-title" style="margin-bottom:0">品項</div>'+
+    '<div style="display:flex;gap:6px">'+
+    '<button class="btn btn-ghost btn-sm" onclick="addNqItemFromCatalog()">📦 從目錄選</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="openNewProductFromQuote()">＋ 新增品項</button>'+
+    '</div></div>'+
+    '<div id="nq-items-list"></div>'+
+    '<div class="divider"></div>'+
+    '<div style="margin-bottom:14px"><label>備註</label><textarea id="nq-notes" placeholder="給客戶看的備註..."></textarea></div>'+
+    '<button class="btn btn-primary" onclick="submitNewQuote()">建立報價單</button>'
+  renderNqItems()
+  document.getElementById('modal-new-quote').classList.add('open')
+}
+
+function renderNqItems(){
+  const el=document.getElementById('nq-items-list')
+  if(!el)return
+  if(!_nqItems.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#aaa;font-size:12px;border:1px dashed #e5e5e0;border-radius:8px">尚未新增品項，請從上方按鈕選擇</div>';return}
+  el.innerHTML=_nqItems.map((it,idx)=>buildNqItemHtml(it,idx)).join('')
+}
+
+function buildNqItemHtml(it,idx){
+  const cp=parseFloat(it.cost_price||0)
+  const cus=it.apply_customs!==false?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
+  const base=cp+cus
+  const final=base*(1+(parseFloat(it.margin_pct||0)/100))
+  const cur=it.cost_currency||'USD'
+  const hasP=cp>0
+  return '<div id="nq-item-'+idx+'" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px 16px;margin-bottom:10px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+    '<div style="font-size:12px;font-weight:500;color:#444">品項 '+(idx+1)+(it.from_catalog?'<span style="margin-left:6px;font-size:10px;color:#0F6E56;background:#E1F5EE;padding:1px 6px;border-radius:5px">目錄</span>':'')+'</div>'+
+    '<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:18px;line-height:1" onclick="removeNqItem('+idx+')">×</button>'+
+    '</div>'+
+    '<div class="grid-2" style="margin-bottom:8px">'+
+    '<div><label>產品名稱</label><input value="'+escHtml(it.product||'')+'" placeholder="例：45g 矽離型紙" onchange="updateNqField('+idx+',\'product\',this.value)" /></div>'+
+    '<div><label>規格</label><input value="'+escHtml(it.spec||'')+'" placeholder="選填" onchange="updateNqField('+idx+',\'spec\',this.value)" /></div>'+
+    '<div><label>成本價</label><input type="number" value="'+(it.cost_price||'')+'" placeholder="0.00" step="0.01" onchange="updateNqField('+idx+',\'cost_price\',parseFloat(this.value)||0);refreshNqCalc('+idx+')" /></div>'+
+    '<div><label>幣別</label><select onchange="updateNqField('+idx+',\'cost_currency\',this.value)">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option '+(it.cost_currency===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div><label style="display:flex;justify-content:space-between"><span>清關費 %</span>'+
+    '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
+    '<input type="checkbox" '+(it.apply_customs!==false?'checked':'')+' onchange="updateNqField('+idx+',\'apply_customs\',this.checked);refreshNqCalc('+idx+')" style="width:auto"> 套用</label></label>'+
+    '<input type="number" value="'+(it.customs_fee_pct??parseFloat(settings.default_customs_fee_pct||7.5))+'" min="0" max="50" step="0.5" onchange="updateNqField('+idx+',\'customs_fee_pct\',parseFloat(this.value));refreshNqCalc('+idx+')" /></div>'+
+    '<div><label>利潤 %</label><input type="number" value="'+(it.margin_pct??parseFloat(settings.default_margin_pct||20))+'" min="0" max="200" step="1" onchange="updateNqField('+idx+',\'margin_pct\',parseFloat(this.value));refreshNqCalc('+idx+')" /></div>'+
+    '<div><label>MOQ</label><input value="'+escHtml(it.moq||'')+'" placeholder="例：1000m²" onchange="updateNqField('+idx+',\'moq\',this.value)" /></div>'+
+    '<div><label>交期</label><input value="'+escHtml(it.lead_time||'')+'" placeholder="例：30天" onchange="updateNqField('+idx+',\'lead_time\',this.value)" /></div>'+
+    '</div>'+
+    '<div id="nq-calc-'+idx+'" style="padding:7px 11px;border-radius:7px;background:'+(hasP?'#E1F5EE':'#f8f8f5')+';border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';font-size:12px;color:'+(hasP?'#0F6E56':'#aaa')+'">'+
+    (hasP?'<strong>'+final.toFixed(2)+' '+cur+'</strong><span style="font-size:10px;margin-left:8px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</span>':'請填入成本價以計算報價')+
+    '</div></div>'
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function updateNqField(idx,field,value){
+  _nqItems[idx][field]=value
+}
+
+function refreshNqCalc(idx){
+  const it=_nqItems[idx]
+  const cp=parseFloat(it.cost_price||0)
+  const cus=it.apply_customs!==false?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
+  const base=cp+cus
+  const final=base*(1+(parseFloat(it.margin_pct||0)/100))
+  const cur=it.cost_currency||'USD'
+  const hasP=cp>0
+  const el=document.getElementById('nq-calc-'+idx)
+  if(!el)return
+  el.style.background=hasP?'#E1F5EE':'#f8f8f5'
+  el.style.borderColor=hasP?'#0F6E56':'#e5e5e0'
+  el.style.color=hasP?'#0F6E56':'#aaa'
+  el.innerHTML=hasP?'<strong>'+final.toFixed(2)+' '+cur+'</strong><span style="font-size:10px;margin-left:8px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</span>':'請填入成本價以計算報價'
+}
+function removeNqItem(idx){
+  _nqItems.splice(idx,1)
+  renderNqItems()
+}
+
+function openNewProductFromQuote(){
+  // 開一個輕量 overlay 讓使用者填新產品，存入目錄後自動帶回品項
+  const existing=document.getElementById('new-product-from-quote-overlay')
+  if(existing)existing.remove()
+  const overlay=document.createElement('div')
+  overlay.id='new-product-from-quote-overlay'
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px'
+  const supOpts=suppliers.map(s=>'<option value="'+s.id+'">'+s.company+' — '+s.name+'</option>').join('')
+  overlay.innerHTML=
+    '<div style="background:#fff;border-radius:14px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
+    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0">'+
+    '<div><div style="font-size:14px;font-weight:600">新增品項至目錄</div><div style="font-size:11px;color:#aaa;margin-top:2px">存入目錄後自動加入報價單</div></div>'+
+    '<button onclick="document.getElementById(\'new-product-from-quote-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
+    '</div>'+
+    '<div style="padding:16px 20px 20px">'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>產品名稱 <span class="req">*</span></label><input id="npq-name" placeholder="例：45g 矽離型紙" /></div>'+
+    '<div><label>料號</label><input id="npq-code" placeholder="例：PSA-45G-01" /></div>'+
+    '<div><label>供應商</label><select id="npq-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
+    '<div><label>單位</label><input id="npq-unit" placeholder="例：m²、roll、kg" /></div>'+
+    '<div><label>成本價 <span class="req">*</span></label><input type="number" id="npq-cost" placeholder="0.0000" step="0.0001" /></div>'+
+    '<div><label>幣別</label><select id="npq-currency">'+['USD','THB','TWD','CNY','EUR','JPY'].map(c=>'<option '+(c===(settings.default_cost_currency||'USD')?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div><label>更新週期（天）</label><input type="number" id="npq-days" value="90" min="7" /></div>'+
+    '<div><label>上次確認日期</label><input type="date" id="npq-reviewed" value="'+new Date().toISOString().slice(0,10)+'" /></div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px"><label>備註 / 規格說明</label><textarea id="npq-notes" placeholder="規格、注意事項..."></textarea></div>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn btn-primary" onclick="saveNewProductFromQuote()">存入目錄並加入報價</button>'+
+    '<button class="btn btn-ghost" onclick="document.getElementById(\'new-product-from-quote-overlay\').remove()">取消</button>'+
+    '</div></div></div>'
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
+  document.getElementById('npq-name')?.focus()
+}
+
+async function saveNewProductFromQuote(){
+  const name=document.getElementById('npq-name')?.value.trim()
+  if(!name){showToast('請填寫產品名稱','error');return}
+  const costVal=document.getElementById('npq-cost')?.value
+  if(!costVal){showToast('請填寫成本價','error');return}
+  const data={
+    product_name:name,
+    product_code:document.getElementById('npq-code')?.value.trim()||null,
+    supplier_id:parseInt(document.getElementById('npq-supplier')?.value)||null,
+    unit:document.getElementById('npq-unit')?.value.trim()||null,
+    cost_price:parseFloat(costVal),
+    currency:document.getElementById('npq-currency')?.value||'USD',
+    review_days:parseInt(document.getElementById('npq-days')?.value)||90,
+    last_reviewed_at:document.getElementById('npq-reviewed')?.value||null,
+    notes:document.getElementById('npq-notes')?.value.trim()||null
+  }
+  const{data:inserted,error}=await sb.from('products').insert(data).select().single()
+  if(error){showToast('新增失敗：'+error.message,'error');return}
+  await loadProducts()
+  // 自動帶回品項
+  const sup=suppliers.find(s=>s.id===data.supplier_id)
+  _nqItems.push({
+    product:data.product_name,
+    spec:data.notes||'',
+    cost_price:data.cost_price,
+    cost_currency:data.currency||'USD',
+    customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
+    apply_customs:true,
+    margin_pct:parseFloat(settings.default_margin_pct||20),
+    moq:'',lead_time:'',
+    from_catalog:true,
+    from_product_id:inserted?.id||null
+  })
+  // 如果供應商欄位空的，自動帶入
+  const supSel=document.getElementById('nq-supplier')
+  if(supSel&&!supSel.value&&sup){supSel.value=sup.company}
+  document.getElementById('new-product-from-quote-overlay')?.remove()
+  renderNqItems()
+  showToast('已加入目錄並帶入報價單')
+}
+
+function addNqItemFromCatalog(){
+  // 建立一個產品選擇 overlay
+  const existing=document.getElementById('catalog-picker-overlay')
+  if(existing)existing.remove()
+  const overlay=document.createElement('div')
+  overlay.id='catalog-picker-overlay'
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px'
+  const sorted=[...products].sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW'))
+  const rows=sorted.map(p=>{
+    const st=productStatus(p)
+    const sup=suppliers.find(s=>s.id===p.supplier_id)
+    const stIcon=st==='overdue'?'🔴':st==='warn'?'🟡':'🟢'
+    return '<div onclick="pickCatalogProduct('+p.id+')" style="padding:10px 14px;border-bottom:1px solid #f0f0eb;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background=\'#f8fffc\'" onmouseout="this.style.background=\'\'">'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+      '<span style="font-size:12px">'+stIcon+'</span>'+
+      '<div style="flex:1">'+
+      '<div style="font-size:12px;font-weight:500;color:#1a1a1a">'+p.product_name+(p.product_code?' <span style="font-size:10px;color:#aaa;font-weight:400">'+p.product_code+'</span>':'')+'</div>'+
+      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+' · '+(p.cost_price?p.cost_price+' '+p.currency:'成本未填')+(p.unit?' / '+p.unit:'')+'</div>'+
+      '</div></div></div>'
+  }).join('')
+  overlay.innerHTML=
+    '<div style="background:#fff;border-radius:14px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
+    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;border-radius:14px 14px 0 0">'+
+    '<div style="font-size:14px;font-weight:600">從產品目錄選擇</div>'+
+    '<button onclick="document.getElementById(\'catalog-picker-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
+    '</div>'+
+    '<div style="padding:12px 16px;border-bottom:1px solid #e5e5e0">'+
+    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="filterCatalogPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:7px;border:1px solid #e5e5e0;font-size:12px" />'+
+    '</div>'+
+    '<div id="catalog-picker-list" style="overflow-y:auto;flex:1">'+(rows||'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">尚無產品目錄</div>')+'</div>'+
+    '</div>'
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
+  document.getElementById('catalog-picker-search')?.focus()
+}
+
+function filterCatalogPicker(q){
+  const list=document.getElementById('catalog-picker-list')
+  if(!list)return
+  const kw=q.toLowerCase()
+  const sorted=[...products].sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW'))
+  const filtered=sorted.filter(p=>!kw||p.product_name.toLowerCase().includes(kw)||(p.product_code||'').toLowerCase().includes(kw))
+  if(!filtered.length){list.innerHTML='<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">找不到符合產品</div>';return}
+  list.innerHTML=filtered.map(p=>{
+    const st=productStatus(p)
+    const sup=suppliers.find(s=>s.id===p.supplier_id)
+    const stIcon=st==='overdue'?'🔴':st==='warn'?'🟡':'🟢'
+    return '<div onclick="pickCatalogProduct('+p.id+')" style="padding:10px 14px;border-bottom:1px solid #f0f0eb;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background=\'#f8fffc\'" onmouseout="this.style.background=\'\'">'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+      '<span style="font-size:12px">'+stIcon+'</span>'+
+      '<div style="flex:1">'+
+      '<div style="font-size:12px;font-weight:500;color:#1a1a1a">'+p.product_name+(p.product_code?' <span style="font-size:10px;color:#aaa;font-weight:400">'+p.product_code+'</span>':'')+'</div>'+
+      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+' · '+(p.cost_price?p.cost_price+' '+p.currency:'成本未填')+(p.unit?' / '+p.unit:'')+'</div>'+
+      '</div></div></div>'
+  }).join('')
+}
+
+function pickCatalogProduct(productId){
+  const p=products.find(x=>x.id===productId)
+  if(!p)return
+  const sup=suppliers.find(s=>s.id===p.supplier_id)
+  _nqItems.push({
+    product:p.product_name,
+    spec:p.notes||'',
+    cost_price:p.cost_price||'',
+    cost_currency:p.currency||settings.default_cost_currency||'USD',
+    customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
+    apply_customs:true,
+    margin_pct:parseFloat(settings.default_margin_pct||20),
+    moq:'',lead_time:'',
+    from_catalog:true,
+    from_product_id:p.id
+  })
+  // 如果報價單供應商欄位還沒填，自動帶入
+  const supSel=document.getElementById('nq-supplier')
+  if(supSel&&!supSel.value&&sup){supSel.value=sup.company}
+  document.getElementById('catalog-picker-overlay')?.remove()
+  renderNqItems()
+}
+
+async function submitNewQuote(){
+  const customer=document.getElementById('nq-customer')?.value
+  if(!customer){showToast('請選擇客戶','error');return}
+  if(!_nqItems.length){showToast('請至少新增一個品項','error');return}
+  const hasEmpty=_nqItems.some(it=>!it.product?.trim())
+  if(hasEmpty){showToast('有品項未填產品名稱','error');return}
+  const supplier=document.getElementById('nq-supplier')?.value||null
+  const notes=document.getElementById('nq-notes')?.value||null
+  // 產生 ID
+  const now=new Date()
+  const yy=now.getFullYear()
+  const mm=String(now.getMonth()+1).padStart(2,'0')
+  const dd=String(now.getDate()).padStart(2,'0')
+  const seq=String(quoteHeaders.length+1).padStart(3,'0')
+  const hId='QUO-D-'+yy+mm+dd+'-'+seq+'-v1'
+  const{error}=await sb.from('quote_headers').insert({
+    id:hId,inquiry_id:null,customer,supplier,version:1,status:'draft',notes,source:'direct'
+  })
+  if(error){showToast('建立失敗：'+error.message,'error');return}
+  const itemsToInsert=_nqItems.map(it=>({
+    header_id:hId,
+    product:it.product,
+    spec:it.spec||null,
+    cost_price:parseFloat(it.cost_price)||null,
+    cost_currency:it.cost_currency||'USD',
+    customs_fee_pct:parseFloat(it.customs_fee_pct||7.5),
+    apply_customs:it.apply_customs!==false,
+    margin_pct:parseFloat(it.margin_pct||20),
+    moq:it.moq||null,
+    lead_time:it.lead_time||null
+  }))
+  const{error:e2}=await sb.from('quote_items').insert(itemsToInsert)
+  if(e2){showToast('品項建立失敗：'+e2.message,'error');return}
+  await loadQuotes();closeModal('modal-new-quote');renderQuotes()
+  showToast('報價單 '+hId+' 已建立')
+  // 開啟剛建立的報價
+  setTimeout(()=>openQuoteModal(hId),300)
+}
+
+// ===== 產品目錄 =====
+function populateProductSupplierFilter(){
+  const sel=document.getElementById('fp-supplier')
+  if(!sel)return
+  const cos=[...new Set(products.map(p=>{
+    const s=suppliers.find(x=>x.id===p.supplier_id)
+    return s?s.company:null
+  }).filter(Boolean))].sort()
+  sel.innerHTML='<option value="">全部供應商</option>'+cos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
+}
+
+function clearProductFilters(){
+  ;['fp-search','fp-supplier','fp-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  renderProducts()
+}
+
+function renderProducts(){
+  const el=document.getElementById('product-list')
+  const sum=document.getElementById('product-summary')
+  if(!el)return
+  const q=(document.getElementById('fp-search')?.value||'').toLowerCase()
+  const fSup=document.getElementById('fp-supplier')?.value||''
+  const fStatus=document.getElementById('fp-status')?.value||''
+  let list=products.filter(p=>{
+    if(q&&!p.product_name.toLowerCase().includes(q)&&!(p.product_code||'').toLowerCase().includes(q))return false
+    if(fSup){const s=suppliers.find(x=>x.id===p.supplier_id);if(!s||s.company!==fSup)return false}
+    if(fStatus==='inactive'){return p.is_active===false}
+    if(fStatus){const st=productStatus(p);if(p.is_active===false||st!==fStatus)return false}
+    return true
+  })
+  if(sum)sum.textContent=list.length+' 個產品'
+  if(!list.length){el.innerHTML='<div class="loading">尚無產品，點「新增產品」開始建立目錄</div>';return}
+  el.innerHTML=list.map(p=>{
+    const st=productStatus(p)
+    const daysLeft=productDaysLeft(p)
+    const sup=suppliers.find(s=>s.id===p.supplier_id)
+    const stColor=st==='overdue'?'#A32D2D':st==='warn'?'#7A5B00':'#3B6D11'
+    const stBg=st==='overdue'?'#FCEBEB':st==='warn'?'#FFFBEA':'#EAF3DE'
+    const stLabel=st==='overdue'?'需更新':st==='warn'?'即將到期':'正常'
+    const isActive=p.is_active!==false
+    return '<div class="row '+(st==='overdue'?'overdue':st==='warn'?'warning':'')+'" style="'+(isActive?'':'opacity:0.5')+'" onclick="openProductModal('+p.id+')">'+
+      '<div style="flex:1;min-width:0">'+
+      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;flex-wrap:wrap">'+
+      (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+p.product_code+'</span>':'')+
+      '<span style="font-size:13px;font-weight:500">'+p.product_name+'</span>'+
+      '<span class="badge" style="background:'+stBg+';color:'+stColor+';border:1px solid '+stColor+'">'+stLabel+'</span>'+
+      (!isActive?'<span class="badge" style="background:#f0f0eb;color:#888;border:1px solid #ccc">Inactive</span>':'')+
+      '</div>'+
+      '<div style="font-size:12px;color:#666">'+(sup?sup.company:'—')+(p.cost_price?' · 成本 '+p.cost_price+' '+(p.currency||'')+(p.unit?' / '+p.unit:''):'')+'</div>'+
+      '<div style="font-size:11px;color:#aaa">上次確認：'+(p.last_reviewed_at||'—')+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+(p.review_days?' （'+p.review_days+'天週期）':'')+'</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:6px;flex-shrink:0">'+
+      '<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="event.stopPropagation();confirmReview('+p.id+')">✓ 已確認</button>'+
+      '</div>'+
+      '</div>'
+  }).join('')
+}
+
+async function confirmReview(id){
+  const today=new Date().toISOString().slice(0,10)
+  const{error}=await sb.from('products').update({last_reviewed_at:today}).eq('id',id)
+  if(error){showToast('更新失敗','error');return}
+  await loadProducts();renderProducts();updateProductOverdueAlert()
+  showToast('已標記今日確認')
+}
+
+function openProductModal(id){
+  const p=id?products.find(x=>x.id===id):null
+  const isEdit=!!p
+  const supOpts=suppliers.map(s=>'<option value="'+s.id+'"'+(p&&p.supplier_id===s.id?' selected':'')+'>'+s.company+' — '+s.name+'</option>').join('')
+  document.getElementById('modal-product-hd').innerHTML=
+    '<div style="font-size:14px;font-weight:600">'+(isEdit?'編輯產品':'新增產品')+'</div>'+
+    '<button class="modal-close" onclick="closeModal(\'modal-product\')">×</button>'
+  document.getElementById('modal-product-bd').innerHTML=
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>產品名稱 <span class="req">*</span></label><input id="pd-name" value="'+(p?.product_name||'')+'" placeholder="例：45g 矽離型紙" /></div>'+
+    '<div><label>料號</label><input id="pd-code" value="'+(p?.product_code||'')+'" placeholder="例：PSA-45G-01" /></div>'+
+    '<div><label>供應商</label><select id="pd-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
+    '<div><label>單位</label><input id="pd-unit" value="'+(p?.unit||'')+'" placeholder="例：m²、roll、kg" /></div>'+
+    '<div><label>成本價</label><input type="number" id="pd-cost" value="'+(p?.cost_price||'')+'" placeholder="0.0000" step="0.0001" /></div>'+
+    '<div><label>幣別</label><select id="pd-currency">'+['USD','THB','TWD','CNY','EUR','JPY'].map(c=>'<option '+(p?.currency===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '</div>'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>更新週期（天）</label><input type="number" id="pd-days" value="'+(p?.review_days||90)+'" min="7" placeholder="90" /></div>'+
+    '<div><label>上次確認日期</label><input type="date" id="pd-reviewed" value="'+(p?.last_reviewed_at||new Date().toISOString().slice(0,10))+'" /></div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px"><label>備註</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:14px"><label>狀態</label><select id="pd-active">'+
+    '<option value="true" '+(p?.is_active!==false?'selected':'')+'>Active（現行產品）</option>'+
+    '<option value="false" '+(p?.is_active===false?'selected':'')+'>Inactive（暫不使用）</option>'+
+    '</select></div>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn btn-primary" onclick="saveProduct('+(isEdit?p.id:'null')+')">'+( isEdit?'儲存':'新增')+'</button>'+
+    (isEdit?'<button class="btn btn-ghost" style="color:#A32D2D" onclick="deleteProduct('+p.id+',\''+p.product_name+'\')">刪除</button>':'')+
+    '</div>'
+  document.getElementById('modal-product').classList.add('open')
+}
+
+async function saveProduct(id){
+  const name=document.getElementById('pd-name').value.trim()
+  if(!name){showToast('請填寫產品名稱','error');return}
+  const data={
+    product_name:name,
+    product_code:document.getElementById('pd-code').value.trim()||null,
+    supplier_id:parseInt(document.getElementById('pd-supplier').value)||null,
+    unit:document.getElementById('pd-unit').value.trim()||null,
+    cost_price:parseFloat(document.getElementById('pd-cost').value)||null,
+    currency:document.getElementById('pd-currency').value,
+    review_days:parseInt(document.getElementById('pd-days').value)||90,
+    last_reviewed_at:document.getElementById('pd-reviewed').value||null,
+    notes:document.getElementById('pd-notes').value.trim()||null,
+    is_active:document.getElementById('pd-active').value==='true'
+  }
+  let error
+  if(id){({error}=await sb.from('products').update(data).eq('id',id))}
+  else{({error}=await sb.from('products').insert(data))}
+  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  await loadProducts();closeModal('modal-product')
+  populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
+  showToast(id?'產品已更新':'產品已新增')
+}
+
+async function deleteProduct(id,name){
+  if(!confirm('確定要刪除「'+name+'」嗎？'))return
+  const{error}=await sb.from('products').delete().eq('id',id)
+  if(error){showToast('刪除失敗：'+error.message,'error');return}
+  await loadProducts();closeModal('modal-product')
+  populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
+  showToast('已刪除')
+}
+
+// ===== 客戶管理 =====
 function renderCustomers(){
   const el=document.getElementById('customer-list')
   const sum=document.getElementById('customer-summary')
@@ -639,6 +1326,7 @@ async function saveCustomer(id){
   await loadCustomers();closeModal('modal-customer');renderCustomers()
 }
 
+// ===== 供應商管理 =====
 function renderSupplierMgmt(){
   const el=document.getElementById('supplier-mgmt-list')
   const sum=document.getElementById('supplier-summary')
@@ -718,32 +1406,30 @@ async function saveSupplier(id){
     line_id:document.getElementById('es-line').value.trim()||null,
     whatsapp:document.getElementById('es-whatsapp').value.trim()||null,
     specialty:document.getElementById('es-specialty').value.trim()||null,
-    salutation:document.getElementById('es-salutation').value.trim()||null}).eq('id',id).then(res=>console.log('save result:',JSON.stringify(res)))
+    salutation:document.getElementById('es-salutation').value.trim()||null}).eq('id',id)
   await loadSuppliers();closeModal('modal-supplier');renderSupplierMgmt();showToast('供應商資料已儲存')
 }
 
+// ===== 技術文件庫 =====
 function renderDocs(){
   const q=(document.getElementById('doc-search')?.value||'').toLowerCase()
   const filtered=documents.filter(d=>!q||d.product?.toLowerCase().includes(q)||d.doc_type?.toLowerCase().includes(q)||(d.tags||[]).some(t=>t.toLowerCase().includes(q)))
-  const products=[...new Set(filtered.map(d=>d.product))]
+  const prods=[...new Set(filtered.map(d=>d.product))]
   let html=''
-  if(!products.length)html='<div class="loading">找不到相關文件</div>'
-  products.forEach(p=>{
+  if(!prods.length)html='<div class="loading">找不到相關文件</div>'
+  prods.forEach(p=>{
     html+='<div style="font-size:12px;font-weight:500;color:#666;margin:14px 0 6px;padding-bottom:5px;border-bottom:1px solid #e5e5e0">'+p+'</div>'
     filtered.filter(d=>d.product===p).forEach(doc=>{
       html+='<div class="doc-row"><div class="pdf-icon">PDF</div>'+
         '<div style="flex:1"><div style="font-size:12px;font-weight:500">'+doc.doc_type+'</div><div style="font-size:10px;color:#aaa">'+(doc.file_size||'')+'</div></div>'+
         '<div>'+(doc.tags||[]).map(t=>'<span class="tag">'+t+'</span>').join('')+'</div>'+
-        '<button class="btn btn-ghost btn-sm" onclick="copyDocLink(\''+( doc.file_url||'#')+'\',\''+doc.doc_type+'\')">複製連結</button></div>'
+        '<button class="btn btn-ghost btn-sm" onclick="copyDocLink(\''+(doc.file_url||'#')+'\',\''+doc.doc_type+'\')">複製連結</button></div>'
     })
   })
   document.getElementById('doc-list').innerHTML=html
 }
 
 function copyDocLink(url,name){navigator.clipboard.writeText(url).then(()=>alert('已複製：'+name+' 的連結')).catch(()=>alert('請手動複製'))}
-
-// suppliers 需要 role 欄位，若尚未新增請在 Supabase SQL 執行：
-// alter table suppliers add column if not exists role text;
 
 init()
 </script>
