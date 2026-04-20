@@ -628,6 +628,7 @@ function _renderSampleModal(){
         '<span style="flex:1">'+(r.requested_date||'—')+' · 數量 '+(r.qty||'—')+' '+(s.unit||'')+(r.notes?' · '+r.notes:'')+'</span>'+
         stLabel+
         (isPending?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11;white-space:nowrap" onclick="markRequestReceived('+r.id+','+r.qty+')">標記已到貨</button>':'')+
+        (isPending?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="createTaskFromSampleRequest('+id+','+r.id+')">📌 追蹤</button>':'')+
         '</div></div>'
     })
   } else {
@@ -671,6 +672,7 @@ function _renderSampleModal(){
         (r.tracking_no?' · '+r.tracking_no:'')+' · 數量 '+(r.qty||'—')+' '+(s.unit||'')+'</span>'+
         stBadge+
         (isShipped?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="toggleSmForm(\'sm-fb-'+r.id+'\')">登記回饋</button>':'')+
+        (isShipped?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="createTaskFromShipment('+id+','+r.id+')">📌 追蹤</button>':'')+
         '</div>'+
         (r.feedback?'<div style="font-size:11px;color:#666;margin-top:3px">回饋：'+esc(r.feedback)+'</div>':'')+
         '<div id="sm-fb-'+r.id+'" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:10px;margin-top:6px">'+
@@ -804,6 +806,7 @@ function renderTasks(){
       (t.ref_module?' · '+t.ref_module+(t.ref_id?' #'+t.ref_id:''):'')+
       '</div></div>'+
       '<div style="display:flex;gap:6px;flex-shrink:0">'+
+      (['inquiry','quote','sample'].includes(t.ref_module)&&t.ref_id?'<button class="btn btn-ghost btn-sm" style="color:#185FA5" onclick="goToRef(\''+t.ref_module+'\',\''+t.ref_id+'\')">→ 前往</button>':'')+
       (t.status==='open'?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11" onclick="completeTask(\''+t.id+'\')">✓ 完成</button>':'')+
       '<button class="btn btn-ghost btn-sm" style="color:#aaa" onclick="deleteTask(\''+t.id+'\')">×</button>'+
       '</div></div>'
@@ -865,6 +868,48 @@ async function deleteTask(id){
   const{error}=await sb.from('tasks').delete().eq('id',id)
   if(error){showToast('刪除失敗：'+error.message,'error');return}
   await loadTasks();renderTasks()
+}
+
+function daysFromNow(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+
+async function _quickCreateTask(taskData){
+  await loadTasks()
+  const exists=tasks.some(t=>t.status==='open'&&t.ref_module===taskData.ref_module&&String(t.ref_id)===String(taskData.ref_id))
+  if(exists){showToast('已有進行中的追蹤工作');return}
+  const{error}=await sb.from('tasks').insert(taskData)
+  if(error){showToast('建立失敗：'+error.message,'error');return}
+  await loadTasks();showToast('📌 追蹤工作已建立')
+}
+
+async function createTaskFromInquiry(inqId){
+  const i=inquiries.find(x=>x.id===inqId);if(!i)return
+  const sup=suppliers.find(s=>s.company===i.supplier)
+  await _quickCreateTask({title:'追蹤詢價：'+i.product,ref_module:'inquiry',ref_id:String(inqId),supplier:sup?.company||null,due_date:daysFromNow(3),priority:'normal',status:'open',auto_generated:false})
+}
+
+async function createTaskFromQuote(headerId){
+  const h=quoteHeaders.find(x=>x.id===headerId);if(!h)return
+  const cust=customers.find(c=>c.company===h.customer)
+  await _quickCreateTask({title:'追蹤報價：'+h.customer,ref_module:'quote',ref_id:String(headerId),customer:cust?.company||null,due_date:daysFromNow(5),priority:'normal',status:'open',auto_generated:false})
+}
+
+async function createTaskFromSampleRequest(sampleId,requestId){
+  const s=samples.find(x=>x.id===sampleId)
+  const sup=s?suppliers.find(x=>x.id===s.supplier_id):null
+  await _quickCreateTask({title:'追蹤樣品到貨：'+(s?.product_name||'#'+sampleId),ref_module:'sample',ref_id:String(sampleId),supplier:sup?.company||null,due_date:daysFromNow(7),priority:'normal',status:'open',auto_generated:false})
+}
+
+async function createTaskFromShipment(sampleId,shipmentId){
+  const s=samples.find(x=>x.id===sampleId)
+  const ship=sampleShipmentsOut.find(x=>x.id===shipmentId)
+  const cust=ship?.customer_id?customers.find(x=>x.id===ship.customer_id):null
+  await _quickCreateTask({title:'追蹤客戶回饋：'+(s?.product_name||'#'+sampleId),ref_module:'sample',ref_id:String(sampleId),customer:cust?.company||null,due_date:daysFromNow(14),priority:'normal',status:'open',auto_generated:false})
+}
+
+function goToRef(module,refId){
+  if(module==='inquiry'){switchTab('inquiry');setTimeout(()=>openInqModal(refId),80)}
+  else if(module==='quote'){switchTab('quotes');setTimeout(()=>openQuoteModal(refId),80)}
+  else if(module==='sample'){switchTab('samples');setTimeout(()=>openSampleModal(parseInt(refId)),80)}
 }
 
 async function autoScanTasks(){
@@ -1065,7 +1110,8 @@ function renderInqModalBd(){
     '<div style="margin-bottom:14px"><label>備註</label><textarea onchange="updateInqField(\'remarks\',this.value)">'+(i.remarks||'')+'</textarea></div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+
     '<button class="btn btn-ghost btn-sm" onclick="toggleTpl()">'+(showTpl?'收起範本':'產生詢問供應商訊息')+'</button>'+
-    (i.supplier_price?'<button class="btn btn-ghost btn-sm" onclick="openAddInqToProduct(\''+i.id+'\')">📦 加入產品目錄</button>':'')+ 
+    '<button class="btn btn-ghost btn-sm" onclick="createTaskFromInquiry(\''+i.id+'\')">📌 建立追蹤工作</button>'+
+    (i.supplier_price?'<button class="btn btn-ghost btn-sm" onclick="openAddInqToProduct(\''+i.id+'\')">📦 加入產品目錄</button>':'')+
     (i.supplier_price?'<button class="btn btn-primary btn-sm" onclick="sendToQuote(\''+i.id+'\')">收到成本 → 送去報價</button>':'')+
     '</div>'+
     (showTpl?buildTpl(i,sup):'')
@@ -1306,6 +1352,9 @@ function renderQuoteModalBd(){
     :
       '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存</button>'
     )+
+    '</div>'+
+    '<div style="margin-top:8px">'+
+    '<button class="btn btn-ghost btn-sm" onclick="createTaskFromQuote(\''+h.id+'\')">📌 建立追蹤工作</button>'+
     '</div>'
 }
 
