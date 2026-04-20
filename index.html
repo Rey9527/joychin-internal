@@ -526,12 +526,7 @@ function renderSamples(){
 }
 
 function openSampleModal(id){
-  console.log('openSampleModal called with id:', id, typeof id)
-  console.log('samples array:', samples)
-  console.log('found sample (strict):', samples.find(x=>x.id===id))
-  console.log('found sample (string):', samples.find(x=>String(x.id)===String(id)))
-  console.log('modal-sample-bd element:', document.getElementById('modal-sample-bd'))
-  selectedSampleId=id
+  selectedSampleId=id===null?null:parseInt(id)
   document.getElementById('modal-sample').classList.add('open')
   if(id===null){
     // 新增模式
@@ -575,10 +570,7 @@ async function _createSample(){
 
 function _renderSampleModal(){
   const id=selectedSampleId
-  console.log('_renderSampleModal: id=', id, typeof id)
-  const s=samples.find(x=>x.id===id)
-  console.log('_renderSampleModal: found s=', s)
-  if(!s)return
+  const s=samples.find(x=>x.id===id);if(!s)return
   const sup=suppliers.find(x=>x.id===s.supplier_id)
   const st=calcSampleStatus(id,s.stock_qty)
   const reqs=sampleRequestsIn.filter(r=>r.sample_id===id)
