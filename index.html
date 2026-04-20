@@ -192,7 +192,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-samples" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div id="sample-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openNewSampleModal()">+ 新增樣品</button>
+        <button class="btn btn-primary" onclick="openSampleModal(null)">+ 新增樣品</button>
       </div>
       <div class="filter-bar">
         <select id="fs-status" onchange="renderSamples()">
@@ -525,46 +525,47 @@ function renderSamples(){
   }).join('')
 }
 
-function openNewSampleModal(){
-  selectedSampleId=null
-  const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
-  document.getElementById('modal-sample-hd').innerHTML=
-    '<div style="font-size:14px;font-weight:600">新增樣品</div>'+
-    '<button class="modal-close" onclick="closeModal(\'modal-sample\')">×</button>'
-  document.getElementById('modal-sample-bd').innerHTML=
-    '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>產品名稱 <span class="req">*</span></label><input id="sm-name" /></div>'+
-    '<div><label>規格</label><input id="sm-spec" /></div>'+
-    '<div><label>供應商</label><select id="sm-supplier"><option value="">— 選擇 —</option>'+supCos.map(c=>'<option>'+c+'</option>').join('')+'</select></div>'+
-    '<div><label>庫存數量</label><input id="sm-qty" type="number" value="0" /></div>'+
-    '<div><label>單位</label><input id="sm-unit" placeholder="例：pcs, rolls" /></div>'+
-    '</div>'+
-    '<div style="margin-bottom:14px"><label>備註</label><textarea id="sm-notes"></textarea></div>'+
-    '<button class="btn btn-primary" onclick="createSample()">新增</button>'
+function openSampleModal(id){
+  selectedSampleId=id
   document.getElementById('modal-sample').classList.add('open')
+  if(id===null){
+    // 新增模式
+    const supOpts=suppliers.map(s=>'<option value="'+s.id+'">'+s.company+'</option>').join('')
+    document.getElementById('modal-sample-hd').innerHTML=
+      '<div style="font-size:14px;font-weight:600">新增樣品</div>'+
+      '<button class="modal-close" onclick="closeModal(\'modal-sample\')">×</button>'
+    document.getElementById('modal-sample-bd').innerHTML=
+      '<div class="grid-2" style="margin-bottom:10px">'+
+      '<div><label>產品名稱 <span class="req">*</span></label><input id="sm-name" /></div>'+
+      '<div><label>規格</label><input id="sm-spec" /></div>'+
+      '<div><label>供應商</label><select id="sm-supplier"><option value="">— 選擇 —</option>'+supOpts+'</select></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+      '<div><label>庫存數量</label><input id="sm-qty" type="number" value="0" /></div>'+
+      '<div><label>單位</label><input id="sm-unit" placeholder="例：pcs, rolls" /></div></div>'+
+      '<div><label>關聯詢價 ID</label><input id="sm-inq" placeholder="選填" /></div>'+
+      '</div>'+
+      '<div style="margin-bottom:14px"><label>備註</label><textarea id="sm-notes"></textarea></div>'+
+      '<button class="btn btn-primary" onclick="_createSample()">新增樣品</button>'
+  } else {
+    _renderSampleModal()
+  }
 }
 
-async function createSample(){
+async function _createSample(){
   const name=document.getElementById('sm-name')?.value.trim()
   if(!name){showToast('請填寫產品名稱','error');return}
-  const supCo=document.getElementById('sm-supplier')?.value
-  const sup=supCo?suppliers.find(s=>s.company===supCo):null
+  const supId=document.getElementById('sm-supplier')?.value||null
   const{error}=await sb.from('samples').insert({
     product_name:name,
     spec:document.getElementById('sm-spec')?.value.trim()||null,
-    supplier_id:sup?.id||null,
+    supplier_id:supId?parseInt(supId):null,
     stock_qty:parseFloat(document.getElementById('sm-qty')?.value||0),
     unit:document.getElementById('sm-unit')?.value.trim()||null,
+    from_inquiry_id:document.getElementById('sm-inq')?.value.trim()||null,
     notes:document.getElementById('sm-notes')?.value.trim()||null
   })
   if(error){showToast('新增失敗：'+error.message,'error');return}
   await loadSamples();closeModal('modal-sample');renderSamples();showToast('樣品已新增')
-}
-
-function openSampleModal(id){
-  selectedSampleId=id
-  document.getElementById('modal-sample').classList.add('open')
-  _renderSampleModal()
 }
 
 function _renderSampleModal(){
