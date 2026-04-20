@@ -823,7 +823,7 @@ function openTaskModal(prefill={}){
     '<div style="margin-bottom:10px"><label>標題 <span class="req">*</span></label><input id="tk-title" value="'+(prefill.title||'')+'" /></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>關聯模組</label><select id="tk-module">'+
-    ['','inquiry','quote','sample','order'].map(v=>'<option value="'+v+'" '+(prefill.ref_module===v?'selected':'')+'>'+(v||'無')+'</option>').join('')+
+    [['','— 選擇 —'],['inquiry','詢價單'],['quote','報價單'],['sample','樣品'],['order','訂單'],['manual','無關聯']].map(([v,l])=>'<option value="'+v+'" '+(prefill.ref_module===v?'selected':'')+'>'+(l)+'</option>').join('')+
     '</select></div>'+
     '<div><label>關聯 ID</label><input id="tk-ref-id" value="'+(prefill.ref_id||'')+'" placeholder="選填" /></div>'+
     '<div><label>供應商</label><select id="tk-supplier"><option value="">—</option>'+supCos.map(c=>'<option '+(prefill.supplier===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
