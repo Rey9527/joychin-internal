@@ -672,7 +672,6 @@ function _renderSampleModal(){
         (r.tracking_no?' · '+r.tracking_no:'')+' · 數量 '+(r.qty||'—')+' '+(s.unit||'')+'</span>'+
         stBadge+
         (isShipped?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="toggleSmForm(\'sm-fb-'+r.id+'\')">登記回饋</button>':'')+
-        (isShipped?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="createTaskFromShipment('+id+','+r.id+')">📌 追蹤</button>':'')+
         '</div>'+
         (r.feedback?'<div style="font-size:11px;color:#666;margin-top:3px">回饋：'+esc(r.feedback)+'</div>':'')+
         '<div id="sm-fb-'+r.id+'" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:10px;margin-top:6px">'+
@@ -884,7 +883,7 @@ async function _quickCreateTask(taskData){
 async function createTaskFromInquiry(inqId){
   const i=inquiries.find(x=>x.id===inqId);if(!i)return
   const sup=suppliers.find(s=>s.company===i.supplier)
-  await _quickCreateTask({title:'追蹤詢價：'+i.product,ref_module:'inquiry',ref_id:String(inqId),supplier:sup?.company||null,due_date:daysFromNow(3),priority:'normal',status:'open',auto_generated:false})
+  await _quickCreateTask({title:'追蹤詢價：'+i.product,ref_module:'inquiry',ref_id:String(inqId),supplier_id:sup?.id||null,due_date:daysFromNow(3),priority:'normal',status:'open',auto_generated:false})
 }
 
 async function createTaskFromQuote(headerId){
@@ -894,9 +893,10 @@ async function createTaskFromQuote(headerId){
 }
 
 async function createTaskFromSampleRequest(sampleId,requestId){
+  console.log('createTaskFromSampleRequest sampleId:', sampleId, 'requestId:', requestId)
   const s=samples.find(x=>x.id===sampleId)
   const sup=s?suppliers.find(x=>x.id===s.supplier_id):null
-  await _quickCreateTask({title:'追蹤樣品到貨：'+(s?.product_name||'#'+sampleId),ref_module:'sample',ref_id:String(sampleId),supplier:sup?.company||null,due_date:daysFromNow(7),priority:'normal',status:'open',auto_generated:false})
+  await _quickCreateTask({title:'追蹤樣品到貨：'+(s?.product_name||'#'+sampleId),ref_module:'sample',ref_id:String(sampleId),supplier_id:sup?.id||null,due_date:daysFromNow(7),priority:'normal',status:'open',auto_generated:false})
 }
 
 async function createTaskFromShipment(sampleId,shipmentId){
@@ -1352,9 +1352,6 @@ function renderQuoteModalBd(){
     :
       '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存</button>'
     )+
-    '</div>'+
-    '<div style="margin-top:8px">'+
-    '<button class="btn btn-ghost btn-sm" onclick="createTaskFromQuote(\''+h.id+'\')">📌 建立追蹤工作</button>'+
     '</div>'
 }
 
