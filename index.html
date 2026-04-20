@@ -817,7 +817,6 @@ function renderTasks(){
 
 function openTaskModal(prefill={}){
   const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
-  const custCos=[...new Set(customers.map(c=>c.company))].sort()
   document.getElementById('modal-task-hd').innerHTML=
     '<div style="font-size:14px;font-weight:600">新增工作</div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-task\')">×</button>'
@@ -828,8 +827,8 @@ function openTaskModal(prefill={}){
     [['','— 選擇 —'],['inquiry','詢價單'],['quote','報價單'],['sample','樣品'],['order','訂單'],['manual','無關聯']].map(([v,l])=>'<option value="'+v+'" '+(prefill.ref_module===v?'selected':'')+'>'+(l)+'</option>').join('')+
     '</select></div>'+
     '<div><label>關聯 ID</label><input id="tk-ref-id" value="'+(prefill.ref_id||'')+'" placeholder="選填" /></div>'+
-    '<div><label>供應商</label><select id="tk-supplier"><option value="">—</option>'+supCos.map(c=>'<option '+(prefill.supplier===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
-    '<div><label>客戶</label><select id="tk-customer"><option value="">—</option>'+custCos.map(c=>'<option '+(prefill.customer===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div><label>供應商</label><select id="tk-supplier"><option value="">—</option>'+suppliers.map(s=>'<option value="'+s.id+'" '+(prefill.supplier_id===s.id?'selected':'')+'>'+s.company+'</option>').join('')+'</select></div>'+
+    '<div><label>客戶</label><select id="tk-customer"><option value="">—</option>'+customers.map(c=>'<option value="'+c.id+'" '+(prefill.customer_id===c.id?'selected':'')+'>'+c.company+'</option>').join('')+'</select></div>'+
     '<div><label>到期日</label><input id="tk-due" type="date" value="'+(prefill.due_date||'')+'" /></div>'+
     '<div><label>優先級</label><select id="tk-priority">'+PRIORITY_STATUS.map(p=>'<option value="'+p.id+'" '+(prefill.priority===p.id?'selected':'')+'>'+(p.label)+'</option>').join('')+'</select></div>'+
     '</div>'+
@@ -845,8 +844,8 @@ async function submitTask(){
     title,
     ref_module:document.getElementById('tk-module')?.value||null,
     ref_id:document.getElementById('tk-ref-id')?.value.trim()||null,
-    supplier:document.getElementById('tk-supplier')?.value||null,
-    customer:document.getElementById('tk-customer')?.value||null,
+    supplier_id:parseInt(document.getElementById('tk-supplier')?.value)||null,
+    customer_id:parseInt(document.getElementById('tk-customer')?.value)||null,
     due_date:document.getElementById('tk-due')?.value||null,
     priority:document.getElementById('tk-priority')?.value||'normal',
     notes:document.getElementById('tk-notes')?.value.trim()||null,
@@ -889,7 +888,7 @@ async function createTaskFromInquiry(inqId){
 async function createTaskFromQuote(headerId){
   const h=quoteHeaders.find(x=>x.id===headerId);if(!h)return
   const cust=customers.find(c=>c.company===h.customer)
-  await _quickCreateTask({title:'追蹤報價：'+h.customer,ref_module:'quote',ref_id:String(headerId),customer:cust?.company||null,due_date:daysFromNow(5),priority:'normal',status:'open',auto_generated:false})
+  await _quickCreateTask({title:'追蹤報價：'+h.customer,ref_module:'quote',ref_id:String(headerId),customer_id:cust?.id||null,due_date:daysFromNow(5),priority:'normal',status:'open',auto_generated:false})
 }
 
 async function createTaskFromSampleRequest(sampleId,requestId){
@@ -903,7 +902,7 @@ async function createTaskFromShipment(sampleId,shipmentId){
   const s=samples.find(x=>x.id===sampleId)
   const ship=sampleShipmentsOut.find(x=>x.id===shipmentId)
   const cust=ship?.customer_id?customers.find(x=>x.id===ship.customer_id):null
-  await _quickCreateTask({title:'追蹤客戶回饋：'+(s?.product_name||'#'+sampleId),ref_module:'sample',ref_id:String(sampleId),customer:cust?.company||null,due_date:daysFromNow(14),priority:'normal',status:'open',auto_generated:false})
+  await _quickCreateTask({title:'追蹤客戶回饋：'+(s?.product_name||'#'+sampleId),ref_module:'sample',ref_id:String(sampleId),customer_id:cust?.id||null,due_date:daysFromNow(14),priority:'normal',status:'open',auto_generated:false})
 }
 
 function goToRef(module,refId){
@@ -928,7 +927,7 @@ async function autoScanTasks(){
     if(!hasOpen('sample',refId)){
       const s=samples.find(x=>x.id===r.sample_id)
       const sup=s?suppliers.find(x=>x.id===s.supplier_id):null
-      toCreate.push({title:'追蹤樣品到貨：'+(s?.product_name||'#'+r.sample_id),ref_module:'sample',ref_id:refId,supplier:sup?.company||null,priority:'normal',status:'open'})
+      toCreate.push({title:'追蹤樣品到貨：'+(s?.product_name||'#'+r.sample_id),ref_module:'sample',ref_id:refId,supplier_id:sup?.id||null,priority:'normal',status:'open'})
     }
   })
   // 寄出樣品超過 14 天未回饋
@@ -937,7 +936,7 @@ async function autoScanTasks(){
     if(!hasOpen('sample',refId)){
       const s=samples.find(x=>x.id===r.sample_id)
       const cust=r.customer_id?customers.find(x=>x.id===r.customer_id):null
-      toCreate.push({title:'追蹤客戶樣品回饋：'+(s?.product_name||'#'+r.sample_id),ref_module:'sample',ref_id:refId,customer:cust?.company||null,priority:'normal',status:'open'})
+      toCreate.push({title:'追蹤客戶樣品回饋：'+(s?.product_name||'#'+r.sample_id),ref_module:'sample',ref_id:refId,customer_id:cust?.id||null,priority:'normal',status:'open'})
     }
   })
   if(!toCreate.length)return
