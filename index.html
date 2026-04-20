@@ -198,8 +198,10 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <select id="fs-status" onchange="renderSamples()">
           <option value="">全部狀態</option>
           <option value="in_stock">庫存中</option>
-          <option value="low_stock">庫存不足</option>
-          <option value="out_of_stock">缺貨</option>
+          <option value="waiting_arrival">等待到貨</option>
+          <option value="waiting_feedback">等待回饋</option>
+          <option value="no_stock">無庫存</option>
+          <option value="closed">已結案</option>
         </select>
         <select id="fs-supplier" onchange="renderSamples()"><option value="">全部供應商</option></select>
         <select id="fs-customer" onchange="renderSamples()"><option value="">全部客戶</option></select>
@@ -468,11 +470,18 @@ async function loadTasks(){
 }
 
 // ===== 樣品管理 =====
-const SAMPLE_STATUS=[
-  {id:'in_stock',label:'庫存中',color:'#3B6D11',bg:'#EAF3DE'},
-  {id:'low_stock',label:'庫存不足',color:'#854F0B',bg:'#FAEEDA'},
-  {id:'out_of_stock',label:'缺貨',color:'#A32D2D',bg:'#FCEBEB'},
-]
+function calcSampleStatus(sampleId,stockQty){
+  const reqs=sampleRequestsIn.filter(r=>r.sample_id===sampleId)
+  const ships=sampleShipmentsOut.filter(r=>r.sample_id===sampleId)
+  const hasPending=reqs.some(r=>r.status==='pending')
+  const hasShipped=ships.some(r=>r.status==='shipped')
+  const allFeedback=ships.length>0&&ships.every(r=>['approved','rejected','need_revision'].includes(r.status))
+  if(hasPending)return{id:'waiting_arrival',label:'等待到貨',color:'#854F0B',bg:'#FAEEDA'}
+  if((stockQty??0)===0)return{id:'no_stock',label:'無庫存',color:'#A32D2D',bg:'#FCEBEB'}
+  if(allFeedback)return{id:'closed',label:'已結案',color:'#5F5E5A',bg:'#F1EFE8'}
+  if(hasShipped)return{id:'waiting_feedback',label:'等待回饋',color:'#185FA5',bg:'#E6F1FB'}
+  return{id:'in_stock',label:'庫存中',color:'#3B6D11',bg:'#EAF3DE'}
+}
 const PRIORITY_STATUS=[
   {id:'normal',label:'一般',color:'#5F5E5A',bg:'#F1EFE8'},
   {id:'high',label:'高',color:'#854F0B',bg:'#FAEEDA'},
@@ -492,7 +501,7 @@ function renderSamples(){
   const fSt=document.getElementById('fs-status')?.value||''
   const fSup=document.getElementById('fs-supplier')?.value||''
   let list=samples.filter(s=>{
-    if(fSt&&s.status!==fSt)return false
+    if(fSt&&calcSampleStatus(s.id,s.stock_qty).id!==fSt)return false
     if(fSup){const sup=suppliers.find(x=>x.id===s.supplier_id);if(sup?.company!==fSup)return false}
     return true
   })
@@ -500,7 +509,7 @@ function renderSamples(){
   if(!list.length){el.innerHTML='<div class="loading">尚無樣品資料</div>';return}
   el.innerHTML=list.map(s=>{
     const sup=suppliers.find(x=>x.id===s.supplier_id)
-    const st=SAMPLE_STATUS.find(x=>x.id===s.status)||{label:s.status||'—',color:'#888',bg:'#f0f0f0'}
+    const st=calcSampleStatus(s.id,s.stock_qty)
     const riCount=sampleRequestsIn.filter(r=>r.sample_id===s.id).length
     const soCount=sampleShipmentsOut.filter(r=>r.sample_id===s.id).length
     return '<div class="row" onclick="openSampleModal(\''+s.id+'\')">'+
@@ -529,7 +538,6 @@ function openNewSampleModal(){
     '<div><label>供應商</label><select id="sm-supplier"><option value="">— 選擇 —</option>'+supCos.map(c=>'<option>'+c+'</option>').join('')+'</select></div>'+
     '<div><label>庫存數量</label><input id="sm-qty" type="number" value="0" /></div>'+
     '<div><label>單位</label><input id="sm-unit" placeholder="例：pcs, rolls" /></div>'+
-    '<div><label>狀態</label><select id="sm-status">'+SAMPLE_STATUS.map(s=>'<option value="'+s.id+'">'+s.label+'</option>').join('')+'</select></div>'+
     '</div>'+
     '<div style="margin-bottom:14px"><label>備註</label><textarea id="sm-notes"></textarea></div>'+
     '<button class="btn btn-primary" onclick="createSample()">新增</button>'
@@ -547,7 +555,6 @@ async function createSample(){
     supplier_id:sup?.id||null,
     stock_qty:parseFloat(document.getElementById('sm-qty')?.value||0),
     unit:document.getElementById('sm-unit')?.value.trim()||null,
-    status:document.getElementById('sm-status')?.value||'in_stock',
     notes:document.getElementById('sm-notes')?.value.trim()||null
   })
   if(error){showToast('新增失敗：'+error.message,'error');return}
@@ -556,38 +563,213 @@ async function createSample(){
 
 function openSampleModal(id){
   selectedSampleId=id
+  document.getElementById('modal-sample').classList.add('open')
+  _renderSampleModal()
+}
+
+function _renderSampleModal(){
+  const id=selectedSampleId
   const s=samples.find(x=>x.id===id);if(!s)return
   const sup=suppliers.find(x=>x.id===s.supplier_id)
-  const st=SAMPLE_STATUS.find(x=>x.id===s.status)||{label:s.status,color:'#888',bg:'#f0f0f0'}
+  const st=calcSampleStatus(id,s.stock_qty)
   const reqs=sampleRequestsIn.filter(r=>r.sample_id===id)
   const ships=sampleShipmentsOut.filter(r=>r.sample_id===id)
+  const today=new Date().toISOString().slice(0,10)
+
   document.getElementById('modal-sample-hd').innerHTML=
     '<div style="flex:1"><div style="font-size:15px;font-weight:600">'+s.product_name+'</div>'+
-    '<div style="font-size:12px;color:#666">'+(sup?sup.company:'—')+(s.spec?' · '+s.spec:'')+'</div></div>'+
+    '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+';margin-top:4px">'+st.label+'</span></div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-sample\')">×</button>'
-  const reqsHtml=reqs.length?reqs.map(r=>'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f5f0;font-size:12px">'+
-    '<span>'+(r.requested_date||'—')+' · '+(r.requester||'—')+'</span>'+
-    '<span style="color:#666">'+(r.qty||'—')+' '+(s.unit||'')+'</span></div>').join(''):
-    '<div style="font-size:12px;color:#aaa;padding:8px 0">尚無記錄</div>'
-  const shipsHtml=ships.length?ships.map(r=>'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f5f0;font-size:12px">'+
-    '<span>'+(r.shipped_date||'—')+' · '+(r.recipient||'—')+'</span>'+
-    '<span style="color:#666">'+(r.qty||'—')+' '+(s.unit||'')+'</span></div>').join(''):
-    '<div style="font-size:12px;color:#aaa;padding:8px 0">尚無記錄</div>'
-  document.getElementById('modal-sample-bd').innerHTML=
-    '<div style="margin-bottom:10px"><span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
-    '<span style="font-size:12px;color:#666;margin-left:10px">庫存 '+(s.stock_qty??'—')+' '+(s.unit||'')+'</span></div>'+
-    (s.notes?'<div style="font-size:12px;color:#666;margin-bottom:12px">'+s.notes+'</div>':'')+
-    '<div class="divider"></div>'+
+
+  // Section 1: Basic info
+  const supOpts=suppliers.map(x=>'<option value="'+x.id+'" '+(x.id===s.supplier_id?'selected':'')+'>'+x.company+'</option>').join('')
+  const inqLink=s.from_inquiry_id?'<div><label>關聯詢價 ID</label><input readonly value="'+s.from_inquiry_id+'" style="background:#f8f8f5;color:#888" /></div>':''
+  let html=
+    '<div class="section-title">基本資料</div>'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>產品名稱 <span class="req">*</span></label><input id="sm-e-name" value="'+esc(s.product_name)+'" /></div>'+
+    '<div><label>規格</label><input id="sm-e-spec" value="'+esc(s.spec||'')+'" /></div>'+
+    '<div><label>供應商</label><select id="sm-e-supplier"><option value="">— 選擇 —</option>'+supOpts+'</select></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+    '<div><label>庫存數量</label><input id="sm-e-qty" type="number" value="'+(s.stock_qty??0)+'" /></div>'+
+    '<div><label>單位</label><input id="sm-e-unit" value="'+esc(s.unit||'')+'" /></div></div>'+
+    inqLink+
+    '</div>'+
+    '<div style="margin-bottom:12px"><label>備註</label><textarea id="sm-e-notes">'+esc(s.notes||'')+'</textarea></div>'+
+    '<div style="display:flex;gap:8px;margin-bottom:4px">'+
+    '<button class="btn btn-primary btn-sm" onclick="saveSampleBasic()">儲存基本資料</button>'+
+    '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteSample()">刪除樣品</button>'+
+    '</div>'+
+    '<div class="divider"></div>'
+
+  // Section 2: Requests in
+  html+=
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-    '<div class="section-title" style="margin-bottom:0">索取記錄（來自供應商）</div>'+
-    '<button class="btn btn-ghost btn-sm" onclick="showToast(\'新增索取記錄功能即將開放\')">+ 新增</button></div>'+
-    reqsHtml+
-    '<div class="divider"></div>'+
+    '<div class="section-title" style="margin-bottom:0">索取記錄（向供應商）</div>'+
+    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-req-form\')">+ 向供應商索取</button></div>'+
+    '<div id="sm-req-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
+    '<div class="grid-2" style="margin-bottom:8px">'+
+    '<div><label>數量 <span class="req">*</span></label><input id="smr-qty" type="number" min="0" /></div>'+
+    '<div><label>索取日期</label><input id="smr-date" type="date" value="'+today+'" /></div>'+
+    '</div>'+
+    '<div style="margin-bottom:8px"><label>備註</label><input id="smr-notes" /></div>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn btn-primary btn-sm" onclick="submitSampleRequest()">確認索取</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-req-form\')">取消</button>'+
+    '</div></div>'
+
+  if(reqs.length){
+    reqs.forEach(r=>{
+      const isPending=r.status==='pending'
+      const stLabel=isPending?'<span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #854F0B">等待到貨</span>':'<span class="badge" style="background:#EAF3DE;color:#3B6D11;border:1px solid #3B6D11">已到貨</span>'
+      html+='<div style="padding:8px 0;border-bottom:1px solid #f0f0eb">'+
+        '<div style="display:flex;align-items:center;gap:8px;font-size:12px">'+
+        '<span style="flex:1">'+(r.requested_date||'—')+' · 數量 '+(r.qty||'—')+' '+(s.unit||'')+(r.notes?' · '+r.notes:'')+'</span>'+
+        stLabel+
+        (isPending?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11;white-space:nowrap" onclick="markRequestReceived('+r.id+','+r.qty+')">標記已到貨</button>':'')+
+        '</div></div>'
+    })
+  } else {
+    html+='<div style="font-size:12px;color:#aaa;padding:8px 0;margin-bottom:4px">尚無索取記錄</div>'
+  }
+
+  html+='<div class="divider"></div>'
+
+  // Section 3: Shipments out
+  const custOpts=customers.map(c=>'<option value="'+c.id+'">'+c.company+'</option>').join('')
+  html+=
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
     '<div class="section-title" style="margin-bottom:0">寄出記錄（給客戶）</div>'+
-    '<button class="btn btn-ghost btn-sm" onclick="showToast(\'新增寄出記錄功能即將開放\')">+ 新增</button></div>'+
-    shipsHtml
-  document.getElementById('modal-sample').classList.add('open')
+    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-ship-form\')">+ 寄給客戶</button></div>'+
+    '<div id="sm-ship-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
+    '<div class="grid-2" style="margin-bottom:8px">'+
+    '<div><label>客戶 <span class="req">*</span></label><select id="sms-customer"><option value="">— 選擇 —</option>'+custOpts+'</select></div>'+
+    '<div><label>寄出日期</label><input id="sms-date" type="date" value="'+today+'" /></div>'+
+    '<div><label>快遞單號</label><input id="sms-tracking" /></div>'+
+    '<div><label>數量 <span class="req">*</span></label><input id="sms-qty" type="number" min="0" /></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn btn-primary btn-sm" onclick="submitSampleShipment()">確認寄出</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-ship-form\')">取消</button>'+
+    '</div></div>'
+
+  if(ships.length){
+    const fbStatusMap={approved:'客戶接受',rejected:'客戶拒絕',need_revision:'需修改'}
+    ships.forEach(r=>{
+      const cust=customers.find(c=>c.id===r.customer_id)
+      const isShipped=r.status==='shipped'
+      let stBadge
+      if(isShipped)stBadge='<span class="badge" style="background:#E6F1FB;color:#185FA5;border:1px solid #185FA5">已寄出</span>'
+      else if(r.status==='approved')stBadge='<span class="badge" style="background:#EAF3DE;color:#3B6D11;border:1px solid #3B6D11">客戶接受</span>'
+      else if(r.status==='rejected')stBadge='<span class="badge" style="background:#FCEBEB;color:#A32D2D;border:1px solid #A32D2D">客戶拒絕</span>'
+      else if(r.status==='need_revision')stBadge='<span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #854F0B">需修改</span>'
+      else stBadge='<span class="badge" style="background:#f0f0f0;color:#888">'+r.status+'</span>'
+      html+='<div style="padding:8px 0;border-bottom:1px solid #f0f0eb">'+
+        '<div style="display:flex;align-items:center;gap:8px;font-size:12px">'+
+        '<span style="flex:1">'+(cust?cust.company:'未知客戶')+' · '+(r.shipped_date||'—')+
+        (r.tracking_no?' · '+r.tracking_no:'')+' · 數量 '+(r.qty||'—')+' '+(s.unit||'')+'</span>'+
+        stBadge+
+        (isShipped?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="toggleSmForm(\'sm-fb-'+r.id+'\')">登記回饋</button>':'')+
+        '</div>'+
+        (r.feedback?'<div style="font-size:11px;color:#666;margin-top:3px">回饋：'+esc(r.feedback)+'</div>':'')+
+        '<div id="sm-fb-'+r.id+'" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:10px;margin-top:6px">'+
+        '<div class="grid-2" style="margin-bottom:8px">'+
+        '<div><label>回饋結果</label><select id="smfbs-'+r.id+'">'+
+        '<option value="approved">客戶接受</option>'+
+        '<option value="rejected">客戶拒絕</option>'+
+        '<option value="need_revision">需修改</option>'+
+        '</select></div></div>'+
+        '<div style="margin-bottom:8px"><label>回饋內容</label><textarea id="smfbt-'+r.id+'">'+esc(r.feedback||'')+'</textarea></div>'+
+        '<div style="display:flex;gap:8px">'+
+        '<button class="btn btn-primary btn-sm" onclick="submitShipFeedback('+r.id+')">儲存回饋</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-fb-'+r.id+'\')">取消</button>'+
+        '</div></div>'+
+        '</div>'
+    })
+  } else {
+    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">尚無寄出記錄</div>'
+  }
+
+  document.getElementById('modal-sample-bd').innerHTML=html
+}
+
+function esc(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function toggleSmForm(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none'}
+
+async function saveSampleBasic(){
+  const name=document.getElementById('sm-e-name')?.value.trim()
+  if(!name){showToast('請填寫產品名稱','error');return}
+  const supId=document.getElementById('sm-e-supplier')?.value||null
+  const{error}=await sb.from('samples').update({
+    product_name:name,
+    spec:document.getElementById('sm-e-spec')?.value.trim()||null,
+    supplier_id:supId?parseInt(supId):null,
+    stock_qty:parseFloat(document.getElementById('sm-e-qty')?.value||0),
+    unit:document.getElementById('sm-e-unit')?.value.trim()||null,
+    notes:document.getElementById('sm-e-notes')?.value.trim()||null
+  }).eq('id',selectedSampleId)
+  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  await loadSamples();_renderSampleModal();renderSamples();showToast('樣品資料已更新')
+}
+
+async function deleteSample(){
+  if(!confirm('確定要刪除這筆樣品嗎？'))return
+  const{error}=await sb.from('samples').delete().eq('id',selectedSampleId)
+  if(error){showToast('刪除失敗：'+error.message,'error');return}
+  await loadSamples();closeModal('modal-sample');renderSamples();showToast('樣品已刪除')
+}
+
+async function submitSampleRequest(){
+  const qty=parseFloat(document.getElementById('smr-qty')?.value||0)
+  if(!qty||qty<=0){showToast('請填寫有效數量','error');return}
+  const{error}=await sb.from('sample_requests_in').insert({
+    sample_id:selectedSampleId,
+    qty,
+    requested_date:document.getElementById('smr-date')?.value||null,
+    notes:document.getElementById('smr-notes')?.value.trim()||null,
+    status:'pending'
+  })
+  if(error){showToast('新增失敗：'+error.message,'error');return}
+  await loadSamples();_renderSampleModal();renderSamples();showToast('索取記錄已新增')
+}
+
+async function markRequestReceived(reqId,qty){
+  const today=new Date().toISOString().slice(0,10)
+  const{error}=await sb.from('sample_requests_in').update({status:'received',received_date:today}).eq('id',reqId)
+  if(error){showToast('更新失敗：'+error.message,'error');return}
+  const s=samples.find(x=>x.id===selectedSampleId)
+  const newQty=(s?.stock_qty??0)+(qty??0)
+  await sb.from('samples').update({stock_qty:newQty}).eq('id',selectedSampleId)
+  await loadSamples();_renderSampleModal();renderSamples();showToast('已標記到貨，庫存已更新')
+}
+
+async function submitSampleShipment(){
+  const custId=document.getElementById('sms-customer')?.value
+  if(!custId){showToast('請選擇客戶','error');return}
+  const qty=parseFloat(document.getElementById('sms-qty')?.value||0)
+  if(!qty||qty<=0){showToast('請填寫有效數量','error');return}
+  const s=samples.find(x=>x.id===selectedSampleId)
+  if(qty>(s?.stock_qty??0)){showToast('寄出數量不能超過目前庫存（'+( s?.stock_qty??0)+'）','error');return}
+  const{error}=await sb.from('sample_shipments_out').insert({
+    sample_id:selectedSampleId,
+    customer_id:parseInt(custId),
+    shipped_date:document.getElementById('sms-date')?.value||null,
+    tracking_no:document.getElementById('sms-tracking')?.value.trim()||null,
+    qty,
+    status:'shipped'
+  })
+  if(error){showToast('新增失敗：'+error.message,'error');return}
+  const newQty=(s?.stock_qty??0)-qty
+  await sb.from('samples').update({stock_qty:newQty}).eq('id',selectedSampleId)
+  await loadSamples();_renderSampleModal();renderSamples();showToast('寄出記錄已新增，庫存已扣除')
+}
+
+async function submitShipFeedback(shipId){
+  const status=document.getElementById('smfbs-'+shipId)?.value
+  const feedback=document.getElementById('smfbt-'+shipId)?.value.trim()||null
+  const{error}=await sb.from('sample_shipments_out').update({status,feedback}).eq('id',shipId)
+  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  await loadSamples();_renderSampleModal();renderSamples();showToast('回饋已登記')
 }
 
 // ===== 工作追蹤 =====
@@ -696,11 +878,21 @@ async function autoScanTasks(){
   })
   // 索取樣品超過 7 天未到貨
   sampleRequestsIn.filter(r=>r.status==='pending'&&r.requested_date&&daysDiff(r.requested_date)>=7).forEach(r=>{
-    if(!hasOpen('sample',String(r.id)))toCreate.push({title:'追蹤樣品到貨 #'+r.id,ref_module:'sample',ref_id:String(r.id),priority:'normal',status:'open'})
+    const refId=String(r.sample_id)
+    if(!hasOpen('sample',refId)){
+      const s=samples.find(x=>x.id===r.sample_id)
+      const sup=s?suppliers.find(x=>x.id===s.supplier_id):null
+      toCreate.push({title:'追蹤樣品到貨：'+(s?.product_name||'#'+r.sample_id),ref_module:'sample',ref_id:refId,supplier:sup?.company||null,priority:'normal',status:'open'})
+    }
   })
   // 寄出樣品超過 14 天未回饋
   sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&daysDiff(r.shipped_date)>=14).forEach(r=>{
-    if(!hasOpen('sample',String(r.id)))toCreate.push({title:'追蹤客戶樣品回饋 #'+r.id,ref_module:'sample',ref_id:String(r.id),priority:'normal',status:'open'})
+    const refId=String(r.sample_id)
+    if(!hasOpen('sample',refId)){
+      const s=samples.find(x=>x.id===r.sample_id)
+      const cust=r.customer_id?customers.find(x=>x.id===r.customer_id):null
+      toCreate.push({title:'追蹤客戶樣品回饋：'+(s?.product_name||'#'+r.sample_id),ref_module:'sample',ref_id:refId,customer:cust?.company||null,priority:'normal',status:'open'})
+    }
   })
   if(!toCreate.length)return
   const{error}=await sb.from('tasks').insert(toCreate)
