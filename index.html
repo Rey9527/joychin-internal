@@ -75,7 +75,25 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .product-option:last-child { border-bottom: none; }
 .product-option .po-name { font-weight: 500; color: #1a1a1a; }
 .product-option .po-meta { font-size: 10px; color: #aaa; margin-top: 1px; }
-@media (max-width: 680px) { .sidebar { width: 48px; } .sidebar-logo p, .nav-item span, .nav-section, .sidebar-footer { display: none; } .content { padding: 14px; } .grid-2 { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr; } }
+#hamburger-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; color: #1a1a1a; line-height: 1; flex-shrink: 0; margin-right: 10px; }
+#sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 299; }
+#sidebar-overlay.open { display: block; }
+.modal-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+@media (max-width: 680px) {
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 300; width: 220px; transform: translateX(-100%); transition: transform 0.25s ease; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-logo p, .nav-item span, .nav-section, .sidebar-footer { display: block; }
+  #hamburger-btn { display: block; }
+  .main { width: 100%; }
+  .content { padding: 14px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
+  input:not([type=checkbox]), select { font-size: 16px !important; padding: 12px 14px; height: auto !important; }
+  textarea { font-size: 16px !important; padding: 12px 14px; }
+  .filter-bar select, .filter-bar input[type=text], .filter-bar input[type=date] { font-size: 14px; padding: 8px 10px; height: auto !important; }
+  .modal-foot { position: sticky; bottom: 0; background: #fff; padding: 12px 20px; margin: 8px -20px -20px; border-top: 1px solid #e5e5e0; z-index: 2; }
+  .btn-doc-copy { min-height: 44px; padding: 0 16px; font-size: 13px; }
+}
 #toast-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
 .toast { padding: 10px 14px; border-radius: 9px; font-size: 12px; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,0.12); display: flex; align-items: flex-start; gap: 10px; animation: toast-in 0.18s ease; }
 .toast-success { background: #E1F5EE; color: #085041; border: 1px solid #0F6E56; }
@@ -86,6 +104,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 </head>
 <body>
 
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
 <div class="sidebar">
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
@@ -129,6 +148,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 <div id="toast-container"></div>
 <div class="main">
   <div class="topbar">
+    <button id="hamburger-btn" onclick="toggleSidebar()" aria-label="選單">☰</button>
     <div class="topbar-title" id="topbar-title">詢價管理</div>
     <div id="overdue-alert" style="display:none" class="badge"></div>
   </div>
@@ -155,26 +175,6 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <span style="font-size:11px;color:#aaa">至</span>
         <input id="f-date-to" type="date" onchange="renderInquiries()" style="max-width:140px" />
         <button class="btn btn-ghost btn-sm" onclick="clearFilters()">清除</button>
-      </div>
-      <div id="new-inq-form" class="card" style="display:none;border-color:#0F6E56;background:#f8fffc">
-        <div class="section-title" style="color:#085041;margin-bottom:12px">新增客製化詢價</div>
-        <div class="grid-2" style="margin-bottom:10px">
-          <div>
-            <label>客戶 <span class="req">*</span></label>
-            <div style="display:flex;gap:6px">
-              <select id="nf-customer" style="flex:1"><option value="">— 選擇客戶 —</option></select>
-              <button class="btn btn-ghost btn-sm" onclick="switchTab('customers');hideNewInqForm()" style="white-space:nowrap">+ 新客戶</button>
-            </div>
-          </div>
-          <div><label>供應商截止回覆日</label><input id="nf-deadline" type="date" /></div>
-        </div>
-        <div style="margin-bottom:10px"><label>產品需求 <span class="req">*</span></label><input id="nf-product" placeholder="例：45g 單面矽離型紙" /></div>
-        <div style="margin-bottom:10px"><label>規格詳細說明</label><textarea id="nf-spec" placeholder="幅寬、克重、矽化量、表面張力..."></textarea></div>
-        <div style="margin-bottom:14px"><label>供應商 <span class="req">*</span></label><select id="nf-supplier"><option value="">— 選擇供應商公司 —</option></select></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="createInquiry()">建立詢價單</button>
-          <button class="btn btn-ghost" onclick="hideNewInqForm()">取消</button>
-        </div>
       </div>
       <div id="inquiry-list"></div>
     </div>
@@ -419,6 +419,17 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="modal-box lg">
     <div class="modal-hd" id="modal-order-hd"></div>
     <div class="modal-bd" id="modal-order-bd"></div>
+  </div>
+</div>
+
+<!-- 新增詢價 Modal -->
+<div class="modal-overlay" id="modal-new-inq" onclick="closeModalOnBg(event,'modal-new-inq')">
+  <div class="modal-box sm">
+    <div class="modal-hd">
+      <div style="font-size:14px;font-weight:600">新增詢價單</div>
+      <button class="modal-close" onclick="closeModal('modal-new-inq')">×</button>
+    </div>
+    <div class="modal-bd" id="modal-new-inq-bd"></div>
   </div>
 </div>
 
@@ -969,6 +980,7 @@ function renderOrders(){
       (cust?cust.company:'—')+' · '+(sup?sup.company:'—')+
       (o.order_date?' · '+o.order_date:'')+
       (o.expected_delivery?' · 預計 '+o.expected_delivery:'')+
+      (o.tracking_no?' · 📦 '+o.tracking_no:'')+
       '</div></div>'+
       '<div style="text-align:right;flex-shrink:0">'+
       (o.total_amount?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+Number(o.total_amount).toLocaleString()+' '+(o.currency||'')+'</div>':'')+
@@ -1111,27 +1123,26 @@ function _renderOrderModal(){
   html+='<div class="divider"></div>'
 
   // Section 3: Status workflow
-  html+='<div class="section-title">狀態操作</div>'
+  html+='<div class="modal-foot" style="flex-direction:column;align-items:flex-start;gap:10px">'+
+    '<div class="section-title" style="margin-bottom:0">狀態操作</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">'
   if(o.status==='confirmed'){
     html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'in_production\')">標記生產中 →</button>'
   } else if(o.status==='in_production'){
     html+=
-      '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">'+
-      '<div style="flex:1;min-width:160px"><label>快遞單號</label><input id="ord-tracking-new" value="'+esc(o.tracking_no||'')+'" /></div>'+
-      '<button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="updateOrderStatus(\'shipped\',{tracking_no:document.getElementById(\'ord-tracking-new\')?.value})">標記已出貨 →</button>'+
-      '</div>'
+      '<div style="min-width:160px"><label>快遞單號</label><input id="ord-tracking-new" value="'+esc(o.tracking_no||'')+'" /></div>'+
+      '<button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="updateOrderStatus(\'shipped\',{tracking_no:document.getElementById(\'ord-tracking-new\')?.value})">標記已出貨 →</button>'
   } else if(o.status==='shipped'){
     html+=
-      '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">'+
-      '<div style="flex:1;min-width:160px"><label>實際到貨日</label><input id="ord-actual-del" type="date" value="'+today+'" /></div>'+
-      '<button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="updateOrderStatus(\'delivered\',{actual_delivery:document.getElementById(\'ord-actual-del\')?.value})">標記已到貨 →</button>'+
-      '</div>'
+      '<div style="min-width:160px"><label>實際到貨日</label><input id="ord-actual-del" type="date" value="'+today+'" /></div>'+
+      '<button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="updateOrderStatus(\'delivered\',{actual_delivery:document.getElementById(\'ord-actual-del\')?.value})">標記已到貨 →</button>'
   } else if(o.status==='delivered'){
     html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'completed\')">標記完成 ✓</button>'
   }
   if(!['cancelled','completed'].includes(o.status)){
-    html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595;margin-left:8px" onclick="updateOrderStatus(\'cancelled\')">取消訂單</button>'
+    html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="updateOrderStatus(\'cancelled\')">取消訂單</button>'
   }
+  html+='</div></div>'
 
   document.getElementById('modal-order-bd').innerHTML=html
 }
@@ -1353,6 +1364,7 @@ function switchTab(tab){
   if(tab==='samples')renderSamples()
   if(tab==='tasks'){autoScanTasks();renderTasks()}
   if(tab==='orders')renderOrders()
+  closeSidebar()
 }
 
 function populateFilterCustomers(){
@@ -1407,14 +1419,28 @@ function genInqId(){const d=new Date();return 'INQ-'+d.getFullYear()+'-'+String(
 async function showNewInqForm(){
   if(!suppliers.length)await loadSuppliers()
   if(!customers.length)await loadCustomers()
-  const cSel=document.getElementById('nf-customer')
-  cSel.innerHTML='<option value="">— 選擇客戶 —</option>'+customers.map(c=>'<option value="'+c.company+'">'+c.company+'（'+c.name+'）</option>').join('')
-  const sSel=document.getElementById('nf-supplier')
-  const cos=[...new Set(suppliers.map(s=>s.company))].sort()
-  sSel.innerHTML='<option value="">— 選擇供應商公司 —</option>'+cos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
-  document.getElementById('new-inq-form').style.display='block'
+  const custOpts=customers.map(c=>'<option value="'+c.company+'">'+c.company+'（'+c.name+'）</option>').join('')
+  const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
+  const supOpts=supCos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
+  document.getElementById('modal-new-inq-bd').innerHTML=
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>客戶 <span class="req">*</span></label>'+
+    '<div style="display:flex;gap:6px">'+
+    '<select id="nf-customer" style="flex:1"><option value="">— 選擇客戶 —</option>'+custOpts+'</select>'+
+    '<button class="btn btn-ghost btn-sm" onclick="switchTab(\'customers\');closeModal(\'modal-new-inq\')" style="white-space:nowrap">+ 新客戶</button>'+
+    '</div></div>'+
+    '<div><label>供應商截止回覆日</label><input id="nf-deadline" type="date" /></div>'+
+    '</div>'+
+    '<div style="margin-bottom:10px"><label>產品需求 <span class="req">*</span></label><input id="nf-product" placeholder="例：45g 單面矽離型紙" /></div>'+
+    '<div style="margin-bottom:10px"><label>規格詳細說明</label><textarea id="nf-spec" placeholder="幅寬、克重、矽化量、表面張力..."></textarea></div>'+
+    '<div style="margin-bottom:14px"><label>供應商 <span class="req">*</span></label><select id="nf-supplier"><option value="">— 選擇供應商公司 —</option>'+supOpts+'</select></div>'+
+    '<div class="modal-foot">'+
+    '<button class="btn btn-primary" onclick="createInquiry()">建立詢價單</button>'+
+    '<button class="btn btn-ghost" onclick="closeModal(\'modal-new-inq\')">取消</button>'+
+    '</div>'
+  document.getElementById('modal-new-inq').classList.add('open')
 }
-function hideNewInqForm(){document.getElementById('new-inq-form').style.display='none'}
+function hideNewInqForm(){closeModal('modal-new-inq')}
 
 async function createInquiry(){
   const customer=document.getElementById('nf-customer').value
@@ -1436,6 +1462,8 @@ async function createInquiry(){
 async function openInqModal(id){selectedInqId=id;showTpl=false;await loadSuppliers();renderInqModalHd();renderInqModalBd();document.getElementById('modal-inq').classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 function closeModalOnBg(e,id){if(e.target===document.getElementById(id))closeModal(id)}
+function toggleSidebar(){document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open')}
+function closeSidebar(){document.querySelector('.sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('open')}
 
 function renderInqModalHd(){
   const i=inquiries.find(x=>x.id===selectedInqId);if(!i)return
@@ -1685,7 +1713,7 @@ function renderQuoteModalBd(){
     addItemSection+
     '<div class="divider"></div>'+
     '<div style="margin-bottom:16px"><label>備註</label><textarea onchange="qHeaderChange(\'notes\',this.value)">'+(h.notes||'')+'</textarea></div>'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">'+
+    '<div class="modal-foot" style="justify-content:space-between;align-items:center">'+
     (h.status==='draft'?
       '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存草稿</button>'+
       '<div style="display:flex;gap:8px">'+
@@ -2477,7 +2505,7 @@ function renderDocs(){
       html+='<div class="doc-row"><div class="pdf-icon">PDF</div>'+
         '<div style="flex:1"><div style="font-size:12px;font-weight:500">'+doc.doc_type+'</div><div style="font-size:10px;color:#aaa">'+(doc.file_size||'')+'</div></div>'+
         '<div>'+(doc.tags||[]).map(t=>'<span class="tag">'+t+'</span>').join('')+'</div>'+
-        '<button class="btn btn-ghost btn-sm" onclick="copyDocLink(\''+(doc.file_url||'#')+'\',\''+doc.doc_type+'\')">複製連結</button></div>'
+        '<button class="btn btn-ghost btn-sm btn-doc-copy" onclick="copyDocLink(\''+(doc.file_url||'#')+'\',\''+doc.doc_type+'\')">複製連結</button></div>'
     })
   })
   document.getElementById('doc-list').innerHTML=html
