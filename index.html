@@ -34,6 +34,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 input, select, textarea { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #e5e5e0; font-size: 12px; color: #1a1a1a; background: #fff; font-family: inherit; transition: border 0.12s; box-sizing: border-box; height: 36px; }
 textarea { height: auto; min-height: 72px; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: #0F6E56; }
+select:disabled { background: #f5f5f0; color: #999; cursor: not-allowed; border-color: #e5e5e0; }
 textarea { resize: vertical; min-height: 72px; }
 label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .req { color: #A32D2D; }
@@ -262,6 +263,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <div id="customer-summary" style="font-size:12px;color:#888"></div>
         <button class="btn btn-primary" onclick="showNewCustomerForm()">+ 新增客戶</button>
       </div>
+      <div id="customer-review-alert" style="display:none" class="alert-warn"></div>
       <div id="new-customer-form" class="card" style="display:none;border-color:#185FA5;background:#f0f7ff">
         <div class="section-title" style="color:#0C447C;margin-bottom:12px">新增客戶</div>
         <div class="grid-2" style="margin-bottom:10px">
@@ -447,11 +449,32 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 <script>
 function showToast(msg,type='success'){
   const c=document.getElementById('toast-container')
+  if(type==='error'){
+    const existing=c.querySelector('.toast-error')
+    if(existing)existing.remove()
+  }
   const t=document.createElement('div')
   t.className='toast toast-'+type
   t.innerHTML='<span style="flex:1">'+msg+'</span>'+(type==='error'?'<button class="toast-close" onclick="this.parentElement.remove()">×</button>':'')
   c.appendChild(t)
   if(type==='success')setTimeout(()=>t.remove(),3000)
+}
+function confirmModal(msg,onConfirm){
+  const id='confirm-overlay-'+Date.now()
+  const ov=document.createElement('div')
+  ov.id=id
+  ov.className='modal-overlay open'
+  ov.innerHTML=
+    '<div class="modal-box sm" style="max-width:360px">'+
+    '<div class="modal-hd"><div style="font-size:14px;font-weight:600">確認</div></div>'+
+    '<div class="modal-bd"><p style="font-size:13px;line-height:1.6">'+msg+'</p></div>'+
+    '<div class="modal-foot" style="justify-content:flex-end">'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\''+id+'\').remove()">取消</button>'+
+    '<button class="btn btn-primary btn-sm" id="'+id+'-ok">確定</button>'+
+    '</div></div>'
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()})
+  document.getElementById(id+'-ok').onclick=()=>{ov.remove();onConfirm()}
+  document.body.appendChild(ov)
 }
 
 const SB_URL='https://ckgjcwhlusksqbqvvbma.supabase.co'
@@ -490,7 +513,12 @@ async function loadOrders(){
 
 async function init(){
   await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadSettings(),loadProducts(),loadSamples(),loadTasks(),loadOrders()])
-  renderInquiries(); renderDocs(); populateFilterCustomers()
+  const savedTab=sessionStorage.getItem('activeTab')
+  if(savedTab&&TAB_LABELS[savedTab]){
+    switchTab(savedTab,false)
+  } else {
+    renderInquiries(); renderDocs(); populateFilterCustomers()
+  }
 }
 async function loadInquiries(){const{data}=await sb.from('inquiries').select('*').order('created_at',{ascending:false});inquiries=data||[];updateOverdueAlert()}
 async function loadDocuments(){const{data}=await sb.from('documents').select('*').order('product');documents=data||[]}
@@ -768,10 +796,11 @@ async function saveSampleBasic(){
 }
 
 async function deleteSample(){
-  if(!confirm('確定要刪除這筆樣品嗎？'))return
-  const{error}=await sb.from('samples').delete().eq('id',selectedSampleId)
-  if(error){showToast('刪除失敗：'+error.message,'error');return}
-  await loadSamples();closeModal('modal-sample');renderSamples();showToast('樣品已刪除')
+  confirmModal('確定要刪除這筆樣品嗎？',async()=>{
+    const{error}=await sb.from('samples').delete().eq('id',selectedSampleId)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadSamples();renderSamples();closeModal('modal-sample');showToast('樣品已刪除')
+  })
 }
 
 async function submitSampleRequest(){
@@ -915,10 +944,11 @@ async function completeTask(id){
 }
 
 async function deleteTask(id){
-  if(!confirm('確定要刪除這筆工作嗎？'))return
-  const{error}=await sb.from('tasks').delete().eq('id',id)
-  if(error){showToast('刪除失敗：'+error.message,'error');return}
-  await loadTasks();renderTasks()
+  confirmModal('確定要刪除這筆工作嗎？',async()=>{
+    const{error}=await sb.from('tasks').delete().eq('id',id)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadTasks();renderTasks()
+  })
 }
 
 // ===== 訂單管理 =====
@@ -1025,9 +1055,10 @@ async function _createOrder(){
   const supCo=document.getElementById('or-supplier')?.value
   if(!custId){showToast('請選擇客戶','error');return}
   if(!supCo){showToast('請選擇供應商','error');return}
+  const cust=customers.find(x=>x.id===parseInt(custId))
   const sup=suppliers.find(s=>s.company===supCo)
   const{error}=await sb.from('orders').insert({
-    id,customer_id:parseInt(custId),supplier_id:sup?.id||null,
+    id,customer:cust?.company||null,customer_id:parseInt(custId),supplier_id:sup?.id||null,
     order_date:document.getElementById('or-date')?.value||null,
     expected_delivery:document.getElementById('or-exp-del')?.value||null,
     transport_method:document.getElementById('or-transport')?.value||null,
@@ -1178,11 +1209,12 @@ async function saveOrderBasic(){
 }
 
 async function deleteOrder(){
-  if(!confirm('確定要刪除此訂單嗎？'))return
-  await sb.from('order_items').delete().eq('order_id',selectedOrderId)
-  const{error}=await sb.from('orders').delete().eq('id',selectedOrderId)
-  if(error){showToast('刪除失敗：'+error.message,'error');return}
-  await loadOrders();closeModal('modal-order');renderOrders();showToast('訂單已刪除')
+  confirmModal('確定要刪除此訂單嗎？',async()=>{
+    await sb.from('order_items').delete().eq('order_id',selectedOrderId)
+    const{error}=await sb.from('orders').delete().eq('id',selectedOrderId)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadOrders();closeModal('modal-order');renderOrders();showToast('訂單已刪除')
+  })
 }
 
 async function submitOrderItem(){
@@ -1350,13 +1382,15 @@ function sObj(id,arr){return (arr||INQ_STATUS).find(s=>s.id===id)||{label:id,col
 function badge(status,arr){const s=sObj(status,arr);return '<span class="badge" style="background:'+s.bg+';color:'+s.color+';border:1px solid '+s.color+'">'+s.label+'</span>'}
 
 const TAB_LABELS={inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',tasks:'工作追蹤',orders:'訂單管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫'}
-function switchTab(tab){
+function switchTab(tab,save=true){
   activeTab=tab
+  if(save)sessionStorage.setItem('activeTab',tab)
   Object.keys(TAB_LABELS).forEach(t=>{
     const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?'block':'none'
     const nav=document.getElementById('nav-'+t);if(nav)nav.classList.toggle('active',t===tab)
   })
   document.getElementById('topbar-title').textContent=TAB_LABELS[tab]||''
+  if(tab==='inquiry'){renderInquiries();populateFilterCustomers()}
   if(tab==='customers')renderCustomers()
   if(tab==='suppliers_mgmt')renderSupplierMgmt()
   if(tab==='quotes')renderQuotes()
@@ -1422,12 +1456,16 @@ async function showNewInqForm(){
   const custOpts=customers.map(c=>'<option value="'+c.company+'">'+c.company+'（'+c.name+'）</option>').join('')
   const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
   const supOpts=supCos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
+  const activeProds=products.filter(p=>p.is_active!==false)
+  const prodOpts=activeProds.map(p=>'<option value="'+p.id+'">'+(p.product_code?'['+p.product_code+'] ':'')+p.product_name+'</option>').join('')
   document.getElementById('modal-new-inq-bd').innerHTML=
+    '<div style="margin-bottom:10px"><label>關聯產品目錄（選填）</label>'+
+    '<select id="nf-from-product" onchange="onNfProductChange()"><option value="">— 不關聯目錄 —</option>'+prodOpts+'</select></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>客戶 <span class="req">*</span></label>'+
     '<div style="display:flex;gap:6px">'+
     '<select id="nf-customer" style="flex:1"><option value="">— 選擇客戶 —</option>'+custOpts+'</select>'+
-    '<button class="btn btn-ghost btn-sm" onclick="switchTab(\'customers\');closeModal(\'modal-new-inq\')" style="white-space:nowrap">+ 新客戶</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="openQuickAddCustomer()" style="white-space:nowrap">+ 新客戶</button>'+
     '</div></div>'+
     '<div><label>供應商截止回覆日</label><input id="nf-deadline" type="date" /></div>'+
     '</div>'+
@@ -1441,6 +1479,21 @@ async function showNewInqForm(){
   document.getElementById('modal-new-inq').classList.add('open')
 }
 function hideNewInqForm(){closeModal('modal-new-inq')}
+function onNfProductChange(){
+  const sel=document.getElementById('nf-from-product')
+  if(!sel||!sel.value)return
+  const p=products.find(x=>x.id===parseInt(sel.value))
+  if(!p)return
+  const prodInput=document.getElementById('nf-product')
+  const specInput=document.getElementById('nf-spec')
+  const supSel=document.getElementById('nf-supplier')
+  if(prodInput&&!prodInput.value)prodInput.value=p.product_name
+  if(specInput&&!specInput.value&&p.notes)specInput.value=p.notes
+  if(supSel){
+    const sup=suppliers.find(s=>s.id===p.supplier_id)
+    if(sup){const opt=[...supSel.options].find(o=>o.value===sup.company);if(opt)supSel.value=sup.company}
+  }
+}
 
 async function createInquiry(){
   const customer=document.getElementById('nf-customer').value
@@ -1495,6 +1548,7 @@ function renderInqModalBd(){
     '<button class="btn btn-ghost btn-sm" onclick="toggleTpl()">'+(showTpl?'收起範本':'產生詢問供應商訊息')+'</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="createTaskFromInquiry(\''+i.id+'\')">📌 建立追蹤工作</button>'+
     (i.supplier_price?'<button class="btn btn-ghost btn-sm" onclick="openAddInqToProduct(\''+i.id+'\')">📦 加入產品目錄</button>':'')+
+    (i.supplier_price&&i.from_product_id?'<button class="btn btn-ghost btn-sm" onclick="updateProductCostFromInquiry(\''+i.id+'\')">📦 更新產品目錄成本</button>':'')+
     (i.supplier_price?'<button class="btn btn-primary btn-sm" onclick="sendToQuote(\''+i.id+'\')">收到成本 → 送去報價</button>':'')+
     '</div>'+
     (showTpl?buildTpl(i,sup):'')
@@ -1696,12 +1750,11 @@ function renderQuoteModalBd(){
     '<div><label>篩選供應商</label><select id="qi-sup" onchange="filterQiProducts()">'+
     '<option value="">全部供應商</option>'+supplierCos.map(c=>'<option>'+c+'</option>').join('')+
     '</select></div>'+
-    '<div><label>選擇產品</label><select id="qi-prod">'+
-    '<option value="">— 選擇產品 —</option>'+
-    products.map(p=>{const ps=suppliers.find(s=>s.id===p.supplier_id);return '<option value="'+p.id+'">'+(ps?'['+ps.company+'] ':'')+p.product_name+'</option>'}).join('')+
+    '<div><label>選擇產品</label><select id="qi-prod" disabled>'+
+    '<option value="">— 先選供應商 —</option>'+
     '</select></div>'+
     '</div>'+
-    '<button class="btn btn-ghost btn-sm" onclick="addQuoteItem()">+ 加入品項</button>'
+    '<button class="btn btn-blue btn-sm" onclick="addQuoteItem()">+ 加入品項</button>'
 
   document.getElementById('modal-quote-bd').innerHTML=
     '<div style="margin-bottom:10px">'+badge(h.status,QUO_STATUS)+'</div>'+
@@ -1758,9 +1811,23 @@ function filterQiProducts(){
   const supFilter=document.getElementById('qi-sup')?.value||''
   const prodSel=document.getElementById('qi-prod')
   if(!prodSel)return
-  const filtered=supFilter?products.filter(p=>{const s=suppliers.find(x=>x.id===p.supplier_id);return s?.company===supFilter}):products
+  
+  if(!supFilter){
+    prodSel.disabled=true
+    prodSel.innerHTML='<option value="">— 先選供應商 —</option>'
+    return
+  }
+  
+  prodSel.disabled=false
+  const filtered=products.filter(p=>{
+    const s=suppliers.find(x=>x.id===p.supplier_id)
+    return s?.company===supFilter
+  })
   prodSel.innerHTML='<option value="">— 選擇產品 —</option>'+
-    filtered.map(p=>{const ps=suppliers.find(s=>s.id===p.supplier_id);return '<option value="'+p.id+'">'+(ps?'['+ps.company+'] ':'')+p.product_name+'</option>'}).join('')
+    filtered.map(p=>{
+      const ps=suppliers.find(s=>s.id===p.supplier_id)
+      return '<option value="'+p.id+'">'+(ps?'['+ps.company+'] ':'')+p.product_name+'</option>'
+    }).join('')
 }
 
 async function addQuoteItem(){
@@ -2290,8 +2357,9 @@ function openProductModal(id){
     '<option value="true" '+(p?.is_active!==false?'selected':'')+'>Active（現行產品）</option>'+
     '<option value="false" '+(p?.is_active===false?'selected':'')+'>Inactive（暫不使用）</option>'+
     '</select></div>'+
-    '<div style="display:flex;gap:8px">'+
+    '<div class="modal-foot">'+
     '<button class="btn btn-primary" onclick="saveProduct('+(isEdit?p.id:'null')+')">'+( isEdit?'儲存':'新增')+'</button>'+
+    (isEdit?'<button class="btn btn-ghost" onclick="createInquiryFromProduct('+p.id+');closeModal(\'modal-product\')">🔄 重新詢價</button>':'')+
     (isEdit?'<button class="btn btn-ghost" style="color:#A32D2D" onclick="deleteProduct('+p.id+',\''+p.product_name+'\')">刪除</button>':'')+
     '</div>'
   document.getElementById('modal-product').classList.add('open')
@@ -2322,35 +2390,104 @@ async function saveProduct(id){
 }
 
 async function deleteProduct(id,name){
-  if(!confirm('確定要刪除「'+name+'」嗎？'))return
-  const{error}=await sb.from('products').delete().eq('id',id)
-  if(error){showToast('刪除失敗：'+error.message,'error');return}
-  await loadProducts();closeModal('modal-product')
-  populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
-  showToast('已刪除')
+  confirmModal('確定要刪除「'+name+'」嗎？',async()=>{
+    const{error}=await sb.from('products').delete().eq('id',id)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadProducts();closeModal('modal-product')
+    populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
+    showToast('已刪除')
+  })
+}
+async function createInquiryFromProduct(productId){
+  const p=products.find(x=>x.id===productId);if(!p)return
+  const sup=suppliers.find(s=>s.id===p.supplier_id)
+  const data={
+    product:p.product_name,
+    spec:p.notes||null,
+    supplier:sup?.company||null,
+    customer:'內部詢價',
+    status:'pending',
+    from_product_id:productId
+  }
+  const{data:inserted,error}=await sb.from('inquiries').insert(data).select().single()
+  if(error){showToast('建立詢價失敗：'+error.message,'error');return}
+  await loadInquiries()
+  showToast('詢價單已建立')
+  setTimeout(()=>{switchTab('inquiry');setTimeout(()=>openInqModal(inserted.id),80)},200)
+}
+async function updateProductCostFromInquiry(inqId){
+  const i=inquiries.find(x=>x.id===parseInt(inqId)||x.id===inqId);if(!i)return
+  if(!i.from_product_id||!i.supplier_price){showToast('缺少產品關聯或成本資料','error');return}
+  const rawCost=parseFloat((i.supplier_price||'').match(/[\d.]+/)?.[0])||null
+  const rawCur=(i.supplier_price||'').replace(/[\d.,\s]+/,'').trim()||'USD'
+  if(!rawCost){showToast('無法解析成本金額','error');return}
+  const today=new Date().toISOString().slice(0,10)
+  const{error}=await sb.from('products').update({
+    cost_price:rawCost,
+    currency:rawCur,
+    last_reviewed_at:today
+  }).eq('id',i.from_product_id)
+  if(error){showToast('更新失敗：'+error.message,'error');return}
+  await loadProducts();renderProducts();updateProductOverdueAlert()
+  showToast('產品目錄成本已更新')
 }
 
 // ===== 客戶管理 =====
+function customerStatus(c){
+  if(!c.last_reviewed_at||!c.review_days)return 'ok'
+  const last=new Date(c.last_reviewed_at)
+  const daysSince=Math.floor((new Date()-last)/(1000*60*60*24))
+  if(daysSince>=c.review_days)return 'overdue'
+  if(daysSince>=c.review_days*0.8)return 'warn'
+  return 'ok'
+}
+function customerDaysLeft(c){
+  if(!c.last_reviewed_at||!c.review_days)return null
+  const last=new Date(c.last_reviewed_at)
+  const daysSince=Math.floor((new Date()-last)/(1000*60*60*24))
+  return c.review_days-daysSince
+}
+function updateCustomerReviewAlert(){
+  const el=document.getElementById('customer-review-alert')
+  if(!el)return
+  const overdue=customers.filter(c=>customerStatus(c)==='overdue')
+  if(overdue.length){
+    el.style.display='block'
+    el.textContent='⚠️ '+overdue.length+' 位客戶需要回顧：'+overdue.map(c=>c.company).join('、')
+  } else {
+    el.style.display='none'
+  }
+}
 function renderCustomers(){
   const el=document.getElementById('customer-list')
   const sum=document.getElementById('customer-summary')
   if(!el)return
   if(sum)sum.textContent=customers.length+' 位客戶'
+  updateCustomerReviewAlert()
   if(!customers.length){el.innerHTML='<div class="loading">尚無客戶資料</div>';return}
-  el.innerHTML=customers.map(c=>'<div class="row" style="cursor:default;align-items:flex-start">'+
-    '<div style="flex:1;min-width:0">'+
-    '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
-    '<span style="font-size:13px;font-weight:500">'+c.company+'</span>'+
-    '<span class="tag">'+(c.country||'—')+'</span>'+
-    (c.industry?'<span class="tag">'+c.industry+'</span>':'')+
-    '</div>'+
-    '<div style="font-size:12px;color:#666">'+c.name+(c.email?' · '+c.email:'')+(c.phone?' · '+c.phone:'')+'</div>'+
-    (c.notes?'<div style="font-size:11px;color:#aaa;margin-top:2px">'+c.notes+'</div>':'')+
-    '</div>'+
-    '<div style="display:flex;gap:6px;flex-shrink:0">'+
-    '<button class="btn btn-ghost btn-sm" onclick="openEditCustomer('+c.id+')">編輯</button>'+
-    '<button class="btn btn-ghost btn-sm" style="color:#aaa" onclick="deleteCustomer('+c.id+',\''+c.company+'\')">×</button>'+
-    '</div></div>').join('')
+  el.innerHTML=customers.map(c=>{
+    const st=customerStatus(c)
+    const daysLeft=customerDaysLeft(c)
+    const stBg=st==='overdue'?'#FCEBEB':st==='warn'?'#FFFBEA':'transparent'
+    const stColor=st==='overdue'?'#A32D2D':st==='warn'?'#7A5B00':null
+    const stLabel=st==='overdue'?'需回顧':st==='warn'?'即將到期':null
+    return '<div class="row '+(st==='overdue'?'overdue':st==='warn'?'warning':'')+'" style="cursor:default;align-items:flex-start">'+
+      '<div style="flex:1;min-width:0">'+
+      '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
+      '<span style="font-size:13px;font-weight:500">'+c.company+'</span>'+
+      '<span class="tag">'+(c.country||'—')+'</span>'+
+      (c.industry?'<span class="tag">'+c.industry+'</span>':'')+
+      (stLabel?'<span class="badge" style="background:'+stBg+';color:'+stColor+'">'+stLabel+'</span>':'')+
+      '</div>'+
+      '<div style="font-size:12px;color:#666">'+c.name+(c.email?' · '+c.email:'')+(c.phone?' · '+c.phone:'')+'</div>'+
+      (c.notes?'<div style="font-size:11px;color:#aaa;margin-top:2px">'+c.notes+'</div>':'')+
+      (c.last_reviewed_at?'<div style="font-size:11px;color:#aaa;margin-top:2px">上次回顧：'+c.last_reviewed_at+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+'</div>':'')+
+      '</div>'+
+      '<div style="display:flex;gap:6px;flex-shrink:0">'+
+      '<button class="btn btn-ghost btn-sm" onclick="openEditCustomer('+c.id+')">編輯</button>'+
+      '<button class="btn btn-ghost btn-sm" style="color:#aaa" onclick="deleteCustomer('+c.id+',\''+c.company+'\')">×</button>'+
+      '</div></div>'
+  }).join('')
 }
 
 function showNewCustomerForm(){document.getElementById('new-customer-form').style.display='block'}
@@ -2374,9 +2511,10 @@ async function createCustomer(){
 }
 
 async function deleteCustomer(id,company){
-  if(!confirm('確定要刪除「'+company+'」嗎？'))return
-  await sb.from('customers').delete().eq('id',id)
-  await loadCustomers();renderCustomers()
+  confirmModal('確定要刪除「'+company+'」嗎？',async()=>{
+    await sb.from('customers').delete().eq('id',id)
+    await loadCustomers();renderCustomers()
+  })
 }
 
 function openEditCustomer(id){
@@ -2390,8 +2528,16 @@ function openEditCustomer(id){
     '<div><label>電話</label><input id="ec-phone" value="'+(c.phone||'')+'" /></div>'+
     '<div><label>國家</label><select id="ec-country">'+['TH','TW','CN','SG','MY','OTHER'].map(v=>'<option '+(c.country===v?'selected':'')+'>'+v+'</option>').join('')+'</select></div>'+
     '<div><label>行業</label><input id="ec-industry" value="'+(c.industry||'')+'" /></div>'+
-    '</div><div style="margin-bottom:14px"><label>備註</label><textarea id="ec-notes">'+(c.notes||'')+'</textarea></div>'+
-    '<button class="btn btn-blue" onclick="saveCustomer('+id+')">儲存</button>'
+    '</div>'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>回顧週期（天）</label><input type="number" id="ec-days" value="'+(c.review_days||180)+'" min="7" /></div>'+
+    '<div><label>上次回顧日期</label><input type="date" id="ec-reviewed" value="'+(c.last_reviewed_at||'')+'" /></div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px"><label>備註</label><textarea id="ec-notes">'+(c.notes||'')+'</textarea></div>'+
+    '<div class="modal-foot">'+
+    '<button class="btn btn-blue" onclick="saveCustomer('+id+')">儲存</button>'+
+    '<button class="btn btn-ghost" onclick="markCustomerReviewed('+id+')">✓ 已回顧</button>'+
+    '</div>'
   document.getElementById('modal-customer').classList.add('open')
 }
 
@@ -2404,8 +2550,70 @@ async function saveCustomer(id){
     phone:document.getElementById('ec-phone').value.trim()||null,
     country:document.getElementById('ec-country').value,
     industry:document.getElementById('ec-industry').value.trim()||null,
-    notes:document.getElementById('ec-notes').value.trim()||null}).eq('id',id)
+    notes:document.getElementById('ec-notes').value.trim()||null,
+    review_days:parseInt(document.getElementById('ec-days')?.value)||180,
+    last_reviewed_at:document.getElementById('ec-reviewed')?.value||null}).eq('id',id)
   await loadCustomers();closeModal('modal-customer');renderCustomers()
+  showToast('客戶已更新')
+}
+async function markCustomerReviewed(id){
+  const today=new Date().toISOString().slice(0,10)
+  const{error}=await sb.from('customers').update({last_reviewed_at:today}).eq('id',id)
+  if(error){showToast('更新失敗','error');return}
+  await loadCustomers();closeModal('modal-customer');renderCustomers()
+  showToast('已標記今日回顧')
+}
+
+function openQuickAddCustomer(){
+  const existing=document.getElementById('quick-add-customer-overlay')
+  if(existing)existing.remove()
+  const ov=document.createElement('div')
+  ov.id='quick-add-customer-overlay'
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:350;display:flex;align-items:center;justify-content:center;padding:16px'
+  ov.innerHTML=
+    '<div style="background:#fff;border-radius:14px;width:100%;max-width:420px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
+    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0">'+
+    '<div style="font-size:14px;font-weight:600">快速新增客戶</div>'+
+    '<button onclick="document.getElementById(\'quick-add-customer-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
+    '</div>'+
+    '<div style="padding:16px 20px 20px">'+
+    '<div class="grid-2" style="margin-bottom:12px">'+
+    '<div><label>聯絡人姓名 <span class="req">*</span></label><input id="qc-name" /></div>'+
+    '<div><label>公司名稱 <span class="req">*</span></label><input id="qc-company" /></div>'+
+    '<div><label>Email</label><input id="qc-email" type="email" /></div>'+
+    '<div><label>電話</label><input id="qc-phone" /></div>'+
+    '<div><label>國家</label><select id="qc-country">'+
+    ['TH','TW','CN','SG','MY','OTHER'].map(v=>'<option>'+v+'</option>').join('')+
+    '</select></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn btn-primary" onclick="_quickCreateCustomer()">新增客戶</button>'+
+    '<button class="btn btn-ghost" onclick="document.getElementById(\'quick-add-customer-overlay\').remove()">取消</button>'+
+    '</div></div></div>'
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()})
+  document.body.appendChild(ov)
+}
+
+async function _quickCreateCustomer(){
+  const name=document.getElementById('qc-name')?.value.trim()
+  const company=document.getElementById('qc-company')?.value.trim()
+  if(!name||!company){showToast('請填寫姓名和公司','error');return}
+  const{data,error}=await sb.from('customers').insert({
+    name,company,
+    email:document.getElementById('qc-email')?.value.trim()||null,
+    phone:document.getElementById('qc-phone')?.value.trim()||null,
+    country:document.getElementById('qc-country')?.value||null
+  }).select().single()
+  if(error){showToast('新增失敗：'+error.message,'error');return}
+  await loadCustomers()
+  document.getElementById('quick-add-customer-overlay')?.remove()
+  // 更新詢價 Modal 的客戶下拉並自動選到新客戶
+  const sel=document.getElementById('nf-customer')
+  if(sel){
+    sel.innerHTML='<option value="">— 選擇客戶 —</option>'+
+      customers.map(c=>'<option value="'+c.company+'" '+(c.id===data?.id?'selected':'')+'>'+c.company+'（'+c.name+'）</option>').join('')
+  }
+  showToast('客戶已新增')
 }
 
 // ===== 供應商管理 =====
@@ -2454,9 +2662,10 @@ async function createSupplier(){
 }
 
 async function deleteSupplier(id,name){
-  if(!confirm('確定要刪除「'+name+'」嗎？'))return
-  await sb.from('suppliers').delete().eq('id',id)
-  await loadSuppliers();renderSupplierMgmt()
+  confirmModal('確定要刪除「'+name+'」嗎？',async()=>{
+    await sb.from('suppliers').delete().eq('id',id)
+    await loadSuppliers();renderSupplierMgmt()
+  })
 }
 
 function openEditSupplier(id){
