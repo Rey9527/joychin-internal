@@ -1492,7 +1492,7 @@ async function showNewInqForm(){
     '<div style="margin-bottom:10px"><label>規格詳細說明</label><textarea id="nf-spec" placeholder="幅寬、克重、矽化量、表面張力..."></textarea></div>'+
     '<div style="margin-bottom:10px"><label>供應商 <span class="req">*</span></label><select id="nf-supplier"><option value="">— 選擇供應商公司 —</option>'+supOpts+'</select></div>'+
     '<div style="margin-bottom:14px"><label>關聯產品目錄（選填）</label>'+
-    '<select id="nf-from-product" onchange="onNfProductChange()"><option value="">— 不關聯目錄 —</option>'+prodOpts+'</select></div>'+
+    '<select id="nf-product-link" onchange="onNfProductChange()"><option value="">— 不關聯目錄 —</option>'+prodOpts+'</select></div>'+
     '<div class="modal-foot">'+
     '<button class="btn btn-primary" onclick="createInquiry()">建立詢價單</button>'+
     '<button class="btn btn-ghost" onclick="closeModal(\'modal-new-inq\')">取消</button>'+
@@ -1501,7 +1501,7 @@ async function showNewInqForm(){
 }
 function hideNewInqForm(){closeModal('modal-new-inq')}
 function onNfProductChange(){
-  const sel=document.getElementById('nf-from-product')
+  const sel=document.getElementById('nf-product-link')
   if(!sel||!sel.value)return
   const p=products.find(x=>x.id===parseInt(sel.value))
   if(!p)return
@@ -1523,7 +1523,7 @@ async function createInquiry(){
   if(!customer){showToast('請選擇客戶','error');return}
   if(!product){showToast('請填寫產品需求','error');return}
   if(!supplier){showToast('請選擇供應商','error');return}
-  const fromProductId=parseInt(document.getElementById('nf-from-product')?.value)||null
+  const fromProductId=parseInt(document.getElementById('nf-product-link')?.value)||null
   const newInq={id:genInqId(),customer,product,supplier,
     spec:document.getElementById('nf-spec').value.trim(),
     supplier_deadline:document.getElementById('nf-deadline').value||null,
@@ -1685,7 +1685,7 @@ async function sendToQuote(inqId){
           '<div>本次供應商報價：<strong>'+rawCost+' '+rawCur+'</strong></div>'+
           '</div>'+
           '<div class="modal-foot">'+
-          '<button class="btn btn-primary" onclick="_doSendToQuote(true)">同步更新目錄</button>'+
+          '<button class="btn btn-primary" onclick="_doSendToQuote(true)">同步更新目錄並送報價</button>'+
           '<button class="btn btn-ghost" onclick="_doSendToQuote(false)">不更新，直接送報價</button>'+
           '</div>'
         document.getElementById('modal-cost-diff').classList.add('open')
