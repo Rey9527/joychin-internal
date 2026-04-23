@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>JOY CHIN PSA — 業務系統</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -23,7 +23,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
 .topbar { background: #fff; border-bottom: 1px solid #e5e5e0; padding: 13px 24px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
 .topbar-title { font-size: 14px; font-weight: 600; color: #1a1a1a; }
-.content { padding: 20px 24px; }
+.content { padding: 20px 24px; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .card { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #e5e5e0; margin-bottom: 14px; }
 .btn { padding: 7px 14px; border-radius: 8px; border: none; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.12s; }
 .btn-primary { background: #0F6E56; color: #fff; }
@@ -76,6 +76,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .modal-bd { padding: 16px 20px 20px; }
 .modal-close { background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border-radius: 999px; flex-shrink: 0; line-height: 1; }
 .modal-close:hover { background: #f5f5f0; }
+.inline-overlay-box { background:#fff; border-radius:14px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.2); }
+.inline-overlay-hd { padding:16px 20px 12px; border-bottom:1px solid #e5e5e0; display:flex; justify-content:space-between; align-items:center; gap:12px; position:sticky; top:0; background:#fff; border-radius:14px 14px 0 0; }
+.inline-overlay-hd > :first-child { min-width:0; flex:1; }
+.inline-overlay-hd > :first-child div,
+.inline-overlay-hd > :first-child span,
+.inline-overlay-hd > :first-child p { word-break: break-word; overflow-wrap: anywhere; }
+.inline-overlay-close { background:none; border:none; font-size:20px; color:#aaa; cursor:pointer; width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:999px; line-height:1; flex-shrink:0; }
+.inline-overlay-close:hover { background:#f5f5f0; }
 /* 產品選擇 dropdown */
 .product-picker { position: relative; }
 .product-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #e5e5e0; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 100; max-height: 220px; overflow-y: auto; display: none; }
@@ -124,6 +132,11 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   }
   .btn-sm { min-height: 44px; padding: 10px 14px; font-size: 13px; }
   .modal-close { width: 42px; height: 42px; font-size: 24px; }
+  .inline-overlay { align-items: flex-end !important; justify-content: center !important; padding: max(12px, env(safe-area-inset-top)) 0 0 !important; }
+  .inline-overlay-box { max-width: 100% !important; max-height: calc(100dvh - max(12px, env(safe-area-inset-top))) !important; border-radius: 14px 14px 0 0 !important; }
+  .inline-overlay-hd { padding: 16px 16px 12px; }
+  .inline-overlay-hd [style*="font-size:14px"] { font-size: 16px !important; line-height: 1.4; }
+  .inline-overlay-close { width: 42px; height: 42px; font-size: 24px; }
   .btn-doc-copy { min-height: 44px; padding: 0 16px; font-size: 13px; }
 }
 #toast-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
@@ -1009,7 +1022,7 @@ const QUO_STATUS=[
 let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteItems=[],settings={},products=[]
 let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[],tasks=[]
 let orders=[],orderItems=[]
-let shipments=[],shipmentOrders=[]
+let shipments=[],shipmentPurchaseOrders=[]
 let purchaseOrders=[],purchaseOrderItems=[]
 let selectedInqId=null,selectedQuoteId=null,selectedSampleId=null,selectedOrderId=null,selectedShipmentId=null,selectedPurchaseId=null,selectedTaskId=null,activeTab='inquiry',showTpl=false
 let _isDirty=false
@@ -1026,11 +1039,14 @@ async function loadOrders(){
   orders=o||[];orderItems=oi||[]
 }
 async function loadShipments(){
-  const[{data:s},{data:so}]=await Promise.all([
+  const [{data:s,error:shipErr},{data:spo,error:linkErr}] = await Promise.all([
     sb.from('shipments').select('*').order('created_at',{ascending:false}),
-    sb.from('shipment_orders').select('*').order('created_at',{ascending:false})
+    sb.from('shipment_purchase_orders').select('*').order('created_at',{ascending:false})
   ])
-  shipments=s||[];shipmentOrders=so||[]
+  shipments=s||[]
+  shipmentPurchaseOrders=spo||[]
+  if(shipErr)showToast('載入船運失敗：'+shipErr.message,'error')
+  if(linkErr)showToast('載入船運關聯失敗：'+linkErr.message,'error')
 }
 
 async function loadPurchaseOrders(){
@@ -1611,11 +1627,24 @@ function shipmentStatusObj(status){
     {id:'cancelled',label:'已取消',color:'#888',bg:'#f0f0f0'}
   ])
 }
-function shipmentLinkedOrders(shipmentId){
-  return shipmentOrders.filter(x=>String(x.shipment_id)===String(shipmentId)).map(link=>orders.find(o=>String(o.id)===String(link.order_id))).filter(Boolean)
+function shipmentLinkedPurchases(shipmentId){
+  return shipmentPurchaseOrders
+    .filter(x=>String(x.shipment_id)===String(shipmentId))
+    .map(link=>purchaseOrders.find(p=>String(p.id)===String(link.purchase_order_id)))
+    .filter(Boolean)
+}
+function purchaseLinkedShipments(purchaseOrderId){
+  return shipmentPurchaseOrders
+    .filter(x=>String(x.purchase_order_id)===String(purchaseOrderId))
+    .map(link=>shipments.find(s=>String(s.id)===String(link.shipment_id)))
+    .filter(Boolean)
 }
 function orderLinkedShipments(orderId){
-  return shipmentOrders.filter(x=>String(x.order_id)===String(orderId)).map(link=>shipments.find(s=>String(s.id)===String(link.shipment_id))).filter(Boolean)
+  const linkedPurchaseIds=purchaseOrders.filter(p=>String(p.customer_order_id||'')===String(orderId)).map(p=>String(p.id))
+  return shipmentPurchaseOrders
+    .filter(x=>linkedPurchaseIds.includes(String(x.purchase_order_id)))
+    .map(link=>shipments.find(s=>String(s.id)===String(link.shipment_id)))
+    .filter(Boolean)
 }
 function generateShipmentNo(){
   const y=new Date().getFullYear()
@@ -1637,7 +1666,7 @@ function renderShipments(){
   if(!list.length){el.innerHTML='<div class="loading">尚無船運資料</div>';return}
   el.innerHTML=list.map(s=>{
     const st=shipmentStatusObj(s.status)
-    const linked=shipmentLinkedOrders(s.id)
+    const linked=shipmentLinkedPurchases(s.id)
     return '<div class="row" onclick="openShipmentModal('+s.id+')">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
@@ -1649,7 +1678,7 @@ function renderShipments(){
       [s.container_no?('櫃號 '+s.container_no):null,s.bl_no?('B/L '+s.bl_no):null,s.etd?('ETD '+s.etd):null,s.eta?('ETA '+s.eta):null].filter(Boolean).join(' · ')+
       '</div></div>'+
       '<div style="text-align:right;flex-shrink:0">'+
-      '<div style="font-size:11px;color:#888">'+linked.length+' 筆訂單</div>'+
+      '<div style="font-size:11px;color:#888">'+linked.length+' 筆採購單</div>'+
       '</div></div>'
   }).join('')
 }
@@ -1659,8 +1688,8 @@ function openShipmentModal(id){
   const s=isNew?null:shipments.find(x=>String(x.id)===String(id))
   const transportOpts='<option value="sea">海運</option><option value="air">空運</option><option value="land">陸運</option><option value="express">快遞</option>'
   const statusOpts='<option value="planned">已規劃</option><option value="booked">已訂艙</option><option value="in_transit">運送中</option><option value="arrived">已到港</option><option value="completed">已完成</option><option value="cancelled">已取消</option>'
-  const availableOrders=orders.filter(o=>!shipmentOrders.some(link=>String(link.order_id)===String(o.id)&&String(link.shipment_id)===String(s?.id||'')))
-  const linkedOrders=isNew?[]:shipmentLinkedOrders(s.id)
+  const availablePurchases=purchaseOrders.filter(p=>!shipmentPurchaseOrders.some(link=>String(link.purchase_order_id)===String(p.id)&&String(link.shipment_id)===String(s?.id||'')))
+  const linkedPurchases=isNew?[]:shipmentLinkedPurchases(s.id)
   document.getElementById('modal-shipment-hd').innerHTML='<div style="font-size:14px;font-weight:600">'+(isNew?'新增船運批次':'船運詳情')+'</div><button class="modal-close" onclick="closeModal(\'modal-shipment\')">×</button>'
   let html=
     '<div class="grid-2" style="margin-bottom:10px">'+
@@ -1682,18 +1711,18 @@ function openShipmentModal(id){
     '<div style="margin-bottom:12px"><label>備註</label><textarea id="sh-notes">'+esc(s?.notes||'')+'</textarea></div>'+
     '<div class="modal-foot" style="margin-bottom:12px"><button class="btn btn-primary" onclick="saveShipment('+(isNew?'null':s.id)+')">'+(isNew?'建立船運批次':'儲存船運資料')+'</button></div>'+
     '<div class="divider"></div>'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="section-title" style="margin-bottom:0">關聯訂單</div></div>'
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="section-title" style="margin-bottom:0">關聯採購單</div></div>'
   if(!isNew){
     html+='<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
-      '<div class="grid-2" style="margin-bottom:8px"><div><label>掛入訂單</label><select id="sh-order-link"><option value="">— 選擇訂單 —</option>'+availableOrders.map(o=>'<option value="'+esc(o.id)+'">'+esc(o.id)+' · '+esc((customers.find(c=>c.id===o.customer_id)?.company)||o.customer||'—')+'</option>').join('')+'</select></div></div>'+
-      '<button class="btn btn-ghost btn-sm" onclick="attachOrderToShipment()">+ 加入此船運</button></div>'
-    if(linkedOrders.length){
-      html+=linkedOrders.map(o=>'<div class="row" style="cursor:pointer" onclick="openOrderModal(\''+esc(o.id)+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(o.id)+'</div><div style="font-size:11px;color:#888">'+esc((customers.find(c=>c.id===o.customer_id)?.company)||o.customer||'—')+' · '+esc(o.status||'')+'</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();detachOrderFromShipment('+s.id+',\''+esc(o.id)+'\')">移除</button></div>').join('')
+      '<div class="grid-2" style="margin-bottom:8px"><div><label>掛入採購單</label><select id="sh-purchase-link"><option value="">— 選擇採購單 —</option>'+availablePurchases.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.id)+' · '+esc(resolvePurchaseSupplierName(p)||'—')+'</option>').join('')+'</select></div></div>'+
+      '<button class="btn btn-ghost btn-sm" onclick="attachPurchaseToShipment()">+ 加入此船運</button></div>'
+    if(linkedPurchases.length){
+      html+=linkedPurchases.map(p=>'<div class="row" style="cursor:pointer" onclick="openPurchaseModal(\''+esc(p.id)+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(p.id)+'</div><div style="font-size:11px;color:#888">'+esc(resolvePurchaseSupplierName(p)||'—')+' · '+esc(p.status||'')+(p.customer_order_id?' · 對應訂單 '+esc(p.customer_order_id):' · 安全庫存 / 非客訂')+'</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();detachPurchaseFromShipment('+s.id+',\''+esc(p.id)+'\')">移除</button></div>').join('')
     } else {
-      html+='<div style="font-size:12px;color:#aaa;padding:8px 0">尚未關聯訂單</div>'
+      html+='<div style="font-size:12px;color:#aaa;padding:8px 0">尚未關聯採購單</div>'
     }
   } else {
-    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">請先建立船運批次，再掛入訂單。</div>'
+    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">請先建立船運批次，再掛入採購單。</div>'
   }
   document.getElementById('modal-shipment-bd').innerHTML=html
   enableDirtyTracking('modal-shipment-bd')
@@ -1726,23 +1755,24 @@ async function saveShipment(id){
   openShipmentModal(resp.data?.id??id)
   showToast(id===null?'船運批次已建立':'船運資料已更新')
 }
-async function attachOrderToShipment(){
+async function attachPurchaseToShipment(){
   const shipmentId=selectedShipmentId
-  const orderId=document.getElementById('sh-order-link')?.value
-  if(!shipmentId||!orderId){showToast('請先選擇要掛入的訂單','error');return}
-  const {error}=await sb.from('shipment_orders').insert({shipment_id:shipmentId,order_id:orderId})
-  if(error){showToast('加入訂單失敗：'+error.message,'error');return}
+  const purchaseOrderId=document.getElementById('sh-purchase-link')?.value
+  if(!shipmentId||!purchaseOrderId){showToast('請先選擇要掛入的採購單','error');return}
+  const {error}=await sb.from('shipment_purchase_orders').insert({shipment_id:shipmentId,purchase_order_id:purchaseOrderId})
+  if(error){showToast('加入採購單失敗：'+error.message,'error');return}
   await loadShipments()
   openShipmentModal(shipmentId)
-  if(selectedOrderId)await loadOrders()
-  showToast('訂單已掛入船運批次')
+  if(selectedPurchaseId)await loadPurchaseOrders()
+  showToast('採購單已掛入船運批次')
 }
-async function detachOrderFromShipment(shipmentId,orderId){
-  const {error}=await sb.from('shipment_orders').delete().eq('shipment_id',shipmentId).eq('order_id',orderId)
-  if(error){showToast('移除訂單失敗：'+error.message,'error');return}
+async function detachPurchaseFromShipment(shipmentId,purchaseOrderId){
+  const {error}=await sb.from('shipment_purchase_orders').delete().eq('shipment_id',shipmentId).eq('purchase_order_id',purchaseOrderId)
+  if(error){showToast('移除採購單失敗：'+error.message,'error');return}
   await loadShipments()
   openShipmentModal(shipmentId)
-  showToast('訂單已移出船運批次')
+  if(selectedPurchaseId)await loadPurchaseOrders()
+  showToast('採購單已移出船運批次')
 }
 
 function openOrderModal(id){
@@ -1961,6 +1991,7 @@ function _renderOrderModal(){
     '</div><div class="divider"></div>'
 
   const linkedShipments=orderLinkedShipments(o.id)
+  const relatedPurchases=purchaseOrders.filter(p=>String(p.customer_order_id||'')===String(o.id))
   html+='<div class="section-title">船運資訊</div>'
   if(linkedShipments.length){
     html+=linkedShipments.map(sh=>{
@@ -1973,7 +2004,7 @@ function _renderOrderModal(){
   } else {
     html+='<div style="font-size:12px;color:#aaa;padding:4px 0 10px">尚未掛入任何船運批次</div>'
   }
-  html+='<div style="margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="openShipmentPickerForOrder(\''+esc(o.id)+'\')">掛入船運批次</button></div><div class="divider"></div>'
+  html+='<div style="font-size:11px;color:#888;margin-bottom:12px">'+(relatedPurchases.length?'請透過相關採購單掛入船運批次。':'此訂單尚未對應任何採購單，若為安全庫存採購則可不關聯訂單。')+'</div><div class="divider"></div>'
 
   // Section 2: Items
   const total=itms.reduce((s,i)=>s+(parseFloat(i.unit_price||0)*parseFloat(i.qty||0)),0)
@@ -2124,30 +2155,13 @@ async function deleteOrderItem(itemId){
 }
 
 function openShipmentPickerForOrder(orderId){
-  const available=shipments.filter(sh=>!shipmentOrders.some(link=>String(link.shipment_id)===String(sh.id)&&String(link.order_id)===String(orderId)))
-  openSubformModal('選擇船運批次',
-    '<div style="margin-bottom:10px;font-size:12px;color:#666">將訂單 '+escapeHtml(orderId)+' 掛入既有船運批次。</div>'+
-    (available.length?available.map(sh=>{
-      const st=shipmentStatusObj(sh.status)
-      return '<div class="row" style="cursor:pointer" onclick="attachSpecificOrderToShipment('+sh.id+',\''+escapeHtml(orderId)+'\')">'+
-        '<div style="flex:1"><div style="font-size:13px;font-weight:500">'+escapeHtml(sh.shipment_no)+'</div>'+
-        '<div style="font-size:11px;color:#888">'+[shipmentModeLabel(sh.transport_mode),sh.etd?('ETD '+sh.etd):null,sh.eta?('ETA '+sh.eta):null].filter(Boolean).join(' · ')+'</div></div>'+
-        '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span></div>'
-    }).join(''):'<div class="loading">目前沒有可掛入的船運批次</div>')
+  const relatedPurchases=purchaseOrders.filter(p=>String(p.customer_order_id||'')===String(orderId))
+  openSubformModal('船運需由採購單掛入',
+    '<div style="margin-bottom:10px;font-size:12px;color:#666">訂單 '+escapeHtml(orderId)+' 的船運資訊，請從相關採購單進行關聯。</div>'+
+    (relatedPurchases.length
+      ? relatedPurchases.map(p=>'<div class="row" style="cursor:pointer" onclick="closeModal(\'modal-subform\');openPurchaseModal(\''+escapeHtml(p.id)+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+escapeHtml(p.id)+'</div><div style="font-size:11px;color:#888">'+escapeHtml(resolvePurchaseSupplierName(p)||'—')+' · '+escapeHtml(p.status||'')+'</div></div><button class="btn btn-ghost btn-sm">前往採購單</button></div>').join('')
+      : '<div class="loading">此訂單目前沒有對應的採購單</div>')
   )
-}
-async function attachSpecificOrderToShipment(shipmentId,orderId){
-  const {error}=await sb.from('shipment_orders').insert({shipment_id:shipmentId,order_id:orderId})
-  if(error){showToast('掛入船運失敗：'+error.message,'error');return}
-  _isDirty=false
-  closeModal('modal-subform')
-  await loadShipments()
-  if(selectedOrderId){
-    await loadOrders()
-    _renderOrderModal()
-  }
-  renderShipments()
-  showToast('訂單已掛入船運批次')
 }
 
 async function updateOrderStatus(newStatus,extra={}){
@@ -2401,6 +2415,7 @@ function openPurchaseModal(id, prefill={}){
   }
   const p=isNew?null:purchaseOrders.find(x=>x.id===id)
   const linkedRefId=prefill.ref_id||''
+  const linkedShipments=p?purchaseLinkedShipments(p.id):[]
   const activeOrders=orders.filter(o=>o.status!=='cancelled')
   const prefillSupplierId=prefill.supplier_id??p?.supplier_id??null
   const supOpts=suppliers
@@ -2428,6 +2443,16 @@ function openPurchaseModal(id, prefill={}){
     '<div id="pp-source-stock" style="display:none;margin-bottom:12px"><label>關聯產品目錄</label><select id="pp-ref-product" onchange="_isDirty=true;onPurchaseProductChange()"><option value="">— 選擇產品 —</option>'+productOpts+'</select><div id="pp-stock-info" style="margin-top:8px;font-size:11px;color:#666"></div></div>'+
     '<div id="pp-source-verbal" style="display:none;margin-bottom:12px"><label>客戶備註</label><input id="pp-remark" value="'+(p?.remark||'')+'" placeholder="說明口頭承諾內容" onchange="_isDirty=true" /></div>'+
     '<div style="margin-bottom:14px"><label>備註</label><textarea id="pp-notes" onchange="_isDirty=true">'+(p?.notes||'')+'</textarea></div>'
+  if(p){
+    html+='<div class="divider"></div><div style="margin-bottom:12px"><div class="section-title">船運資訊</div>'+
+      (linkedShipments.length
+        ? linkedShipments.map(sh=>{
+            const st=shipmentStatusObj(sh.status)
+            return '<div class="row" style="margin-bottom:8px" onclick="openShipmentModal('+sh.id+')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(sh.shipment_no)+'</div><div style="font-size:11px;color:#888">'+[shipmentModeLabel(sh.transport_mode),sh.etd?('ETD '+sh.etd):null,sh.eta?('ETA '+sh.eta):null,sh.container_no?('櫃號 '+sh.container_no):null].filter(Boolean).join(' · ')+'</div></div><span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span></div>'
+          }).join('')
+        : '<div style="font-size:12px;color:#aaa;padding:4px 0 10px">尚未掛入任何船運批次</div>')+
+      '</div>'
+  }
   if(p||isNew||prefill.items){
     const items=p?purchaseOrderItems.filter(i=>i.purchase_order_id===p.id):(window._pendingPurchaseItems||prefill.items||[])
     html+='<div class="divider"></div><div style="margin-bottom:12px"><div class="section-title">品項明細</div><div id="po-items">'+(items.map(i=>'<div class="row" style="cursor:default">'+
@@ -2526,6 +2551,7 @@ async function createPurchaseOrder(){
   const id=generatePurchaseId()
   const status=source==='verbal'?'pending_approval':'draft'
   const payload={id,source,supplier_id:supplierId,status}
+  payload.customer_order_id=source==='order'?(document.getElementById('pp-ref-order')?.value||null):null
   assignIfPresent(payload,'accounting_no',document.getElementById('pp-accounting')?.value?.trim())
   assignIfPresent(payload,'expected_delivery',document.getElementById('pp-expected')?.value)
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value||'USD')
@@ -2613,6 +2639,7 @@ async function savePurchaseOrder(){
     source:document.getElementById('pp-source')?.value,
     supplier_id:supplierId
   }
+  payload.customer_order_id=payload.source==='order'?(document.getElementById('pp-ref-order')?.value||null):null
   assignIfPresent(payload,'accounting_no',document.getElementById('pp-accounting')?.value?.trim())
   assignIfPresent(payload,'expected_delivery',document.getElementById('pp-expected')?.value)
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value)
@@ -2961,12 +2988,13 @@ function openAddInqToProduct(inqId){
   const supOpts=suppliers.map(s=>'<option value="'+s.id+'"'+(s.id==supId?' selected':'')+'>'+s.company+' — '+s.name+'</option>').join('')
   const overlay=document.createElement('div')
   overlay.id='add-to-product-overlay'
+  overlay.className='inline-overlay'
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px'
   overlay.innerHTML=
-    '<div style="background:#fff;border-radius:14px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
-    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0">'+
+    '<div class="inline-overlay-box" style="max-width:500px;max-height:88vh;overflow-y:auto">'+
+    '<div class="inline-overlay-hd">'+
     '<div><div style="font-size:14px;font-weight:600">加入產品目錄</div><div style="font-size:11px;color:#aaa;margin-top:2px">來自詢價：'+i.product+'</div></div>'+
-    '<button onclick="document.getElementById(\'add-to-product-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
+    '<button class="inline-overlay-close" onclick="document.getElementById(\'add-to-product-overlay\').remove()">×</button>'+
     '</div>'+
     '<div style="padding:16px 20px 20px">'+
     '<div class="grid-2" style="margin-bottom:10px">'+
@@ -3576,14 +3604,15 @@ function openNewProductFromQuote(){
   if(existing)existing.remove()
   const overlay=document.createElement('div')
   overlay.id='new-product-from-quote-overlay'
+  overlay.className='inline-overlay'
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px'
   const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
   const supOpts=supCos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
   overlay.innerHTML=
-    '<div style="background:#fff;border-radius:14px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
-    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0">'+
+    '<div class="inline-overlay-box" style="max-width:500px;max-height:88vh;overflow-y:auto">'+
+    '<div class="inline-overlay-hd">'+
     '<div><div style="font-size:14px;font-weight:600">新增品項至目錄</div><div style="font-size:11px;color:#aaa;margin-top:2px">存入目錄後自動加入報價單</div></div>'+
-    '<button onclick="document.getElementById(\'new-product-from-quote-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
+    '<button class="inline-overlay-close" onclick="document.getElementById(\'new-product-from-quote-overlay\').remove()">×</button>'+
     '</div>'+
     '<div style="padding:16px 20px 20px">'+
     '<div class="grid-2" style="margin-bottom:10px">'+
@@ -3998,7 +4027,7 @@ function renderCustomers(){
     const stColor=st==='overdue'?'#A32D2D':st==='warn'?'#7A5B00':null
     const stLabel=st==='overdue'?'需回顧':st==='warn'?'即將到期':null
     return '<div class="card" style="margin-bottom:10px">'+
-      '<div style="font-size:13px;font-weight:500;color:#185FA5;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid #e5e5e0;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="openEditCustomer('+primary.id+')">'+
+      '<div style="font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid #e5e5e0;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="openEditCustomer('+primary.id+')">'+
       '<span>'+company+'</span><span style="font-size:11px;color:#888">'+people.length+' 位聯絡人</span></div>'+
       people.map(c=>
         '<div class="row '+(st==='overdue'?'overdue':st==='warn'?'warning':'')+'" style="align-items:flex-start;margin-bottom:0;border:none;padding:7px 0;cursor:pointer" onclick="openEditCustomer('+c.id+')">'+
@@ -4117,7 +4146,7 @@ function openEditCustomer(id){
     '</div>'+
     '<div style="margin-bottom:14px"><label>備註</label><textarea id="ec-notes">'+(c.notes||'')+'</textarea></div>'+
     '<div class="modal-foot">'+
-    '<button class="btn btn-blue" onclick="saveCustomer('+id+')">儲存</button>'+
+    '<button class="btn btn-primary" onclick="saveCustomer('+id+')">儲存</button>'+
     '<button class="btn btn-ghost" onclick="openNewCustomerContact('+id+')">＋ 新增同公司聯絡人</button>'+
     '<button class="btn btn-ghost" onclick="markCustomerReviewed('+id+')">✓ 已回顧</button>'+
     '</div>'
@@ -4131,7 +4160,7 @@ async function saveCustomer(id){
   const name=document.getElementById('ec-name').value.trim()
   const company=document.getElementById('ec-company').value.trim()
   if(!name||!company){showToast('請填寫姓名和公司','error');return}
-  await sb.from('customers').update({name,company,
+  const {error:updateError}=await sb.from('customers').update({name,company,
     email:document.getElementById('ec-email').value.trim()||null,
     phone:document.getElementById('ec-phone').value.trim()||null,
     country:document.getElementById('ec-country').value,
@@ -4139,13 +4168,16 @@ async function saveCustomer(id){
     notes:document.getElementById('ec-notes').value.trim()||null,
     review_days:getCustomerReviewDays(),
     last_reviewed_at:document.getElementById('ec-reviewed')?.value||null}).eq('id',id)
+  if(updateError){showToast('儲存客戶失敗：'+updateError.message,'error');return}
   if(company!==current.company){
-    await Promise.all([
+    const syncResults=await Promise.all([
       sb.from('customers').update({company}).eq('company',current.company).neq('id',id),
       sb.from('inquiries').update({customer:company}).eq('customer',current.company),
       sb.from('quote_headers').update({customer:company}).eq('customer',current.company),
       sb.from('orders').update({customer:company}).eq('customer',current.company)
     ])
+    const syncError=syncResults.find(r=>r.error)?.error
+    if(syncError){showToast('客戶名稱同步失敗：'+syncError.message,'error');return}
   }
   _isDirty=false
   await loadCustomers();closeModal('modal-customer');renderCustomers()
@@ -4164,12 +4196,13 @@ function openQuickAddCustomer(){
   if(existing)existing.remove()
   const ov=document.createElement('div')
   ov.id='quick-add-customer-overlay'
+  ov.className='inline-overlay'
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:350;display:flex;align-items:center;justify-content:center;padding:16px'
   ov.innerHTML=
-    '<div style="background:#fff;border-radius:14px;width:100%;max-width:420px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
-    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0">'+
+    '<div class="inline-overlay-box" style="max-width:420px;max-height:88vh;overflow-y:auto">'+
+    '<div class="inline-overlay-hd">'+
     '<div style="font-size:14px;font-weight:600">快速新增客戶</div>'+
-    '<button onclick="document.getElementById(\'quick-add-customer-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
+    '<button class="inline-overlay-close" onclick="document.getElementById(\'quick-add-customer-overlay\').remove()">×</button>'+
     '</div>'+
     '<div style="padding:16px 20px 20px">'+
     '<div class="grid-2" style="margin-bottom:12px">'+
@@ -4431,7 +4464,7 @@ function renderSupplierMgmt(){
   suppliers.forEach(s=>{if(!cos[s.company])cos[s.company]=[];cos[s.company].push(s)})
   el.innerHTML=Object.entries(cos).map(([company,people])=>
     '<div class="card" style="margin-bottom:10px">'+
-    '<div style="font-size:13px;font-weight:500;color:#085041;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid #e5e5e0;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="openEditSupplier('+people[0].id+')"><span>'+company+'</span><span style="font-size:11px;color:#888">'+people.length+' 位聯絡人</span></div>'+
+    '<div style="font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid #e5e5e0;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="openEditSupplier('+people[0].id+')"><span>'+company+'</span><span style="font-size:11px;color:#888">'+people.length+' 位聯絡人</span></div>'+
     people.map(s=>'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f5f5f0;cursor:pointer" onclick="openEditSupplier('+s.id+')">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="font-size:12px;font-weight:500;color:#333">'+s.name+(s.role?' <span style="font-size:10px;color:#aaa;font-weight:400">· '+s.role+'</span>':'')+'</div>'+
@@ -4553,7 +4586,7 @@ async function saveSupplier(id){
   const email=document.getElementById('es-email').value.trim()
   const country=document.getElementById('es-country').value
   if(!name||!company||!email||!country){showToast('請填寫姓名、公司、國家和 Email','error');return}
-  await sb.from('suppliers').update({name,company,email,
+  const {error:updateError}=await sb.from('suppliers').update({name,company,email,
     country,
     role:document.getElementById('es-role').value.trim()||null,
     phone:document.getElementById('es-phone').value.trim()||null,
@@ -4561,12 +4594,15 @@ async function saveSupplier(id){
     whatsapp:document.getElementById('es-whatsapp').value.trim()||null,
     specialty:document.getElementById('es-specialty').value.trim()||null,
     salutation:document.getElementById('es-salutation').value.trim()||null}).eq('id',id)
+  if(updateError){showToast('儲存供應商失敗：'+updateError.message,'error');return}
   if(company!==current.company){
-    await Promise.all([
+    const syncResults=await Promise.all([
       sb.from('suppliers').update({company}).eq('company',current.company).neq('id',id),
       sb.from('inquiries').update({supplier:company}).eq('supplier',current.company),
       sb.from('quote_headers').update({supplier:company}).eq('supplier',current.company)
     ])
+    const syncError=syncResults.find(r=>r.error)?.error
+    if(syncError){showToast('供應商名稱同步失敗：'+syncError.message,'error');return}
   }
   _isDirty=false
   await loadSuppliers();closeModal('modal-supplier');renderSupplierMgmt();showToast('供應商資料已儲存')
