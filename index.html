@@ -62,6 +62,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .tpl-box { background: #f8f8f5; border: 1px solid #e5e5e0; border-radius: 9px; padding: 13px 15px; font-size: 11px; line-height: 1.8; white-space: pre-wrap; font-family: monospace; color: #1a1a1a; }
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
 .filter-bar select, .filter-bar input[type=text], .filter-bar input[type=date] { width: auto; font-size: 12px; padding: 6px 10px; }
+.filter-date-label { display: none; font-size: 11px; color: #666; margin: 0; }
 .mobile-filter-toggle { display: none; }
 .filter-drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 430; }
 .filter-drawer-overlay.open { display: block; }
@@ -69,10 +70,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .filter-drawer.open { transform: translateX(0); }
 .filter-drawer-hd { padding: 16px; border-bottom: 1px solid #e5e5e0; display: flex; justify-content: space-between; align-items: center; }
 .filter-drawer-bd { padding: 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.filter-drawer-ft { padding: 12px 16px max(12px, env(safe-area-inset-bottom)); border-top: 1px solid #e5e5e0; background: #fff; display: flex; gap: 8px; }
+.filter-drawer-ft .btn { flex: 1; min-height: 44px; }
 .filter-drawer-bd .filter-bar { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin: 0; }
 .filter-drawer-bd .filter-bar select,
 .filter-drawer-bd .filter-bar input,
 .filter-drawer-bd .filter-bar button { width: 100% !important; max-width: none !important; }
+.filter-drawer-bd .filter-date-label { display: block; margin: 2px 0 -8px; }
+.filter-drawer-bd .filter-bar > span { display: none; }
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
 .modal-overlay.open { display: flex; }
 .modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 600px; max-height: 88vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
@@ -112,8 +117,8 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .nf-suggest-item:first-child { margin-top:6px; }
 @keyframes modal-slide-up { from { transform: translateY(60%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @media (max-width: 680px) {
-  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 300; width: 220px; transform: translateX(-100%); transition: transform 0.25s ease; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .sidebar-nav { flex: initial; }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 300; width: 220px; transform: translateX(-100%); transition: transform 0.25s ease; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+  .sidebar-nav { flex: initial; padding-bottom: 16px; }
   .sidebar.open { transform: translateX(0); }
   .sidebar-logo p, .nav-item span, .nav-section, .sidebar-footer { display: block; }
   #hamburger-btn { display: block; }
@@ -127,10 +132,13 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   .filter-bar.mobile-drawer-source { display: none; }
   .filter-bar { overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
   .filter-bar select, .filter-bar input { flex-shrink: 0; font-size: 14px !important; padding: 8px 10px; height: auto !important; }
+  .quote-actions { width: 100%; justify-content: flex-start !important; }
+  .quote-actions .btn-primary { flex: 1 1 100%; min-height: 44px; }
+  .quote-actions .btn-ghost { flex: 1 1 auto; }
   .modal-overlay { align-items: flex-end; padding: 0; }
-  .modal-box, .modal-box.sm, .modal-box.lg { max-width: 100%; max-height: 95vh; border-radius: 14px 14px 0 0; }
+  .modal-box, .modal-box.sm, .modal-box.lg { max-width: 100%; max-height: calc(100dvh - max(18px, env(safe-area-inset-top))); border-radius: 14px 14px 0 0; }
   .modal-overlay.open .modal-box { animation: modal-slide-up 0.25s ease; }
-  .modal-hd { padding: 16px 16px 12px; align-items: flex-start; }
+  .modal-hd { padding: calc(16px + env(safe-area-inset-top)) 16px 12px; align-items: flex-start; }
   .modal-hd > :first-child { padding-top: 2px; }
   .modal-hd [style*="font-size:14px"] { font-size: 16px !important; line-height: 1.4; }
   .modal-bd { padding: 14px 16px 18px; }
@@ -200,12 +208,16 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <button class="modal-close" onclick="closeFilterDrawer()">×</button>
   </div>
   <div class="filter-drawer-bd" id="filter-drawer-bd"></div>
+  <div class="filter-drawer-ft">
+    <button class="btn btn-ghost" onclick="resetCurrentFilterDrawer()">清除</button>
+    <button class="btn btn-primary" onclick="applyFilterDrawer()">套用</button>
+  </div>
 </div>
 <div class="sidebar">
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>離型紙業務系統</p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.2.2</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.2.3</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section">業務</div>
@@ -293,9 +305,9 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         </select>
         <select id="f-customer" onchange="renderInquiries()"><option value="">全部客戶</option></select>
         <input id="f-product" type="text" placeholder="搜尋產品..." oninput="renderInquiries()" style="max-width:150px" />
-        <input id="f-date-from" type="date" onchange="renderInquiries()" style="max-width:140px" />
+        <label class="filter-date-label">起始日期</label><input id="f-date-from" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="起始日期" />
         <span style="font-size:11px;color:#aaa">至</span>
-        <input id="f-date-to" type="date" onchange="renderInquiries()" style="max-width:140px" />
+        <label class="filter-date-label">結束日期</label><input id="f-date-to" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="結束日期" />
         <button class="btn btn-ghost btn-sm" onclick="clearFilters()">清除</button>
       </div>
       <div id="inquiry-list"></div>
@@ -305,7 +317,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-quotes" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px">
         <div id="quote-summary" style="font-size:12px;color:#888"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <div class="quote-actions" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
           <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('quotes')">☰ 篩選</button>
           <button class="btn btn-ghost btn-sm" onclick="openSettingsArea()">⚙ 管理設定</button>
           <button class="btn btn-primary" onclick="openNewQuoteModal()">+ 直接新增報價單</button>
@@ -321,9 +333,9 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         </select>
         <input id="fq-customer" type="text" placeholder="搜尋客戶..." oninput="renderQuotes()" style="max-width:150px" />
         <input id="fq-product" type="text" placeholder="搜尋產品..." oninput="renderQuotes()" style="max-width:150px" />
-        <input id="fq-date-from" type="date" onchange="renderQuotes()" style="max-width:140px" />
+        <label class="filter-date-label">起始日期</label><input id="fq-date-from" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="起始日期" />
         <span style="font-size:11px;color:#aaa">至</span>
-        <input id="fq-date-to" type="date" onchange="renderQuotes()" style="max-width:140px" />
+        <label class="filter-date-label">結束日期</label><input id="fq-date-to" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="結束日期" />
         <button class="btn btn-ghost btn-sm" onclick="clearQuoteFilters()">清除</button>
       </div>
       <div id="quote-list"></div>
@@ -331,11 +343,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
     <!-- 樣品管理 -->
     <div id="tab-samples" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="sample-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openSampleModal(null)">+ 新增樣品</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('samples')">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="openSampleModal(null)">+ 新增樣品</button>
+        </div>
       </div>
-      <div class="filter-bar">
+      <div class="filter-bar mobile-drawer-source" id="sample-filter-bar">
         <select id="fs-status" onchange="renderSamples()">
           <option value="">全部狀態</option>
           <option value="in_stock">庫存中</option>
@@ -352,11 +367,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
     <!-- 工作追蹤 -->
     <div id="tab-tasks" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="task-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openTaskModal()">+ 新增工作</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('tasks')">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="openTaskModal()">+ 新增工作</button>
+        </div>
       </div>
-      <div class="filter-bar">
+      <div class="filter-bar mobile-drawer-source" id="task-filter-bar">
         <select id="ft-status" onchange="renderTasks()">
           <option value="">全部</option>
           <option value="open">進行中</option>
@@ -374,11 +392,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
     <!-- 訂單管理 -->
     <div id="tab-orders" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="order-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openOrderModal(null)">+ 新增訂單</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('orders')">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="openOrderModal(null)">+ 新增訂單</button>
+        </div>
       </div>
-      <div class="filter-bar">
+      <div class="filter-bar mobile-drawer-source" id="order-filter-bar">
         <select id="fo-status" onchange="renderOrders()">
           <option value="">全部狀態</option>
           <option value="confirmed">已確認</option>
@@ -396,11 +417,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
     <!-- 船運管理 -->
     <div id="tab-shipments" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="shipment-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openShipmentModal(null)">+ 新增船運批次</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('shipments')">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="openShipmentModal(null)">+ 新增船運批次</button>
+        </div>
       </div>
-      <div class="filter-bar">
+      <div class="filter-bar mobile-drawer-source" id="shipment-filter-bar">
         <select id="fsh-mode" onchange="renderShipments()">
           <option value="">全部方式</option>
           <option value="sea">海運</option>
@@ -483,12 +507,15 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
     <!-- 產品目錄 -->
     <div id="tab-products" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="product-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openProductModal()">+ 新增產品</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('products')">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="openProductModal()">+ 新增產品</button>
+        </div>
       </div>
       <div id="product-overdue-alert" style="display:none" class="alert-warn"></div>
-      <div class="filter-bar">
+      <div class="filter-bar mobile-drawer-source" id="product-filter-bar">
         <input id="fp-search" type="text" placeholder="搜尋產品名稱、料號..." oninput="renderProducts()" style="max-width:200px" />
         <select id="fp-supplier" onchange="renderProducts()"><option value="">全部供應商</option></select>
         <select id="fp-status" onchange="renderProducts()">
@@ -522,11 +549,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
     <!-- 採購單管理 -->
     <div id="tab-purchases" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="purchase-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openPurchaseModal(null)">+ 新增採購單</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('purchases')">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="openPurchaseModal(null)">+ 新增採購單</button>
+        </div>
       </div>
-      <div class="filter-bar">
+      <div class="filter-bar mobile-drawer-source" id="purchase-filter-bar">
         <select id="pf-status" onchange="renderPurchaseOrders()">
           <option value="">全部狀態</option>
           <option value="draft">草稿</option>
@@ -1226,6 +1256,11 @@ function renderSamples(){
   }).join('')
 }
 
+function clearSampleFilters(){
+  ;['fs-status','fs-supplier','fs-customer'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  renderSamples()
+}
+
 function openSampleModal(id){
   selectedSampleId=id===null?null:parseInt(id)
   document.getElementById('modal-sample').classList.add('open')
@@ -1516,6 +1551,11 @@ function renderTasks(){
   el.innerHTML=html
 }
 
+function clearTaskFilters(){
+  ;['ft-status','ft-priority'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  renderTasks()
+}
+
 function openTaskModalById(id){
   const task=tasks.find(t=>String(t.id)===String(id))
   if(!task)return
@@ -1671,6 +1711,11 @@ function renderOrders(){
   }).join('')
 }
 
+function clearOrderFilters(){
+  ;['fo-status','fo-customer','fo-supplier'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  renderOrders()
+}
+
 function shipmentModeLabel(mode){
   return ({sea:'海運',air:'空運',land:'陸運',express:'快遞'})[mode]||mode||'—'
 }
@@ -1738,6 +1783,11 @@ function renderShipments(){
       '<div style="font-size:11px;color:#888">'+linked.length+' 筆採購單</div>'+
       '</div></div>'
   }).join('')
+}
+
+function clearShipmentFilters(){
+  ;['fsh-mode','fsh-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  renderShipments()
 }
 function openShipmentModal(id){
   selectedShipmentId=id
@@ -2459,6 +2509,11 @@ function renderPurchaseOrders(){
   }).join('')
 }
 
+function clearPurchaseFilters(){
+  ;['pf-status','pf-supplier'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  renderPurchaseOrders()
+}
+
 function openPurchaseModal(id, prefill={}){
   selectedPurchaseId=id
   _isDirty=false
@@ -2964,7 +3019,13 @@ function closeSidebar(){document.querySelector('.sidebar').classList.remove('ope
 function openFilterDrawer(kind){
   const map={
     inquiry:{title:'詢價篩選',source:'inquiry-filter-bar'},
-    quotes:{title:'報價篩選',source:'quote-filter-bar'}
+    quotes:{title:'報價篩選',source:'quote-filter-bar'},
+    samples:{title:'樣品篩選',source:'sample-filter-bar'},
+    tasks:{title:'工作篩選',source:'task-filter-bar'},
+    orders:{title:'訂單篩選',source:'order-filter-bar'},
+    shipments:{title:'船運篩選',source:'shipment-filter-bar'},
+    products:{title:'產品篩選',source:'product-filter-bar'},
+    purchases:{title:'採購單篩選',source:'purchase-filter-bar'}
   }
   const cfg=map[kind];if(!cfg)return
   const source=document.getElementById(cfg.source)
@@ -2981,15 +3042,45 @@ function closeFilterDrawer(){
   const drawer=document.getElementById('filter-drawer')
   const source=drawer.querySelector('.filter-bar')
   if(source){
-    const targetId=source.id==='inquiry-filter-bar'?'tab-inquiry':source.id==='quote-filter-bar'?'tab-quotes':null
+    const targetMap={
+      'inquiry-filter-bar':['tab-inquiry','#inquiry-list'],
+      'quote-filter-bar':['tab-quotes','#quote-list'],
+      'sample-filter-bar':['tab-samples','#sample-list'],
+      'task-filter-bar':['tab-tasks','#task-list'],
+      'order-filter-bar':['tab-orders','#order-list'],
+      'shipment-filter-bar':['tab-shipments','#shipment-list'],
+      'product-filter-bar':['tab-products','#product-list'],
+      'purchase-filter-bar':['tab-purchases','#purchase-list']
+    }
+    const target=targetMap[source.id]
+    const targetId=target?.[0]
     if(targetId){
-      const list=document.getElementById(targetId).querySelector('#'+source.id)
-      if(!list)document.getElementById(targetId).insertBefore(source,document.getElementById(targetId).querySelector(source.id==='inquiry-filter-bar'?'#inquiry-list':'#quote-list'))
+      const exists=document.getElementById(targetId).querySelector('#'+source.id)
+      if(!exists)document.getElementById(targetId).insertBefore(source,document.getElementById(targetId).querySelector(target[1]))
     }
     source.classList.add('mobile-drawer-source')
   }
   document.getElementById('filter-drawer-overlay').classList.remove('open')
   document.getElementById('filter-drawer').classList.remove('open')
+}
+function applyFilterDrawer(){
+  closeFilterDrawer()
+}
+function resetCurrentFilterDrawer(){
+  const source=document.getElementById('filter-drawer').querySelector('.filter-bar')
+  if(!source)return
+  const actions={
+    'inquiry-filter-bar':clearFilters,
+    'quote-filter-bar':clearQuoteFilters,
+    'sample-filter-bar':clearSampleFilters,
+    'task-filter-bar':clearTaskFilters,
+    'order-filter-bar':clearOrderFilters,
+    'shipment-filter-bar':clearShipmentFilters,
+    'product-filter-bar':clearProductFilters,
+    'purchase-filter-bar':clearPurchaseFilters
+  }
+  const fn=actions[source.id]
+  if(fn)fn()
 }
 function openSubformModal(title,bodyHtml){
   _isDirty=false
