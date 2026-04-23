@@ -179,6 +179,9 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <button class="nav-item" id="nav-users_mgmt" onclick="switchTab('users_mgmt')" style="display:none">
       <span class="nav-icon">⚙️</span><span>使用者管理</span>
     </button>
+    <button class="nav-item" id="nav-settings" onclick="switchTab('settings')" style="display:none">
+      <span class="nav-icon">🧭</span><span>系統設定</span>
+    </button>
     <div class="nav-section">產品</div>
     <button class="nav-item" id="nav-products" onclick="switchTab('products')">
       <span class="nav-icon">📦</span><span>產品目錄</span>
@@ -187,7 +190,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <span class="nav-icon">📁</span><span>技術文件庫</span>
     </button>
   </nav>
-  <div class="sidebar-footer">rey@joy-paper.com</div>
+  <div class="sidebar-footer" id="sidebar-user-email">未登入</div>
 </div>
 
 <div id="toast-container"></div>
@@ -233,7 +236,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div id="quote-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-ghost btn-sm" onclick="openSettingsModal()">⚙ 報價預設值</button>
+          <button class="btn btn-ghost btn-sm" onclick="openSettingsArea()">⚙ 管理設定</button>
           <button class="btn btn-primary" onclick="openNewQuoteModal()">+ 直接新增報價單</button>
         </div>
       </div>
@@ -309,7 +312,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-customers" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div id="customer-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="showNewCustomerForm()">+ 新增客戶</button>
+        <button class="btn btn-primary" onclick="openCreateCustomerModal()">+ 新增客戶</button>
       </div>
       <div id="customer-review-alert" style="display:none" class="alert-warn"></div>
       <div id="new-customer-form" class="card" style="display:none;border-color:#185FA5;background:#f0f7ff">
@@ -341,13 +344,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-suppliers_mgmt" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div id="supplier-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="showNewSupplierForm()">+ 新增供應商</button>
+        <button class="btn btn-primary" onclick="openCreateSupplierModal()">+ 新增供應商</button>
       </div>
       <div id="new-supplier-form" class="card" style="display:none;border-color:#0F6E56;background:#f8fffc">
         <div class="section-title" style="color:#085041;margin-bottom:12px">新增供應商聯絡人</div>
         <div class="grid-2" style="margin-bottom:10px">
           <div><label>姓名 <span class="req">*</span></label><input id="ns-name" placeholder="例：王經理" /></div>
           <div><label>公司 <span class="req">*</span></label><input id="ns-company" placeholder="例：裕豐紙業" /></div>
+          <div><label>國家 <span class="req">*</span></label><select id="ns-country"><option value="TH">泰國 TH</option><option value="TW">台灣 TW</option><option value="CN">中國 CN</option><option value="SG">新加坡 SG</option><option value="MY">馬來西亞 MY</option><option value="OTHER">其他</option></select></div>
           <div><label>職務</label><input id="ns-role" placeholder="例：業務經理" /></div>
           <div><label>Email <span class="req">*</span></label><input id="ns-email" placeholder="wang@yufeng.com" /></div>
           <div><label>電話</label><input id="ns-phone" placeholder="+886 2 1234 5678" /></div>
@@ -393,6 +397,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <button class="btn btn-primary" onclick="showNewUserModal()">+ 新增使用者</button>
       </div>
       <div id="user-list"></div>
+    </div>
+
+    <!-- 系統設定 -->
+    <div id="tab-settings" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div id="settings-summary" style="font-size:12px;color:#888">僅管理者可調整全域規則</div>
+      </div>
+      <div id="settings-panel"></div>
     </div>
 
     <!-- 採購單管理 -->
@@ -630,6 +642,9 @@ function showToast(msg,type='success'){
   c.appendChild(t)
   if(type==='success')setTimeout(()=>t.remove(),3000)
 }
+function clearErrorToasts(){
+  document.querySelectorAll('#toast-container .toast-error').forEach(el=>el.remove())
+}
 function confirmModal(msg,onConfirm){
   const id='confirm-overlay-'+Date.now()
   const ov=document.createElement('div')
@@ -702,6 +717,69 @@ function canAccessPurchases(){
   return !!(currentUser&&(currentUser.role==='admin'||currentUser.role==='manager'||currentUser.role==='assistant'))
 }
 
+const DEFAULT_APP_SETTINGS={
+  default_customs_fee_pct:'7.5',
+  default_margin_pct:'20',
+  default_cost_currency:'USD',
+  default_quote_currency:'USD',
+  default_customer_review_days:'180',
+  default_product_review_days:'90'
+}
+
+function getSettingValue(key,fallback){
+  const value=settings[key]
+  return value===undefined||value===null||value===''?fallback:value
+}
+
+function getSettingNumber(key,fallback){
+  const value=parseFloat(getSettingValue(key,fallback))
+  return Number.isFinite(value)?value:fallback
+}
+
+function getCustomerReviewDays(){
+  return getSettingNumber('default_customer_review_days',180)
+}
+
+function getProductReviewDays(){
+  return getSettingNumber('default_product_review_days',90)
+}
+
+function getSupplierCountryValue(supplierId){
+  if(supplierId===null||supplierId===undefined||supplierId==='')return 'OTHER'
+  return suppliers.find(s=>String(s.id)===String(supplierId))?.country||'OTHER'
+}
+
+function supplierNeedsCustoms(supplierId){
+  return getSupplierCountryValue(supplierId)!=='TH'
+}
+
+function shouldApplyCustoms(item){
+  return supplierNeedsCustoms(item?.supplier_id) && item?.apply_customs!==false
+}
+
+function getSupplierCustomsHint(supplierId){
+  return supplierNeedsCustoms(supplierId)?'海外供應商，套用清關費':'泰國供應商，不套用清關費'
+}
+
+function buildSettingCurrencyOptions(selectedValue){
+  const pairs=[
+    ['USD','USD (United States)'],
+    ['THB','THB (Thailand)'],
+    ['TWD','TWD (Taiwan)'],
+    ['CNY','CNY (China)'],
+    ['EUR','EUR (European Union)']
+  ]
+  return buildOptionPairs(pairs,selectedValue)
+}
+
+function openSettingsArea(){
+  if(!isManager()){
+    showToast('只有管理者可以調整系統設定','error')
+    return
+  }
+  switchTab('settings')
+}
+
 function buildOptions(values,selectedValue=null){
   return values.map(value=>'<option'+(value===selectedValue?' selected':'')+'>'+value+'</option>').join('')
 }
@@ -710,6 +788,16 @@ function buildOptionPairs(pairs,selectedValue=null){
   return pairs.map(([value,label])=>
     '<option value="'+escapeHtml(value)+'"'+(String(value)===String(selectedValue)?' selected':'')+'>'+escapeHtml(label)+'</option>'
   ).join('')
+}
+
+function enableDirtyTracking(containerId){
+  const root=document.getElementById(containerId)
+  if(!root)return
+  root.querySelectorAll('input,select,textarea').forEach(el=>{
+    if(el.readOnly||el.disabled)return
+    el.addEventListener('input',()=>{_isDirty=true})
+    el.addEventListener('change',()=>{_isDirty=true})
+  })
 }
 
 function escapeHtml(str){
@@ -780,6 +868,7 @@ async function doLogin(){
 
 function logout(){
   clearCurrentUser()
+  document.getElementById('sidebar-user-email').textContent='未登入'
   document.getElementById('main-app').style.display='none'
   document.getElementById('login-page').style.display='flex'
   document.getElementById('login-email').value=''
@@ -821,9 +910,10 @@ let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteIte
 let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[],tasks=[]
 let orders=[],orderItems=[]
 let purchaseOrders=[],purchaseOrderItems=[]
-let selectedInqId=null,selectedQuoteId=null,selectedSampleId=null,selectedOrderId=null,selectedPurchaseId=null,activeTab='inquiry',showTpl=false
+let selectedInqId=null,selectedQuoteId=null,selectedSampleId=null,selectedOrderId=null,selectedPurchaseId=null,selectedTaskId=null,activeTab='inquiry',showTpl=false
 let _isDirty=false
 let _qPendingItems={},_qPendingHeader={}
+let _pendingOrderItems=[]
 // 直接新增報價單的暫存
 let _nqItems=[] // [{product,spec,cost_price,cost_currency,customs_fee_pct,apply_customs,margin_pct,moq,lead_time,from_product_id}]
 
@@ -848,8 +938,10 @@ async function init(){
     document.getElementById('user-info').style.display='block'
     document.getElementById('user-info').textContent=currentUser.name+' ('+currentUser.role+')'
     document.getElementById('logout-btn').style.display='block'
+    document.getElementById('sidebar-user-email').textContent=currentUser.email||currentUser.name||'已登入'
     if(isManager()){
       document.getElementById('nav-users_mgmt').style.display='flex'
+      document.getElementById('nav-settings').style.display='flex'
     }
     if(canAccessPurchases()){
       document.getElementById('nav-purchases').style.display='flex'
@@ -874,7 +966,11 @@ async function loadQuotes(){
   ])
   quoteHeaders=h||[];quoteItems=it||[]
 }
-async function loadSettings(){const{data}=await sb.from('settings').select('*');settings={};(data||[]).forEach(r=>settings[r.key]=r.value)}
+async function loadSettings(){
+  const{data}=await sb.from('settings').select('*')
+  settings={...DEFAULT_APP_SETTINGS}
+  ;(data||[]).forEach(r=>settings[r.key]=r.value)
+}
 async function loadProducts(){
   const{data}=await sb.from('products').select('*').order('product_name')
   products=data||[]
@@ -1219,7 +1315,7 @@ function renderTasks(){
   const taskRow=t=>{
     const pr=PRIORITY_STATUS.find(x=>x.id===t.priority)||PRIORITY_STATUS[0]
     const overdue=t.due_date&&t.due_date<today&&t.status==='open'
-    return '<div class="row '+(overdue?'overdue':'')+'" style="cursor:default">'+
+    return '<div class="row '+(overdue?'overdue':'')+'" onclick="openTaskModalById(\''+t.id+'\')">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
       '<span style="font-size:13px;font-weight:500'+(t.status==='done'?';text-decoration:line-through;color:#aaa':'')+'">'+t.title+'</span>'+
@@ -1230,9 +1326,8 @@ function renderTasks(){
       (t.ref_module?' · '+t.ref_module+(t.ref_id?' #'+t.ref_id:''):'')+
       '</div></div>'+
       '<div style="display:flex;gap:6px;flex-shrink:0">'+
-      (['inquiry','quote','sample','order'].includes(t.ref_module)&&t.ref_id?'<button class="btn btn-ghost btn-sm" style="color:#185FA5" onclick="goToRef(\''+t.ref_module+'\',\''+t.ref_id+'\')">→ 前往</button>':'')+
-      (t.status==='open'?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11" onclick="completeTask(\''+t.id+'\')">✓ 完成</button>':'')+
-      '<button class="btn btn-ghost btn-sm" style="color:#aaa" onclick="deleteTask(\''+t.id+'\')">×</button>'+
+      (t.status==='open'?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11" onclick="event.stopPropagation();completeTask(\''+t.id+'\')">✓ 完成</button>':'')+
+      '<button class="btn btn-ghost btn-sm" style="color:#aaa" onclick="event.stopPropagation();deleteTask(\''+t.id+'\')">×</button>'+
       '</div></div>'
   }
   let html=open.map(taskRow).join('')
@@ -1240,25 +1335,42 @@ function renderTasks(){
   el.innerHTML=html
 }
 
+function openTaskModalById(id){
+  const task=tasks.find(t=>String(t.id)===String(id))
+  if(!task)return
+  selectedTaskId=task.id
+  openTaskModal(task)
+}
+
 function openTaskModal(prefill={}){
+  const isEdit=!!prefill.id
+  selectedTaskId=isEdit?prefill.id:null
   const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
+  const lockRef=isEdit&&!!(prefill.ref_module||prefill.ref_id)
   document.getElementById('modal-task-hd').innerHTML=
-    '<div style="font-size:14px;font-weight:600">新增工作</div>'+
+    '<div style="font-size:14px;font-weight:600">'+(isEdit?'工作詳情':'新增工作')+'</div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-task\')">×</button>'
+  const hasRef=['inquiry','quote','sample','order'].includes(prefill.ref_module)&&prefill.ref_id
   document.getElementById('modal-task-bd').innerHTML=
-    '<div style="margin-bottom:10px"><label>標題 <span class="req">*</span></label><input id="tk-title" value="'+(prefill.title||'')+'" /></div>'+
+    '<div style="margin-bottom:10px"><label>標題 <span class="req">*</span></label><input id="tk-title" value="'+(prefill.title||'')+'" '+(isEdit?'readonly style="background:#f8f8f5;color:#666"':'')+' /></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>關聯模組</label><select id="tk-module">'+
+    '<div><label>關聯模組</label><select id="tk-module" '+(lockRef?'disabled style="background:#f8f8f5;color:#666"':'')+'>'+
     buildOptionPairs(TASK_MODULE_OPTION_PAIRS,prefill.ref_module)+
     '</select></div>'+
-    '<div><label>關聯 ID</label><input id="tk-ref-id" value="'+(prefill.ref_id||'')+'" placeholder="選填" /></div>'+
+    '<div><label>關聯 ID</label><input id="tk-ref-id" value="'+(prefill.ref_id||'')+'" placeholder="選填" '+(lockRef?'readonly style="background:#f8f8f5;color:#666"':'')+' /></div>'+
     '<div><label>供應商</label><select id="tk-supplier"><option value="">—</option>'+suppliers.map(s=>'<option value="'+s.id+'" '+(prefill.supplier_id===s.id?'selected':'')+'>'+s.company+'</option>').join('')+'</select></div>'+
     '<div><label>客戶</label><select id="tk-customer"><option value="">—</option>'+customers.map(c=>'<option value="'+c.id+'" '+(prefill.customer_id===c.id?'selected':'')+'>'+c.company+'</option>').join('')+'</select></div>'+
     '<div><label>到期日</label><input id="tk-due" type="date" value="'+(prefill.due_date||'')+'" /></div>'+
-    '<div><label>優先級</label><select id="tk-priority">'+PRIORITY_STATUS.map(p=>'<option value="'+p.id+'" '+(prefill.priority===p.id?'selected':'')+'>'+(p.label)+'</option>').join('')+'</select></div>'+
+    '<div><label>優先級</label><select id="tk-priority">'+PRIORITY_STATUS.map(p=>'<option value="'+p.id+'" '+((prefill.priority||'normal')===p.id?'selected':'')+'>'+(p.label)+'</option>').join('')+'</select></div>'+
     '</div>'+
+    '<div style="margin-bottom:10px"><label>狀態</label><select id="tk-status"><option value="open" '+((prefill.status||'open')==='open'?'selected':'')+'>進行中</option><option value="done" '+(prefill.status==='done'?'selected':'')+'>已完成</option></select></div>'+
     '<div style="margin-bottom:14px"><label>備註</label><textarea id="tk-notes">'+(prefill.notes||'')+'</textarea></div>'+
-    '<button class="btn btn-primary" onclick="submitTask()">新增工作</button>'
+    '<div class="modal-foot">'+
+    '<button class="btn btn-primary" onclick="'+(isEdit?'saveTask()':'submitTask()')+'">'+(isEdit?'儲存':'新增工作')+'</button>'+
+    (isEdit&&prefill.status==='open'?'<button class="btn btn-ghost" style="color:#3B6D11" onclick="completeTask(\''+prefill.id+'\')">✓ 完成</button>':'')+
+    (hasRef?'<button class="btn btn-ghost" style="color:#185FA5" onclick="goToRef(\''+prefill.ref_module+'\',\''+prefill.ref_id+'\')">→ 前往原單據</button>':'')+
+    (isEdit?'<button class="btn btn-ghost" style="color:#aaa" onclick="deleteTask(\''+prefill.id+'\')">刪除</button>':'')+
+    '</div>'
   document.getElementById('modal-task').classList.add('open')
 }
 
@@ -1274,23 +1386,39 @@ async function submitTask(){
     due_date:document.getElementById('tk-due')?.value||null,
     priority:document.getElementById('tk-priority')?.value||'normal',
     notes:document.getElementById('tk-notes')?.value.trim()||null,
-    status:'open'
+    status:document.getElementById('tk-status')?.value||'open'
   })
   if(error){showToast('新增失敗：'+error.message,'error');return}
   await loadTasks();closeModal('modal-task');renderTasks();showToast('工作已新增')
 }
 
+async function saveTask(){
+  if(!selectedTaskId)return
+  const{error}=await sb.from('tasks').update({
+    ref_module:document.getElementById('tk-module')?.value||null,
+    ref_id:document.getElementById('tk-ref-id')?.value.trim()||null,
+    supplier_id:parseInt(document.getElementById('tk-supplier')?.value)||null,
+    customer_id:parseInt(document.getElementById('tk-customer')?.value)||null,
+    due_date:document.getElementById('tk-due')?.value||null,
+    priority:document.getElementById('tk-priority')?.value||'normal',
+    notes:document.getElementById('tk-notes')?.value.trim()||null,
+    status:document.getElementById('tk-status')?.value||'open'
+  }).eq('id',selectedTaskId)
+  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  await loadTasks();renderTasks();closeModal('modal-task');showToast('工作已更新')
+}
+
 async function completeTask(id){
   const{error}=await sb.from('tasks').update({status:'done'}).eq('id',id)
   if(error){showToast('更新失敗：'+error.message,'error');return}
-  await loadTasks();renderTasks()
+  await loadTasks();renderTasks();closeModal('modal-task')
 }
 
 async function deleteTask(id){
   confirmModal('確定要刪除這筆工作嗎？',async()=>{
     const{error}=await sb.from('tasks').delete().eq('id',id)
     if(error){showToast('刪除失敗：'+error.message,'error');return}
-    await loadTasks();renderTasks()
+    await loadTasks();renderTasks();closeModal('modal-task')
   })
 }
 
@@ -1367,6 +1495,7 @@ function openOrderModal(id){
   document.getElementById('modal-order').classList.add('open')
   const today=new Date().toISOString().slice(0,10)
   if(id===null){
+    _pendingOrderItems=[]
     const newId=generateOrderId()
     const custOpts=customers.map(c=>'<option value="'+c.id+'">'+c.company+'</option>').join('')
     const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
@@ -1386,6 +1515,25 @@ function openOrderModal(id){
       '<div><label>快遞單號</label><input id="or-tracking" /></div>'+
       '</div>'+
       '<div style="margin-bottom:14px"><label>備註</label><textarea id="or-notes"></textarea></div>'+
+      '<div class="divider"></div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+      '<div class="section-title" style="margin-bottom:0">品項明細</div>'+
+      '</div>'+
+      '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
+      '<div class="grid-2" style="margin-bottom:8px">'+
+      '<div><label>產品目錄（選填）</label><select id="noi-prod" onchange="_fillNewOiFromProduct()"><option value="">— 從目錄選擇 —</option>'+products.map(p=>'<option value="'+p.id+'">'+p.product_name+'</option>').join('')+'</select></div>'+
+      '<div><label>產品名稱 <span class="req">*</span></label><input id="noi-name" placeholder="可直接手動輸入" /></div>'+
+      '<div><label>規格</label><input id="noi-spec" /></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+      '<div><label>數量</label><input id="noi-qty" type="number" min="0" /></div>'+
+      '<div><label>單位</label><input id="noi-unit" /></div></div>'+
+      '<div><label>單價</label><input id="noi-price" type="number" min="0" step="0.01" /></div>'+
+      '<div><label>幣別</label><select id="noi-currency">'+buildOptions(CURRENCY_OPTIONS,'USD')+'</select></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px">'+
+      '<button class="btn btn-primary btn-sm" onclick="addPendingOrderItem()">加入品項</button>'+
+      '</div></div>'+
+      '<div id="new-order-items" style="margin-bottom:12px"><div style="font-size:12px;color:#aaa">尚未新增品項</div></div>'+
       '<button class="btn btn-primary" onclick="_createOrder()">建立訂單</button>'
   } else {
     _renderOrderModal()
@@ -1398,8 +1546,10 @@ async function _createOrder(){
   const supCo=document.getElementById('or-supplier')?.value
   if(!custId){showToast('請選擇客戶','error');return}
   if(!supCo){showToast('請選擇供應商','error');return}
+  if(!_pendingOrderItems.length){showToast('請先新增至少 1 筆產品品項，再建立訂單','error');return}
   const cust=customers.find(x=>x.id===parseInt(custId))
   const sup=suppliers.find(s=>s.company===supCo)
+  const total=_pendingOrderItems.reduce((sum,it)=>sum+(parseFloat(it.unit_price||0)*parseFloat(it.qty||0)),0)
   const{error}=await sb.from('orders').insert({
     id,customer:cust?.company||null,customer_id:parseInt(custId),supplier_id:sup?.id||null,
     order_date:document.getElementById('or-date')?.value||null,
@@ -1408,14 +1558,82 @@ async function _createOrder(){
     tracking_no:document.getElementById('or-tracking')?.value.trim()||null,
     currency:document.getElementById('or-currency')?.value||'USD',
     notes:document.getElementById('or-notes')?.value.trim()||null,
-    status:'confirmed',total_amount:0
+    status:'confirmed',total_amount:total
   })
   if(error){showToast('建立失敗：'+error.message,'error');return}
+  const {error:itemError}=await sb.from('order_items').insert(_pendingOrderItems.map(it=>({
+    order_id:id,
+    product_name:it.product_name,
+    spec:it.spec||null,
+    qty:it.qty,
+    unit:it.unit||null,
+    unit_price:it.unit_price,
+    currency:it.currency||null
+  })))
+  if(itemError){
+    await sb.from('orders').delete().eq('id',id)
+    showToast('品項建立失敗，訂單未建立：'+itemError.message,'error')
+    return
+  }
+  _pendingOrderItems=[]
   await loadOrders()
   selectedOrderId=id
   _renderOrderModal()
   renderOrders()
   showToast('訂單已建立')
+}
+
+function renderPendingOrderItems(){
+  const el=document.getElementById('new-order-items')
+  if(!el)return
+  if(!_pendingOrderItems.length){
+    el.innerHTML='<div style="font-size:12px;color:#aaa">尚未新增品項</div>'
+    return
+  }
+  const total=_pendingOrderItems.reduce((sum,it)=>sum+(parseFloat(it.unit_price||0)*parseFloat(it.qty||0)),0)
+  el.innerHTML=_pendingOrderItems.map((it,idx)=>
+    '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0eb;font-size:12px">'+
+    '<span style="flex:1">'+esc(it.product_name||'—')+(it.spec?' <span style="color:#aaa">'+esc(it.spec)+'</span>':'')+
+    ' · '+(it.qty||'—')+' '+(it.unit||'')+' × '+(it.unit_price||'—')+' '+(it.currency||'USD')+'</span>'+
+    '<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0 4px" onclick="removePendingOrderItem('+idx+')">×</button>'+
+    '</div>'
+  ).join('')+'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">總計 '+total.toFixed(2)+'</div>'
+}
+
+function _fillNewOiFromProduct(){
+  const pid=parseInt(document.getElementById('noi-prod')?.value)||null
+  if(!pid)return
+  const p=products.find(x=>x.id===pid);if(!p)return
+  const nameEl=document.getElementById('noi-name');if(nameEl)nameEl.value=p.product_name
+  const specEl=document.getElementById('noi-spec');if(specEl)specEl.value=p.notes||''
+  const unitEl=document.getElementById('noi-unit');if(unitEl)unitEl.value=p.unit||''
+  const priceEl=document.getElementById('noi-price');if(priceEl)priceEl.value=p.cost_price||''
+  const currencyEl=document.getElementById('noi-currency');if(currencyEl)currencyEl.value=p.currency||'USD'
+}
+
+function addPendingOrderItem(){
+  const name=document.getElementById('noi-name')?.value.trim()
+  if(!name){showToast('請填寫產品名稱','error');return}
+  const qty=parseFloat(document.getElementById('noi-qty')?.value||0)
+  const unitPrice=parseFloat(document.getElementById('noi-price')?.value||0)
+  if(!qty||!unitPrice){showToast('請填寫有效的數量與單價','error');return}
+  _pendingOrderItems.push({
+    product_name:name,
+    spec:document.getElementById('noi-spec')?.value.trim()||null,
+    qty,
+    unit:document.getElementById('noi-unit')?.value.trim()||null,
+    unit_price:unitPrice,
+    currency:document.getElementById('noi-currency')?.value||'USD'
+  })
+  ;['noi-name','noi-spec','noi-qty','noi-unit','noi-price'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  const prodEl=document.getElementById('noi-prod');if(prodEl)prodEl.value=''
+  renderPendingOrderItems()
+  showToast('品項已加入')
+}
+
+function removePendingOrderItem(idx){
+  _pendingOrderItems.splice(idx,1)
+  renderPendingOrderItems()
 }
 
 function _renderOrderModal(){
@@ -1425,6 +1643,7 @@ function _renderOrderModal(){
   const sup=suppliers.find(x=>x.id===o.supplier_id)
   const st=sObj(o.status,ORDER_STATUS)
   const itms=orderItems.filter(i=>i.order_id===id)
+  const hasItems=itms.length>0
   const today=new Date().toISOString().slice(0,10)
 
   document.getElementById('modal-order-hd').innerHTML=
@@ -1464,9 +1683,9 @@ function _renderOrderModal(){
     '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'ord-item-form\')">+ 新增品項</button></div>'+
     '<div id="ord-item-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
     '<div class="grid-2" style="margin-bottom:8px">'+
-    '<div><label>產品</label><select id="oi-prod" onchange="_fillOiFromProduct()"><option value="">— 選擇 or 手填 —</option>'+
+    '<div><label>產品目錄（選填）</label><select id="oi-prod" onchange="_fillOiFromProduct()"><option value="">— 從目錄選擇 —</option>'+
     products.map(p=>'<option value="'+p.id+'">'+p.product_name+'</option>').join('')+'</select></div>'+
-    '<div><label>產品名稱 <span class="req">*</span></label><input id="oi-name" /></div>'+
+    '<div><label>產品名稱 <span class="req">*</span></label><input id="oi-name" placeholder="可直接手動輸入" /></div>'+
     '<div><label>規格</label><input id="oi-spec" /></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
     '<div><label>數量</label><input id="oi-qty" type="number" min="0" /></div>'+
@@ -1497,15 +1716,16 @@ function _renderOrderModal(){
   html+='<div class="divider"></div>'
 
   if(!['cancelled','completed'].includes(o.status)){
-    html+='<div style="margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')">建立採購單</button></div>'
+    html+='<div style="margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(hasItems?'':'disabled')+'>建立採購單</button>'+(hasItems?'':'<div style="font-size:11px;color:#A32D2D;margin-top:6px">請先新增至少 1 筆產品品項</div>')+'</div>'
   }
 
   // Section 3: Status workflow
   html+='<div class="modal-foot" style="flex-direction:column;align-items:flex-start;gap:10px">'+
     '<div class="section-title" style="margin-bottom:0">狀態操作</div>'+
+    '<div style="font-size:11px;color:#888">「生產中」代表訂單已確認、品項已定，供應商端正式進入備料／生產／採購執行階段。</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">'
   if(o.status==='confirmed'){
-    html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'in_production\')">標記生產中 →</button>'
+    html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'in_production\')" '+(hasItems?'':'disabled')+'>標記生產中 →</button>'
   } else if(o.status==='in_production'){
     html+=
       '<div style="min-width:160px"><label>快遞單號</label><input id="ord-tracking-new" value="'+esc(o.tracking_no||'')+'" /></div>'+
@@ -1538,9 +1758,11 @@ function _fillOiFromProduct(){
 async function saveOrderBasic(){
   const custId=document.getElementById('ore-customer')?.value
   if(!custId){showToast('請選擇客戶','error');return}
+  const cust=customers.find(x=>x.id===parseInt(custId))
   const supCo=document.getElementById('ore-supplier')?.value
   const sup=supCo?suppliers.find(s=>s.company===supCo):null
   const{error}=await sb.from('orders').update({
+    customer:cust?.company||null,
     customer_id:parseInt(custId),
     supplier_id:sup?.id||null,
     currency:document.getElementById('ore-currency')?.value||null,
@@ -1596,7 +1818,17 @@ async function deleteOrderItem(itemId){
 }
 
 async function updateOrderStatus(newStatus,extra={}){
-  const{error}=await sb.from('orders').update({status:newStatus,...extra}).eq('id',selectedOrderId)
+  if(newStatus==='in_production'&&!orderItems.some(i=>i.order_id===selectedOrderId)){
+    showToast('請先新增至少 1 筆產品品項，再標記生產中','error')
+    return
+  }
+  const order=orders.find(o=>o.id===selectedOrderId)
+  let patch={status:newStatus,...extra}
+  if(newStatus==='cancelled'){
+    const stamp='[取消記錄] '+new Date().toLocaleString('sv-SE',{timeZone:'Asia/Bangkok'}).replace(' ',' ')+' / '+(currentUser?.email||currentUser?.name||'unknown')
+    patch.notes=[order?.notes,stamp].filter(Boolean).join('\n')
+  }
+  const{error}=await sb.from('orders').update(patch).eq('id',selectedOrderId)
   if(error){showToast('更新失敗：'+error.message,'error');return}
   await loadOrders();_renderOrderModal();renderOrders();showToast('狀態已更新')
 }
@@ -1644,6 +1876,13 @@ function goToRef(module,refId){
   else if(module==='order'){switchTab('orders');setTimeout(()=>openOrderModal(refId),80)}
 }
 
+function inquiryPendingDays(i){
+  if(!['pending','asked'].includes(i?.status))return 0
+  const base=i?.updated_at||i?.created_at
+  if(!base)return 0
+  return Math.floor((new Date()-new Date(base))/(1000*60*60*24))
+}
+
 async function autoScanTasks(){
   await loadTasks()
   const today=new Date()
@@ -1651,7 +1890,7 @@ async function autoScanTasks(){
   const hasOpen=(module,refId)=>tasks.some(t=>t.status==='open'&&t.ref_module===module&&t.ref_id===refId)
   const toCreate=[]
   // 詢價超過 3 天未更新
-  inquiries.filter(i=>['pending','asked'].includes(i.status)&&i.updated_at&&daysDiff(i.updated_at)>=3).forEach(i=>{
+  inquiries.filter(i=>inquiryPendingDays(i)>=3).forEach(i=>{
     if(!hasOpen('inquiry',i.id))toCreate.push({title:'追蹤供應商回覆 - '+i.customer,ref_module:'inquiry',ref_id:i.id,priority:'normal',status:'open'})
   })
   // 索取樣品超過 7 天未到貨
@@ -1703,7 +1942,7 @@ async function autoScanTasks(){
 function updateOverdueAlert(){
   const n=inquiries.filter(i=>isOverdue(i)&&!['sent_to_quote','closed'].includes(i.status)).length
   const el=document.getElementById('overdue-alert')
-  if(n>0){el.style.display='inline-block';el.setAttribute('style','display:inline-block;background:#FCEBEB;color:#A32D2D;border:1px solid #F09595;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:500');el.textContent='⚠ '+n+' 筆超時'}
+  if(n>0){el.style.display='inline-block';el.setAttribute('style','display:inline-block;background:#FCEBEB;color:#A32D2D;border:1px solid #F09595;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:500');el.textContent='⚠ '+n+' 筆待追詢'}
   else el.style.display='none'
 }
 function updateProductOverdueAlert(){
@@ -1720,21 +1959,23 @@ function updateProductOverdueAlert(){
   }
 }
 function productStatus(p){
-  if(!p.last_reviewed_at||!p.review_days)return 'ok'
+  const reviewDays=getProductReviewDays()
+  if(!p.last_reviewed_at||!reviewDays)return 'ok'
   const last=new Date(p.last_reviewed_at)
   const daysSince=Math.floor((new Date()-last)/(1000*60*60*24))
-  if(daysSince>=p.review_days)return 'overdue'
-  if(daysSince>=p.review_days*0.8)return 'warn'
+  if(daysSince>=reviewDays)return 'overdue'
+  if(daysSince>=reviewDays*0.8)return 'warn'
   return 'ok'
 }
 function productDaysLeft(p){
-  if(!p.last_reviewed_at||!p.review_days)return null
+  const reviewDays=getProductReviewDays()
+  if(!p.last_reviewed_at||!reviewDays)return null
   const last=new Date(p.last_reviewed_at)
   const daysSince=Math.floor((new Date()-last)/(1000*60*60*24))
-  return p.review_days-daysSince
+  return reviewDays-daysSince
 }
 
-function isOverdue(i){return i.supplier_deadline&&new Date(i.supplier_deadline)<new Date()}
+function isOverdue(i){return inquiryPendingDays(i)>=3}
 function sObj(id,arr){return (arr||INQ_STATUS).find(s=>s.id===id)||{label:id,color:'#888',bg:'#f0f0f0'}}
 function badge(status,arr){const s=sObj(status,arr);return '<span class="badge" style="background:'+s.bg+';color:'+s.color+';border:1px solid '+s.color+'">'+s.label+'</span>'}
 const PURCHASE_STATUS=[
@@ -1809,6 +2050,13 @@ function openPurchaseModal(id, prefill={}){
   selectedPurchaseId=id
   _isDirty=false
   const isNew=!id
+  if(isNew){
+    if(prefill.keepPending){
+      window._pendingPurchaseItems=(window._pendingPurchaseItems||[]).map(item=>({...item}))
+    }else{
+      window._pendingPurchaseItems=(prefill.items||[]).map(item=>({...item}))
+    }
+  }
   const p=isNew?null:purchaseOrders.find(x=>x.id===id)
   const linkedRefId=prefill.ref_id||''
   const activeOrders=orders.filter(o=>o.status!=='cancelled')
@@ -1838,8 +2086,8 @@ function openPurchaseModal(id, prefill={}){
     '<div id="pp-source-stock" style="display:none;margin-bottom:12px"><label>關聯產品目錄</label><select id="pp-ref-product" onchange="_isDirty=true;onPurchaseProductChange()"><option value="">— 選擇產品 —</option>'+productOpts+'</select><div id="pp-stock-info" style="margin-top:8px;font-size:11px;color:#666"></div></div>'+
     '<div id="pp-source-verbal" style="display:none;margin-bottom:12px"><label>客戶備註</label><input id="pp-remark" value="'+(p?.remark||'')+'" placeholder="說明口頭承諾內容" onchange="_isDirty=true" /></div>'+
     '<div style="margin-bottom:14px"><label>備註</label><textarea id="pp-notes" onchange="_isDirty=true">'+(p?.notes||'')+'</textarea></div>'
-  if(p||prefill.items){
-    const items=p?purchaseOrderItems.filter(i=>i.purchase_order_id===p.id):(prefill.items||[])
+  if(p||isNew||prefill.items){
+    const items=p?purchaseOrderItems.filter(i=>i.purchase_order_id===p.id):(window._pendingPurchaseItems||prefill.items||[])
     html+='<div class="divider"></div><div style="margin-bottom:12px"><div class="section-title">品項明細</div><div id="po-items">'+(items.map(i=>'<div class="row" style="cursor:default">'+
       '<div style="flex:1"><div style="font-size:12px">'+(i.product_name||i.product)+'</div><div style="font-size:10px;color:#888">'+(i.qty||i.quantity)+' '+(i.unit||'')+' × '+(i.unit_price||i.price)+' '+(i.currency||'USD')+'</div></div>'+'</div>').join(''))+'</div></div>'
     html+='<div class="divider"></div><div style="margin-bottom:14px"><label>新增品項</label><div class="grid-2" style="margin-bottom:8px"><select id="poi-product"><option value="">— 選擇產品 —</option>'+activeProducts.map(pr=>'<option value="'+pr.product_name+'">'+pr.product_name+'</option>').join('')+'</select><input id="poi-product-manual" placeholder="或手動輸入" /></div><div class="grid-3"><input id="poi-qty" placeholder="數量" type="number" /><input id="poi-unit" placeholder="單位" /><input id="poi-price" placeholder="單價" type="number" /></div><div class="grid-2" style="margin-top:8px"><select id="poi-currency">'+currencyOpts+'</select><button class="btn btn-ghost btn-sm" onclick="addPurchaseItem()">+ 加入品項</button></div></div>'
@@ -1929,6 +2177,10 @@ async function createPurchaseOrder(){
   const source=document.getElementById('pp-source')?.value
   const supplierId=parseInt(document.getElementById('pp-supplier')?.value||'',10)||null
   if(!source||!supplierId){showToast('請填寫必要欄位','error');return}
+  if(!window._pendingPurchaseItems||!window._pendingPurchaseItems.length){
+    showToast('請先新增至少 1 筆產品品項，再建立採購單','error')
+    return
+  }
   const id=generatePurchaseId()
   const status=source==='verbal'?'pending_approval':'draft'
   const payload={id,source,supplier_id:supplierId,status}
@@ -1986,6 +2238,10 @@ function createPurchaseFromOrder(orderId){
   const o=orders.find(x=>x.id===orderId)
   if(!o)return
   const oItems=orderItems.filter(oi=>oi.order_id===o.id)
+  if(!oItems.length){
+    showToast('請先新增至少 1 筆產品品項，再建立採購單','error')
+    return
+  }
   const prefill={
     source:'order',
     ref_id:o.id,
@@ -2032,7 +2288,6 @@ async function savePurchaseOrder(){
 }
 
 async function addPurchaseItem(){
-  if(!selectedPurchaseId)return
   const manualProd=document.getElementById('poi-product-manual')?.value
   const productName=document.getElementById('poi-product')?.value||manualProd
   const qty=parseFloat(document.getElementById('poi-qty')?.value)
@@ -2040,6 +2295,13 @@ async function addPurchaseItem(){
   const unitPrice=parseFloat(document.getElementById('poi-price')?.value)
   const currency=document.getElementById('poi-currency')?.value||'USD'
   if(!productName||!qty||!unitPrice){showToast('請填寫品項資料','error');return}
+  if(!selectedPurchaseId){
+    if(!window._pendingPurchaseItems)window._pendingPurchaseItems=[]
+    window._pendingPurchaseItems.push({product_name:productName,qty,unit,unit_price:unitPrice,currency})
+    openPurchaseModal(null,{keepPending:true,source:document.getElementById('pp-source')?.value||'',supplier_id:parseInt(document.getElementById('pp-supplier')?.value||'',10)||null,currency:document.getElementById('pp-currency')?.value||'USD'})
+    showToast('品項已加入')
+    return
+  }
   const{error}=await sb.from('purchase_order_items').insert({
     purchase_order_id:selectedPurchaseId,product_name:productName,qty,unit,unit_price:unitPrice,currency
   })
@@ -2075,8 +2337,12 @@ async function rejectPurchaseOrder(){
   showToast('採購單已拒絕')
 }
 
-const TAB_LABELS={inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',tasks:'工作追蹤',orders:'訂單管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',purchases:'採購單管理'}
+const TAB_LABELS={inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',tasks:'工作追蹤',orders:'訂單管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',settings:'系統設定',purchases:'採購單管理'}
 function switchTab(tab,save=true){
+  if(tab==='settings'&&!isManager()){
+    showToast('只有管理者可以查看系統設定','error')
+    tab='inquiry'
+  }
   activeTab=tab
   if(save)sessionStorage.setItem(SESSION_ACTIVE_TAB_KEY,tab)
   Object.keys(TAB_LABELS).forEach(t=>{
@@ -2093,6 +2359,7 @@ function switchTab(tab,save=true){
   if(tab==='tasks'){autoScanTasks();renderTasks()}
   if(tab==='orders')renderOrders()
   if(tab==='users_mgmt'){loadUsers().then(renderUsersMgmt)}
+  if(tab==='settings')renderSettingsTab()
   if(tab==='purchases'){populatePurchaseSupplierFilter();renderPurchaseOrders()}
   closeSidebar()
 }
@@ -2136,11 +2403,11 @@ function inqRowHtml(i){
     '<div style="flex:1;min-width:0">'+
     '<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;flex-wrap:wrap">'+
     '<span style="font-size:10px;color:#aaa;font-family:monospace">'+i.id+'</span>'+
-    '<span style="font-size:13px;font-weight:500">'+i.customer+'</span>'+
-    (od?'<span class="overdue-tag">⚠ 超時</span>':'')+
+      '<span style="font-size:13px;font-weight:500">'+i.customer+'</span>'+
+      (od?'<span class="overdue-tag">⚠ 待追詢</span>':'')+
     '</div>'+
     '<div style="font-size:12px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">'+i.product+'</div>'+
-    '<div style="font-size:11px;color:#aaa">'+(i.supplier||'—')+(i.supplier_deadline?' · 截止 '+i.supplier_deadline:'')+'</div>'+
+    '<div style="font-size:11px;color:#aaa">'+(i.supplier||'—')+(['pending','asked'].includes(i.status)?' · '+inquiryPendingDays(i)+' 天未回覆':'')+'</div>'+
     '</div>'+badge(i.status)+'</div>'
 }
 
@@ -2161,7 +2428,7 @@ async function showNewInqForm(){
     '<select id="nf-customer" style="flex:1"><option value="">— 選擇客戶 —</option>'+custOpts+'</select>'+
     '<button class="btn btn-ghost btn-sm" onclick="openQuickAddCustomer()" style="white-space:nowrap">+ 新客戶</button>'+
     '</div></div>'+
-    '<div><label>供應商截止回覆日</label><input id="nf-deadline" type="date" /></div>'+
+    '<div><label>逾時提醒</label><input value="供應商 3 天未回覆會自動標示超時" readonly style="background:#f8f8f5;color:#666" /></div>'+
     '</div>'+
     '<div style="margin-bottom:10px"><label>產品需求 <span class="req">*</span></label><input id="nf-product" oninput="onNfProductInput()" placeholder="例：45g 單面矽離型紙" /><div id="nf-product-suggest"></div></div>'+
     '<div style="margin-bottom:10px"><label>關聯產品目錄（選填）</label>'+
@@ -2227,7 +2494,7 @@ async function createInquiry(){
   const fromProductId=parseInt(document.getElementById('nf-product-link')?.value)||null
   const newInq={id:genInqId(),customer,product,supplier,
     spec:document.getElementById('nf-spec').value.trim(),
-    supplier_deadline:document.getElementById('nf-deadline').value||null,
+    supplier_deadline:null,
     status:'pending',can_make:'待確認',margin:'20',
     from_product_id:fromProductId}
   const{error}=await sb.from('inquiries').insert(newInq)
@@ -2238,13 +2505,17 @@ async function createInquiry(){
 
 async function openInqModal(id){selectedInqId=id;showTpl=false;await loadSuppliers();renderInqModalHd();renderInqModalBd();document.getElementById('modal-inq').classList.add('open')}
 function closeModal(id){
+  const closeNow=()=>{
+    _isDirty=false
+    clearErrorToasts()
+    document.getElementById(id).classList.remove('open')
+  }
   if(_isDirty){
     confirmModal('有未儲存的變更，確定要離開嗎？',()=>{
-      _isDirty=false
-      document.getElementById(id).classList.remove('open')
+      closeNow()
     })
   }else{
-    document.getElementById(id).classList.remove('open')
+    closeNow()
   }
 }
 function closeModalOnBg(e,id){if(e.target===document.getElementById(id))closeModal(id)}
@@ -2263,8 +2534,13 @@ function renderInqModalHd(){
 function renderInqModalBd(){
   const i=inquiries.find(x=>x.id===selectedInqId);if(!i)return
   const sup=suppliers.filter(s=>s.company===i.supplier)
+  const pendingDays=inquiryPendingDays(i)
   document.getElementById('modal-inq-bd').innerHTML=
     '<div style="margin-bottom:10px">'+badge(i.status)+'</div>'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>詢價建立日</label><input value="'+((i.created_at||'').slice(0,10)||'—')+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+    '<div><label>供應商回覆追蹤</label><input value="'+(['pending','asked'].includes(i.status)?(pendingDays>=3?'已 '+pendingDays+' 天未回覆':'已等待 '+pendingDays+' 天'):'目前不列入未回覆追蹤')+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+    '</div>'+
     '<div style="font-size:11px;font-weight:500;color:#666;margin-bottom:6px">更新狀態</div>'+
     '<div class="status-btns">'+INQ_STATUS.map(s=>'<button class="status-btn" style="background:'+(i.status===s.id?s.bg:'transparent')+';color:'+(i.status===s.id?s.color:'#aaa')+';border-color:'+(i.status===s.id?s.color:'#e5e5e0')+'" onclick="updateInqStatus(\''+s.id+'\')">'+s.label+'</button>').join('')+'</div>'+
     '<div class="divider"></div>'+
@@ -2313,7 +2589,7 @@ function openAddInqToProduct(inqId){
     '<div><label>單位</label><input id="atp-unit" placeholder="例：m²、roll、kg" /></div>'+
     '<div><label>成本價 <span class="req">*</span></label><input type="number" id="atp-cost" value="'+rawCost+'" step="0.0001" /></div>'+
     '<div><label>幣別</label><select id="atp-currency">'+buildOptions(CURRENCY_OPTIONS,rawCur)+'</select></div>'+
-    '<div><label>更新週期（天）</label><input type="number" id="atp-days" value="90" min="7" /></div>'+
+    '<div><label>統一更新週期（天）</label><input value="'+getProductReviewDays()+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
     '<div><label>狀態</label><select id="atp-active"><option value="true">Active（現行產品）</option><option value="false">Inactive（暫不使用）</option></select></div>'+
     '</div>'+
     '<div style="margin-bottom:14px"><label>備註 / 規格說明</label><textarea id="atp-notes">'+escHtmlInq(i.spec||'')+'</textarea></div>'+
@@ -2339,7 +2615,7 @@ async function saveInqToProduct(inqId){
     unit:document.getElementById('atp-unit')?.value.trim()||null,
     cost_price:parseFloat(costVal),
     currency:document.getElementById('atp-currency')?.value||'USD',
-    review_days:parseInt(document.getElementById('atp-days')?.value)||90,
+    review_days:getProductReviewDays(),
     last_reviewed_at:new Date().toISOString().slice(0,10),
     notes:document.getElementById('atp-notes')?.value.trim()||null,
     is_active:document.getElementById('atp-active')?.value==='true'
@@ -2354,7 +2630,7 @@ async function saveInqToProduct(inqId){
 function buildTpl(i,sup){
   const _s=sup[0]||{}
   const supName=sup.length?(_s.salutation||(_s.name+(_s.role?' '+_s.role:''))):'您好'
-  const deadline=i.supplier_deadline||'2天內'
+  const deadline='3 天內'
   const text=supName+' 您好，\n\n我司客戶有以下離型紙需求，請協助確認並報價：\n\n【產品規格】\n'+i.product+'\n'+(i.spec||'（規格待補充）')+'\n\n請提供以下資訊：\n1. 貴司是否可以生產此規格？\n2. 生產交期（從確認訂單起算）\n3. 最低起訂量（MOQ）\n4. 原料由貴司提供，請確認原料條件\n5. 報價（含包裝及運至工廠條件，FOB / CIF 請註明）\n6. 如需打樣，打樣費及時間\n\n請於 '+deadline+' 前回覆，謝謝。\n\n此致\nJOY CHIN PSA INCORPORATION CO LTD'
   window._tpl=text
   return '<div style="border-top:1px solid #e5e5e0;padding-top:12px">'+
@@ -2423,6 +2699,7 @@ async function _doSendToQuote(updateCatalog){
 async function _execSendToQuote(inqId){
   const i=inquiries.find(x=>x.id===inqId);if(!i)return
   const hId='QUO-'+inqId.replace('INQ-','')+'-v1'
+  const inquirySupplier=suppliers.find(s=>s.company===i.supplier)
   const{error}=await sb.from('quote_headers').insert({
     id:hId,inquiry_id:inqId,customer:i.customer,supplier:i.supplier,version:1,status:'draft'
   })
@@ -2430,10 +2707,10 @@ async function _execSendToQuote(inqId){
   const rawCost=parseFloat((i.supplier_price||'').match(/[\d.]+/)?.[0])||null
   const rawCur=(i.supplier_price||'').replace(/[\d.]+/,'').trim()||'USD'
   const{error:e2}=await sb.from('quote_items').insert({
-    header_id:hId,product:i.product,spec:i.spec||null,
+    header_id:hId,product:i.product,spec:i.spec||null,supplier_id:inquirySupplier?.id||null,
     cost_price:rawCost,cost_currency:rawCur,
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
-    apply_customs:true,margin_pct:parseFloat(settings.default_margin_pct||20),
+    apply_customs:supplierNeedsCustoms(inquirySupplier?.id||null),margin_pct:parseFloat(settings.default_margin_pct||20),
     moq:i.moq||null,lead_time:i.lead_time||null
   })
   if(e2){showToast('品項建立失敗：'+e2.message,'error');return}
@@ -2489,7 +2766,9 @@ function renderQuoteModalBd(){
   const items=quoteItems.filter(it=>it.header_id===h.id)
   const itemsHtml=items.map((it,idx)=>{
     const cp=parseFloat(it.cost_price||0)
-    const cus=it.apply_customs!==false?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
+    const canApplyCustoms=supplierNeedsCustoms(it.supplier_id)
+    const applyCustoms=shouldApplyCustoms(it)
+    const cus=applyCustoms?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
     const base=cp+cus
     const final=base*(1+(parseFloat(it.margin_pct||0)/100))
     const cur=it.cost_currency||'USD'
@@ -2506,12 +2785,13 @@ function renderQuoteModalBd(){
       '<div><label>幣別</label><select onchange="qItemChange(\''+it.id+'\',\'cost_currency\',this.value)">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(it.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
       '<div><label style="display:flex;justify-content:space-between"><span>清關手續費 %</span>'+
       '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
-      '<input type="checkbox" '+(it.apply_customs!==false?'checked':'')+' onchange="qItemChange(\''+it.id+'\',\'apply_customs\',this.checked)" style="width:auto"> 套用</label></label>'+
-      '<input type="number" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" onchange="qItemChange(\''+it.id+'\',\'customs_fee_pct\',parseFloat(this.value))" /></div>'+
+      '<input type="checkbox" '+(applyCustoms?'checked':'')+' '+(canApplyCustoms?'':'disabled')+' onchange="qItemChange(\''+it.id+'\',\'apply_customs\',this.checked)" style="width:auto"> 套用</label></label>'+
+      '<input type="number" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" '+(canApplyCustoms?'':'disabled')+' onchange="qItemChange(\''+it.id+'\',\'customs_fee_pct\',parseFloat(this.value))" /></div>'+
       '<div><label>利潤 %</label><input type="number" value="'+(it.margin_pct??20)+'" min="0" max="200" step="1" onchange="qItemChange(\''+it.id+'\',\'margin_pct\',parseFloat(this.value))" /></div>'+
       '<div><label>MOQ</label><input value="'+(it.moq||'')+'" placeholder="例：1000m²" onchange="qItemChange(\''+it.id+'\',\'moq\',this.value)" /></div>'+
       '<div><label>交期</label><input value="'+(it.lead_time||'')+'" placeholder="例：30天" onchange="qItemChange(\''+it.id+'\',\'lead_time\',this.value)" /></div>'+
       '</div>'+
+      '<div style="font-size:10px;color:'+(canApplyCustoms?'#666':'#0F6E56')+';margin-bottom:8px">'+getSupplierCustomsHint(it.supplier_id)+'</div>'+
       '<div style="padding:8px 12px;border-radius:8px;border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';background:'+(hasP?'#E1F5EE':'#f8f8f5')+'">'+
       (hasP?'<span style="font-size:15px;font-weight:600;color:#0F6E56">'+final.toFixed(2)+' '+cur+'</span>'+
       '<span style="font-size:10px;color:#0F6E56;margin-left:10px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</span>':
@@ -2568,9 +2848,13 @@ function renderQuoteModalBd(){
 }
 
 function qItemChange(id,field,value){
+  const it=quoteItems.find(x=>x.id===id)
+  if(field==='apply_customs'&&!supplierNeedsCustoms(it?.supplier_id)){
+    value=false
+  }
   if(!_qPendingItems[id])_qPendingItems[id]={}
   _qPendingItems[id][field]=value
-  const it=quoteItems.find(x=>x.id===id);if(it)it[field]=value
+  if(it)it[field]=value
   renderQuoteModalBd()
 }
 function qHeaderChange(field,value){
@@ -2615,7 +2899,7 @@ async function addQuoteItem(){
     header_id:selectedQuoteId,product:p.product_name,spec:p.spec||null,
     product_id:p.id,supplier_id:p.supplier_id||null,
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
-    apply_customs:true,margin_pct:parseFloat(settings.default_margin_pct||20)
+    apply_customs:supplierNeedsCustoms(p.supplier_id||null),margin_pct:parseFloat(settings.default_margin_pct||20)
   })
   if(error){showToast('新增品項失敗：'+error.message,'error');return}
   await loadQuotes()
@@ -2705,7 +2989,7 @@ async function sendQuoteToOrder(){
   if(items.length){
     const oiRows=items.map(it=>{
       const cp=parseFloat(it.cost_price||0)
-      const cus=it.apply_customs!==false?cp*(parseFloat(it.customs_fee_pct||0)/100):0
+      const cus=shouldApplyCustoms(it)?cp*(parseFloat(it.customs_fee_pct||0)/100):0
       const finalPrice=(cp+cus)*(1+(parseFloat(it.margin_pct||0)/100))
       return{order_id:orderId,product_name:it.product,spec:it.spec||null,qty:1,unit:it.moq||null,unit_price:parseFloat(finalPrice.toFixed(4)),currency:it.cost_currency||'USD'}
     })
@@ -2720,27 +3004,72 @@ async function sendQuoteToOrder(){
   setTimeout(()=>{switchTab('orders');setTimeout(()=>openOrderModal(orderId),80)},200)
 }
 
-async function openSettingsModal(){
-  await loadSettings()
-  document.getElementById('modal-settings-bd').innerHTML=
+function renderSettingsTab(){
+  const el=document.getElementById('settings-panel')
+  if(!el)return
+  if(!isManager()){
+    el.innerHTML='<div class="loading">只有管理者可以查看系統設定</div>'
+    return
+  }
+  const customerDays=getCustomerReviewDays()
+  const productDays=getProductReviewDays()
+  el.innerHTML=
+    '<div class="card" style="margin-bottom:12px">'+
+    '<div class="section-title">報價預設值</div>'+
     '<div class="grid-2" style="margin-bottom:14px">'+
-    '<div><label>預設清關手續費 %</label><input type="number" id="set-customs" value="'+(settings.default_customs_fee_pct||7.5)+'" min="0" max="50" step="0.5" /></div>'+
-    '<div><label>預設利潤 %</label><input type="number" id="set-margin" value="'+(settings.default_margin_pct||20)+'" min="0" max="200" step="1" /></div>'+
-    '<div><label>預設成本幣別</label><select id="set-cost-cur">'+buildOptions(CURRENCY_OPTIONS.filter(c=>c!=='JPY'),settings.default_cost_currency)+'</select></div>'+
-    '<div><label>預設報價幣別</label><select id="set-quote-cur">'+buildOptions(CURRENCY_OPTIONS.filter(c=>c!=='JPY'),settings.default_quote_currency)+'</select></div>'+
-    '</div><button class="btn btn-primary" onclick="saveSettings()">儲存設定</button>'
-  document.getElementById('modal-settings').classList.add('open')
+    '<div><label>預設清關手續費 %</label><input type="number" id="set-customs" value="'+getSettingNumber('default_customs_fee_pct',7.5)+'" min="0" max="50" step="0.5" /></div>'+
+    '<div><label>預設利潤 %</label><input type="number" id="set-margin" value="'+getSettingNumber('default_margin_pct',20)+'" min="0" max="200" step="1" /></div>'+
+    '<div><label>預設成本幣別</label><select id="set-cost-cur">'+buildSettingCurrencyOptions(getSettingValue('default_cost_currency','USD'))+'</select></div>'+
+    '<div><label>預設報價幣別</label><select id="set-quote-cur">'+buildSettingCurrencyOptions(getSettingValue('default_quote_currency','USD'))+'</select></div>'+
+    '</div></div>'+
+    '<div class="card" style="margin-bottom:12px">'+
+    '<div class="section-title">客戶管理規則</div>'+
+    '<div class="grid-2" style="margin-bottom:8px">'+
+    '<div><label>統一客戶回顧週期（天）</label><input type="number" id="set-customer-review-days" value="'+customerDays+'" min="7" step="1" /></div>'+
+    '</div>'+
+    '<div style="font-size:11px;color:#888">儲存後，所有客戶都會使用同一個回顧週期。</div>'+
+    '</div>'+
+    '<div class="card" style="margin-bottom:12px">'+
+    '<div class="section-title">產品管理規則</div>'+
+    '<div class="grid-2" style="margin-bottom:8px">'+
+    '<div><label>統一產品更新週期（天）</label><input type="number" id="set-product-review-days" value="'+productDays+'" min="7" step="1" /></div>'+
+    '</div>'+
+    '<div style="font-size:11px;color:#888">儲存後，所有產品都會使用同一個更新週期。</div>'+
+    '</div>'+
+    '<div class="modal-foot"><button class="btn btn-primary" onclick="saveSettings()">儲存設定</button></div>'
+}
+
+function openSettingsModal(){
+  openSettingsArea()
 }
 
 async function saveSettings(){
+  if(!isManager()){
+    showToast('只有管理者可以儲存系統設定','error')
+    return
+  }
+  const customerReviewDays=parseInt(document.getElementById('set-customer-review-days')?.value,10)||180
+  const productReviewDays=parseInt(document.getElementById('set-product-review-days')?.value,10)||90
   const rows=[
     {key:'default_customs_fee_pct',value:document.getElementById('set-customs').value,label:'預設清關手續費'},
     {key:'default_margin_pct',value:document.getElementById('set-margin').value,label:'預設利潤'},
     {key:'default_cost_currency',value:document.getElementById('set-cost-cur').value,label:'預設成本幣別'},
     {key:'default_quote_currency',value:document.getElementById('set-quote-cur').value,label:'預設報價幣別'},
+    {key:'default_customer_review_days',value:String(customerReviewDays),label:'統一客戶回顧週期'},
+    {key:'default_product_review_days',value:String(productReviewDays),label:'統一產品更新週期'},
   ]
   await Promise.all(rows.map(r=>sb.from('settings').upsert({...r,updated_at:new Date().toISOString()})))
-  await loadSettings();closeModal('modal-settings');showToast('設定已儲存')
+  await Promise.all([
+    sb.from('customers').update({review_days:customerReviewDays}).neq('id',0),
+    sb.from('products').update({review_days:productReviewDays}).neq('id',0)
+  ])
+  await Promise.all([loadSettings(),loadCustomers(),loadProducts()])
+  renderSettingsTab()
+  renderCustomers()
+  renderProducts()
+  updateCustomerReviewAlert()
+  updateProductOverdueAlert()
+  showToast('設定已儲存')
 }
 
 // ===== 直接新增報價單 =====
@@ -2779,7 +3108,9 @@ function renderNqItems(){
 
 function buildNqItemHtml(it,idx){
   const cp=parseFloat(it.cost_price||0)
-  const cus=it.apply_customs!==false?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
+  const canApplyCustoms=supplierNeedsCustoms(it.supplier_id)
+  const applyCustoms=shouldApplyCustoms(it)
+  const cus=applyCustoms?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
   const base=cp+cus
   const final=base*(1+(parseFloat(it.margin_pct||0)/100))
   const cur=it.cost_currency||'USD'
@@ -2796,12 +3127,13 @@ function buildNqItemHtml(it,idx){
     '<div><label>幣別</label><select onchange="updateNqField('+idx+',\'cost_currency\',this.value)">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(it.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
     '<div><label style="display:flex;justify-content:space-between"><span>清關費 %</span>'+
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
-    '<input type="checkbox" '+(it.apply_customs!==false?'checked':'')+' onchange="updateNqField('+idx+',\'apply_customs\',this.checked);refreshNqCalc('+idx+')" style="width:auto"> 套用</label></label>'+
-    '<input type="number" value="'+(it.customs_fee_pct??parseFloat(settings.default_customs_fee_pct||7.5))+'" min="0" max="50" step="0.5" onchange="updateNqField('+idx+',\'customs_fee_pct\',parseFloat(this.value));refreshNqCalc('+idx+')" /></div>'+
+    '<input type="checkbox" '+(applyCustoms?'checked':'')+' '+(canApplyCustoms?'':'disabled')+' onchange="updateNqField('+idx+',\'apply_customs\',this.checked);refreshNqCalc('+idx+')" style="width:auto"> 套用</label></label>'+
+    '<input type="number" value="'+(it.customs_fee_pct??parseFloat(settings.default_customs_fee_pct||7.5))+'" min="0" max="50" step="0.5" '+(canApplyCustoms?'':'disabled')+' onchange="updateNqField('+idx+',\'customs_fee_pct\',parseFloat(this.value));refreshNqCalc('+idx+')" /></div>'+
     '<div><label>利潤 %</label><input type="number" value="'+(it.margin_pct??parseFloat(settings.default_margin_pct||20))+'" min="0" max="200" step="1" onchange="updateNqField('+idx+',\'margin_pct\',parseFloat(this.value));refreshNqCalc('+idx+')" /></div>'+
     '<div><label>MOQ</label><input value="'+escHtml(it.moq||'')+'" placeholder="例：1000m²" onchange="updateNqField('+idx+',\'moq\',this.value)" /></div>'+
     '<div><label>交期</label><input value="'+escHtml(it.lead_time||'')+'" placeholder="例：30天" onchange="updateNqField('+idx+',\'lead_time\',this.value)" /></div>'+
     '</div>'+
+    '<div style="font-size:10px;color:'+(canApplyCustoms?'#666':'#0F6E56')+';margin-bottom:8px">'+getSupplierCustomsHint(it.supplier_id)+'</div>'+
     '<div id="nq-calc-'+idx+'" style="padding:7px 11px;border-radius:7px;background:'+(hasP?'#E1F5EE':'#f8f8f5')+';border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';font-size:12px;color:'+(hasP?'#0F6E56':'#aaa')+'">'+
     (hasP?'<strong>'+final.toFixed(2)+' '+cur+'</strong><span style="font-size:10px;margin-left:8px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</span>':'請填入成本價以計算報價')+
     '</div></div>'
@@ -2810,13 +3142,16 @@ function buildNqItemHtml(it,idx){
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 function updateNqField(idx,field,value){
+  if(field==='apply_customs'&&!supplierNeedsCustoms(_nqItems[idx]?.supplier_id)){
+    value=false
+  }
   _nqItems[idx][field]=value
 }
 
 function refreshNqCalc(idx){
   const it=_nqItems[idx]
   const cp=parseFloat(it.cost_price||0)
-  const cus=it.apply_customs!==false?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
+  const cus=shouldApplyCustoms(it)?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
   const base=cp+cus
   const final=base*(1+(parseFloat(it.margin_pct||0)/100))
   const cur=it.cost_currency||'USD'
@@ -2856,7 +3191,7 @@ function openNewProductFromQuote(){
     '<div><label>單位</label><input id="npq-unit" placeholder="例：m²、roll、kg" /></div>'+
     '<div><label>成本價 <span class="req">*</span></label><input type="number" id="npq-cost" placeholder="0.0000" step="0.0001" /></div>'+
     '<div><label>幣別</label><select id="npq-currency">'+buildOptions(CURRENCY_OPTIONS,settings.default_cost_currency||'USD')+'</select></div>'+
-    '<div><label>更新週期（天）</label><input type="number" id="npq-days" value="90" min="7" /></div>'+
+    '<div><label>統一更新週期（天）</label><input value="'+getProductReviewDays()+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
     '<div><label>上次確認日期</label><input type="date" id="npq-reviewed" value="'+new Date().toISOString().slice(0,10)+'" /></div>'+
     '</div>'+
     '<div style="margin-bottom:14px"><label>備註 / 規格說明</label><textarea id="npq-notes" placeholder="規格、注意事項..."></textarea></div>'+
@@ -2883,7 +3218,7 @@ async function saveNewProductFromQuote(){
     unit:document.getElementById('npq-unit')?.value.trim()||null,
     cost_price:parseFloat(costVal),
     currency:document.getElementById('npq-currency')?.value||'USD',
-    review_days:parseInt(document.getElementById('npq-days')?.value)||90,
+    review_days:getProductReviewDays(),
     last_reviewed_at:document.getElementById('npq-reviewed')?.value||null,
     notes:document.getElementById('npq-notes')?.value.trim()||null
   }
@@ -2896,9 +3231,10 @@ async function saveNewProductFromQuote(){
     cost_price:data.cost_price,
     cost_currency:data.currency||'USD',
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
-    apply_customs:true,
+    apply_customs:supplierNeedsCustoms(supMatch?.id||null),
     margin_pct:parseFloat(settings.default_margin_pct||20),
     moq:'',lead_time:'',
+    supplier_id:supMatch?.id||null,
     from_catalog:true,
     from_product_id:inserted?.id||null
   })
@@ -2975,9 +3311,10 @@ function pickCatalogProduct(productId){
     cost_price:p.cost_price||'',
     cost_currency:p.currency||settings.default_cost_currency||'USD',
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
-    apply_customs:true,
+    apply_customs:supplierNeedsCustoms(p.supplier_id||null),
     margin_pct:parseFloat(settings.default_margin_pct||20),
     moq:'',lead_time:'',
+    supplier_id:p.supplier_id||null,
     from_catalog:true,
     from_product_id:p.id
   })
@@ -3027,10 +3364,11 @@ async function submitNewQuote(){
     header_id:hId,
     product:it.product,
     spec:it.spec||null,
+    supplier_id:it.supplier_id||null,
     cost_price:parseFloat(it.cost_price)||null,
     cost_currency:it.cost_currency||'USD',
     customs_fee_pct:parseFloat(it.customs_fee_pct||7.5),
-    apply_customs:it.apply_customs!==false,
+    apply_customs:shouldApplyCustoms(it),
     margin_pct:parseFloat(it.margin_pct||20),
     moq:it.moq||null,
     lead_time:it.lead_time||null
@@ -3092,7 +3430,7 @@ function renderProducts(){
       (!isActive?'<span class="badge" style="background:#f0f0eb;color:#888;border:1px solid #ccc">Inactive</span>':'')+
       '</div>'+
       '<div style="font-size:12px;color:#666">'+(sup?sup.company:'—')+(p.cost_price?' · 成本 '+p.cost_price+' '+(p.currency||'')+(p.unit?' / '+p.unit:''):'')+'</div>'+
-      '<div style="font-size:11px;color:#aaa">上次確認：'+(p.last_reviewed_at||'—')+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+(p.review_days?' （'+p.review_days+'天週期）':'')+'</div>'+
+      '<div style="font-size:11px;color:#aaa">上次確認：'+(p.last_reviewed_at||'—')+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+' （'+getProductReviewDays()+'天週期）</div>'+
       '</div>'+
       '<div style="display:flex;gap:6px;flex-shrink:0">'+
       '<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="event.stopPropagation();confirmReview('+p.id+')">✓ 已確認</button>'+
@@ -3113,6 +3451,7 @@ function openProductModal(id){
   const p=id?products.find(x=>x.id===id):null
   const isEdit=!!p
   const supOpts=suppliers.map(s=>'<option value="'+s.id+'"'+(p&&p.supplier_id===s.id?' selected':'')+'>'+s.company+' — '+s.name+'</option>').join('')
+  const productReviewDays=getProductReviewDays()
   document.getElementById('modal-product-hd').innerHTML=
     '<div style="font-size:14px;font-weight:600">'+(isEdit?'編輯產品':'新增產品')+'</div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-product\')">×</button>'
@@ -3126,7 +3465,7 @@ function openProductModal(id){
     '<div><label>幣別</label><select id="pd-currency">'+buildOptions(CURRENCY_OPTIONS,p?.currency)+'</select></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>更新週期（天）</label><input type="number" id="pd-days" value="'+(p?.review_days||90)+'" min="7" placeholder="90" /></div>'+
+    '<div><label>統一更新週期（天）</label><input value="'+productReviewDays+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
     '<div><label>上次確認日期</label><input type="date" id="pd-reviewed" value="'+(p?.last_reviewed_at||new Date().toISOString().slice(0,10))+'" /></div>'+
     '</div>'+
     '<div style="margin-bottom:14px"><label>備註</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
@@ -3152,7 +3491,7 @@ async function saveProduct(id){
     unit:document.getElementById('pd-unit').value.trim()||null,
     cost_price:parseFloat(document.getElementById('pd-cost').value)||null,
     currency:document.getElementById('pd-currency').value,
-    review_days:parseInt(document.getElementById('pd-days').value)||90,
+    review_days:getProductReviewDays(),
     last_reviewed_at:document.getElementById('pd-reviewed').value||null,
     notes:document.getElementById('pd-notes').value.trim()||null,
     is_active:document.getElementById('pd-active').value==='true'
@@ -3212,18 +3551,20 @@ async function updateProductCostFromInquiry(inqId){
 
 // ===== 客戶管理 =====
 function customerStatus(c){
-  if(!c.last_reviewed_at||!c.review_days)return 'ok'
+  const reviewDays=getCustomerReviewDays()
+  if(!c.last_reviewed_at||!reviewDays)return 'ok'
   const last=new Date(c.last_reviewed_at)
   const daysSince=Math.floor((new Date()-last)/(1000*60*60*24))
-  if(daysSince>=c.review_days)return 'overdue'
-  if(daysSince>=c.review_days*0.8)return 'warn'
+  if(daysSince>=reviewDays)return 'overdue'
+  if(daysSince>=reviewDays*0.8)return 'warn'
   return 'ok'
 }
 function customerDaysLeft(c){
-  if(!c.last_reviewed_at||!c.review_days)return null
+  const reviewDays=getCustomerReviewDays()
+  if(!c.last_reviewed_at||!reviewDays)return null
   const last=new Date(c.last_reviewed_at)
   const daysSince=Math.floor((new Date()-last)/(1000*60*60*24))
-  return c.review_days-daysSince
+  return reviewDays-daysSince
 }
 function updateCustomerReviewAlert(){
   const el=document.getElementById('customer-review-alert')
@@ -3240,38 +3581,75 @@ function renderCustomers(){
   const el=document.getElementById('customer-list')
   const sum=document.getElementById('customer-summary')
   if(!el)return
-  if(sum)sum.textContent=customers.length+' 位客戶'
+  const companyEntries=Object.entries(customers.reduce((acc,c)=>{if(!acc[c.company])acc[c.company]=[];acc[c.company].push(c);return acc},{}))
+  if(sum)sum.textContent=companyEntries.length+' 家客戶 / '+customers.length+' 位聯絡人'
   updateCustomerReviewAlert()
   if(!customers.length){el.innerHTML='<div class="loading">尚無客戶資料</div>';return}
-  el.innerHTML=customers.map(c=>{
-    const st=customerStatus(c)
-    const daysLeft=customerDaysLeft(c)
+  el.innerHTML=companyEntries.map(([company,people])=>{
+    const primary=people[0]
+    const st=customerStatus(primary)
+    const daysLeft=customerDaysLeft(primary)
     const stBg=st==='overdue'?'#FCEBEB':st==='warn'?'#FFFBEA':'transparent'
     const stColor=st==='overdue'?'#A32D2D':st==='warn'?'#7A5B00':null
     const stLabel=st==='overdue'?'需回顧':st==='warn'?'即將到期':null
-    return '<div class="row '+(st==='overdue'?'overdue':st==='warn'?'warning':'')+'" style="cursor:default;align-items:flex-start">'+
-      '<div style="flex:1;min-width:0">'+
-      '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
-      '<span style="font-size:13px;font-weight:500">'+c.company+'</span>'+
-      '<span class="tag">'+(c.country||'—')+'</span>'+
-      (c.industry?'<span class="tag">'+c.industry+'</span>':'')+
-      (stLabel?'<span class="badge" style="background:'+stBg+';color:'+stColor+'">'+stLabel+'</span>':'')+
-      '</div>'+
-      '<div style="font-size:12px;color:#666">'+c.name+(c.email?' · '+c.email:'')+(c.phone?' · '+c.phone:'')+'</div>'+
-      (c.notes?'<div style="font-size:11px;color:#aaa;margin-top:2px">'+c.notes+'</div>':'')+
-      (c.last_reviewed_at?'<div style="font-size:11px;color:#aaa;margin-top:2px">上次回顧：'+c.last_reviewed_at+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+'</div>':'')+
-      '</div>'+
-      '<div style="display:flex;gap:6px;flex-shrink:0">'+
-      '<button class="btn btn-ghost btn-sm" onclick="openEditCustomer('+c.id+')">編輯</button>'+
-      '<button class="btn btn-ghost btn-sm" style="color:#aaa" onclick="deleteCustomer('+c.id+',\''+c.company+'\')">×</button>'+
-      '</div></div>'
+    return '<div class="card" style="margin-bottom:10px">'+
+      '<div style="font-size:13px;font-weight:500;color:#185FA5;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid #e5e5e0;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="openEditCustomer('+primary.id+')">'+
+      '<span>'+company+'</span><span style="font-size:11px;color:#888">'+people.length+' 位聯絡人</span></div>'+
+      people.map(c=>
+        '<div class="row '+(st==='overdue'?'overdue':st==='warn'?'warning':'')+'" style="align-items:flex-start;margin-bottom:0;border:none;padding:7px 0;cursor:pointer" onclick="openEditCustomer('+c.id+')">'+
+        '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
+        '<span style="font-size:12px;font-weight:500">'+c.name+'</span>'+
+        '<span class="tag">'+(c.country||'—')+'</span>'+
+        (c.industry?'<span class="tag">'+c.industry+'</span>':'')+
+        (stLabel&&c.id===primary.id?'<span class="badge" style="background:'+stBg+';color:'+stColor+'">'+stLabel+'</span>':'')+
+        '</div>'+
+        '<div style="font-size:11px;color:#666">'+[c.email,c.phone].filter(Boolean).join(' · ')+'</div>'+
+        (c.notes?'<div style="font-size:11px;color:#aaa;margin-top:2px">'+c.notes+'</div>':'')+
+        (c.last_reviewed_at&&c.id===primary.id?'<div style="font-size:11px;color:#aaa;margin-top:2px">上次回顧：'+c.last_reviewed_at+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+'</div>':'')+
+        '</div>'+
+        '<div style="display:flex;gap:6px;flex-shrink:0">'+
+        '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditCustomer('+c.id+')">詳情</button>'+
+        '<button class="btn btn-ghost btn-sm" style="color:#aaa" onclick="event.stopPropagation();deleteCustomer('+c.id+',\''+c.name+'\')">×</button>'+
+        '</div></div>'
+      ).join('')+
+    '</div>'
   }).join('')
 }
 
-function showNewCustomerForm(){document.getElementById('new-customer-form').style.display='block'}
+function showNewCustomerForm(prefill={}){
+  ;['nc-name','nc-company','nc-email','nc-phone','nc-industry','nc-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  document.getElementById('new-customer-form').style.display='block'
+  const companyEl=document.getElementById('nc-company')
+  const countryEl=document.getElementById('nc-country')
+  if(companyEl&&prefill.company)companyEl.value=prefill.company
+  if(countryEl&&prefill.country)countryEl.value=prefill.country
+}
+function openCreateCustomerModal(prefill={}){
+  _isDirty=false
+  document.getElementById('modal-customer-hd').innerHTML='<div style="font-size:14px;font-weight:600">新增客戶聯絡人</div><button class="modal-close" onclick="closeModal(\'modal-customer\')">×</button>'
+  document.getElementById('modal-customer-bd').innerHTML=
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>姓名 <span class="req">*</span></label><input id="cc-name" value="'+escapeHtml(prefill.name||'')+'" /></div>'+
+    '<div><label>公司 <span class="req">*</span></label><input id="cc-company" value="'+escapeHtml(prefill.company||'')+'" /></div>'+
+    '<div><label>Email</label><input id="cc-email" value="'+escapeHtml(prefill.email||'')+'" /></div>'+
+    '<div><label>電話</label><input id="cc-phone" value="'+escapeHtml(prefill.phone||'')+'" /></div>'+
+    '<div><label>國家</label><select id="cc-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,prefill.country||'TH')+'</select></div>'+
+    '<div><label>行業</label><input id="cc-industry" value="'+escapeHtml(prefill.industry||'')+'" /></div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px"><label>備註</label><textarea id="cc-notes">'+escapeHtml(prefill.notes||'')+'</textarea></div>'+
+    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateCustomerFromModal()">新增</button></div>'
+  enableDirtyTracking('modal-customer-bd')
+  document.getElementById('modal-customer').classList.add('open')
+}
+function openNewCustomerContact(customerId){
+  const c=customers.find(x=>x.id===customerId)
+  openCreateCustomerModal({company:c?.company||'',country:c?.country||'TH',industry:c?.industry||''})
+}
 function hideNewCustomerForm(){
   document.getElementById('new-customer-form').style.display='none'
   ;['nc-name','nc-company','nc-email','nc-phone','nc-industry','nc-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  const countryEl=document.getElementById('nc-country');if(countryEl)countryEl.value='TH'
 }
 
 async function createCustomer(){
@@ -3283,9 +3661,27 @@ async function createCustomer(){
     phone:document.getElementById('nc-phone').value.trim()||null,
     country:document.getElementById('nc-country').value,
     industry:document.getElementById('nc-industry').value.trim()||null,
-    notes:document.getElementById('nc-notes').value.trim()||null})
+    notes:document.getElementById('nc-notes').value.trim()||null,
+    review_days:getCustomerReviewDays()})
   if(error){showToast('新增失敗：'+error.message,'error');return}
   await loadCustomers();hideNewCustomerForm();renderCustomers()
+}
+async function submitCreateCustomerFromModal(){
+  const name=document.getElementById('cc-name')?.value.trim()
+  const company=document.getElementById('cc-company')?.value.trim()
+  if(!name||!company){showToast('請填寫姓名和公司','error');return}
+  const{error}=await sb.from('customers').insert({
+    name,company,
+    email:document.getElementById('cc-email')?.value.trim()||null,
+    phone:document.getElementById('cc-phone')?.value.trim()||null,
+    country:document.getElementById('cc-country')?.value||'TH',
+    industry:document.getElementById('cc-industry')?.value.trim()||null,
+    notes:document.getElementById('cc-notes')?.value.trim()||null,
+    review_days:getCustomerReviewDays()
+  })
+  if(error){showToast('新增失敗：'+error.message,'error');return}
+  _isDirty=false
+  await loadCustomers();closeModal('modal-customer');renderCustomers();showToast('客戶聯絡人已新增')
 }
 
 async function deleteCustomer(id,company){
@@ -3297,8 +3693,11 @@ async function deleteCustomer(id,company){
 
 function openEditCustomer(id){
   const c=customers.find(x=>x.id===id);if(!c)return
-  document.getElementById('modal-customer-hd').innerHTML='<div style="font-size:14px;font-weight:600">編輯客戶</div><button class="modal-close" onclick="closeModal(\'modal-customer\')">×</button>'
+  _isDirty=false
+  const companyContacts=customers.filter(x=>x.company===c.company)
+  document.getElementById('modal-customer-hd').innerHTML='<div style="font-size:14px;font-weight:600">客戶詳情</div><button class="modal-close" onclick="closeModal(\'modal-customer\')">×</button>'
   document.getElementById('modal-customer-bd').innerHTML=
+    (companyContacts.length>1?'<div style="font-size:11px;color:#888;margin-bottom:10px">此客戶共有 '+companyContacts.length+' 位聯絡人：'+companyContacts.map(contact=>'<button class="btn btn-ghost btn-sm" style="margin:0 4px 4px 0" onclick="openEditCustomer('+contact.id+')">'+contact.name+'</button>').join('')+'</div>':'')+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>姓名 <span class="req">*</span></label><input id="ec-name" value="'+(c.name||'')+'" /></div>'+
     '<div><label>公司 <span class="req">*</span></label><input id="ec-company" value="'+(c.company||'')+'" /></div>'+
@@ -3308,18 +3707,22 @@ function openEditCustomer(id){
     '<div><label>行業</label><input id="ec-industry" value="'+(c.industry||'')+'" /></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>回顧週期（天）</label><input type="number" id="ec-days" value="'+(c.review_days||180)+'" min="7" /></div>'+
+    '<div><label>統一回顧週期（天）</label><input value="'+getCustomerReviewDays()+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
     '<div><label>上次回顧日期</label><input type="date" id="ec-reviewed" value="'+(c.last_reviewed_at||'')+'" /></div>'+
     '</div>'+
     '<div style="margin-bottom:14px"><label>備註</label><textarea id="ec-notes">'+(c.notes||'')+'</textarea></div>'+
     '<div class="modal-foot">'+
     '<button class="btn btn-blue" onclick="saveCustomer('+id+')">儲存</button>'+
+    '<button class="btn btn-ghost" onclick="openNewCustomerContact('+id+')">＋ 新增同公司聯絡人</button>'+
     '<button class="btn btn-ghost" onclick="markCustomerReviewed('+id+')">✓ 已回顧</button>'+
     '</div>'
+  enableDirtyTracking('modal-customer-bd')
   document.getElementById('modal-customer').classList.add('open')
 }
 
 async function saveCustomer(id){
+  const current=customers.find(x=>x.id===id)
+  if(!current)return
   const name=document.getElementById('ec-name').value.trim()
   const company=document.getElementById('ec-company').value.trim()
   if(!name||!company){showToast('請填寫姓名和公司','error');return}
@@ -3329,8 +3732,16 @@ async function saveCustomer(id){
     country:document.getElementById('ec-country').value,
     industry:document.getElementById('ec-industry').value.trim()||null,
     notes:document.getElementById('ec-notes').value.trim()||null,
-    review_days:parseInt(document.getElementById('ec-days')?.value)||180,
+    review_days:getCustomerReviewDays(),
     last_reviewed_at:document.getElementById('ec-reviewed')?.value||null}).eq('id',id)
+  if(company!==current.company){
+    await Promise.all([
+      sb.from('customers').update({company}).eq('company',current.company).neq('id',id),
+      sb.from('inquiries').update({customer:company}).eq('customer',current.company),
+      sb.from('quote_headers').update({customer:company}).eq('customer',current.company),
+      sb.from('orders').update({customer:company}).eq('customer',current.company)
+    ])
+  }
   _isDirty=false
   await loadCustomers();closeModal('modal-customer');renderCustomers()
   showToast('客戶已更新')
@@ -3379,7 +3790,8 @@ async function _quickCreateCustomer(){
     name,company,
     email:document.getElementById('qc-email')?.value.trim()||null,
     phone:document.getElementById('qc-phone')?.value.trim()||null,
-    country:document.getElementById('qc-country')?.value||null
+    country:document.getElementById('qc-country')?.value||null,
+    review_days:getCustomerReviewDays()
   }).select().single()
   if(error){showToast('新增失敗：'+error.message,'error');return}
   await loadCustomers()
@@ -3570,44 +3982,97 @@ function renderSupplierMgmt(){
   const el=document.getElementById('supplier-mgmt-list')
   const sum=document.getElementById('supplier-summary')
   if(!el)return
-  if(sum)sum.textContent=suppliers.length+' 位供應商聯絡人'
+  const companyEntries=Object.entries(suppliers.reduce((acc,s)=>{if(!acc[s.company])acc[s.company]=[];acc[s.company].push(s);return acc},{}))
+  if(sum)sum.textContent=companyEntries.length+' 家供應商 / '+suppliers.length+' 位聯絡人'
   if(!suppliers.length){el.innerHTML='<div class="loading">尚無供應商資料</div>';return}
   const cos={}
   suppliers.forEach(s=>{if(!cos[s.company])cos[s.company]=[];cos[s.company].push(s)})
   el.innerHTML=Object.entries(cos).map(([company,people])=>
     '<div class="card" style="margin-bottom:10px">'+
-    '<div style="font-size:13px;font-weight:500;color:#085041;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid #e5e5e0">'+company+'</div>'+
-    people.map(s=>'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f5f5f0">'+
+    '<div style="font-size:13px;font-weight:500;color:#085041;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid #e5e5e0;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="openEditSupplier('+people[0].id+')"><span>'+company+'</span><span style="font-size:11px;color:#888">'+people.length+' 位聯絡人</span></div>'+
+    people.map(s=>'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f5f5f0;cursor:pointer" onclick="openEditSupplier('+s.id+')">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="font-size:12px;font-weight:500;color:#333">'+s.name+(s.role?' <span style="font-size:10px;color:#aaa;font-weight:400">· '+s.role+'</span>':'')+'</div>'+
       '<div style="font-size:11px;color:#aaa;margin-top:1px">'+[s.email,s.phone,s.specialty].filter(Boolean).join(' · ')+'</div>'+
       '</div>'+
-      '<button class="btn btn-ghost btn-sm" onclick="openEditSupplier('+s.id+')">編輯</button>'+
-      '<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0" onclick="deleteSupplier('+s.id+',\''+s.name+'\')">×</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditSupplier('+s.id+')">詳情</button>'+
+      '<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0" onclick="event.stopPropagation();deleteSupplier('+s.id+',\''+s.name+'\')">×</button>'+
       '</div>').join('')+
     '</div>').join('')
 }
 
-function showNewSupplierForm(){document.getElementById('new-supplier-form').style.display='block'}
+function showNewSupplierForm(prefill={}){
+  ;['ns-name','ns-company','ns-role','ns-email','ns-phone','ns-line','ns-whatsapp','ns-specialty','ns-salutation'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  document.getElementById('new-supplier-form').style.display='block'
+  const companyEl=document.getElementById('ns-company')
+  const countryEl=document.getElementById('ns-country')
+  if(companyEl&&prefill.company)companyEl.value=prefill.company
+  if(countryEl&&prefill.country)countryEl.value=prefill.country
+}
+function openCreateSupplierModal(prefill={}){
+  _isDirty=false
+  document.getElementById('modal-supplier-hd').innerHTML='<div style="font-size:14px;font-weight:600">新增供應商聯絡人</div><button class="modal-close" onclick="closeModal(\'modal-supplier\')">×</button>'
+  document.getElementById('modal-supplier-bd').innerHTML=
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>姓名 <span class="req">*</span></label><input id="cs-name" value="'+escapeHtml(prefill.name||'')+'" /></div>'+
+    '<div><label>公司 <span class="req">*</span></label><input id="cs-company" value="'+escapeHtml(prefill.company||'')+'" /></div>'+
+    '<div><label>國家 <span class="req">*</span></label><select id="cs-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,prefill.country||'TH')+'</select></div>'+
+    '<div><label>職務</label><input id="cs-role" value="'+escapeHtml(prefill.role||'')+'" /></div>'+
+    '<div><label>Email <span class="req">*</span></label><input id="cs-email" value="'+escapeHtml(prefill.email||'')+'" /></div>'+
+    '<div><label>電話</label><input id="cs-phone" value="'+escapeHtml(prefill.phone||'')+'" /></div>'+
+    '<div><label>LINE ID</label><input id="cs-line" value="'+escapeHtml(prefill.line_id||'')+'" /></div>'+
+    '<div><label>WhatsApp</label><input id="cs-whatsapp" value="'+escapeHtml(prefill.whatsapp||'')+'" /></div>'+
+    '<div><label>專長產品</label><input id="cs-specialty" value="'+escapeHtml(prefill.specialty||'')+'" /></div>'+
+    '<div><label>郵件稱謂</label><input id="cs-salutation" value="'+escapeHtml(prefill.salutation||'')+'" /></div>'+
+    '</div><div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateSupplierFromModal()">新增</button></div>'
+  enableDirtyTracking('modal-supplier-bd')
+  document.getElementById('modal-supplier').classList.add('open')
+}
+function openNewSupplierContact(supplierId){
+  const s=suppliers.find(x=>x.id===supplierId)
+  openCreateSupplierModal({company:s?.company||'',country:s?.country||'TH'})
+}
 function hideNewSupplierForm(){
   document.getElementById('new-supplier-form').style.display='none'
   ;['ns-name','ns-company','ns-role','ns-email','ns-phone','ns-line','ns-whatsapp','ns-specialty','ns-salutation'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  const countryEl=document.getElementById('ns-country');if(countryEl)countryEl.value='TH'
 }
 
 async function createSupplier(){
   const name=document.getElementById('ns-name').value.trim()
   const company=document.getElementById('ns-company').value.trim()
   const email=document.getElementById('ns-email').value.trim()
-  if(!name||!company||!email){showToast('請填寫姓名、公司和 Email','error');return}
-  const{error}=await sb.from('suppliers').insert({name,company,email,
+  const country=document.getElementById('ns-country').value
+  if(!name||!company||!email||!country){showToast('請填寫姓名、公司、國家和 Email','error');return}
+  const{data,error}=await sb.from('suppliers').insert({name,company,email,
+    country,
     role:document.getElementById('ns-role').value.trim()||null,
     phone:document.getElementById('ns-phone').value.trim()||null,
     line_id:document.getElementById('ns-line').value.trim()||null,
     whatsapp:document.getElementById('ns-whatsapp').value.trim()||null,
     specialty:document.getElementById('ns-specialty').value.trim()||null,
-    salutation:document.getElementById('ns-salutation').value.trim()||null})
+    salutation:document.getElementById('ns-salutation').value.trim()||null}).select().single()
   if(error){showToast('新增失敗：'+error.message,'error');return}
   await loadSuppliers();hideNewSupplierForm();renderSupplierMgmt()
+}
+async function submitCreateSupplierFromModal(){
+  const name=document.getElementById('cs-name')?.value.trim()
+  const company=document.getElementById('cs-company')?.value.trim()
+  const email=document.getElementById('cs-email')?.value.trim()
+  const country=document.getElementById('cs-country')?.value
+  if(!name||!company||!email||!country){showToast('請填寫姓名、公司、國家和 Email','error');return}
+  const{error}=await sb.from('suppliers').insert({
+    name,company,email,country,
+    role:document.getElementById('cs-role')?.value.trim()||null,
+    phone:document.getElementById('cs-phone')?.value.trim()||null,
+    line_id:document.getElementById('cs-line')?.value.trim()||null,
+    whatsapp:document.getElementById('cs-whatsapp')?.value.trim()||null,
+    specialty:document.getElementById('cs-specialty')?.value.trim()||null,
+    salutation:document.getElementById('cs-salutation')?.value.trim()||null
+  })
+  if(error){showToast('新增失敗：'+error.message,'error');return}
+  _isDirty=false
+  await loadSuppliers();closeModal('modal-supplier');renderSupplierMgmt();showToast('供應商聯絡人已新增')
 }
 
 async function deleteSupplier(id,name){
@@ -3619,11 +4084,15 @@ async function deleteSupplier(id,name){
 
 function openEditSupplier(id){
   const s=suppliers.find(x=>x.id===id);if(!s)return
-  document.getElementById('modal-supplier-hd').innerHTML='<div style="font-size:14px;font-weight:600">編輯供應商</div><button class="modal-close" onclick="closeModal(\'modal-supplier\')">×</button>'
+  _isDirty=false
+  const companyContacts=suppliers.filter(x=>x.company===s.company)
+  document.getElementById('modal-supplier-hd').innerHTML='<div style="font-size:14px;font-weight:600">供應商詳情</div><button class="modal-close" onclick="closeModal(\'modal-supplier\')">×</button>'
   document.getElementById('modal-supplier-bd').innerHTML=
+    (companyContacts.length>1?'<div style="font-size:11px;color:#888;margin-bottom:10px">此供應商共有 '+companyContacts.length+' 位聯絡人：'+companyContacts.map(c=>'<button class="btn btn-ghost btn-sm" style="margin:0 4px 4px 0" onclick="openEditSupplier('+c.id+')">'+c.name+'</button>').join('')+'</div>':'')+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>姓名 <span class="req">*</span></label><input id="es-name" value="'+(s.name||'')+'" /></div>'+
     '<div><label>公司 <span class="req">*</span></label><input id="es-company" value="'+(s.company||'')+'" /></div>'+
+    '<div><label>國家 <span class="req">*</span></label><select id="es-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,getSupplierCountryValue(s.id))+'</select></div>'+
     '<div><label>職務</label><input id="es-role" value="'+(s.role||'')+'" /></div>'+
     '<div><label>Email <span class="req">*</span></label><input id="es-email" value="'+(s.email||'')+'" /></div>'+
     '<div><label>電話</label><input id="es-phone" value="'+(s.phone||'')+'" /></div>'+
@@ -3631,22 +4100,34 @@ function openEditSupplier(id){
     '<div><label>WhatsApp</label><input id="es-whatsapp" value="'+(s.whatsapp||'')+'" /></div>'+
     '<div><label>專長產品</label><input id="es-specialty" value="'+(s.specialty||'')+'" /></div>'+
     '<div><label>郵件稱謂</label><input id="es-salutation" value="'+(s.salutation||'')+'" placeholder="例：王哥、李總、David" /></div>'+
-    '</div><button class="btn btn-primary" onclick="saveSupplier('+id+')">儲存</button>'
+    '</div><div class="modal-foot"><button class="btn btn-primary" onclick="saveSupplier('+id+')">儲存</button><button class="btn btn-ghost" onclick="openNewSupplierContact('+id+')">＋ 新增同公司聯絡人</button></div>'
+  enableDirtyTracking('modal-supplier-bd')
   document.getElementById('modal-supplier').classList.add('open')
 }
 
 async function saveSupplier(id){
+  const current=suppliers.find(x=>x.id===id)
+  if(!current)return
   const name=document.getElementById('es-name').value.trim()
   const company=document.getElementById('es-company').value.trim()
   const email=document.getElementById('es-email').value.trim()
-  if(!name||!company||!email){showToast('請填寫姓名、公司和 Email','error');return}
+  const country=document.getElementById('es-country').value
+  if(!name||!company||!email||!country){showToast('請填寫姓名、公司、國家和 Email','error');return}
   await sb.from('suppliers').update({name,company,email,
+    country,
     role:document.getElementById('es-role').value.trim()||null,
     phone:document.getElementById('es-phone').value.trim()||null,
     line_id:document.getElementById('es-line').value.trim()||null,
     whatsapp:document.getElementById('es-whatsapp').value.trim()||null,
     specialty:document.getElementById('es-specialty').value.trim()||null,
     salutation:document.getElementById('es-salutation').value.trim()||null}).eq('id',id)
+  if(company!==current.company){
+    await Promise.all([
+      sb.from('suppliers').update({company}).eq('company',current.company).neq('id',id),
+      sb.from('inquiries').update({supplier:company}).eq('supplier',current.company),
+      sb.from('quote_headers').update({supplier:company}).eq('supplier',current.company)
+    ])
+  }
   _isDirty=false
   await loadSuppliers();closeModal('modal-supplier');renderSupplierMgmt();showToast('供應商資料已儲存')
 }
