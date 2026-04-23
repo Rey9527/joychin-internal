@@ -68,9 +68,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .modal-box.sm { max-width: 440px; }
 .modal-box.lg { max-width: 720px; }
 #modal-subform { z-index: 420; }
-.modal-hd { display: flex; justify-content: space-between; align-items: flex-start; padding: 18px 20px 12px; position: sticky; top: 0; background: #fff; border-bottom: 1px solid #e5e5e0; border-radius: 14px 14px 0 0; z-index: 1; }
+.modal-hd { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 18px 20px 12px; position: sticky; top: 0; background: #fff; border-bottom: 1px solid #e5e5e0; border-radius: 14px 14px 0 0; z-index: 1; }
+.modal-hd > :first-child { min-width: 0; flex: 1; }
+.modal-hd > :first-child div,
+.modal-hd > :first-child span,
+.modal-hd > :first-child p { word-break: break-word; overflow-wrap: anywhere; }
 .modal-bd { padding: 16px 20px 20px; }
-.modal-close { background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; padding: 0; flex-shrink: 0; line-height: 1; }
+.modal-close { background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border-radius: 999px; flex-shrink: 0; line-height: 1; }
+.modal-close:hover { background: #f5f5f0; }
 /* 產品選擇 dropdown */
 .product-picker { position: relative; }
 .product-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #e5e5e0; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 100; max-height: 220px; overflow-y: auto; display: none; }
@@ -103,7 +108,22 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   .modal-overlay { align-items: flex-end; padding: 0; }
   .modal-box, .modal-box.sm, .modal-box.lg { max-width: 100%; max-height: 95vh; border-radius: 14px 14px 0 0; }
   .modal-overlay.open .modal-box { animation: modal-slide-up 0.25s ease; }
+  .modal-hd { padding: 16px 16px 12px; align-items: flex-start; }
+  .modal-hd > :first-child { padding-top: 2px; }
+  .modal-hd [style*="font-size:14px"] { font-size: 16px !important; line-height: 1.4; }
+  .modal-bd { padding: 14px 16px 18px; }
   .modal-foot { position: sticky; bottom: 0; background: #fff; padding: 12px 20px; margin: 8px -20px -20px; border-top: 1px solid #e5e5e0; z-index: 2; }
+  .modal-foot { padding: 12px 16px; margin: 8px -16px -18px; }
+  .modal-foot .btn,
+  .modal-bd .btn,
+  .row .btn,
+  .status-btn {
+    min-height: 44px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .btn-sm { min-height: 44px; padding: 10px 14px; font-size: 13px; }
+  .modal-close { width: 42px; height: 42px; font-size: 24px; }
   .btn-doc-copy { min-height: 44px; padding: 0 16px; font-size: 13px; }
 }
 #toast-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
@@ -150,7 +170,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>離型紙業務系統</p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.3.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.2.1</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section">業務</div>
@@ -198,7 +218,10 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   </nav>
   <div class="sidebar-footer">
     <div id="sidebar-user-email">未登入</div>
-    <div style="margin-top:8px;font-size:10px;line-height:1.5;color:#888">Powered by NNPC Consulting Co., Ltd.</div>
+    <div style="margin-top:8px;font-size:10px;line-height:1.5;color:#888">
+      <div>Powered by</div>
+      <div>NNPC Consulting Co., Ltd.</div>
+    </div>
   </div>
 </div>
 
@@ -4221,6 +4244,7 @@ async function createUser(){
 function openUserDetail(userId){
   const u=users.find(x=>x.id===userId)
   if(!u)return
+  _isDirty=false
   const isSelf=currentUser&&currentUser.id===u.id
   const isManager=currentUser&&(currentUser.role==='admin'||currentUser.role==='manager')
   const roleBadge='<span class="badge" style="background:'+userRoleColor(u.role)+'20;color:'+userRoleColor(u.role)+';border:1px solid '+userRoleColor(u.role)+'">'+userRoleLabel(u.role)+'</span>'
@@ -4235,10 +4259,13 @@ function openUserDetail(userId){
       '<option value="manager"'+(u.role==='manager'?' selected':'')+'>經理</option>'+
       '<option value="admin"'+(u.role==='admin'?' selected':'')+'>系統管理員</option>'+
     '</select></div>'+
-    '<div><label>狀態</label><select id="ud-active" '+(isManager&&!isSelf?'':'disabled style="background:#f8f8f5;color:#666"')+'>'+
-      '<option value="true"'+(u.is_active?' selected':'')+'>啟用</option>'+
-      '<option value="false"'+(!u.is_active?' selected':'')+'>停用</option>'+
-    '</select></div>'+
+    '<div><label>狀態</label><div style="display:flex;align-items:center;gap:10px;padding:8px 0">'+
+      '<label style="display:inline-flex;align-items:center;gap:8px;cursor:'+(isManager&&!isSelf?'pointer':'not-allowed')+'">'+
+      '<span id="ud-active-track" style="position:relative;display:inline-flex;align-items:center;width:40px;height:22px;background:'+(u.is_active?'#0F6E56':'#d8d8d2')+';border-radius:999px;padding:2px;transition:all .15s">'+
+      '<span id="ud-active-knob" style="display:block;width:18px;height:18px;background:#fff;border-radius:50%;transform:translateX('+(u.is_active?'18px':'0')+');transition:all .15s"></span></span>'+
+      '<input id="ud-active" type="checkbox" '+(u.is_active?'checked ':'')+(isManager&&!isSelf?'':'disabled ')+'style="display:none" onchange="_isDirty=true;document.getElementById(\'ud-active-track\').style.background=this.checked?\'#0F6E56\':\'#d8d8d2\';document.getElementById(\'ud-active-knob\').style.transform=this.checked?\'translateX(18px)\':\'translateX(0)\';document.getElementById(\'ud-active-text\').textContent=this.checked?\'啟用\':\'停用\'" />'+
+      '<span id="ud-active-text" style="font-size:12px;color:#444">'+(u.is_active?'啟用':'停用')+'</span>'+
+      '</label></div></div>'+
     '<div style="display:flex;gap:8px;align-items:center">'+roleBadge+statusBadge+'</div>'+
     '</div>'+
     '<div class="modal-foot">'+
@@ -4249,6 +4276,7 @@ function openUserDetail(userId){
       '<button class="btn btn-ghost" onclick="closeModal(\'modal-user-detail\');toggleUserActive('+u.id+','+u.is_active+')">'+(u.is_active?'停用':'啟用')+'</button>'+
       '<button class="btn btn-ghost" style="color:#e55" onclick="closeModal(\'modal-user-detail\');deleteUser('+u.id+',\''+u.name+'\')">刪除</button>':'')+
     '</div>'
+  enableDirtyTracking('modal-user-detail-bd')
   document.getElementById('modal-user-detail').classList.add('open')
 }
 
@@ -4263,7 +4291,7 @@ async function saveUserDetail(userId){
   const patch={name,email}
   if(isManager&&!isSelf){
     patch.role=normalizeUserRole(document.getElementById('ud-role')?.value)
-    patch.is_active=(document.getElementById('ud-active')?.value||'true')==='true'
+    patch.is_active=!!document.getElementById('ud-active')?.checked
   }
   const{error}=await sb.from('users').update(patch).eq('id',userId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
