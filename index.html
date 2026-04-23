@@ -117,8 +117,9 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .nf-suggest-item:first-child { margin-top:6px; }
 @keyframes modal-slide-up { from { transform: translateY(60%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @media (max-width: 680px) {
-  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 300; width: 220px; transform: translateX(-100%); transition: transform 0.25s ease; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
-  .sidebar-nav { flex: initial; padding-bottom: 16px; }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: auto; z-index: 300; width: 220px; height: 100dvh; max-height: 100dvh; transform: translateX(-100%); transition: transform 0.25s ease; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .sidebar-nav { flex: initial; padding-bottom: 28px; }
+  .sidebar-footer { padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
   .sidebar.open { transform: translateX(0); }
   .sidebar-logo p, .nav-item span, .nav-section, .sidebar-footer { display: block; }
   #hamburger-btn { display: block; }
@@ -217,7 +218,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>離型紙業務系統</p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.2.3</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.2.4</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section">業務</div>
@@ -252,8 +253,8 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <button class="nav-item" id="nav-users_mgmt" onclick="switchTab('users_mgmt')" style="display:none">
       <span class="nav-icon">⚙️</span><span>使用者管理</span>
     </button>
-    <button class="nav-item" id="nav-settings" onclick="switchTab('settings')" style="display:none">
-      <span class="nav-icon">🧭</span><span>系統設定</span>
+    <button class="nav-item" id="nav-settings" onclick="openSettingsArea()" style="display:none">
+      <span class="nav-icon">🧭</span><span>手續成本設定</span>
     </button>
     <div class="nav-section">產品</div>
     <button class="nav-item" id="nav-products" onclick="switchTab('products')">
@@ -319,7 +320,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <div id="quote-summary" style="font-size:12px;color:#888"></div>
         <div class="quote-actions" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
           <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('quotes')">☰ 篩選</button>
-          <button class="btn btn-ghost btn-sm" onclick="openSettingsArea()">⚙ 管理設定</button>
+          <button class="btn btn-ghost btn-sm" onclick="openSettingsArea()">⚙ 手續成本設定</button>
           <button class="btn btn-primary" onclick="openNewQuoteModal()">+ 直接新增報價單</button>
         </div>
       </div>
@@ -539,7 +540,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div id="user-list"></div>
     </div>
 
-    <!-- 系統設定 -->
+    <!-- 手續成本設定 -->
     <div id="tab-settings" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div id="settings-summary" style="font-size:12px;color:#888">僅管理者可調整全域規則</div>
@@ -628,11 +629,11 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   </div>
 </div>
 
-<!-- 報價設定 Modal -->
+<!-- 手續成本設定 Modal -->
 <div class="modal-overlay" id="modal-settings" onclick="closeModalOnBg(event,'modal-settings')">
   <div class="modal-box sm">
     <div class="modal-hd">
-      <div style="font-size:14px;font-weight:600">報價預設值設定</div>
+      <div style="font-size:14px;font-weight:600">手續成本設定</div>
       <button class="modal-close" onclick="closeModal('modal-settings')">×</button>
     </div>
     <div class="modal-bd" id="modal-settings-bd"></div>
@@ -958,10 +959,10 @@ function buildSettingCurrencyOptions(selectedValue){
 
 function openSettingsArea(){
   if(!isManager()){
-    showToast('只有管理者可以調整系統設定','error')
+    showToast('只有管理者可以調整手續成本設定','error')
     return
   }
-  switchTab('settings')
+  openSettingsModal()
 }
 
 function buildOptions(values,selectedValue=null){
@@ -2818,10 +2819,10 @@ async function rejectPurchaseOrder(){
   showToast('採購單已拒絕')
 }
 
-const TAB_LABELS={inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',tasks:'工作追蹤',orders:'訂單管理',shipments:'船運管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',settings:'系統設定',purchases:'採購單管理'}
+const TAB_LABELS={inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',tasks:'工作追蹤',orders:'訂單管理',shipments:'船運管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',settings:'手續成本設定',purchases:'採購單管理'}
 function switchTab(tab,save=true){
   if(tab==='settings'&&!isManager()){
-    showToast('只有管理者可以查看系統設定','error')
+    showToast('只有管理者可以查看手續成本設定','error')
     tab='inquiry'
   }
   activeTab=tab
@@ -3619,11 +3620,11 @@ async function sendQuoteToOrder(){
   setTimeout(()=>{switchTab('orders');setTimeout(()=>openOrderModal(orderId),80)},200)
 }
 
-function renderSettingsTab(){
-  const el=document.getElementById('settings-panel')
+function renderSettingsContent(targetId='settings-panel'){
+  const el=document.getElementById(targetId)
   if(!el)return
   if(!isManager()){
-    el.innerHTML='<div class="loading">只有管理者可以查看系統設定</div>'
+    el.innerHTML='<div class="loading">只有管理者可以查看手續成本設定</div>'
     return
   }
   const customerDays=getCustomerReviewDays()
@@ -3664,13 +3665,23 @@ function renderSettingsTab(){
     '<div class="modal-foot"><button class="btn btn-primary" onclick="saveSettings()">儲存設定</button></div>'
 }
 
+function renderSettingsTab(){
+  renderSettingsContent('settings-panel')
+}
+
 function openSettingsModal(){
-  openSettingsArea()
+  if(!isManager()){
+    showToast('只有管理者可以調整手續成本設定','error')
+    return
+  }
+  document.getElementById('modal-settings-bd').innerHTML=''
+  renderSettingsContent('modal-settings-bd')
+  document.getElementById('modal-settings').classList.add('open')
 }
 
 async function saveSettings(){
   if(!isManager()){
-    showToast('只有管理者可以儲存系統設定','error')
+    showToast('只有管理者可以儲存手續成本設定','error')
     return
   }
   const customerReviewDays=parseInt(document.getElementById('set-customer-review-days')?.value,10)||180
@@ -3694,6 +3705,7 @@ async function saveSettings(){
   ])
   await Promise.all([loadSettings(),loadCustomers(),loadProducts()])
   renderSettingsTab()
+  renderSettingsContent('modal-settings-bd')
   renderCustomers()
   renderProducts()
   updateCustomerReviewAlert()
