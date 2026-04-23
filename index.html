@@ -62,6 +62,17 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .tpl-box { background: #f8f8f5; border: 1px solid #e5e5e0; border-radius: 9px; padding: 13px 15px; font-size: 11px; line-height: 1.8; white-space: pre-wrap; font-family: monospace; color: #1a1a1a; }
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
 .filter-bar select, .filter-bar input[type=text], .filter-bar input[type=date] { width: auto; font-size: 12px; padding: 6px 10px; }
+.mobile-filter-toggle { display: none; }
+.filter-drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 430; }
+.filter-drawer-overlay.open { display: block; }
+.filter-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(86vw, 340px); background: #fff; z-index: 431; transform: translateX(100%); transition: transform .22s ease; box-shadow: -8px 0 24px rgba(0,0,0,.16); display: flex; flex-direction: column; }
+.filter-drawer.open { transform: translateX(0); }
+.filter-drawer-hd { padding: 16px; border-bottom: 1px solid #e5e5e0; display: flex; justify-content: space-between; align-items: center; }
+.filter-drawer-bd { padding: 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.filter-drawer-bd .filter-bar { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin: 0; }
+.filter-drawer-bd .filter-bar select,
+.filter-drawer-bd .filter-bar input,
+.filter-drawer-bd .filter-bar button { width: 100% !important; max-width: none !important; }
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
 .modal-overlay.open { display: flex; }
 .modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 600px; max-height: 88vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
@@ -101,7 +112,8 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .nf-suggest-item:first-child { margin-top:6px; }
 @keyframes modal-slide-up { from { transform: translateY(60%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @media (max-width: 680px) {
-  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 300; width: 220px; transform: translateX(-100%); transition: transform 0.25s ease; }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 300; width: 220px; transform: translateX(-100%); transition: transform 0.25s ease; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .sidebar-nav { flex: initial; }
   .sidebar.open { transform: translateX(0); }
   .sidebar-logo p, .nav-item span, .nav-section, .sidebar-footer { display: block; }
   #hamburger-btn { display: block; }
@@ -111,6 +123,8 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   .grid-3 { grid-template-columns: 1fr; }
   input:not([type=checkbox]), select, input[type=date], input[type=number] { font-size: 16px !important; padding: 12px 14px; height: auto !important; }
   textarea { font-size: 16px !important; padding: 12px 14px; }
+  .mobile-filter-toggle { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
+  .filter-bar.mobile-drawer-source { display: none; }
   .filter-bar { overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
   .filter-bar select, .filter-bar input { flex-shrink: 0; font-size: 14px !important; padding: 8px 10px; height: auto !important; }
   .modal-overlay { align-items: flex-end; padding: 0; }
@@ -179,11 +193,19 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 <div id="main-app">
 
 <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+<div id="filter-drawer-overlay" class="filter-drawer-overlay" onclick="closeFilterDrawer()"></div>
+<div id="filter-drawer" class="filter-drawer">
+  <div class="filter-drawer-hd">
+    <div id="filter-drawer-title" style="font-size:14px;font-weight:600">篩選條件</div>
+    <button class="modal-close" onclick="closeFilterDrawer()">×</button>
+  </div>
+  <div class="filter-drawer-bd" id="filter-drawer-bd"></div>
+</div>
 <div class="sidebar">
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>離型紙業務系統</p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.2.1</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.2.2</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section">業務</div>
@@ -253,11 +275,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
     <!-- 詢價管理 -->
     <div id="tab-inquiry">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="inq-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="showNewInqForm()">+ 新增詢價</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('inquiry')">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="showNewInqForm()">+ 新增詢價</button>
+        </div>
       </div>
-      <div class="filter-bar">
+      <div class="filter-bar mobile-drawer-source" id="inquiry-filter-bar">
         <select id="f-status" onchange="renderInquiries()">
           <option value="">全部狀態</option>
           <option value="pending">待詢供應商</option>
@@ -278,12 +303,28 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
     <!-- 報價管理 -->
     <div id="tab-quotes" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px">
         <div id="quote-summary" style="font-size:12px;color:#888"></div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('quotes')">☰ 篩選</button>
           <button class="btn btn-ghost btn-sm" onclick="openSettingsArea()">⚙ 管理設定</button>
           <button class="btn btn-primary" onclick="openNewQuoteModal()">+ 直接新增報價單</button>
         </div>
+      </div>
+      <div class="filter-bar mobile-drawer-source" id="quote-filter-bar">
+        <select id="fq-status" onchange="renderQuotes()">
+          <option value="">全部狀態</option>
+          <option value="draft">草稿</option>
+          <option value="sent">已送客戶</option>
+          <option value="accepted">客戶接受</option>
+          <option value="rejected">客戶拒絕</option>
+        </select>
+        <input id="fq-customer" type="text" placeholder="搜尋客戶..." oninput="renderQuotes()" style="max-width:150px" />
+        <input id="fq-product" type="text" placeholder="搜尋產品..." oninput="renderQuotes()" style="max-width:150px" />
+        <input id="fq-date-from" type="date" onchange="renderQuotes()" style="max-width:140px" />
+        <span style="font-size:11px;color:#aaa">至</span>
+        <input id="fq-date-to" type="date" onchange="renderQuotes()" style="max-width:140px" />
+        <button class="btn btn-ghost btn-sm" onclick="clearQuoteFilters()">清除</button>
       </div>
       <div id="quote-list"></div>
     </div>
@@ -913,6 +954,21 @@ function enableDirtyTracking(containerId){
   })
 }
 
+function enhanceNumericInputs(root=document){
+  root.querySelectorAll('input[type=number]').forEach(el=>{
+    const step=String(el.getAttribute('step')||'')
+    const decimal=step.includes('.')||step==='any'
+    el.setAttribute('inputmode',decimal?'decimal':'numeric')
+    el.setAttribute('pattern',decimal?'[0-9]*[.]?[0-9]*':'[0-9]*')
+  })
+}
+
+document.addEventListener('focusin',e=>{
+  if(e.target&&e.target.matches&&e.target.matches('input[type=number]')){
+    enhanceNumericInputs(e.target.parentElement||document)
+  }
+})
+
 function escapeHtml(str){
   return String(str)
     .replace(/&/g,'&amp;')
@@ -1078,6 +1134,7 @@ async function init(){
   } else {
     renderInquiries(); renderDocs(); populateFilterCustomers()
   }
+  enhanceNumericInputs()
 }
 async function loadInquiries(){const{data}=await sb.from('inquiries').select('*').order('created_at',{ascending:false});inquiries=data||[];updateOverdueAlert()}
 async function loadDocuments(){const{data}=await sb.from('documents').select('*').order('product');documents=data||[]}
@@ -2904,6 +2961,36 @@ function closeModal(id){
 function closeModalOnBg(e,id){if(e.target===document.getElementById(id))closeModal(id)}
 function toggleSidebar(){document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open')}
 function closeSidebar(){document.querySelector('.sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('open')}
+function openFilterDrawer(kind){
+  const map={
+    inquiry:{title:'詢價篩選',source:'inquiry-filter-bar'},
+    quotes:{title:'報價篩選',source:'quote-filter-bar'}
+  }
+  const cfg=map[kind];if(!cfg)return
+  const source=document.getElementById(cfg.source)
+  const body=document.getElementById('filter-drawer-bd')
+  if(!source||!body)return
+  document.getElementById('filter-drawer-title').textContent=cfg.title
+  body.innerHTML=''
+  body.appendChild(source)
+  source.classList.remove('mobile-drawer-source')
+  document.getElementById('filter-drawer-overlay').classList.add('open')
+  document.getElementById('filter-drawer').classList.add('open')
+}
+function closeFilterDrawer(){
+  const drawer=document.getElementById('filter-drawer')
+  const source=drawer.querySelector('.filter-bar')
+  if(source){
+    const targetId=source.id==='inquiry-filter-bar'?'tab-inquiry':source.id==='quote-filter-bar'?'tab-quotes':null
+    if(targetId){
+      const list=document.getElementById(targetId).querySelector('#'+source.id)
+      if(!list)document.getElementById(targetId).insertBefore(source,document.getElementById(targetId).querySelector(source.id==='inquiry-filter-bar'?'#inquiry-list':'#quote-list'))
+    }
+    source.classList.add('mobile-drawer-source')
+  }
+  document.getElementById('filter-drawer-overlay').classList.remove('open')
+  document.getElementById('filter-drawer').classList.remove('open')
+}
 function openSubformModal(title,bodyHtml){
   _isDirty=false
   document.getElementById('modal-subform-hd').innerHTML='<div style="font-size:14px;font-weight:600">'+title+'</div><button class="modal-close" onclick="closeModal(\'modal-subform\')">×</button>'
@@ -3140,10 +3227,26 @@ function renderQuotes(){
   const el=document.getElementById('quote-list')
   const sum=document.getElementById('quote-summary')
   if(!el)return
+  const fStatus=document.getElementById('fq-status')?.value||''
+  const fCustomer=(document.getElementById('fq-customer')?.value||'').toLowerCase()
+  const fProduct=(document.getElementById('fq-product')?.value||'').toLowerCase()
+  const fFrom=document.getElementById('fq-date-from')?.value||''
+  const fTo=document.getElementById('fq-date-to')?.value||''
+  let filtered=quoteHeaders.filter(h=>{
+    const items=quoteItems.filter(it=>it.header_id===h.id)
+    const created=(h.created_at||'').slice(0,10)
+    if(fStatus&&h.status!==fStatus)return false
+    if(fCustomer&&!String(h.customer||'').toLowerCase().includes(fCustomer))return false
+    if(fProduct&&!items.some(it=>String(it.product||'').toLowerCase().includes(fProduct)))return false
+    if(fFrom&&created&&created<fFrom)return false
+    if(fTo&&created&&created>fTo)return false
+    return true
+  })
   const active=quoteHeaders.filter(h=>!['accepted','rejected'].includes(h.status))
-  if(sum)sum.textContent=active.length+' 筆進行中 / 共 '+quoteHeaders.length+' 筆'
+  if(sum)sum.textContent=filtered.length+' 筆符合 / '+active.length+' 筆進行中 / 共 '+quoteHeaders.length+' 筆'
   if(!quoteHeaders.length){el.innerHTML='<div class="loading">尚無報價，從詢價頁按「收到成本 → 送去報價」，或點「直接新增報價單」</div>';return}
-  el.innerHTML=quoteHeaders.map(h=>{
+  if(!filtered.length){el.innerHTML='<div class="loading">沒有符合篩選條件的報價</div>';return}
+  el.innerHTML=filtered.map(h=>{
     const items=quoteItems.filter(it=>it.header_id===h.id)
     const d=new Date(h.created_at).toLocaleDateString('zh-TW')
     return '<div class="row" onclick="openQuoteModal(\''+h.id+'\')">'+
@@ -3158,6 +3261,12 @@ function renderQuotes(){
       '<div style="font-size:11px;color:#aaa">'+d+' · 供應商：'+(h.supplier||'—')+'</div>'+
       '</div>'+badge(h.status,QUO_STATUS)+'</div>'
   }).join('')
+}
+
+function clearQuoteFilters(){
+  ['fq-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  ;['fq-customer','fq-product','fq-date-from','fq-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  renderQuotes()
 }
 
 async function openQuoteModal(id){
