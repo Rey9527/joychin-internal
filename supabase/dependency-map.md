@@ -115,6 +115,7 @@ Important columns / 重要欄位:
 - `is_active`
 - `min_stock_qty`
 - `stock_qty`
+- `meters_per_roll`
 
 ### samples
 Used for sample inventory, incoming requests, and outgoing shipments.  
