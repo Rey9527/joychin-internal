@@ -1051,6 +1051,21 @@ function supplierNeedsCustoms(supplierId){
 function shouldApplyCustoms(item){
   return supplierNeedsCustoms(item?.supplier_id) && item?.apply_customs!==false
 }
+function calcQuote(cp,customs_fee_pct,margin_pct,applyCustoms){
+  const afterCustoms=applyCustoms?cp*(1+parseFloat(customs_fee_pct||0)/100):cp
+  const final=afterCustoms*(1+parseFloat(margin_pct||0)/100)
+  return{afterCustoms,final}
+}
+function calcQuoteLabel(cp,customs_fee_pct,margin_pct,applyCustoms,cur){
+  const cpFmt=parseFloat(cp||0).toFixed(2)
+  const cusPct=parseFloat(customs_fee_pct||0)
+  const mgnPct=parseFloat(margin_pct||0)
+  const{afterCustoms,final}=calcQuote(cp,customs_fee_pct,margin_pct,applyCustoms)
+  if(applyCustoms){
+    return '成本 '+cpFmt+' '+cur+' × (1+'+cusPct+'%) × (1+'+mgnPct+'%) = '+final.toFixed(2)+' '+cur
+  }
+  return '成本 '+cpFmt+' '+cur+' × (1+'+mgnPct+'%) = '+final.toFixed(2)+' '+cur
+}
 
 function getSupplierCustomsHint(supplierId){
   return supplierNeedsCustoms(supplierId)?'海外供應商，套用清關費':'泰國供應商，不套用清關費'
@@ -4565,9 +4580,7 @@ function renderQuoteModalBd(){
     const cp=parseFloat(it.cost_price||0)
     const canApplyCustoms=editable&&supplierNeedsCustoms(it.supplier_id)
     const applyCustoms=shouldApplyCustoms(it)
-    const cus=applyCustoms?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
-    const base=cp+cus
-    const final=base*(1+(parseFloat(it.margin_pct||0)/100))
+    const{afterCustoms,final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyCustoms)
     const cur=it.cost_currency||'USD'
     const hasP=cp>0
     const itSup=it.supplier_id?suppliers.find(s=>s.id===it.supplier_id):null
@@ -4596,7 +4609,7 @@ function renderQuoteModalBd(){
       '<div style="font-size:10px;color:'+(supplierNeedsCustoms(it.supplier_id)?'#666':'#0F6E56')+';margin-bottom:8px">'+getSupplierCustomsHint(it.supplier_id)+'</div>'+
       '<div style="padding:8px 12px;border-radius:8px;border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';background:'+(hasP?'#E1F5EE':'#f8f8f5')+'">'+
       (hasP?'<span style="font-size:15px;font-weight:600;color:#0F6E56">'+final.toFixed(2)+' '+cur+'</span>'+
-      '<span style="font-size:10px;color:#0F6E56;margin-left:10px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</span>':
+      '<span style="font-size:10px;color:#0F6E56;margin-left:10px">'+calcQuoteLabel(cp,it.customs_fee_pct,it.margin_pct,applyCustoms,cur)+'</span>':
       '<span style="font-size:12px;color:#aaa">請先填入成本</span>')+'</div></div>'
   }).join('')
 
@@ -4699,9 +4712,9 @@ async function editQuote(){
   const items=quoteItems.filter(it=>it.header_id===h.id)
   const snapshot=items.map(it=>{
     const cp=parseFloat(it.cost_price||0)
-    const cus=it.apply_customs?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
-    const quoted_price=parseFloat(((cp+cus)*(1+parseFloat(it.margin_pct||0)/100)).toFixed(2))
-    return{product:it.product,cost_price:it.cost_price,cost_currency:it.cost_currency,margin_pct:it.margin_pct,quoted_price}
+    const applyC=shouldApplyCustoms(it)
+    const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyC)
+    return{product:it.product,cost_price:it.cost_price,cost_currency:it.cost_currency,margin_pct:it.margin_pct,quoted_price:parseFloat(final.toFixed(2))}
   })
   const{error}=await sb.from('quote_changes').insert({
     header_id:h.id,
@@ -4882,8 +4895,7 @@ async function sendQuoteToOrder(){
   if(items.length){
     const oiRows=items.map(it=>{
       const cp=parseFloat(it.cost_price||0)
-      const cus=shouldApplyCustoms(it)?cp*(parseFloat(it.customs_fee_pct||0)/100):0
-      const finalPrice=(cp+cus)*(1+(parseFloat(it.margin_pct||0)/100))
+      const{final:finalPrice}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,shouldApplyCustoms(it))
       return{order_id:orderId,product_name:it.product,spec:it.spec||null,qty:1,unit:it.moq||null,unit_price:parseFloat(finalPrice.toFixed(4)),currency:it.cost_currency||'USD'}
     })
     const{error:iErr}=await sb.from('order_items').insert(oiRows)
@@ -5060,9 +5072,7 @@ function buildNqItemHtml(it,idx){
   const cp=parseFloat(it.cost_price||0)
   const canApplyCustoms=supplierNeedsCustoms(it.supplier_id)
   const applyCustoms=shouldApplyCustoms(it)
-  const cus=applyCustoms?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
-  const base=cp+cus
-  const final=base*(1+(parseFloat(it.margin_pct||0)/100))
+  const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyCustoms)
   const cur=it.cost_currency||'USD'
   const hasP=cp>0
   return '<div id="nq-item-'+idx+'" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px 16px;margin-bottom:10px">'+
@@ -5085,7 +5095,7 @@ function buildNqItemHtml(it,idx){
     '</div>'+
     '<div style="font-size:10px;color:'+(canApplyCustoms?'#666':'#0F6E56')+';margin-bottom:8px">'+getSupplierCustomsHint(it.supplier_id)+'</div>'+
     '<div id="nq-calc-'+idx+'" style="padding:7px 11px;border-radius:7px;background:'+(hasP?'#E1F5EE':'#f8f8f5')+';border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';font-size:12px;color:'+(hasP?'#0F6E56':'#aaa')+'">'+
-    (hasP?'<strong>'+final.toFixed(2)+' '+cur+'</strong><span style="font-size:10px;margin-left:8px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</span>':'請填入成本價以計算報價')+
+    (hasP?'<strong>'+final.toFixed(2)+' '+cur+'</strong><span style="font-size:10px;margin-left:8px">'+calcQuoteLabel(cp,it.customs_fee_pct,it.margin_pct,applyCustoms,cur)+'</span>':'請填入成本價以計算報價')+
     '</div></div>'
 }
 
@@ -5101,9 +5111,8 @@ function updateNqField(idx,field,value){
 function refreshNqCalc(idx){
   const it=_nqItems[idx]
   const cp=parseFloat(it.cost_price||0)
-  const cus=shouldApplyCustoms(it)?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
-  const base=cp+cus
-  const final=base*(1+(parseFloat(it.margin_pct||0)/100))
+  const applyCustoms=shouldApplyCustoms(it)
+  const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyCustoms)
   const cur=it.cost_currency||'USD'
   const hasP=cp>0
   const el=document.getElementById('nq-calc-'+idx)
@@ -5111,7 +5120,7 @@ function refreshNqCalc(idx){
   el.style.background=hasP?'#E1F5EE':'#f8f8f5'
   el.style.borderColor=hasP?'#0F6E56':'#e5e5e0'
   el.style.color=hasP?'#0F6E56':'#aaa'
-  el.innerHTML=hasP?'<strong>'+final.toFixed(2)+' '+cur+'</strong><span style="font-size:10px;margin-left:8px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</span>':'請填入成本價以計算報價'
+  el.innerHTML=hasP?'<strong>'+final.toFixed(2)+' '+cur+'</strong><span style="font-size:10px;margin-left:8px">'+calcQuoteLabel(cp,it.customs_fee_pct,it.margin_pct,applyCustoms,cur)+'</span>':'請填入成本價以計算報價'
 }
 function removeNqItem(idx){
   _nqItems.splice(idx,1)
