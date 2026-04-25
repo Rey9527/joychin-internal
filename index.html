@@ -1222,6 +1222,7 @@ let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[],tasks=[]
 let orders=[],orderItems=[]
 let shipments=[],shipmentPurchaseOrders=[]
 let purchaseOrders=[],purchaseOrderItems=[],purchaseOrderOrderLinks=[]
+let quoteChanges=[]
 let selectedInqId=null,selectedQuoteId=null,selectedSampleId=null,selectedOrderId=null,selectedShipmentId=null,selectedPurchaseId=null,selectedTaskId=null,activeTab='inquiry',showTpl=false
 let _isDirty=false
 let _qPendingItems={},_qPendingHeader={}
@@ -1277,7 +1278,7 @@ async function init(){
       document.getElementById('nav-purchases').style.display='flex'
     }
   }
-  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadSettings(),loadProducts(),loadSamples(),loadTasks(),loadOrders(),loadShipments(),loadUsers(),loadPurchaseOrders()])
+  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadQuoteChanges(),loadSettings(),loadProducts(),loadSamples(),loadTasks(),loadOrders(),loadShipments(),loadUsers(),loadPurchaseOrders()])
   const savedTab=sessionStorage.getItem(SESSION_ACTIVE_TAB_KEY)
   if(savedTab&&TAB_LABELS[savedTab]){
     switchTab(savedTab,false)
@@ -1309,6 +1310,10 @@ async function loadQuotes(){
     sb.from('quote_items').select('*')
   ])
   quoteHeaders=h||[];quoteItems=it||[]
+}
+async function loadQuoteChanges(){
+  const{data}=await sb.from('quote_changes').select('*').order('changed_at',{ascending:false})
+  quoteChanges=data||[]
 }
 async function loadSettings(){
   const{data}=await sb.from('settings').select('*')
@@ -4520,7 +4525,6 @@ function renderQuotes(){
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
       '<span style="font-size:10px;color:#aaa;font-family:monospace">'+h.id+'</span>'+
       '<span style="font-size:13px;font-weight:500">'+h.customer+'</span>'+
-      '<span style="font-size:10px;color:#aaa;background:#f0f0eb;padding:1px 6px;border-radius:5px">v'+h.version+'</span>'+
       (h.source==='direct'?'<span style="font-size:10px;color:#185FA5;background:#E6F1FB;padding:1px 6px;border-radius:5px;border:1px solid #B5D4F4">直接建立</span>':'')+
       '</div>'+
       '<div style="font-size:12px;color:#666">'+(items.length?items.map(it=>it.product).join('、'):'—')+'</div>'+
@@ -4545,8 +4549,7 @@ async function openQuoteModal(id){
 function renderQuoteModalHd(){
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
   document.getElementById('modal-quote-hd').innerHTML=
-    '<div style="flex:1"><div style="font-size:15px;font-weight:600;margin-bottom:2px">'+h.customer+
-    ' <span style="font-size:11px;color:#aaa;font-weight:400;background:#f0f0eb;padding:1px 7px;border-radius:5px">v'+h.version+'</span></div>'+
+    '<div style="flex:1"><div style="font-size:15px;font-weight:600;margin-bottom:2px">'+h.customer+'</div>'+
     '<div style="font-size:12px;color:#666">'+h.id+' · 供應商：'+(h.supplier||'—')+'</div></div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-quote\')">×</button>'
 }
@@ -4626,7 +4629,7 @@ function renderQuoteModalBd(){
       '<button class="btn btn-ghost btn-sm" style="color:#534AB7;border-color:#534AB7" onclick="qSaveAndStatus(\'sent\')">標記為已送客戶</button>'+
       '</div>'
     :h.status==='sent'?
-      '<button class="btn btn-ghost btn-sm" onclick="newQuoteVersion()">產生新版本</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="editQuote()">修改報價</button>'+
       '<div style="display:flex;gap:8px">'+
       '<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="qSaveAndStatus(\'accepted\')">客戶接受 ✓</button>'+
       '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="qSaveAndStatus(\'rejected\')">客戶拒絕 ✗</button>'+
@@ -4652,7 +4655,68 @@ function renderQuoteModalBd(){
     addItemSection+
     '<div class="divider"></div>'+
     '<div style="margin-bottom:16px"><label>備註</label>'+notesField+'</div>'+
+    renderQuoteHistory(h.id)+
     '<div class="modal-foot" style="justify-content:space-between;align-items:center">'+footHtml+'</div>'
+}
+
+function renderQuoteHistory(headerId){
+  const records=quoteChanges.filter(c=>c.header_id===headerId)
+  if(!records.length)return ''
+  const rows=records.map((c,i)=>{
+    const dt=c.changed_at?new Date(c.changed_at).toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'
+    const snap=Array.isArray(c.snapshot)?c.snapshot:[]
+    const snapHtml=snap.length?
+      '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-top:6px">'+
+      '<tr style="color:#aaa;border-bottom:1px solid #eee"><th style="text-align:left;padding:2px 4px">產品</th><th style="padding:2px 4px">成本</th><th style="padding:2px 4px">幣別</th><th style="padding:2px 4px">利潤%</th><th style="padding:2px 4px">報價</th></tr>'+
+      snap.map(s=>'<tr style="border-bottom:1px solid #f5f5f2">'+
+        '<td style="padding:3px 4px">'+esc(s.product||'—')+'</td>'+
+        '<td style="padding:3px 4px;text-align:right">'+parseFloat(s.cost_price||0).toFixed(2)+'</td>'+
+        '<td style="padding:3px 4px;text-align:center">'+esc(s.cost_currency||'—')+'</td>'+
+        '<td style="padding:3px 4px;text-align:right">'+(s.margin_pct??'—')+'</td>'+
+        '<td style="padding:3px 4px;text-align:right">'+parseFloat(s.quoted_price||0).toFixed(2)+'</td>'+
+      '</tr>').join('')+
+      '</table>'
+      :'<div style="font-size:11px;color:#aaa;margin-top:4px">無品項快照</div>'
+    return '<details style="padding:8px 0;border-bottom:1px solid #f0f0ec">'+
+      '<summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px">'+
+      '<span style="font-size:11px;color:#aaa;flex:0 0 auto">'+dt+'</span>'+
+      '<span style="font-size:11px;font-weight:500;color:#444">'+esc(c.changed_by||'—')+'</span>'+
+      '<span style="font-size:10px;background:#f0f0eb;padding:1px 6px;border-radius:4px;color:#666">'+esc(c.change_type||'edit')+'</span>'+
+      (c.note?'<span style="font-size:11px;color:#888;flex:1">'+esc(c.note)+'</span>':'')+
+      '</summary>'+
+      snapHtml+
+      '</details>'
+  }).join('')
+  return '<div class="divider"></div>'+
+    '<details style="margin-bottom:12px">'+
+    '<summary style="cursor:pointer;list-style:none;font-size:12px;font-weight:500;color:#666;padding:4px 0">▸ 修改歷史（'+records.length+' 筆）</summary>'+
+    '<div style="margin-top:8px">'+rows+'</div>'+
+    '</details>'
+}
+
+async function editQuote(){
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
+  const items=quoteItems.filter(it=>it.header_id===h.id)
+  const snapshot=items.map(it=>{
+    const cp=parseFloat(it.cost_price||0)
+    const cus=it.apply_customs?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
+    const quoted_price=parseFloat(((cp+cus)*(1+parseFloat(it.margin_pct||0)/100)).toFixed(2))
+    return{product:it.product,cost_price:it.cost_price,cost_currency:it.cost_currency,margin_pct:it.margin_pct,quoted_price}
+  })
+  const{error}=await sb.from('quote_changes').insert({
+    header_id:h.id,
+    changed_by:currentUser?.name||currentUser?.email||'unknown',
+    change_type:'edit',
+    note:'修改報價前快照',
+    snapshot,
+    changed_at:new Date().toISOString()
+  })
+  if(error){showToast('快照儲存失敗：'+error.message,'error');return}
+  const{error:e2}=await sb.from('quote_headers').update({status:'draft'}).eq('id',h.id)
+  if(e2){showToast('狀態更新失敗：'+e2.message,'error');return}
+  await Promise.all([loadQuotes(),loadQuoteChanges()])
+  renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
+  showToast('已儲存修改前快照，請更新報價內容後重新送出')
 }
 
 function goUpdateProductCost(productId){
@@ -4758,7 +4822,13 @@ async function saveQuote(){
   if(fail){showToast('品項儲存失敗：'+fail.error.message,'error');return}
   _qPendingItems={};_qPendingHeader={}
   _isDirty=false
-  await loadQuotes();renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId)
+  if(h?.status==='draft'){
+    await Promise.all([loadQuotes(),loadQuoteChanges()])
+  } else {
+    await loadQuotes()
+  }
+  renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
   showToast('報價已儲存')
 }
 
