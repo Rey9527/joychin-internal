@@ -238,6 +238,10 @@ Important columns / 重要欄位:
 - `total_amount`
 - `created_at`
 - `updated_at`
+- `source`
+- `approval_status`
+- `approved_by`
+- `approved_at`
 
 ### order_items
 Used for order line items.  
@@ -284,6 +288,9 @@ Important columns / 重要欄位:
 - `unit`
 - `unit_price`
 - `currency`
+- `ref_order_id`
+- `received_qty`
+- `rolls_qty`
 
 ### settings
 Used for default quotation and cost-related configuration.  
