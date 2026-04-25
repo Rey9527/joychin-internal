@@ -4552,9 +4552,13 @@ function renderQuoteModalHd(){
 function renderQuoteModalBd(){
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
   const items=quoteItems.filter(it=>it.header_id===h.id)
+  const editable=h.status==='draft'
+  const ro=' readonly style="background:#f5f5f2;color:#666;cursor:default"'
+  const dis=' disabled style="background:#f5f5f2;color:#666"'
+
   const itemsHtml=items.map((it,idx)=>{
     const cp=parseFloat(it.cost_price||0)
-    const canApplyCustoms=supplierNeedsCustoms(it.supplier_id)
+    const canApplyCustoms=editable&&supplierNeedsCustoms(it.supplier_id)
     const applyCustoms=shouldApplyCustoms(it)
     const cus=applyCustoms?(cp*(parseFloat(it.customs_fee_pct||0)/100)):0
     const base=cp+cus
@@ -4565,7 +4569,7 @@ function renderQuoteModalBd(){
     return '<div style="border:1px solid #e5e5e0;border-radius:10px;padding:14px 16px;margin-bottom:10px;background:#fafaf8">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
       '<span style="font-size:12px;font-weight:500;color:#444">品項 '+(idx+1)+'：'+it.product+(itSup?' <span style="font-size:10px;color:#aaa;font-weight:400">· '+itSup.company+'</span>':'')+'</span>'+
-      '<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0" onclick="removeQuoteItem(\''+it.id+'\')">×</button>'+
+      (editable?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0" onclick="removeQuoteItem(\''+it.id+'\')">×</button>':'<span></span>')+
       '</div>'+
       (it.spec?'<div style="font-size:11px;color:#aaa;margin-bottom:8px">'+it.spec+'</div>':'')+
       '<div class="grid-2" style="margin-bottom:8px">'+
@@ -4574,17 +4578,17 @@ function renderQuoteModalBd(){
         ?'<a href="#" style="font-size:10px;color:#0F6E56;text-decoration:none" onclick="event.preventDefault();goUpdateProductCost('+it.product_id+')">📦 更新目錄成本</a>'
         :'<span style="font-size:10px;color:#bbb">非目錄產品</span>')+
       '</label>'+
-      '<input type="number" value="'+(it.cost_price||'')+'" placeholder="0.00" step="0.01" readonly style="background:#f5f5f2;color:#666;cursor:default" /></div>'+
-      '<div><label>幣別</label><select disabled style="background:#f5f5f2;color:#666">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(it.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+      '<input type="number" value="'+(it.cost_price||'')+'" placeholder="0.00" step="0.01"'+ro+' /></div>'+
+      '<div><label>幣別</label><select'+dis+'>'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(it.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
       '<div><label style="display:flex;justify-content:space-between"><span>清關手續費 %</span>'+
       '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
-      '<input type="checkbox" '+(applyCustoms?'checked':'')+' '+(canApplyCustoms?'':'disabled')+' onchange="qItemChange(\''+it.id+'\',\'apply_customs\',this.checked)" style="width:auto"> 套用</label></label>'+
-      '<input type="number" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" '+(canApplyCustoms?'':'disabled')+' onchange="qItemChange(\''+it.id+'\',\'customs_fee_pct\',parseFloat(this.value))" /></div>'+
-      '<div><label>利潤 %</label><input type="number" value="'+(it.margin_pct??20)+'" min="0" max="200" step="1" onchange="qItemChange(\''+it.id+'\',\'margin_pct\',parseFloat(this.value))" /></div>'+
-      '<div><label>MOQ</label><input value="'+(it.moq||'')+'" placeholder="例：1000m²" onchange="qItemChange(\''+it.id+'\',\'moq\',this.value)" /></div>'+
-      '<div><label>交期</label><input value="'+(it.lead_time||'')+'" placeholder="例：30天" onchange="qItemChange(\''+it.id+'\',\'lead_time\',this.value)" /></div>'+
+      '<input type="checkbox" '+(applyCustoms?'checked':'')+' '+(canApplyCustoms?'':'disabled')+' '+(editable&&canApplyCustoms?'onchange="qItemChange(\''+it.id+'\',\'apply_customs\',this.checked)"':'')+' style="width:auto"> 套用</label></label>'+
+      '<input type="number" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" '+(editable&&canApplyCustoms?'onchange="qItemChange(\''+it.id+'\',\'customs_fee_pct\',parseFloat(this.value))"':'')+(!editable||!canApplyCustoms?' disabled style="background:#f5f5f2;color:#666"':'')+' /></div>'+
+      '<div><label>利潤 %</label><input type="number" value="'+(it.margin_pct??20)+'" min="0" max="200" step="1" '+(editable?'onchange="qItemChange(\''+it.id+'\',\'margin_pct\',parseFloat(this.value))"':dis)+' /></div>'+
+      '<div><label>MOQ</label><input value="'+(it.moq||'')+'" placeholder="例：1000m²" '+(editable?'onchange="qItemChange(\''+it.id+'\',\'moq\',this.value)"':ro)+' /></div>'+
+      '<div><label>交期</label><input value="'+(it.lead_time||'')+'" placeholder="例：30天" '+(editable?'onchange="qItemChange(\''+it.id+'\',\'lead_time\',this.value)"':ro)+' /></div>'+
       '</div>'+
-      '<div style="font-size:10px;color:'+(canApplyCustoms?'#666':'#0F6E56')+';margin-bottom:8px">'+getSupplierCustomsHint(it.supplier_id)+'</div>'+
+      '<div style="font-size:10px;color:'+(supplierNeedsCustoms(it.supplier_id)?'#666':'#0F6E56')+';margin-bottom:8px">'+getSupplierCustomsHint(it.supplier_id)+'</div>'+
       '<div style="padding:8px 12px;border-radius:8px;border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';background:'+(hasP?'#E1F5EE':'#f8f8f5')+'">'+
       (hasP?'<span style="font-size:15px;font-weight:600;color:#0F6E56">'+final.toFixed(2)+' '+cur+'</span>'+
       '<span style="font-size:10px;color:#0F6E56;margin-left:10px">成本 '+cp.toFixed(2)+' + 清關 '+cus.toFixed(2)+' + 利潤 '+(final-base).toFixed(2)+'</span>':
@@ -4592,7 +4596,7 @@ function renderQuoteModalBd(){
   }).join('')
 
   const supplierCos=[...new Set(suppliers.map(s=>s.company))].sort()
-  const addItemSection=
+  const addItemSection=editable?
     '<div class="divider"></div>'+
     '<div class="section-title" style="margin-bottom:8px">新增品項</div>'+
     '<div class="grid-2" style="margin-bottom:8px">'+
@@ -4604,19 +4608,15 @@ function renderQuoteModalBd(){
     '</select></div>'+
     '</div>'+
     '<button class="btn btn-blue btn-sm" onclick="addQuoteItem()">+ 加入品項</button>'
+    :''
 
-  document.getElementById('modal-quote-bd').innerHTML=
-    '<div style="margin-bottom:10px">'+badge(h.status,QUO_STATUS)+'</div>'+
-    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
-    '<span class="section-title" style="margin-bottom:0">品項明細</span>'+
-    '<span style="font-size:10px;color:#aaa">成本唯讀，請至產品目錄更新</span>'+
-    '</div>'+
-    (items.length?itemsHtml:'<div style="font-size:12px;color:#aaa;margin-bottom:10px">尚無品項</div>')+
-    addItemSection+
-    '<div class="divider"></div>'+
-    '<div style="margin-bottom:16px"><label>備註</label><textarea onchange="qHeaderChange(\'notes\',this.value)">'+(h.notes||'')+'</textarea></div>'+
-    '<div class="modal-foot" style="justify-content:space-between;align-items:center">'+
-    (h.status==='draft'?
+  const statusBanner=
+    h.status==='sent'?'<div style="background:#FEF3E2;border:1px solid #E2C97E;border-radius:8px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⚠ 此報價單已送出，如需修改請產生新版本</div>':
+    (h.status==='accepted'||h.status==='rejected')?'<div style="background:#f5f5f2;border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-size:12px;color:#888;margin-bottom:12px">此報價單已結案</div>':
+    ''
+
+  const footHtml=
+    h.status==='draft'?
       '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存草稿</button>'+
       '<div style="display:flex;gap:8px">'+
       '<button class="btn btn-ghost btn-sm" onclick="showToast(\'PDF 產生功能即將開放\')">產生 PDF</button>'+
@@ -4624,20 +4624,33 @@ function renderQuoteModalBd(){
       '<button class="btn btn-ghost btn-sm" style="color:#534AB7;border-color:#534AB7" onclick="qSaveAndStatus(\'sent\')">標記為已送客戶</button>'+
       '</div>'
     :h.status==='sent'?
-      '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="newQuoteVersion()">產生新版本</button>'+
       '<div style="display:flex;gap:8px">'+
       '<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="qSaveAndStatus(\'accepted\')">客戶接受 ✓</button>'+
       '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="qSaveAndStatus(\'rejected\')">客戶拒絕 ✗</button>'+
       '</div>'
-    :h.status==='accepted'?
-      '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存</button>'+
-      '<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">送去訂單 →</button>'
-    :h.status==='rejected'?
-      '<button class="btn btn-ghost btn-sm" onclick="newQuoteVersion()">產生新版本</button>'
+    :(h.status==='accepted'||h.status==='rejected')?
+      '<div></div>'+
+      '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'
     :
       '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存</button>'
-    )+
-    '</div>'
+
+  const notesField=editable
+    ?'<textarea onchange="qHeaderChange(\'notes\',this.value)">'+(h.notes||'')+'</textarea>'
+    :'<textarea disabled style="background:#f5f5f2;color:#666">'+(h.notes||'')+'</textarea>'
+
+  document.getElementById('modal-quote-bd').innerHTML=
+    '<div style="margin-bottom:10px">'+badge(h.status,QUO_STATUS)+'</div>'+
+    statusBanner+
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+    '<span class="section-title" style="margin-bottom:0">品項明細</span>'+
+    '<span style="font-size:10px;color:#aaa">成本唯讀，請至產品目錄更新</span>'+
+    '</div>'+
+    (items.length?itemsHtml:'<div style="font-size:12px;color:#aaa;margin-bottom:10px">尚無品項</div>')+
+    addItemSection+
+    '<div class="divider"></div>'+
+    '<div style="margin-bottom:16px"><label>備註</label>'+notesField+'</div>'+
+    '<div class="modal-foot" style="justify-content:space-between;align-items:center">'+footHtml+'</div>'
 }
 
 function goUpdateProductCost(productId){
