@@ -1057,14 +1057,13 @@ function calcQuote(cp,customs_fee_pct,margin_pct,applyCustoms){
   return{afterCustoms,final}
 }
 function calcQuoteLabel(cp,customs_fee_pct,margin_pct,applyCustoms,cur){
-  const cpFmt=parseFloat(cp||0).toFixed(2)
+  const{afterCustoms,final}=calcQuote(cp,customs_fee_pct,margin_pct,applyCustoms)
   const cusPct=parseFloat(customs_fee_pct||0)
   const mgnPct=parseFloat(margin_pct||0)
-  const{afterCustoms,final}=calcQuote(cp,customs_fee_pct,margin_pct,applyCustoms)
   if(applyCustoms){
-    return '成本 '+cpFmt+' '+cur+' × (1+'+cusPct+'%) × (1+'+mgnPct+'%) = '+final.toFixed(2)+' '+cur
+    return '成本 '+parseFloat(cp||0).toFixed(2)+' · 含清關 '+afterCustoms.toFixed(2)+' (+'+cusPct+'%) · 報價 '+final.toFixed(2)+' '+cur+' (+'+mgnPct+'%)'
   }
-  return '成本 '+cpFmt+' '+cur+' × (1+'+mgnPct+'%) = '+final.toFixed(2)+' '+cur
+  return '成本 '+parseFloat(cp||0).toFixed(2)+' · 報價 '+final.toFixed(2)+' '+cur+' (+'+mgnPct+'%)'
 }
 
 function getSupplierCustomsHint(supplierId){
@@ -4499,6 +4498,7 @@ async function _execSendToQuote(inqId){
     cost_price:rawCost,cost_currency:rawCur,
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
     apply_customs:supplierNeedsCustoms(inquirySupplier?.id||null),margin_pct:parseFloat(settings.default_margin_pct||20),
+    final_price:rawCost?parseFloat(calcQuote(rawCost,settings.default_customs_fee_pct||7.5,settings.default_margin_pct||20,supplierNeedsCustoms(inquirySupplier?.id||null)).final.toFixed(4)):null,
     moq:i.moq||null,lead_time:i.lead_time||null
   })
   if(e2){showToast('品項建立失敗：'+e2.message,'error');return}
@@ -4607,10 +4607,17 @@ function renderQuoteModalBd(){
       '<div><label>交期</label><input value="'+(it.lead_time||'')+'" placeholder="例：30天" '+(editable?'onchange="qItemChange(\''+it.id+'\',\'lead_time\',this.value)"':ro)+' /></div>'+
       '</div>'+
       '<div style="font-size:10px;color:'+(supplierNeedsCustoms(it.supplier_id)?'#666':'#0F6E56')+';margin-bottom:8px">'+getSupplierCustomsHint(it.supplier_id)+'</div>'+
-      '<div style="padding:8px 12px;border-radius:8px;border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';background:'+(hasP?'#E1F5EE':'#f8f8f5')+'">'+
-      (hasP?'<span style="font-size:15px;font-weight:600;color:#0F6E56">'+final.toFixed(2)+' '+cur+'</span>'+
-      '<span style="font-size:10px;color:#0F6E56;margin-left:10px">'+calcQuoteLabel(cp,it.customs_fee_pct,it.margin_pct,applyCustoms,cur)+'</span>':
-      '<span style="font-size:12px;color:#aaa">請先填入成本</span>')+'</div></div>'
+      (()=>{
+        const displayPrice=(!editable&&it.final_price!=null)?it.final_price:final
+        const locked=!editable&&it.final_price!=null
+        return '<div style="padding:8px 12px;border-radius:8px;border:1px solid '+(hasP?'#0F6E56':'#e5e5e0')+';background:'+(hasP?'#E1F5EE':'#f8f8f5')+'">'+
+          (hasP
+            ?'<span style="font-size:15px;font-weight:600;color:#0F6E56">'+parseFloat(displayPrice).toFixed(2)+' '+cur+(locked?' <span style="font-size:10px;font-weight:400;color:#5AA88A">（已鎖定）</span>':'')+'</span>'+
+            '<div style="font-size:10px;color:#0F6E56;margin-top:2px">'+calcQuoteLabel(cp,it.customs_fee_pct,it.margin_pct,applyCustoms,cur)+'</div>'
+            :'<span style="font-size:12px;color:#aaa">請先填入成本</span>'
+          )+'</div>'
+      })()+
+      '</div>'
   }).join('')
 
   const supplierCos=[...new Set(suppliers.map(s=>s.company))].sort()
@@ -4745,7 +4752,15 @@ function qItemChange(id,field,value){
   }
   if(!_qPendingItems[id])_qPendingItems[id]={}
   _qPendingItems[id][field]=value
-  if(it)it[field]=value
+  if(it){
+    it[field]=value
+    const cp=parseFloat(it.cost_price||0)
+    if(cp>0){
+      const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,shouldApplyCustoms(it))
+      it.final_price=parseFloat(final.toFixed(4))
+      _qPendingItems[id].final_price=it.final_price
+    }
+  }
   renderQuoteModalBd()
 }
 function qHeaderChange(field,value){
@@ -4786,11 +4801,18 @@ async function addQuoteItem(){
   if(!prodId){showToast('請選擇產品','error');return}
   const p=products.find(x=>String(x.id)===String(prodId))
   if(!p)return
+  const _aqCp=parseFloat(p.cost_price||0)
+  const _aqAc=supplierNeedsCustoms(p.supplier_id||null)
+  const _aqCusPct=parseFloat(settings.default_customs_fee_pct||7.5)
+  const _aqMgn=parseFloat(settings.default_margin_pct||20)
+  const _aqFinal=_aqCp>0?parseFloat(calcQuote(_aqCp,_aqCusPct,_aqMgn,_aqAc).final.toFixed(4)):null
   const{error}=await sb.from('quote_items').insert({
     header_id:selectedQuoteId,product:p.product_name,spec:p.spec||null,
     product_id:p.id,supplier_id:p.supplier_id||null,
-    customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
-    apply_customs:supplierNeedsCustoms(p.supplier_id||null),margin_pct:parseFloat(settings.default_margin_pct||20)
+    cost_price:_aqCp||null,cost_currency:p.currency||'USD',
+    customs_fee_pct:_aqCusPct,
+    apply_customs:_aqAc,margin_pct:_aqMgn,
+    final_price:_aqFinal
   })
   if(error){showToast('新增品項失敗：'+error.message,'error');return}
   await loadQuotes()
@@ -4894,9 +4916,12 @@ async function sendQuoteToOrder(){
   if(oErr){showToast('建立訂單失敗：'+oErr.message,'error');return}
   if(items.length){
     const oiRows=items.map(it=>{
-      const cp=parseFloat(it.cost_price||0)
-      const{final:finalPrice}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,shouldApplyCustoms(it))
-      return{order_id:orderId,product_name:it.product,spec:it.spec||null,qty:1,unit:it.moq||null,unit_price:parseFloat(finalPrice.toFixed(4)),currency:it.cost_currency||'USD'}
+      const _up=it.final_price!=null?it.final_price:(()=>{
+        const cp=parseFloat(it.cost_price||0)
+        const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,shouldApplyCustoms(it))
+        return parseFloat(final.toFixed(4))
+      })()
+      return{order_id:orderId,product_name:it.product,spec:it.spec||null,qty:1,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD'}
     })
     const{error:iErr}=await sb.from('order_items').insert(oiRows)
     if(iErr){showToast('品項寫入失敗：'+iErr.message,'error');return}
@@ -5323,20 +5348,28 @@ async function submitNewQuote(){
     id:hId,inquiry_id:null,customer,supplier,version:1,status:'draft',notes,source:'direct'
   })
   if(error){showToast('建立失敗：'+error.message,'error');return}
-  const itemsToInsert=_nqItems.map(it=>({
-    header_id:hId,
-    product:it.product,
-    spec:it.spec||null,
-    product_id:it.from_product_id||null,
-    supplier_id:it.supplier_id||null,
-    cost_price:parseFloat(it.cost_price)||null,
-    cost_currency:it.cost_currency||'USD',
-    customs_fee_pct:parseFloat(it.customs_fee_pct||7.5),
-    apply_customs:shouldApplyCustoms(it),
-    margin_pct:parseFloat(it.margin_pct||20),
-    moq:it.moq||null,
-    lead_time:it.lead_time||null
-  }))
+  const itemsToInsert=_nqItems.map(it=>{
+    const _cp=parseFloat(it.cost_price)||null
+    const _ac=shouldApplyCustoms(it)
+    const _cusPct=parseFloat(it.customs_fee_pct||7.5)
+    const _mgn=parseFloat(it.margin_pct||20)
+    const _fp=_cp?parseFloat(calcQuote(_cp,_cusPct,_mgn,_ac).final.toFixed(4)):null
+    return{
+      header_id:hId,
+      product:it.product,
+      spec:it.spec||null,
+      product_id:it.from_product_id||null,
+      supplier_id:it.supplier_id||null,
+      cost_price:_cp,
+      cost_currency:it.cost_currency||'USD',
+      customs_fee_pct:_cusPct,
+      apply_customs:_ac,
+      margin_pct:_mgn,
+      final_price:_fp,
+      moq:it.moq||null,
+      lead_time:it.lead_time||null
+    }
+  })
   const{error:e2}=await sb.from('quote_items').insert(itemsToInsert)
   if(e2){showToast('品項建立失敗：'+e2.message,'error');return}
   await loadQuotes();closeModal('modal-new-quote');renderQuotes()

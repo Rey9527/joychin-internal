@@ -216,6 +216,7 @@ Important columns / 重要欄位:
 - `margin_pct`
 - `moq`
 - `lead_time`
+- `final_price`
 
 ### orders
 Used for confirmed orders and order status workflow.  
