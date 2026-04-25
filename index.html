@@ -5431,21 +5431,20 @@ async function saveProduct(id){
       const activeHeaderIds=[...new Set(affectedItems.map(x=>x.header_id))]
       const{data:activeHeaders}=await sb.from('quote_headers').select('id,customer,status').in('id',activeHeaderIds).in('status',['draft','sent'])
       if(activeHeaders&&activeHeaders.length){
-        const affectedIds=new Set(activeHeaders.map(h=>h.id))
-        const affectedItemIds=affectedItems.filter(x=>affectedIds.has(x.header_id)).map(x=>x.id)
         const bd=document.getElementById('modal-cost-impact-bd')
         bd.innerHTML=
-          '<div style="font-size:13px;margin-bottom:12px">以下報價單包含此產品，成本可能已過期：</div>'+
+          '<div style="font-size:13px;margin-bottom:12px">以下報價單包含此產品，成本可能已過期，請勾選要產生新版本的報價單：</div>'+
           '<div style="margin-bottom:16px">'+
-          activeHeaders.map(h=>'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0ec">'+
-            '<span style="font-size:12px;font-weight:500">'+h.id+'</span>'+
+          activeHeaders.map(h=>'<label style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #f0f0ec;cursor:pointer">'+
+            '<input type="checkbox" class="cost-impact-check" data-hid="'+h.id+'" style="width:auto;margin:0">'+
+            '<span style="font-size:12px;font-weight:500;flex:1">'+h.id+'</span>'+
             '<span style="font-size:11px;color:#666">'+h.customer+'</span>'+
-            '<span class="badge" style="font-size:10px">'+badge(h.status,QUO_STATUS)+'</span>'+
-          '</div>').join('')+
+            '<span>'+badge(h.status,QUO_STATUS)+'</span>'+
+          '</label>').join('')+
           '</div>'+
           '<div class="modal-foot" style="gap:8px;flex-direction:column;align-items:stretch">'+
-          '<button class="btn btn-primary btn-sm" onclick="syncQuoteItemsCost('+id+','+newCost+',\''+newCurrency+'\','+JSON.stringify(affectedItemIds)+')">同步更新這些報價單的成本</button>'+
-          '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-cost-impact\')">不同步，僅更新目錄</button>'+
+          '<button class="btn btn-primary btn-sm" onclick="createVersionsForChecked('+id+','+newCost+',\''+newCurrency+'\')">為勾選的報價單產生新版本</button>'+
+          '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-cost-impact\')">僅更新目錄，不動報價單</button>'+
           '</div>'
         document.getElementById('modal-cost-impact').classList.add('open')
       }
@@ -5453,12 +5452,39 @@ async function saveProduct(id){
   }
 }
 
-async function syncQuoteItemsCost(productId,newCost,newCurrency,itemIds){
-  const{error}=await sb.from('quote_items').update({cost_price:newCost,cost_currency:newCurrency}).in('id',itemIds)
-  if(error){showToast('同步失敗：'+error.message,'error');return}
+async function _createNewVersionWithUpdatedCost(headerId,productId,newCost,newCurrency){
+  const h=quoteHeaders.find(x=>x.id===headerId);if(!h)return false
+  const items=quoteItems.filter(it=>it.header_id===h.id)
+  const newV=h.version+1
+  const newId=h.id.replace(/-v\d+$/,'')+'-v'+newV
+  const{error}=await sb.from('quote_headers').insert({
+    id:newId,inquiry_id:h.inquiry_id||null,customer:h.customer,supplier:h.supplier,version:newV,status:'draft',notes:h.notes,source:h.source||null
+  })
+  if(error)return false
+  if(items.length){
+    const newItems=items.map(({id:_,...rest})=>({
+      ...rest,header_id:newId,
+      cost_price:rest.product_id===productId?newCost:rest.cost_price,
+      cost_currency:rest.product_id===productId?newCurrency:rest.cost_currency
+    }))
+    const{error:e2}=await sb.from('quote_items').insert(newItems)
+    if(e2)return false
+  }
+  return true
+}
+
+async function createVersionsForChecked(productId,newCost,newCurrency){
+  const checked=[...document.querySelectorAll('.cost-impact-check:checked')].map(el=>el.dataset.hid)
+  if(!checked.length){showToast('請至少勾選一張報價單','warn');return}
+  let count=0
+  for(const hid of checked){
+    const ok=await _createNewVersionWithUpdatedCost(hid,productId,newCost,newCurrency)
+    if(ok)count++
+  }
   await loadQuotes()
   closeModal('modal-cost-impact')
-  showToast('報價單成本已同步更新')
+  showToast('已為 '+count+' 張報價單產生新版本')
+  switchTab('quotes')
 }
 
 async function deleteProduct(id,name){
