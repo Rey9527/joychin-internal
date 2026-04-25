@@ -5398,6 +5398,15 @@ function openProductModal(id){
   document.getElementById('modal-product').classList.add('open')
 }
 
+async function _finishSaveProduct(msg){
+  _isDirty=false
+  await loadProducts()
+  closeModal('modal-product')
+  closeModal('modal-cost-impact')
+  populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
+  showToast(msg||'產品已更新')
+}
+
 async function saveProduct(id){
   const name=document.getElementById('pd-name').value.trim()
   if(!name){showToast('請填寫產品名稱','error');return}
@@ -5423,10 +5432,7 @@ async function saveProduct(id){
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
   else{({error}=await sb.from('products').insert(data))}
   if(error){showToast('儲存失敗：'+error.message,'error');return}
-  _isDirty=false
-  await loadProducts();closeModal('modal-product')
-  populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
-  showToast(id?'產品已更新':'產品已新增')
+
   if(id&&costChanged){
     console.log('查詢 product_id:', id, '型別:', typeof id)
     console.log('舊成本:', existing?.cost_price, '新成本:', newCost, '是否變動:', costChanged)
@@ -5451,12 +5457,14 @@ async function saveProduct(id){
           '</div>'+
           '<div class="modal-foot" style="gap:8px;flex-direction:column;align-items:stretch">'+
           '<button class="btn btn-primary btn-sm" onclick="createVersionsForChecked('+id+','+newCost+',\''+newCurrency+'\')">為勾選的報價單產生新版本</button>'+
-          '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-cost-impact\')">僅更新目錄，不動報價單</button>'+
+          '<button class="btn btn-ghost btn-sm" onclick="_finishSaveProduct(\'產品已更新\')">僅更新目錄，不動報價單</button>'+
           '</div>'
         document.getElementById('modal-cost-impact').classList.add('open')
+        return
       }
     }
   }
+  await _finishSaveProduct(id?'產品已更新':'產品已新增')
 }
 
 async function _createNewVersionWithUpdatedCost(headerId,productId,newCost,newCurrency){
@@ -5489,8 +5497,7 @@ async function createVersionsForChecked(productId,newCost,newCurrency){
     if(ok)count++
   }
   await loadQuotes()
-  closeModal('modal-cost-impact')
-  showToast('已為 '+count+' 張報價單產生新版本')
+  await _finishSaveProduct('已為 '+count+' 張報價單產生新版本')
   switchTab('quotes')
 }
 
