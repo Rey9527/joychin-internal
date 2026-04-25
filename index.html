@@ -5432,30 +5432,13 @@ async function saveProduct(id){
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
   else{({error}=await sb.from('products').insert(data))}
   if(error){showToast('儲存失敗：'+error.message,'error');return}
-  if(id&&costChanged){
-    alert('成本有變動，product_id: '+id+'，開始查詢報價單')
-    const{data:affectedItems}=await sb.from('quote_items').select('*').eq('product_id',parseInt(id))
-    alert('找到 quote_items: '+(affectedItems?.length||0)+' 筆')
-    alert('affectedItems: '+JSON.stringify(affectedItems))
-    const activeHeaderIds=[...new Set(affectedItems.map(x=>x.header_id))]
-    alert('activeHeaderIds: '+JSON.stringify(activeHeaderIds))
-    const{data:activeHeaders}=await sb.from('quote_headers').select('id,customer,status').in('id',activeHeaderIds).in('status',['draft','sent'])
-    alert('activeHeaders: '+JSON.stringify(activeHeaders))
-    const bd=document.getElementById('modal-cost-impact-bd')
-    alert('modal-cost-impact-bd element: '+bd)
-  }
 
   if(id&&costChanged){
-    console.log('查詢 product_id:', id, '型別:', typeof id)
-    console.log('舊成本:', existing?.cost_price, '新成本:', newCost, '是否變動:', costChanged)
-    const{data:affectedItems,error:qErr}=await sb.from('quote_items').select('*').eq('product_id',parseInt(id))
-    console.log('quote_items 查詢結果:', affectedItems, '錯誤:', qErr)
+    const{data:affectedItems}=await sb.from('quote_items').select('*').eq('product_id',parseInt(id))
     if(affectedItems&&affectedItems.length){
       const activeHeaderIds=[...new Set(affectedItems.map(x=>x.header_id))]
-      const{data:activeHeaders}=await sb.from('quote_headers').select('id,customer,status').in('id',activeHeaderIds).in('status',['draft','sent'])
-      console.log('affected headers:', activeHeaders)
+      const{data:activeHeaders}=await sb.from('quote_headers').select('id,customer,status').in('id',activeHeaderIds).in('status',['draft','sent','accepted'])
       if(activeHeaders&&activeHeaders.length){
-        console.log('showing modal with:', activeHeaders)
         const bd=document.getElementById('modal-cost-impact-bd')
         bd.innerHTML=
           '<div style="font-size:13px;margin-bottom:12px">以下報價單包含此產品，成本可能已過期，請勾選要產生新版本的報價單：</div>'+
