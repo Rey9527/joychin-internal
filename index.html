@@ -5432,6 +5432,11 @@ async function saveProduct(id){
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
   else{({error}=await sb.from('products').insert(data))}
   if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(id&&costChanged){
+    alert('成本有變動，product_id: '+id+'，開始查詢報價單')
+    const{data:affectedItems}=await sb.from('quote_items').select('*').eq('product_id',parseInt(id))
+    alert('找到 quote_items: '+(affectedItems?.length||0)+' 筆')
+  }
 
   if(id&&costChanged){
     console.log('查詢 product_id:', id, '型別:', typeof id)
