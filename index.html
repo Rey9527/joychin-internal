@@ -5428,9 +5428,10 @@ async function saveProduct(id){
   populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
   showToast(id?'產品已更新':'產品已新增')
   if(id&&costChanged){
-    console.log('product_id:', id)
-    const{data:affectedItems}=await sb.from('quote_items').select('id,header_id,cost_price,cost_currency').eq('product_id',id)
-    console.log('affected quote_items:', affectedItems)
+    console.log('查詢 product_id:', id, '型別:', typeof id)
+    console.log('舊成本:', existing?.cost_price, '新成本:', newCost, '是否變動:', costChanged)
+    const{data:affectedItems,error:qErr}=await sb.from('quote_items').select('id,header_id,cost_price,cost_currency').eq('product_id',id)
+    console.log('quote_items 查詢結果:', affectedItems, '錯誤:', qErr)
     if(affectedItems&&affectedItems.length){
       const activeHeaderIds=[...new Set(affectedItems.map(x=>x.header_id))]
       const{data:activeHeaders}=await sb.from('quote_headers').select('id,customer,status').in('id',activeHeaderIds).in('status',['draft','sent'])
