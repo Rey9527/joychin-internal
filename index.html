@@ -4553,7 +4553,6 @@ function renderQuoteModalHd(){
 
 function renderQuoteModalBd(){
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
-  console.log('quote status:', h.status)
   const items=quoteItems.filter(it=>it.header_id===h.id)
   const editable=h.status==='draft'
   const ro=' readonly style="background:#f5f5f2;color:#666;cursor:default"'
@@ -4663,7 +4662,7 @@ function goUpdateProductCost(productId){
 }
 
 function qItemChange(id,field,value){
-  const it=quoteItems.find(x=>x.id===id)
+  const it=quoteItems.find(x=>String(x.id)===String(id))
   if(field==='apply_customs'&&!supplierNeedsCustoms(it?.supplier_id)){
     value=false
   }
