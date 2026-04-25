@@ -5430,7 +5430,7 @@ async function saveProduct(id){
   if(id&&costChanged){
     console.log('查詢 product_id:', id, '型別:', typeof id)
     console.log('舊成本:', existing?.cost_price, '新成本:', newCost, '是否變動:', costChanged)
-    const{data:affectedItems,error:qErr}=await sb.from('quote_items').select('id,header_id,cost_price,cost_currency').eq('product_id',id)
+    const{data:affectedItems,error:qErr}=await sb.from('quote_items').select('*').eq('product_id',parseInt(id))
     console.log('quote_items 查詢結果:', affectedItems, '錯誤:', qErr)
     if(affectedItems&&affectedItems.length){
       const activeHeaderIds=[...new Set(affectedItems.map(x=>x.header_id))]
