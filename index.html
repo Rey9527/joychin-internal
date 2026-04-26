@@ -4636,8 +4636,9 @@ function renderQuoteModalBd(){
     :''
 
   const statusBanner=
-    h.status==='sent'?'<div style="background:#FEF3E2;border:1px solid #E2C97E;border-radius:8px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⚠ 此報價單已送出，如需修改請產生新版本</div>':
-    (h.status==='accepted'||h.status==='rejected')?'<div style="background:#f5f5f2;border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-size:12px;color:#888;margin-bottom:12px">此報價單已結案</div>':
+    h.status==='sent'?'<div style="background:#FEF3E2;border:1px solid #E2C97E;border-radius:8px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⚠ 此報價單已送出，如需修改請點「修改報價」</div>':
+    h.status==='accepted'?'<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:8px 12px;font-size:12px;color:#2E7D32;margin-bottom:12px">✓ 客戶已接受，可送去訂單建立正式訂單</div>':
+    h.status==='rejected'?'<div style="background:#f5f5f2;border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-size:12px;color:#888;margin-bottom:12px">此報價單已被拒絕</div>':
     ''
 
   const footHtml=
@@ -4654,7 +4655,10 @@ function renderQuoteModalBd(){
       '<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="qSaveAndStatus(\'accepted\')">客戶接受 ✓</button>'+
       '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="qSaveAndStatus(\'rejected\')">客戶拒絕 ✗</button>'+
       '</div>'
-    :(h.status==='accepted'||h.status==='rejected')?
+    :h.status==='accepted'?
+      '<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">送去訂單 →</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'
+    :h.status==='rejected'?
       '<div></div>'+
       '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'
     :
