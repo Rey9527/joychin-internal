@@ -1738,8 +1738,9 @@ function openTaskModal(prefill={}){
     '<div style="font-size:14px;font-weight:600">'+(isEdit?'工作詳情':'新增工作')+'</div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-task\')">×</button>'
   const hasRef=['inquiry','quote','sample','order'].includes(prefill.ref_module)&&prefill.ref_id
+  const _tkTitleDisplay=(window._jcT?window._jcT(prefill.title||''):prefill.title||'')
   document.getElementById('modal-task-bd').innerHTML=
-    '<div style="margin-bottom:10px"><label>標題 <span class="req">*</span></label><input id="tk-title" value="'+(prefill.title||'')+'" '+(isEdit?'readonly style="background:#f8f8f5;color:#666"':'')+' /></div>'+
+    '<div style="margin-bottom:10px"><label>標題 <span class="req">*</span></label><input id="tk-title" value="'+_tkTitleDisplay+'" '+(isEdit?'readonly style="background:#f8f8f5;color:#666"':'')+' /></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>關聯模組</label><select id="tk-module" '+(lockRef?'disabled style="background:#f8f8f5;color:#666"':'')+'>'+
     buildOptionPairs(TASK_MODULE_OPTION_PAIRS,prefill.ref_module)+
