@@ -747,6 +747,259 @@
     '初始密碼':'Initial Password',
     '逾期提醒':'Overdue Reminder',
 
+    // User management
+    '使用者已新增':'User added',
+    '使用者資料已更新':'User updated',
+    '已刪除':'Deleted',
+    ' 位使用者':' users',
+    '尚無使用者資料':'No users yet',
+    '啟用':'Active',
+    '停用':'Inactive',
+    '（我）':'(me)',
+    '一般使用者':'User',
+    '經理':'Manager',
+    '系統管理員':'Admin',
+    '儲存資料':'Save',
+    '修改我的密碼':'Change My Password',
+    '重設密碼':'Reset Password',
+    '目前密碼':'Current Password',
+    '新密碼':'New Password',
+    '確認新密碼':'Confirm New Password',
+    '再次輸入新密碼':'Re-enter new password',
+    '確認重設':'Confirm Reset',
+    '請填寫所有欄位':'Please fill in all fields',
+    '驗證目前密碼失敗：':'Failed to verify current password: ',
+    '目前密碼不正確':'Current password is incorrect',
+    '新密碼與確認密碼不一致':'Passwords do not match',
+    '密碼至少需要 4 個字元':'Password must be at least 4 characters',
+    '密碼已更新':'Password updated',
+    '密碼已重設':'Password reset',
+    '重設失敗：':'Reset failed: ',
+    '請輸入新密碼':'Please enter a new password',
+    '請填寫姓名與 Email':'Please fill in name and email',
+    '重設「':'Reset password for "',
+    '」的密碼':'"',
+    '確定要停用此使用者嗎？':'Confirm deactivate this user?',
+    '確定要啟用此使用者嗎？':'Confirm activate this user?',
+    '確定要刪除使用者「':'Confirm delete user "',
+    '」嗎？':'"?',
+    '已停用':'Deactivated',
+    '已啟用':'Activated',
+    '停用失敗：':'Failed to deactivate: ',
+    '啟用失敗：':'Failed to activate: ',
+
+    // Quote item modal
+    '供應商成本':'Supplier Cost',
+    '📦 更新目錄成本':'📦 Update Catalog Cost',
+    '非目錄':'Not in catalog',
+    '清關手續費 %':'Customs Fee %',
+    '套用':'Apply',
+    '報價（含清關含利潤）':'Quote (incl. customs & margin)',
+    '利潤率 ':'Margin: ',
+    '寬幅':'Width',
+    '來自目錄':'From catalog',
+    '計價單位（成本）':'Pricing Unit (cost)',
+    '報給客戶的單位':'Customer Pricing Unit',
+
+    // Document library
+    '找不到相關文件':'No matching documents',
+    '複製連結':'Copy Link',
+    '已複製：':'Copied: ',
+    ' 的連結':' link',
+    '請手動複製':'Please copy manually',
+
+    // Confirm modal (generic)
+    '確定要刪除嗎？':'Confirm delete?',
+    '確定要刪除這筆樣品嗎？':'Confirm delete this sample?',
+    '確定要刪除這筆工作嗎？':'Confirm delete this task?',
+    '確定要刪除此訂單嗎？':'Confirm delete this order?',
+    '確定要拒絕此口頭承諾訂單嗎？':'Confirm reject this verbal order?',
+    '確定要取消此採購單嗎？':'Confirm cancel this PO?',
+    '有商品在採購車中，確定要放棄並返回嗎？':'Items in cart — discard and go back?',
+    '切換供應商將清空採購車，確定嗎？':'Switching supplier will clear the cart. Continue?',
+    '有未儲存的變更，確定要離開嗎？':'You have unsaved changes — leave anyway?',
+    '確定':'Confirm',
+    '此操作無法復原。':'This action cannot be undone.',
+
+    // Login screen
+    '請輸入帳號與密碼':'Enter your email and password',
+    '帳號或密碼錯誤':'Incorrect email or password',
+    '帳號已停用，請聯絡管理員':'Account is inactive. Contact your administrator.',
+    '已登入':'Logged in',
+    '登入成功':'Login successful',
+
+    // Topbar overdue alert
+    '筆逾期':'overdue',
+    '筆即將到期':'due soon',
+
+    // Dropdown placeholders
+    '— 手動輸入 / 從產品目錄帶入 —':'— Manual / from catalog —',
+    '— 選擇客戶 —':'— Select Customer —',
+    '— 選擇採購單品項 —':'— Select PO Item —',
+
+    // Empty state messages
+    '此訂單目前沒有對應的採購單':'No purchase orders linked to this order',
+    '沒有符合條件的產品':'No matching products',
+    '目前沒有可選產品':'No products available',
+    '此供應商沒有可帶入的訂單品項':'No order items available for this supplier',
+    '尚未新增品項':'No items added yet',
+    '尚無寄出記錄':'No shipments yet',
+    '尚無產品目錄':'No product catalog yet',
+    '尚無索取記錄':'No sample requests yet',
+    '尚未選擇品項，點右上角按鈕從目錄選擇':'No items — use the button to select from catalog',
+    '尚未選購任何產品':'No products selected yet',
+    '此供應商沒有產品目錄':'This supplier has no product catalog',
+    '此訂單尚無品項':'No items on this order',
+
+    // Filter labels
+    '工作篩選':'Filter Tasks',
+    '採購單篩選':'Filter POs',
+    '報價篩選':'Filter Quotes',
+    '樣品篩選':'Filter Samples',
+    '船運篩選':'Filter Shipments',
+    '訂單篩選':'Filter Orders',
+    '詢價篩選':'Filter Inquiries',
+    '產品篩選':'Filter Products',
+
+    // Info / label strings
+    '未填報價':'No quote',
+    '回饋：':'Feedback: ',
+    '來自訂單':'From order',
+    '目前目錄成本：':'Current catalog cost: ',
+    '上次更新：':'Last updated: ',
+    '上次回顧日期':'Last Reviewed',
+    '· 供應商：':'· Supplier: ',
+    '· 含清關':'· incl. customs',
+    '· 單價':'· Unit Price',
+    '· 報價':'· Quote',
+    '· 寬':'· W',
+    '· 已滿足':'· Fulfilled',
+    '· 成本':'· Cost',
+    '· 數量':'· Qty',
+    '· 未滿足':'· Unfulfilled',
+    '（規格待補充）':'(spec pending)',
+    '（訂單':'(Order ',
+    '[取消記錄]':'[cancel log]',
+    '%) · 報價':'%) · Quote',
+    '🛒 採購':'🛒 Purchase',
+    '採購品項：':'PO Items: ',
+    '本次供應商報價：':'Supplier quote this time: ',
+    '本次到貨':'Current arrival',
+    '前版本':'Previous version',
+    '新版本 v':'New version v',
+    '此關聯':'This link',
+    '的訊息':' message',
+    '安全庫存 / 未分配':'Safety stock / Unallocated',
+    '統一回顧週期（天）':'Review cycle (days)',
+    '舊版單一關聯欄位':'Legacy single-link field',
+    '缺少產品關聯或成本資料':'Missing product link or cost data',
+    '清關費 %':'Customs %',
+    '米,m²,公斤':'m,m²,kg',
+    '主動備貨':'Proactive stock',
+    '，前版報價已記錄於修改歷史':', previous quote saved in history',
+
+    // Modal / dialog titles & module names
+    '從產品目錄選擇':'Select from Catalog',
+    '快速新增客戶':'Quick Add Customer',
+    '客戶詳情':'Customer Details',
+    '供應商詳情':'Supplier Details',
+    '內部詢價':'Internal Inquiry',
+    '報價快照':'Quote Snapshot',
+    '成本更新影響提醒':'Cost Update Impact Notice',
+    '為採購品項分配訂單':'Allocate Order to PO Item',
+    '採購選購':'Shopping Cart',
+    '業務系統登入':'System Login',
+    '新增關聯客戶訂單':'Link Customer Order',
+    '建立詢價單':'Create Inquiry',
+    '新增詢價單':'New Inquiry',
+    '建立報價單':'Create Quote',
+
+    // Buttons
+    '儲存回饋':'Save Feedback',
+    '儲存品項':'Save Item',
+    '儲存基本資料':'Save Info',
+    '加入品項':'Add Item',
+    '確認寄出':'Confirm Shipment',
+    '確認索取':'Confirm Request',
+    '標記已出貨 →':'Mark Shipped →',
+    '標記已到貨 →':'Mark Received →',
+    '取消採購單':'Cancel PO',
+    '取消訂單':'Cancel Order',
+    '刪除樣品':'Delete Sample',
+    '刪除訂單':'Delete Order',
+    '前往採購單':'Go to PO',
+    '+ 從目錄選擇':'+ From Catalog',
+    '+ 新客戶':'+ New Customer',
+    '不更新，直接送報價':'Skip update, send to quote',
+    '僅更新目錄，不動報價單':'Update catalog only',
+    '同步更新目錄並送報價':'Update catalog & send to quote',
+    '加入採購車':'Add to Cart',
+    '審批通過 ✓':'Approve ✓',
+    '標記完成 ✓':'Mark Complete ✓',
+    '標記已到貨':'Mark Received',
+    '標記為已發給供應商 →':'Mark as Sent to Supplier →',
+    '標記生產中 →':'Mark In Production →',
+    '為勾選的報價單產生新版本':'New version for selected quotes',
+    '登記到貨':'Record Arrival',
+    '登記回饋':'Record Feedback',
+    '📌 追蹤':'📌 Track',
+    '＋ 新增同公司聯絡人':'＋ Add Contact (same company)',
+    '輸入報給客戶的價格':'Enter price for customer',
+    '已寄出':'Shipped',
+    '已標記今日回顧':'Marked as reviewed today',
+    '已滿足':'Fulfilled',
+    '未滿足':'Unfulfilled',
+    '✓ 已加入':'✓ Added',
+    '✓ 已審批通過':'✓ Approved',
+    '✗ 審批已拒絕':'✗ Rejected',
+    '⏳ 等待主管審批':'⏳ Awaiting approval',
+    '等待主管審批':'Awaiting approval',
+    '成本未填':'Cost missing',
+    '找不到符合產品':'No matching product',
+    '未知客戶':'Unknown customer',
+    '無關聯':'No link',
+    '詢價單':'Inquiry',
+    '詢價提醒天數':'Inquiry reminder days',
+    '詢價超時天數':'Inquiry overdue days',
+    '查無此帳號':'Account not found',
+    '此帳號已停用，請聯絡管理員':'Account is inactive. Contact your administrator.',
+    '只有管理者可以儲存系統設定':'Only managers can save system settings',
+    '⚠ 口頭承諾訂單需要主管審批後才能建立採購單':'⚠ Verbal orders require manager approval before creating a PO',
+    '⚠ 缺少寬幅，請在下方補填':'⚠ Width missing — please fill in below',
+    '⚠ 請填寫寬幅才能計算 m² 金額':'⚠ Please enter width to calculate m² amount',
+    '此為口頭承諾訂單，請審批後才可建立採購單。':'This is a verbal order. Approval required before creating a PO.',
+    '此動作會將訂單標記為取消，並留下取消記錄。請填寫取消原因後再確認。':'This will mark the order as cancelled. Please enter a reason before confirming.',
+    '此訂單尚未對應任何採購單，若為安全庫存採購則可不關聯訂單。':'No PO linked yet. If purchasing for safety stock, no order link is required.',
+    '此關聯僅表示這張採購單的一部分數量分配給哪張客戶訂單；未分配數量會視為安全庫存。':'This link shows what portion of the PO is allocated to a customer order; unallocated qty is treated as safety stock.',
+    '泰國供應商，不套用清關費':'Thai supplier — no customs fee',
+    '海外供應商，套用清關費':'Overseas supplier — customs fee applied',
+    '以下報價單包含此產品，成本可能已過期，請勾選要產生新版本的報價單：':'The following quotes include this product with a possibly outdated cost. Select quotes to version:',
+    '請填寫姓名和公司':'Please fill in name and company',
+    '請至少勾選一張報價單':'Please select at least one quote',
+    '請輸入 Email':'Please enter an email',
+    '船運需由採購單掛入':'Shipments must be linked via PO',
+    '的船運資訊，請從相關採購單進行關聯。':' shipment info — link via the related PO.',
+    '待審批口頭承諾訂單：':'Verbal orders pending approval: ',
+    '待審批採購單：':'POs pending approval: ',
+    '回顧客戶資料：':'Review customer: ',
+    '+ 向供應商索取':'+ Request from Supplier',
+    '+ 寄給客戶':'+ Ship to Customer',
+    '3 天內':'within 3 days',
+    'JOY CHIN PSA — 業務系統':'JOY CHIN PSA — Business System',
+    '修改報價前快照':'Pre-edit quote snapshot',
+    '品項已新增':'Item added',
+    '樣品需求':'Sample Requirement',
+    '請輸入密碼':'Please enter your password',
+    '請透過相關採購單掛入船運批次。':'Link shipments via the related PO.',
+    '選擇產品目錄':'Select from Catalog',
+    '選自目錄':'From catalog',
+    '部分品項無法自動更新成本，請手動確認':'Some items cannot be auto-updated — please verify manually',
+    '需審批後才能建立採購單':'Approval required before creating a PO',
+    '📌 追蹤工作已建立':'📌 Tracking task created',
+    '/ 原因：':'/ Reason: ',
+    '✓ 已回顧':'✓ Reviewed',
+    '→ 前往原單據':'→ View Source',
+
     // Misc
     '版本號':'Version',
     '確認新增':'Confirm Add',
@@ -761,6 +1014,12 @@
 
   // Toast prefix map: Chinese prefix → English prefix (for dynamic messages)
   const TOAST_PREFIX=[
+    // Confirm modal dynamic strings
+    ['確定要移除 ','Confirm remove: '],
+    ['確定要刪除「','Confirm delete "'],
+    ['確定要','Confirm: '],
+    // Overdue alert dynamic strings (textContent set directly)
+    ['⚠ ','⚠ '],
     ['只有管理者可以查看系統設定','Only managers can view system settings'],
     ['只有管理者可以調整系統設定','Only managers can adjust system settings'],
     ['已建立新版本','New version created'],
@@ -833,6 +1092,25 @@
     ['移除關聯訂單失敗：','Failed to remove order link: '],
     ['儲存船運失敗：','Failed to save shipment: '],
     // Validation
+    ['已複製：','Copied: '],
+    ['請手動複製','Please copy manually'],
+    ['使用者已新增','User added'],
+    ['使用者資料已更新','User updated'],
+    ['密碼已更新','Password updated'],
+    ['密碼已重設','Password reset'],
+    ['已停用','Deactivated'],
+    ['已啟用','Activated'],
+    ['已刪除','Deleted'],
+    ['請填寫所有欄位','Please fill in all fields'],
+    ['目前密碼不正確','Current password is incorrect'],
+    ['新密碼與確認密碼不一致','Passwords do not match'],
+    ['密碼至少需要 4 個字元','Password must be at least 4 characters'],
+    ['驗證目前密碼失敗：','Failed to verify current password: '],
+    ['重設失敗：','Reset failed: '],
+    ['停用失敗：','Failed to deactivate: '],
+    ['啟用失敗：','Failed to activate: '],
+    ['設定已儲存','Settings saved'],
+    ['儲存設定失敗：','Failed to save settings: '],
     ['請填寫姓名、公司、國家和 Email','Please fill in name, company, country and email'],
     ['客戶已新增','Customer added'],
     ['客戶資料已更新','Customer updated'],
@@ -872,7 +1150,90 @@
     ['找不到供應商','Supplier not found'],
     ['找不到採購品項','PO item not found'],
     ['找不到要移除的關聯資料','Link not found'],
+    // Additional error prefixes
+    ['供應商名稱同步失敗：','Failed to sync supplier name: '],
+    ['客戶名稱同步失敗：','Failed to sync customer name: '],
+    ['儲存客戶失敗：','Failed to save customer: '],
+    ['儲存供應商失敗：','Failed to save supplier: '],
+    ['品項儲存失敗：','Failed to save item: '],
+    ['品項寫入失敗：','Failed to write item: '],
+    ['品項建立失敗，訂單未建立：','Item creation failed — order not created: '],
+    ['品項複製失敗：','Failed to copy item: '],
+    ['建立新版本失敗：','Failed to create new version: '],
+    ['建立訂單失敗：','Failed to create order: '],
+    ['建立詢價失敗：','Failed to create inquiry: '],
+    ['自動建立工作單失敗：','Failed to auto-create task: '],
+    ['無法解析成本金額','Cannot parse cost amount'],
+    // Success messages
+    ['供應商聯絡人已新增','Supplier contact added'],
+    ['供應商資料已儲存','Supplier saved'],
+    ['客戶聯絡人已新增','Customer contact added'],
+    ['客戶已更新','Customer updated'],
+    ['報價已儲存','Quote saved'],
+    ['報價預設值已儲存','Quote defaults saved'],
+    ['產品已新增','Product added'],
+    ['產品目錄成本已更新','Catalog cost updated'],
+    ['產品目錄成本有差異','Catalog cost difference detected'],
+    ['詢價單已建立','Inquiry created'],
+    ['已建立新版本 v','New version created: v'],
+    ['已標記今日回顧','Marked as reviewed today'],
+    ['新增品項失敗：','Failed to add item: '],
+    // Task title prefixes (auto-generated task titles)
+    ['追蹤供應商回覆 -','Track supplier reply - '],
+    ['追蹤報價：','Track quote: '],
+    ['追蹤客戶回饋：','Track customer feedback: '],
+    ['追蹤客戶樣品回饋：','Track customer sample feedback: '],
+    ['追蹤樣品到貨：','Track sample arrival: '],
+    ['追蹤訂單出貨：','Track order shipment: '],
+    ['追蹤訂單到貨：','Track order arrival: '],
+    ['追蹤詢價：','Track inquiry: '],
+    // Additional error/validation prefixes
+    ['載入採購單品項失敗：','Failed to load PO items: '],
+    ['載入採購單關聯訂單失敗：','Failed to load PO order links: '],
+    ['載入船運關聯失敗：','Failed to load shipment links: '],
+    ['寄出數量不能超過目前庫存（','Quantity cannot exceed current stock ('],
   ]
+
+  // ── Dynamic pattern translator ────────────────────────────────────────────
+
+  const DYNAMIC_PATTERNS=[
+    // overdue alerts: "⚠ 3 筆逾時" → "⚠ 3 overdue"
+    [/^(⚠\s*)(\d+)\s*筆逾時/,(_,p,n)=>p+n+' overdue'],
+    // "⚠ 2 個產品成本需要更新" → "⚠ 2 products need cost update"
+    [/^(⚠\s*)(\d+)\s*個產品成本需要更新\s*/,(_,p,n)=>p+n+' products need cost update  '],
+    // "🕐 1 個即將到期" → "🕐 1 due soon"
+    [/^(🕐\s*)(\d+)\s*個即將到期/,(_,p,n)=>p+n+' due soon'],
+    // task row: "到期 2024-01-01 ⚠ 已逾期" → "Due 2024-01-01 ⚠ Overdue"
+    [/^到期\s+(\d{4}-\d{2}-\d{2})\s*(⚠\s*已逾期)?/,(_,d,ov)=>'Due '+d+(ov?' ⚠ Overdue':'')],
+    // "到期 2024-01-01 " (no overdue)
+    [/^到期\s+(\d{4}-\d{2}-\d{2})\s*$/,(_,d)=>'Due '+d],
+    // Number-prefix dynamic strings
+    [/^(\d+)\s*張報價單產生新版本/,(_,n)=>n+' quote(s) versioned'],
+    [/^(\d+)\s*筆品項已加入採購車/,(_,n)=>n+' item(s) added to cart'],
+    [/^(\d+)\s*筆品項已加入/,(_,n)=>n+' item(s) added'],
+    [/^(\d+)\s*筆待追詢/,(_,n)=>n+' follow-up required'],
+    [/^(\d+)\s*位客戶需要回顧：/,(_,n)=>n+' customers need review: '],
+    [/^(\d+)\s*位聯絡人：/,(_,n)=>n+' contact(s): '],
+    [/^此供應商共有\s*(\d+)/,(_,n)=>'This supplier has '+n],
+    [/^此客戶共有\s*(\d+)/,(_,n)=>'This customer has '+n],
+    [/^(\d+)\s*個產品目錄成本需要更新/,(_,n)=>n+' catalog cost(s) need update'],
+    // confirm modal with variable: "確定要移除 ABC 的關聯嗎？"
+    [/^確定要移除\s+(.+)\s+的關聯嗎？$/,(_,label)=>'Confirm remove link for '+label+'?'],
+    // "確定要刪除「X」嗎？"
+    [/^確定要刪除「(.+)」嗎？$/,(_,name)=>'Confirm delete "'+name+'"?'],
+    // "確定要XXX此使用者嗎？" — handled by DICT, but fallback:
+    [/^確定要(.+)此使用者嗎？$/,(_,action)=>'Confirm '+action+' this user?'],
+    // "N 筆" counter generic → "N items"
+    [/^(\d+)\s*筆$/,(_,n)=>n+' items'],
+  ]
+
+  function translateDynamic(text){
+    for(const [re,fn] of DYNAMIC_PATTERNS){
+      const m=text.match(re)
+      if(m)return fn(...m)
+    }
+    return text
+  }
 
   // ── Core translation engine ───────────────────────────────────────────────
 
@@ -886,6 +1247,10 @@
       const trimmed=orig.trim()
       if(DICT[trimmed]){
         node.nodeValue=orig.replace(trimmed,DICT[trimmed])
+      } else {
+        // Dynamic pattern replacements
+        const t=translateDynamic(trimmed)
+        if(t!==trimmed)node.nodeValue=orig.replace(trimmed,t)
       }
     }
     // Also handle placeholder attributes
@@ -938,6 +1303,8 @@
         currentLang='en'
         localStorage.setItem(STORAGE_KEY,'en')
         btn.innerHTML='🌐 中文'
+        wrapShowToast()
+        wrapConfirmModal()
         applyToAll()
         startObserver()
       }else{
@@ -947,6 +1314,16 @@
       }
     }
     logoutBtn.parentNode.insertBefore(btn,logoutBtn)
+  }
+
+  // ── confirmModal interceptor ──────────────────────────────────────────────
+  function wrapConfirmModal(){
+    if(typeof window.confirmModal!=='function'||window._confirmModalOriginal)return
+    window._confirmModalOriginal=window.confirmModal
+    window.confirmModal=(msg,onConfirm)=>{
+      const translated=DICT[msg]||translateDynamic(msg)
+      window._confirmModalOriginal(translated,onConfirm)
+    }
   }
 
   // ── showToast interceptor ─────────────────────────────────────────────────
@@ -972,6 +1349,7 @@
     injectToggleButton()
     if(currentLang==='en'){
       wrapShowToast()
+      wrapConfirmModal()
       applyToAll()
       startObserver()
       setTimeout(applyToAll,600)
@@ -987,6 +1365,6 @@
   // Re-run after app fully loads (showToast may not exist yet at DOMContentLoaded)
   setTimeout(()=>{
     injectToggleButton()
-    if(currentLang==='en'){wrapShowToast();applyToAll()}
+    if(currentLang==='en'){wrapShowToast();wrapConfirmModal();applyToAll()}
   },1000)
 })()

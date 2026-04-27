@@ -4300,6 +4300,7 @@ function genInqId(){const d=new Date();return 'INQ-'+d.getFullYear()+'-'+String(
 async function showNewInqForm(){
   if(!suppliers.length)await loadSuppliers()
   if(!customers.length)await loadCustomers()
+  if(!products.length)await loadProducts()
   const custOpts=[...new Set(customers.map(c=>c.company).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-TW')).map(co=>'<option value="'+esc(co)+'">'+esc(co)+'</option>').join('')
   const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
   const supOpts=supCos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
@@ -4314,7 +4315,7 @@ async function showNewInqForm(){
     '</div>'+
     '<div style="margin-bottom:10px"><label>產品需求 <span class="req">*</span></label>'+
     '<div style="display:flex;gap:6px">'+
-    '<input id="nf-product" placeholder="可手動輸入或從目錄帶入" style="flex:1" />'+
+    '<input id="nf-product" placeholder="可手動輸入或從目錄帶入" style="flex:1" oninput="nfProductManualEdit()" />'+
     '<input id="nf-product-id" type="hidden" />'+
     '<button class="btn btn-ghost btn-sm" onclick="openInqProductPicker()" style="white-space:nowrap">選自目錄</button>'+
     '</div></div>'+
@@ -4327,6 +4328,22 @@ async function showNewInqForm(){
   document.getElementById('modal-new-inq').classList.add('open')
 }
 function hideNewInqForm(){closeModal('modal-new-inq')}
+function _buildInqPickerRows(list){
+  return list.map(p=>{
+    const sup=suppliers.find(s=>s.id===p.supplier_id)
+    return '<div onclick="pickInqProduct('+p.id+')" style="padding:10px 14px;border-bottom:1px solid #f0f0eb;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background=\'#f8fffc\'" onmouseout="this.style.background=\'\'">'+
+      '<div style="font-size:12px;font-weight:500;color:#1a1a1a">'+p.product_name+(p.product_code?' <span style="font-size:10px;color:#aaa;font-weight:400">'+p.product_code+'</span>':'')+'</div>'+
+      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+(p.cost_price?' · '+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):'')+'</div>'+
+      '</div>'
+  }).join('')
+}
+function filterInqProductPicker(q){
+  const list=document.getElementById('catalog-picker-list')
+  if(!list)return
+  const kw=q.toLowerCase()
+  const filtered=(window._inqPickerProds||[]).filter(p=>!kw||p.product_name.toLowerCase().includes(kw)||(p.product_code||'').toLowerCase().includes(kw))
+  list.innerHTML=filtered.length?_buildInqPickerRows(filtered):'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">找不到符合產品</div>'
+}
 function openInqProductPicker(){
   const existing=document.getElementById('catalog-picker-overlay')
   if(existing)existing.remove()
@@ -4334,28 +4351,26 @@ function openInqProductPicker(){
   overlay.id='catalog-picker-overlay'
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px'
   const sorted=[...products].filter(p=>p.is_active!==false).sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW'))
-  const buildRows=list=>list.map(p=>{
-    const sup=suppliers.find(s=>s.id===p.supplier_id)
-    return '<div onclick="pickInqProduct('+p.id+')" style="padding:10px 14px;border-bottom:1px solid #f0f0eb;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background=\'#f8fffc\'" onmouseout="this.style.background=\'\'">'+
-      '<div style="font-size:12px;font-weight:500;color:#1a1a1a">'+p.product_name+(p.product_code?' <span style="font-size:10px;color:#aaa">'+p.product_code+'</span>':'')+'</div>'+
-      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+(p.cost_price?' · '+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):'')+'</div>'+
-      '</div>'
-  }).join('')
+  window._inqPickerProds=sorted
   overlay.innerHTML=
     '<div style="background:#fff;border-radius:14px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
-    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center">'+
+    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;border-radius:14px 14px 0 0">'+
     '<div style="font-size:14px;font-weight:600">從產品目錄選擇</div>'+
     '<button onclick="document.getElementById(\'catalog-picker-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
     '</div>'+
     '<div style="padding:12px 16px;border-bottom:1px solid #e5e5e0">'+
-    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="(function(q){const kw=q.toLowerCase();const list=document.getElementById(\'catalog-picker-list\');if(!list)return;const f=[...window._inqPickerProds||[]].filter(p=>!kw||p.product_name.toLowerCase().includes(kw)||(p.product_code||\'\').toLowerCase().includes(kw));list.innerHTML=f.length?f.map(p=>{const s=suppliers.find(x=>x.id===p.supplier_id);return\'<div onclick=\\\"pickInqProduct(\'+p.id+\')\\\" style=\\\"padding:10px 14px;border-bottom:1px solid #f0f0eb;cursor:pointer\\\" onmouseover=\\\"this.style.background=\\\\\\\"#f8fffc\\\\\\\"\\\" onmouseout=\\\"this.style.background=\\\\\\\"\\\\\\\"\\\">\'+\'<div style=\\\"font-size:12px;font-weight:500\\\">\'+p.product_name+\'</div><div style=\\\"font-size:11px;color:#aaa\\\">\'+((s?s.company:\'—\')+(p.cost_price?\' · \'+parseFloat(p.cost_price).toFixed(2)+\' \'+(p.currency||\'\'): \'\'))+\'</div></div>\'}).join(\'\'):\'<div style=\\\"padding:30px;text-align:center;color:#aaa;font-size:12px\\\">找不到符合產品</div>\'})(this.value)" style="width:100%;padding:7px 11px;border-radius:7px;border:1px solid #e5e5e0;font-size:12px" />'+
+    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="filterInqProductPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:7px;border:1px solid #e5e5e0;font-size:12px" />'+
     '</div>'+
-    '<div id="catalog-picker-list" style="overflow-y:auto;flex:1">'+(buildRows(sorted)||'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">尚無產品目錄</div>')+'</div>'+
+    '<div id="catalog-picker-list" style="overflow-y:auto;flex:1">'+(_buildInqPickerRows(sorted)||'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">尚無產品目錄</div>')+'</div>'+
     '</div>'
-  window._inqPickerProds=sorted
   document.body.appendChild(overlay)
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
   document.getElementById('catalog-picker-search')?.focus()
+}
+function nfProductManualEdit(){
+  document.getElementById('nf-product-id').value=''
+  const s=document.getElementById('nf-supplier')
+  if(s){s.disabled=false;s.style.background='';s.style.color=''}
 }
 function pickInqProduct(productId){
   const p=products.find(x=>x.id===productId)
@@ -4370,7 +4385,13 @@ function pickInqProduct(productId){
   if(specEl&&!specEl.value&&p.notes)specEl.value=p.notes
   if(supSel&&p.supplier_id){
     const sup=suppliers.find(s=>s.id===p.supplier_id)
-    if(sup){const opt=[...supSel.options].find(o=>o.value===sup.company);if(opt)supSel.value=sup.company}
+    if(sup){
+      const opt=[...supSel.options].find(o=>o.value===sup.company)
+      if(opt)supSel.value=sup.company
+      supSel.disabled=true
+      supSel.style.background='#f8f8f5'
+      supSel.style.color='#666'
+    }
   }
 }
 
