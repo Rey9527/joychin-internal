@@ -1831,7 +1831,7 @@ function openComplaintModal(id){
     '<div><label>客訴編號</label><input id="cmp-no" value="'+esc(isNew?generateComplaintNo():c.complaint_no)+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
     '<div><label>狀態</label><select id="cmp-status">'+COMPLAINT_STATUS.map(s=>'<option value="'+s.id+'" '+((c.status||'open')===s.id?'selected':'')+'>'+(s.label)+'</option>').join('')+'</select></div>'+
     '<div><label>來源 <span class="req">*</span></label><select id="cmp-source">'+COMPLAINT_SOURCE.map(s=>'<option value="'+s.id+'" '+(c.source===s.id?'selected':'')+'>'+(s.label)+'</option>').join('')+'</select></div>'+
-    '<div><label>發現日期</label><input id="cmp-date" type="date" value="'+(c.created_at||'').slice(0,10)||new Date().toISOString().slice(0,10)+'" /></div>'+
+    '<div><label>發現日期</label><input id="cmp-date" type="date" value="'+((c.created_at||'').slice(0,10)||new Date().toISOString().slice(0,10))+'" /></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>客戶</label><select id="cmp-customer">'+custOpts+'</select></div>'+
