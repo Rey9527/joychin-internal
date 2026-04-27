@@ -117,6 +117,11 @@ CREATE TABLE public.purchase_order_items (
   currency text DEFAULT 'USD'::text,
   amount numeric,
   notes text,
+  rolls_qty numeric,
+  width_m numeric,
+  pricing_unit text,
+  ref_order_id text,
+  received_qty numeric,
   CONSTRAINT purchase_order_items_pkey PRIMARY KEY (id),
   CONSTRAINT purchase_order_items_po_id_fkey FOREIGN KEY (po_id) REFERENCES public.purchase_orders(id),
   CONSTRAINT purchase_order_items_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id)

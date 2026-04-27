@@ -116,6 +116,8 @@ Important columns / 重要欄位:
 - `min_stock_qty`
 - `stock_qty`
 - `meters_per_roll`
+- `width_m`
+- `pricing_unit`
 
 ### samples
 Used for sample inventory, incoming requests, and outgoing shipments.  
@@ -217,6 +219,8 @@ Important columns / 重要欄位:
 - `moq`
 - `lead_time`
 - `final_price`
+- `width_m`
+- `pricing_unit`
 
 ### orders
 Used for confirmed orders and order status workflow.  
@@ -257,6 +261,8 @@ Important columns / 重要欄位:
 - `unit`
 - `unit_price`
 - `currency`
+- `width_m`
+- `pricing_unit`
 
 ### purchase_orders
 Used for purchase workflow and approval flow.  
@@ -292,6 +298,8 @@ Important columns / 重要欄位:
 - `ref_order_id`
 - `received_qty`
 - `rolls_qty`
+- `width_m`
+- `pricing_unit`
 
 ### settings
 Used for default quotation and cost-related configuration.  

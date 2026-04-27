@@ -7,7 +7,7 @@ Internal HTML app for JOY CHIN internal workflow management.
 - `Beta`
 
 ## 目前版本 / Current Version
-- `v0.3.0`
+- `v0.4.0`
 
 ## 專案說明 / Project Overview
 這個專案目前是一個單檔 HTML 應用，主要用於管理詢價、報價、樣品、工作追蹤、訂單、採購、客戶、供應商、產品與文件。  
