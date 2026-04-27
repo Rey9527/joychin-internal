@@ -7,7 +7,7 @@ Internal HTML app for JOY CHIN internal workflow management.
 - `Beta`
 
 ## 目前版本 / Current Version
-- `v0.4.0`
+- `v0.5.0`
 
 ## 專案說明 / Project Overview
 這個專案目前是一個單檔 HTML 應用，主要用於管理詢價、報價、樣品、工作追蹤、訂單、採購、客戶、供應商、產品與文件。  
@@ -27,6 +27,8 @@ This project is currently a single-file HTML application used to manage inquirie
 - 訂單管理
 - 採購單管理（含採購選購流程）
 - 使用者管理（含登入權限控制）
+- 儀表板（自動掃描待追蹤項目）
+- 客訴管理（含折讓單追蹤）
 
 ## 資料庫 / Database
 目前此專案共用同一個 Supabase project。  

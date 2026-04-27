@@ -226,7 +226,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>離型紙業務系統</p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.4.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.5.0</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section">業務</div>
@@ -250,6 +250,9 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     </button>
     <button class="nav-item" id="nav-samples" onclick="switchTab('samples')">
       <span class="nav-icon">🧪</span><span>樣品管理</span>
+    </button>
+    <button class="nav-item" id="nav-complaints" onclick="switchTab('complaints')">
+      <span class="nav-icon">🚨</span><span>客訴管理</span>
     </button>
     <div class="nav-section">通訊錄</div>
     <button class="nav-item" id="nav-customers" onclick="switchTab('customers')">
@@ -385,6 +388,28 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <button class="btn btn-ghost btn-sm" onclick="renderDashboard()">↻ 重新整理</button>
       </div>
       <div id="dashboard-list"></div>
+    </div>
+
+    <!-- 客訴管理 -->
+    <div id="tab-complaints" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
+        <div id="complaint-summary" style="font-size:12px;color:#888"></div>
+        <button class="btn btn-primary" onclick="openComplaintModal(null)">+ 新增客訴</button>
+      </div>
+      <div class="filter-bar" id="complaint-filter-bar">
+        <select id="fc-source" onchange="renderComplaints()">
+          <option value="">全部來源</option>
+          <option value="unloading">下貨櫃發現</option>
+          <option value="customer">客戶回報</option>
+        </select>
+        <select id="fc-status" onchange="renderComplaints()">
+          <option value="">全部狀態</option>
+          <option value="open">處理中</option>
+          <option value="pending_credit">等待折讓單</option>
+          <option value="resolved">已結案</option>
+        </select>
+      </div>
+      <div id="complaint-list"></div>
     </div>
 
     <!-- 訂單管理 -->
@@ -783,6 +808,12 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 </div>
 
 <!-- 新增詢價 Modal -->
+<div class="modal-overlay" id="modal-complaint" onclick="closeModalOnBg(event,'modal-complaint')">
+  <div class="modal-box">
+    <div class="modal-hd" id="modal-complaint-hd"></div>
+    <div class="modal-bd" id="modal-complaint-bd"></div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-new-inq" onclick="closeModalOnBg(event,'modal-new-inq')">
   <div class="modal-box sm">
     <div class="modal-hd">
@@ -1224,7 +1255,7 @@ const QUO_STATUS=[
 
 let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteItems=[],settings={},products=[]
 let productViewMode=localStorage.getItem('productViewMode')||'grid'
-let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[]
+let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[],complaints=[]
 let orders=[],orderItems=[]
 let shipments=[],shipmentPurchaseOrders=[]
 let purchaseOrders=[],purchaseOrderItems=[],purchaseOrderOrderLinks=[]
@@ -1284,7 +1315,7 @@ async function init(){
       document.getElementById('nav-purchases').style.display='flex'
     }
   }
-  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadQuoteChanges(),loadSettings(),loadProducts(),loadSamples(),loadOrders(),loadShipments(),loadUsers(),loadPurchaseOrders()])
+  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadQuoteChanges(),loadSettings(),loadProducts(),loadSamples(),loadOrders(),loadShipments(),loadUsers(),loadPurchaseOrders(),loadComplaints()])
   const savedTab=sessionStorage.getItem(SESSION_ACTIVE_TAB_KEY)
   if(savedTab&&TAB_LABELS[savedTab]){
     switchTab(savedTab,false)
@@ -1731,6 +1762,132 @@ function renderDashboard(){
     }).join('')
   }
   el.innerHTML=html
+}
+
+// ===== 客訴管理 =====
+async function loadComplaints(){
+  const{data}=await sb.from('complaints').select('*').order('created_at',{ascending:false})
+  complaints=data||[]
+}
+const COMPLAINT_SOURCE=[
+  {id:'unloading',label:'下貨櫃發現',color:'#854F0B',bg:'#FAEEDA'},
+  {id:'customer',label:'客戶回報',color:'#534AB7',bg:'#EEEDFE'},
+]
+const COMPLAINT_STATUS=[
+  {id:'open',label:'處理中',color:'#A32D2D',bg:'#FCEBEB'},
+  {id:'pending_credit',label:'等待折讓單',color:'#854F0B',bg:'#FAEEDA'},
+  {id:'resolved',label:'已結案',color:'#3B6D11',bg:'#EAF3DE'},
+]
+function complaintSourceObj(src){return sObj(src,COMPLAINT_SOURCE)}
+function complaintStatusObj(st){return sObj(st,COMPLAINT_STATUS)}
+function generateComplaintNo(){
+  const d=new Date().toISOString().slice(0,10).replace(/-/g,'')
+  const seq=(complaints.filter(c=>c.complaint_no&&c.complaint_no.startsWith('CMP-'+d)).length+1).toString().padStart(3,'0')
+  return 'CMP-'+d+'-'+seq
+}
+function renderComplaints(){
+  const el=document.getElementById('complaint-list')
+  const sum=document.getElementById('complaint-summary')
+  if(!el)return
+  const fSrc=document.getElementById('fc-source')?.value||''
+  const fSt=document.getElementById('fc-status')?.value||''
+  let list=complaints.filter(c=>{
+    if(fSrc&&c.source!==fSrc)return false
+    if(fSt&&c.status!==fSt)return false
+    return true
+  })
+  const open=list.filter(c=>c.status!=='resolved').length
+  if(sum)sum.textContent=open+' 筆處理中 / 共 '+list.length+' 筆'
+  if(!list.length){el.innerHTML='<div class="loading">尚無客訴記錄</div>';return}
+  el.innerHTML=list.map(c=>{
+    const src=complaintSourceObj(c.source)
+    const st=complaintStatusObj(c.status)
+    return '<div class="row" onclick="openComplaintModal(\''+c.id+'\')">'+
+      '<div style="flex:1;min-width:0">'+
+      '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
+      '<span style="font-size:13px;font-weight:500">'+esc(c.complaint_no)+'</span>'+
+      '<span class="badge" style="background:'+src.bg+';color:'+src.color+';border:1px solid '+src.color+'">'+src.label+'</span>'+
+      '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
+      '</div>'+
+      '<div style="font-size:12px;color:#666">'+esc(c.product_name||'—')+(c.defect_qty?' · '+c.defect_qty+' '+(c.unit||''):'')+' · '+(c.created_at||'').slice(0,10)+'</div>'+
+      (c.defect_description?'<div style="font-size:11px;color:#aaa;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.defect_description)+'</div>':'')+
+      '</div></div>'
+  }).join('')
+}
+let selectedComplaintId=null
+function openComplaintModal(id){
+  selectedComplaintId=id
+  const isNew=!id
+  const c=isNew?{}:complaints.find(x=>String(x.id)===String(id))||{}
+  const supOpts='<option value="">—</option>'+suppliers.map(s=>'<option value="'+s.id+'" '+(c.supplier_id===s.id?'selected':'')+'>'+esc(s.company)+'</option>').join('')
+  const custOpts='<option value="">—</option>'+customers.map(x=>'<option value="'+x.id+'" '+(c.customer_id===x.id?'selected':'')+'>'+esc(x.company)+'</option>').join('')
+  const shipOpts='<option value="">—</option>'+shipments.map(s=>'<option value="'+s.id+'" '+(String(c.related_shipment_id)===String(s.id)?'selected':'')+'>'+esc(s.shipment_no)+'</option>').join('')
+  const poOpts='<option value="">—</option>'+purchaseOrders.map(p=>'<option value="'+esc(p.id)+'" '+(c.related_purchase_order_id===p.id?'selected':'')+'>'+esc(p.id)+'</option>').join('')
+  document.getElementById('modal-complaint-hd').innerHTML=
+    '<div style="font-size:14px;font-weight:600">'+(isNew?'新增客訴':esc(c.complaint_no))+'</div>'+
+    '<button class="modal-close" onclick="closeModal(\'modal-complaint\')">×</button>'
+  document.getElementById('modal-complaint-bd').innerHTML=
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>客訴編號</label><input id="cmp-no" value="'+esc(isNew?generateComplaintNo():c.complaint_no)+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+    '<div><label>狀態</label><select id="cmp-status">'+COMPLAINT_STATUS.map(s=>'<option value="'+s.id+'" '+((c.status||'open')===s.id?'selected':'')+'>'+(s.label)+'</option>').join('')+'</select></div>'+
+    '<div><label>來源 <span class="req">*</span></label><select id="cmp-source">'+COMPLAINT_SOURCE.map(s=>'<option value="'+s.id+'" '+(c.source===s.id?'selected':'')+'>'+(s.label)+'</option>').join('')+'</select></div>'+
+    '<div><label>發現日期</label><input id="cmp-date" type="date" value="'+(c.created_at||'').slice(0,10)||new Date().toISOString().slice(0,10)+'" /></div>'+
+    '</div>'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>客戶</label><select id="cmp-customer">'+custOpts+'</select></div>'+
+    '<div><label>供應商</label><select id="cmp-supplier">'+supOpts+'</select></div>'+
+    '<div><label>關聯船運</label><select id="cmp-shipment">'+shipOpts+'</select></div>'+
+    '<div><label>關聯採購單</label><select id="cmp-po">'+poOpts+'</select></div>'+
+    '</div>'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>問題產品</label><input id="cmp-product" value="'+esc(c.product_name||'')+'" placeholder="產品名稱" /></div>'+
+    '<div style="display:flex;gap:6px"><div style="flex:1"><label>異常數量</label><input id="cmp-qty" type="number" value="'+(c.defect_qty||'')+'" min="0" step="any" /></div><div style="width:80px"><label>單位</label><input id="cmp-unit" value="'+esc(c.unit||'')+'" /></div></div>'+
+    '</div>'+
+    '<div style="margin-bottom:10px"><label>異常描述 <span class="req">*</span></label><textarea id="cmp-desc">'+esc(c.defect_description||'')+'</textarea></div>'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>折讓單編號</label><input id="cmp-credit" value="'+esc(c.credit_note_no||'')+'" placeholder="取得後填入" /></div>'+
+    '</div>'+
+    '<div style="margin-bottom:10px"><label>處理結果</label><textarea id="cmp-resolution">'+esc(c.resolution||'')+'</textarea></div>'+
+    '<div style="margin-bottom:14px"><label>備註</label><textarea id="cmp-notes">'+esc(c.notes||'')+'</textarea></div>'+
+    '<div class="modal-foot">'+
+    '<button class="btn btn-primary" onclick="saveComplaint()">'+( isNew?'建立客訴':'儲存')+'</button>'+
+    (!isNew?'<button class="btn btn-ghost" style="color:#aaa" onclick="deleteComplaint(\''+id+'\')">刪除</button>':'')+
+    '</div>'
+  document.getElementById('modal-complaint').classList.add('open')
+}
+async function saveComplaint(){
+  const isNew=!selectedComplaintId
+  const payload={
+    complaint_no:document.getElementById('cmp-no')?.value.trim(),
+    source:document.getElementById('cmp-source')?.value,
+    status:document.getElementById('cmp-status')?.value||'open',
+    customer_id:parseInt(document.getElementById('cmp-customer')?.value)||null,
+    supplier_id:parseInt(document.getElementById('cmp-supplier')?.value)||null,
+    related_shipment_id:parseInt(document.getElementById('cmp-shipment')?.value)||null,
+    related_purchase_order_id:document.getElementById('cmp-po')?.value||null,
+    product_name:document.getElementById('cmp-product')?.value.trim()||null,
+    defect_qty:parseFloat(document.getElementById('cmp-qty')?.value)||null,
+    unit:document.getElementById('cmp-unit')?.value.trim()||null,
+    defect_description:document.getElementById('cmp-desc')?.value.trim()||null,
+    credit_note_no:document.getElementById('cmp-credit')?.value.trim()||null,
+    resolution:document.getElementById('cmp-resolution')?.value.trim()||null,
+    notes:document.getElementById('cmp-notes')?.value.trim()||null,
+  }
+  if(!payload.source){showToast('請選擇來源','error');return}
+  if(!payload.defect_description){showToast('請填寫異常描述','error');return}
+  const{error}=isNew
+    ?await sb.from('complaints').insert(payload)
+    :await sb.from('complaints').update(payload).eq('id',selectedComplaintId)
+  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  await loadComplaints();renderComplaints();closeModal('modal-complaint')
+  showToast(isNew?'客訴已建立':'客訴已更新')
+}
+async function deleteComplaint(id){
+  confirmModal('確定要刪除這筆客訴嗎？',async()=>{
+    const{error}=await sb.from('complaints').delete().eq('id',id)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadComplaints();renderComplaints();closeModal('modal-complaint')
+  })
 }
 
 // ===== 訂單管理 =====
@@ -4107,7 +4264,7 @@ async function confirmShopOrder(){
 }
 // ── end 採購選購 ──────────────────────────────────────────
 
-const TAB_LABELS={dashboard:'儀表板',inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',orders:'訂單管理',shipments:'船運管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',settings:'系統設定',purchases:'採購單管理','purchase-shop':'採購選購'}
+const TAB_LABELS={dashboard:'儀表板',inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',complaints:'客訴管理',orders:'訂單管理',shipments:'船運管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',settings:'系統設定',purchases:'採購單管理','purchase-shop':'採購選購'}
 function switchTab(tab,save=true){
   if(tab==='settings'&&!isManager()){
     showToast('只有管理者可以查看系統設定','error')
@@ -4126,6 +4283,7 @@ function switchTab(tab,save=true){
   if(tab==='quotes')renderQuotes()
   if(tab==='products'){populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()}
   if(tab==='samples')renderSamples()
+  if(tab==='complaints')renderComplaints()
   if(tab==='dashboard')renderDashboard()
   if(tab==='orders')renderOrders()
   if(tab==='shipments')renderShipments()
