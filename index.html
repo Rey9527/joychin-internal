@@ -4184,14 +4184,11 @@ async function showNewInqForm(){
   const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
   const supOpts=supCos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
   document.getElementById('modal-new-inq-bd').innerHTML=
-    '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>客戶 <span class="req">*</span></label>'+
+    '<div style="margin-bottom:10px"><label>客戶 <span class="req">*</span></label>'+
     '<div style="display:flex;gap:6px">'+
     '<select id="nf-customer" style="flex:1"><option value="">— 選擇客戶 —</option>'+custOpts+'</select>'+
     '<button class="btn btn-ghost btn-sm" onclick="openQuickAddCustomer()" style="white-space:nowrap">+ 新客戶</button>'+
     '</div></div>'+
-    '<div><label>逾時提醒</label><input value="超過 '+getInquiryWarnDays()+' 天提醒，超過 '+getInquiryOverdueDays()+' 天列為待追詢" readonly style="background:#f8f8f5;color:#666" /></div>'+
-    '</div>'+
     '<div style="margin-bottom:10px"><label>產品需求 <span class="req">*</span></label>'+
     '<div style="display:flex;gap:6px">'+
     '<input id="nf-product" placeholder="可手動輸入或從目錄帶入" style="flex:1" oninput="nfProductManualEdit()" />'+
