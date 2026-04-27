@@ -1819,8 +1819,16 @@ function openComplaintModal(id){
   selectedComplaintId=id
   const isNew=!id
   const c=isNew?{}:complaints.find(x=>String(x.id)===String(id))||{}
-  const supOpts='<option value="">—</option>'+suppliers.map(s=>'<option value="'+s.id+'" '+(c.supplier_id===s.id?'selected':'')+'>'+esc(s.company)+'</option>').join('')
-  const custOpts='<option value="">—</option>'+customers.map(x=>'<option value="'+x.id+'" '+(c.customer_id===x.id?'selected':'')+'>'+esc(x.company)+'</option>').join('')
+  const supCos=[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort()
+  const supOpts='<option value="">—</option>'+supCos.map(co=>{
+    const first=suppliers.find(s=>s.company===co)
+    return '<option value="'+first.id+'" '+(c.supplier_id===first.id?'selected':'')+'>'+esc(co)+'</option>'
+  }).join('')
+  const custCos=[...new Set(customers.map(x=>x.company).filter(Boolean))].sort()
+  const custOpts='<option value="">—</option>'+custCos.map(co=>{
+    const first=customers.find(x=>x.company===co)
+    return '<option value="'+first.id+'" '+(c.customer_id===first.id?'selected':'')+'>'+esc(co)+'</option>'
+  }).join('')
   const shipOpts='<option value="">—</option>'+shipments.map(s=>'<option value="'+s.id+'" '+(String(c.related_shipment_id)===String(s.id)?'selected':'')+'>'+esc(s.shipment_no)+'</option>').join('')
   const poOpts='<option value="">—</option>'+purchaseOrders.map(p=>'<option value="'+esc(p.id)+'" '+(c.related_purchase_order_id===p.id?'selected':'')+'>'+esc(p.id)+'</option>').join('')
   document.getElementById('modal-complaint-hd').innerHTML=
