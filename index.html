@@ -1815,7 +1815,7 @@ function shipmentStatusObj(status){
     {id:'planned',label:'已規劃',color:'#854F0B',bg:'#FAEEDA'},
     {id:'booked',label:'已訂艙',color:'#185FA5',bg:'#E6F1FB'},
     {id:'in_transit',label:'運送中',color:'#534AB7',bg:'#EEEDFE'},
-    {id:'arrived',label:'已到港',color:'#0F6E56',bg:'#E1F5EE'},
+    {id:'customs_clearance',label:'報關中',color:'#0F6E56',bg:'#E1F5EE'},
     {id:'completed',label:'已完成',color:'#3B6D11',bg:'#EAF3DE'},
     {id:'cancelled',label:'已取消',color:'#888',bg:'#f0f0f0'}
   ])
@@ -2282,6 +2282,7 @@ function openShipmentModal(id){
     '<div style="font-size:14px;font-weight:600">'+esc(s.shipment_no)+'</div>'+
     '<div style="display:flex;align-items:center;gap:8px">'+
       '<button class="btn btn-ghost btn-sm" onclick="openShipmentEditModal('+id+')">船運詳情 / 編輯</button>'+
+      (s.status==='customs_clearance'?'<button class="btn btn-primary btn-sm" onclick="openShipmentReceivePanel('+id+')">✓ 確認入庫</button>':'')+
       '<button class="modal-close" onclick="closeModal(\'modal-shipment\')">×</button>'+
     '</div>'
   let html=
@@ -2306,11 +2307,67 @@ function openShipmentModal(id){
   document.getElementById('modal-shipment-bd').innerHTML=html
   document.getElementById('modal-shipment').classList.add('open')
 }
+
+function openShipmentReceivePanel(shipmentId){
+  const s=shipments.find(x=>String(x.id)===String(shipmentId));if(!s)return
+  const linked=shipmentLinkedPurchases(shipmentId)
+  if(!linked.length){showToast('此船運尚未掛載採購單','error');return}
+  let html='<div class="divider"></div>'+
+    '<div class="section-title" style="margin:12px 0 10px">確認入庫 — 填寫實收數量</div>'
+  linked.forEach(po=>{
+    const items=purchaseOrderItems.filter(i=>i.po_id===po.id)
+    if(!items.length)return
+    html+='<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px">採購單 '+esc(String(po.id))+'</div>'
+    items.forEach(item=>{
+      const expectedQty=parseFloat(item.qty||item.quantity||0)
+      const prevReceived=parseFloat(item.received_qty||0)
+      html+='<div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0eb">'+
+        '<div><div style="font-size:13px;font-weight:500">'+esc(item.product_name||'—')+'</div>'+
+        (item.spec?'<div style="font-size:11px;color:#888">'+esc(item.spec)+'</div>':'')+
+        '<div style="font-size:11px;color:#aaa">訂單量 '+expectedQty+' '+esc(item.unit||'')+(prevReceived>0?' · 前次已到 '+prevReceived:'')+'</div></div>'+
+        '<div style="font-size:11px;color:#888;white-space:nowrap">此次實收</div>'+
+        '<input type="number" id="rcv-'+item.id+'" value="'+Math.max(0,expectedQty-prevReceived)+'" min="0" style="width:80px;text-align:right" placeholder="0" />'+
+        '</div>'
+    })
+    html+='<div style="margin-bottom:12px"></div>'
+  })
+  html+='<div style="display:flex;gap:8px;margin-top:8px">'+
+    '<button class="btn btn-primary" onclick="saveShipmentReceive(\''+shipmentId+'\')">儲存入庫紀錄 → 完成</button>'+
+    '<button class="btn btn-ghost" onclick="openShipmentModal(\''+shipmentId+'\')">取消</button>'+
+    '</div>'
+  const bd=document.getElementById('modal-shipment-bd')
+  bd.innerHTML=bd.innerHTML+html
+}
+
+async function saveShipmentReceive(shipmentId){
+  const linked=shipmentLinkedPurchases(shipmentId)
+  const updates=[]
+  linked.forEach(po=>{
+    purchaseOrderItems.filter(i=>i.po_id===po.id).forEach(item=>{
+      const input=document.getElementById('rcv-'+item.id)
+      if(!input)return
+      const thisReceived=parseFloat(input.value)||0
+      const prev=parseFloat(item.received_qty||0)
+      updates.push({id:item.id,received_qty:prev+thisReceived})
+    })
+  })
+  for(const u of updates){
+    const{error}=await sb.from('purchase_order_items').update({received_qty:u.received_qty}).eq('id',u.id)
+    if(error){showToast('更新品項失敗：'+error.message,'error');return}
+  }
+  const{error:shErr}=await sb.from('shipments').update({status:'completed'}).eq('id',shipmentId)
+  if(shErr){showToast('更新船運狀態失敗：'+shErr.message,'error');return}
+  await Promise.all([loadShipments(),loadPurchaseOrders()])
+  closeModal('modal-shipment')
+  renderShipments()
+  showToast('入庫完成，船運已標記為已完成')
+}
+
 function openShipmentEditModal(id){
   const isNew=id===null
   const s=isNew?null:shipments.find(x=>String(x.id)===String(id))
   const transportOpts='<option value="sea">海運</option><option value="air">空運</option><option value="land">陸運</option><option value="express">快遞</option>'
-  const statusOpts='<option value="planned">已規劃</option><option value="booked">已訂艙</option><option value="in_transit">運送中</option><option value="arrived">已到港</option><option value="completed">已完成</option><option value="cancelled">已取消</option>'
+  const statusOpts='<option value="planned">已規劃</option><option value="booked">已訂艙</option><option value="in_transit">運送中</option><option value="customs_clearance">報關中</option><option value="completed">已完成</option><option value="cancelled">已取消</option>'
   const availablePurchases=purchaseOrders.filter(p=>!shipmentPurchaseOrders.some(link=>String(link.purchase_order_id)===String(p.id)&&String(link.shipment_id)===String(s?.id||'')))
   const linkedPurchases=isNew?[]:shipmentLinkedPurchases(s.id)
   document.getElementById('modal-shipment-edit-hd').innerHTML=
