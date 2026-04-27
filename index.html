@@ -2285,16 +2285,30 @@ function openShipmentModal(id){
       (s.status==='customs_clearance'?'<button class="btn btn-primary btn-sm" onclick="openShipmentReceivePanel('+id+')">✓ 確認入庫</button>':'')+
       '<button class="modal-close" onclick="closeModal(\'modal-shipment\')">×</button>'+
     '</div>'
+  const today=new Date().toISOString().slice(0,10)
+  const nextStatusMap={planned:'booked',booked:'in_transit',in_transit:'customs_clearance',customs_clearance:'completed'}
+  const nextStatusLabel={planned:'→ 已訂艙',booked:'→ 運送中',in_transit:'→ 報關中',customs_clearance:'→ 確認完成'}
+  const nextSt=nextStatusMap[s.status]
   let html=
     '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
       '<span class="tag">'+shipmentModeLabel(s.transport_mode)+'</span>'+
       (portLine?'<span style="font-size:13px;color:#555">'+esc(portLine)+'</span>':'')+
     '</div>'+
-    '<div style="display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap">'+
+    '<div style="display:flex;gap:20px;margin-bottom:12px;flex-wrap:wrap">'+
       '<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ETD</div><div style="font-size:14px;font-weight:500">'+(s.etd||'—')+'</div></div>'+
       '<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ETA</div><div style="font-size:14px;font-weight:500">'+(s.eta||'—')+'</div></div>'+
+      (s.atd?'<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ATD</div><div style="font-size:14px;font-weight:500">'+s.atd+'</div></div>':'')+
+      (s.ata?'<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ATA</div><div style="font-size:14px;font-weight:500">'+s.ata+'</div></div>':'')+
     '</div>'+
+    (nextSt&&s.status!=='completed'&&s.status!=='cancelled'?
+      '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+      '<span style="font-size:12px;color:#666">推進狀態：</span>'+
+      '<button class="btn btn-ghost btn-sm" style="color:#185FA5" onclick="quickUpdateShipmentStatus(\''+id+'\',\''+nextSt+'\')">'+nextStatusLabel[s.status]+'</button>'+
+      (s.status==='in_transit'&&s.eta&&s.eta<=today?'<span style="font-size:11px;color:#A32D2D">⚠ ETA 已到</span>':'')+
+      (s.status==='booked'&&s.etd&&s.etd<=today?'<span style="font-size:11px;color:#A32D2D">⚠ ETD 已到</span>':'')+
+      '</div>'
+    :'')+
     '<div class="divider"></div>'+
     '<div class="section-title" style="margin-bottom:8px">產品清單</div>'
   if(productSummary.length){
@@ -2306,6 +2320,15 @@ function openShipmentModal(id){
   }
   document.getElementById('modal-shipment-bd').innerHTML=html
   document.getElementById('modal-shipment').classList.add('open')
+}
+
+async function quickUpdateShipmentStatus(shipmentId,newStatus){
+  const{error}=await sb.from('shipments').update({status:newStatus}).eq('id',shipmentId)
+  if(error){showToast('更新失敗：'+error.message,'error');return}
+  await loadShipments()
+  openShipmentModal(shipmentId)
+  renderShipments()
+  if(newStatus==='customs_clearance')renderDashboard()
 }
 
 function openShipmentReceivePanel(shipmentId){
