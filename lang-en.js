@@ -12,6 +12,7 @@
     '業務':'Business',
     '通訊錄':'Contacts',
     '產品':'Products',
+    '設定':'Settings',
     '離型紙業務系統':'Release Liner System',
     '未登入':'Not logged in',
 
@@ -1000,6 +1001,11 @@
     '✓ 已回顧':'✓ Reviewed',
     '→ 前往原單據':'→ View Source',
 
+    // Dynamic content static strings
+    '例：m²、roll、kg':'e.g. m², roll, kg',
+    '您好':'Hello',
+    '目前不列入未回覆追蹤':'Not tracked for follow-up',
+
     // Misc
     '版本號':'Version',
     '確認新增':'Confirm Add',
@@ -1217,6 +1223,15 @@
     [/^此供應商共有\s*(\d+)/,(_,n)=>'This supplier has '+n],
     [/^此客戶共有\s*(\d+)/,(_,n)=>'This customer has '+n],
     [/^(\d+)\s*個產品目錄成本需要更新/,(_,n)=>n+' catalog cost(s) need update'],
+    // Task title prefixes (stored in DB, translated on display)
+    [/^追蹤詢價：(.*)/,(_,s)=>'Track inquiry: '+s],
+    [/^追蹤報價：(.*)/,(_,s)=>'Track quote: '+s],
+    [/^追蹤供應商回覆 - (.*)/,(_,s)=>'Track supplier reply - '+s],
+    [/^追蹤樣品到貨：(.*)/,(_,s)=>'Track sample arrival: '+s],
+    [/^追蹤客戶回饋：(.*)/,(_,s)=>'Track customer feedback: '+s],
+    [/^追蹤客戶樣品回饋：(.*)/,(_,s)=>'Track customer sample feedback: '+s],
+    [/^追蹤訂單出貨：(.*)/,(_,s)=>'Track order shipment: '+s],
+    [/^追蹤訂單到貨：(.*)/,(_,s)=>'Track order arrival: '+s],
     // confirm modal with variable: "確定要移除 ABC 的關聯嗎？"
     [/^確定要移除\s+(.+)\s+的關聯嗎？$/,(_,label)=>'Confirm remove link for '+label+'?'],
     // "確定要刪除「X」嗎？"
@@ -1225,14 +1240,43 @@
     [/^確定要(.+)此使用者嗎？$/,(_,action)=>'Confirm '+action+' this user?'],
     // "N 筆" counter generic → "N items"
     [/^(\d+)\s*筆$/,(_,n)=>n+' items'],
+    // Summary bar strings (set via textContent)
+    [/^(\d+)\s*筆進行中\s*\/\s*共\s*(\d+)\s*筆$/,(_,a,t)=>a+' active / '+t+' total'],
+    [/^(\d+)\s*筆符合\s*\/\s*(\d+)\s*筆進行中\s*\/\s*共\s*(\d+)\s*筆$/,(_,m,a,t)=>m+' matching / '+a+' active / '+t+' total'],
+    [/^(\d+)\s*筆採購單$/,(_,n)=>n+' PO(s)'],
+    [/^(\d+)\s*筆訂單$/,(_,n)=>n+' order(s)'],
+    [/^(\d+)\s*位聯絡人$/,(_,n)=>n+' contact(s)'],
+    [/^(\d+)\s*家客戶\s*\/\s*(\d+)\s*位聯絡人$/,(_,c,p)=>c+' companies / '+p+' contacts'],
+    [/^(\d+)\s*家供應商\s*\/\s*(\d+)\s*位聯絡人$/,(_,c,p)=>c+' suppliers / '+p+' contacts'],
+    [/^此客戶共有\s*(\d+)\s*位聯絡人：$/,(_,n)=>'This customer has '+n+' contacts:'],
+    [/^此供應商共有\s*(\d+)\s*位聯絡人：$/,(_,n)=>'This supplier has '+n+' contacts:'],
+  ]
+
+  // Substring patterns: replace Chinese fragments within longer text nodes
+  const SUBSTR_PATTERNS=[
+    [/\(系統管理員\)/g,'(Admin)'],
+    [/\(經理\)/g,'(Manager)'],
+    [/\(一般使用者\)/g,'(User)'],
+    [/(\d+)\s*天未回覆/g,(_,n)=>n+' days no reply'],
+    [/已\s*(\d+)\s*天未回覆/g,(_,n)=>n+' days no reply'],
+    [/已等待\s*(\d+)\s*天/g,(_,n)=>'Waiting '+n+' days'],
+    [/▸\s*修改歷史（(\d+)\s*筆）/g,(_,n)=>'▸ Edit history ('+n+')'],
+    [/(\d+)\s*筆採購單/g,(_,n)=>n+' PO(s)'],
+    [/(\d+)\s*位聯絡人/g,(_,n)=>n+' contact(s)'],
   ]
 
   function translateDynamic(text){
+    // Full-string patterns first
     for(const [re,fn] of DYNAMIC_PATTERNS){
       const m=text.match(re)
       if(m)return fn(...m)
     }
-    return text
+    // Substring replacement
+    let result=text
+    for(const [re,fn] of SUBSTR_PATTERNS){
+      result=result.replace(re,fn)
+    }
+    return result
   }
 
   // ── Core translation engine ───────────────────────────────────────────────
@@ -1273,17 +1317,28 @@
   let _observer=null
   function startObserver(){
     if(_observer)return
+    let _raf=null
     _observer=new MutationObserver(mutations=>{
       if(currentLang==='zh')return
       for(const m of mutations){
         for(const node of m.addedNodes){
           if(node.nodeType===1)applyTranslations(node)
           else if(node.nodeType===3){
-            const t=node.nodeValue&&node.nodeValue.trim()
-            if(t&&DICT[t])node.nodeValue=node.nodeValue.replace(t,DICT[t])
+            const orig=node.nodeValue
+            const t=orig&&orig.trim()
+            if(!t)continue
+            if(DICT[t]){node.nodeValue=orig.replace(t,DICT[t])}
+            else{const d=translateDynamic(t);if(d!==t)node.nodeValue=orig.replace(t,d)}
           }
         }
+        // Also re-translate the container when innerHTML is replaced
+        if(m.removedNodes.length&&m.addedNodes.length&&m.target.nodeType===1){
+          applyTranslations(m.target)
+        }
       }
+      // Debounced full pass to catch anything missed
+      if(_raf)cancelAnimationFrame(_raf)
+      _raf=requestAnimationFrame(applyToAll)
     })
     _observer.observe(document.body,{childList:true,subtree:true})
   }
@@ -1342,6 +1397,13 @@
     if(typeof window.showToast!=='function'||window._showToastOriginal)return
     window._showToastOriginal=window.showToast
     window.showToast=(msg,type)=>window._showToastOriginal(translateToastMsg(msg),type)
+  }
+
+  // ── Global translate helper (used by render functions in index.html) ─────
+  window._jcT=function(text){
+    if(!text||currentLang==='zh')return text
+    if(DICT[text])return DICT[text]
+    return translateDynamic(text)
   }
 
   // ── Init ──────────────────────────────────────────────────────────────────

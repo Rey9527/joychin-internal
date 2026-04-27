@@ -258,18 +258,19 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <button class="nav-item" id="nav-suppliers_mgmt" onclick="switchTab('suppliers_mgmt')">
       <span class="nav-icon">🏭</span><span>供應商管理</span>
     </button>
-    <button class="nav-item" id="nav-users_mgmt" onclick="switchTab('users_mgmt')" style="display:none">
-      <span class="nav-icon">⚙️</span><span>使用者管理</span>
-    </button>
-    <button class="nav-item" id="nav-settings" onclick="switchTab('settings')" style="display:none">
-      <span class="nav-icon">🧭</span><span>系統設定</span>
-    </button>
     <div class="nav-section">產品</div>
     <button class="nav-item" id="nav-products" onclick="switchTab('products')">
       <span class="nav-icon">📦</span><span>產品目錄</span>
     </button>
     <button class="nav-item" id="nav-docs" onclick="switchTab('docs')">
       <span class="nav-icon">📁</span><span>技術文件庫</span>
+    </button>
+    <div class="nav-section">設定</div>
+    <button class="nav-item" id="nav-users_mgmt" onclick="switchTab('users_mgmt')" style="display:none">
+      <span class="nav-icon">⚙️</span><span>使用者管理</span>
+    </button>
+    <button class="nav-item" id="nav-settings" onclick="switchTab('settings')" style="display:none">
+      <span class="nav-icon">🧭</span><span>系統設定</span>
     </button>
   </nav>
   <div class="sidebar-footer">
@@ -1699,7 +1700,7 @@ function renderTasks(){
     return '<div class="row '+(overdue?'overdue':'')+'" onclick="openTaskModalById(\''+t.id+'\')">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
-      '<span style="font-size:13px;font-weight:500'+(t.status==='done'?';text-decoration:line-through;color:#aaa':'')+'">'+t.title+'</span>'+
+      '<span style="font-size:13px;font-weight:500'+(t.status==='done'?';text-decoration:line-through;color:#aaa':'')+'">'+(window._jcT?window._jcT(t.title):t.title)+'</span>'+
       '<span class="badge" style="background:'+pr.bg+';color:'+pr.color+';border:1px solid '+pr.color+'">'+pr.label+'</span>'+
       '</div>'+
       '<div style="font-size:11px;color:'+(overdue?'#A32D2D':'#aaa')+'">'+
@@ -3094,7 +3095,7 @@ async function _quickCreateTask(taskData){
   if(exists){showToast('已有進行中的追蹤工作');return}
   const{error}=await sb.from('tasks').insert(taskData)
   if(error){showToast('建立失敗：'+error.message,'error');return}
-  await loadTasks();showToast('📌 追蹤工作已建立')
+  await loadTasks();renderTasks();showToast('📌 追蹤工作已建立')
 }
 
 async function createTaskFromInquiry(inqId){
