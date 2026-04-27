@@ -21,6 +21,7 @@
     '詢價管理':'Inquiries',
     '報價管理':'Quotations',
     '樣品管理':'Samples',
+    '儀表板':'Dashboard',
     '工作追蹤':'Tasks',
     '訂單管理':'Orders',
     '船運管理':'Shipments',
@@ -76,7 +77,25 @@
     '等待回饋':'Awaiting Feedback',
     '無庫存':'No Stock',
 
-    // Filter options — Tasks
+    // Dashboard
+    '目前無待追蹤項目':'No pending items',
+    '↻ 重新整理':'↻ Refresh',
+    '詢價逾期未回':'Inquiry overdue — no reply',
+    '樣品逾期未到貨':'Sample overdue — not arrived',
+    '樣品逾期未回饋':'Sample overdue — no feedback',
+    '生產中但交期已過':'In production — delivery overdue',
+    '出貨超過 7 天未到貨':'Shipped — not received after 7 days',
+    '客戶需要回顧':'Customer review overdue',
+    '採購單未掛船運':'PO without shipment',
+    '已訂艙但未掛採購單':'Booked shipment — no PO linked',
+    'ETA 已到，請更新報關狀態':'ETA reached — update to customs',
+    '報關中超過 5 天，請確認入庫':'Customs >5 days — confirm receipt',
+    '→ 前往':'→ Go',
+    '已 ':'After ',
+    ' 天':' days',
+    '項待追蹤':' items to follow up',
+
+    // Filter options — Tasks (kept for legacy)
     '進行中':'In Progress',
     '已完成':'Completed',
     '緊急':'Urgent',

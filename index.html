@@ -230,8 +230,8 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section">業務</div>
-    <button class="nav-item active" id="nav-tasks" onclick="switchTab('tasks')">
-      <span class="nav-icon">✅</span><span>工作追蹤</span>
+    <button class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">
+      <span class="nav-icon">🏠</span><span>儀表板</span>
     </button>
     <button class="nav-item" id="nav-inquiry" onclick="switchTab('inquiry')">
       <span class="nav-icon">📋</span><span>詢價管理</span>
@@ -378,29 +378,13 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div id="sample-list"></div>
     </div>
 
-    <!-- 工作追蹤 -->
-    <div id="tab-tasks" style="display:none">
+    <!-- 儀表板 -->
+    <div id="tab-dashboard" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
-        <div id="task-summary" style="font-size:12px;color:#888"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('tasks')">☰ 篩選</button>
-          <button class="btn btn-primary" onclick="openTaskModal()">+ 新增工作</button>
-        </div>
+        <div id="dashboard-summary" style="font-size:12px;color:#888"></div>
+        <button class="btn btn-ghost btn-sm" onclick="renderDashboard()">↻ 重新整理</button>
       </div>
-      <div class="filter-bar mobile-drawer-source" id="task-filter-bar">
-        <select id="ft-status" onchange="renderTasks()">
-          <option value="">全部</option>
-          <option value="open">進行中</option>
-          <option value="done">已完成</option>
-        </select>
-        <select id="ft-priority" onchange="renderTasks()">
-          <option value="">全部優先級</option>
-          <option value="urgent">緊急</option>
-          <option value="high">高</option>
-          <option value="normal">一般</option>
-        </select>
-      </div>
-      <div id="task-list"></div>
+      <div id="dashboard-list"></div>
     </div>
 
     <!-- 訂單管理 -->
@@ -774,12 +758,6 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 </div>
 
 <!-- 工作單 Modal -->
-<div class="modal-overlay" id="modal-task" onclick="closeModalOnBg(event,'modal-task')">
-  <div class="modal-box sm">
-    <div class="modal-hd" id="modal-task-hd"></div>
-    <div class="modal-bd" id="modal-task-bd"></div>
-  </div>
-</div>
 
 <!-- 訂單 Modal -->
 <div class="modal-overlay" id="modal-order" onclick="closeModalOnBg(event,'modal-order')">
@@ -1246,7 +1224,7 @@ const QUO_STATUS=[
 
 let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteItems=[],settings={},products=[]
 let productViewMode=localStorage.getItem('productViewMode')||'grid'
-let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[],tasks=[]
+let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[]
 let orders=[],orderItems=[]
 let shipments=[],shipmentPurchaseOrders=[]
 let purchaseOrders=[],purchaseOrderItems=[],purchaseOrderOrderLinks=[]
@@ -1306,12 +1284,12 @@ async function init(){
       document.getElementById('nav-purchases').style.display='flex'
     }
   }
-  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadQuoteChanges(),loadSettings(),loadProducts(),loadSamples(),loadTasks(),loadOrders(),loadShipments(),loadUsers(),loadPurchaseOrders()])
+  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadQuoteChanges(),loadSettings(),loadProducts(),loadSamples(),loadOrders(),loadShipments(),loadUsers(),loadPurchaseOrders()])
   const savedTab=sessionStorage.getItem(SESSION_ACTIVE_TAB_KEY)
   if(savedTab&&TAB_LABELS[savedTab]){
     switchTab(savedTab,false)
   } else {
-    renderInquiries(); renderDocs(); populateFilterCustomers()
+    switchTab('dashboard',false)
   }
   enhanceNumericInputs()
   document.addEventListener('wheel',e=>{
@@ -1361,11 +1339,6 @@ async function loadSamples(){
   ])
   samples=s||[];sampleRequestsIn=ri||[];sampleShipmentsOut=so||[]
 }
-async function loadTasks(){
-  const{data}=await sb.from('tasks').select('*').order('due_date',{ascending:true})
-  tasks=data||[]
-}
-
 // ===== 樣品管理 =====
 function calcSampleStatus(sampleId,stockQty){
   const reqs=sampleRequestsIn.filter(r=>r.sample_id===sampleId)
@@ -1530,7 +1503,6 @@ function _renderSampleModal(){
         '<span style="flex:1">'+(r.requested_date||'—')+' · 數量 '+(r.qty||'—')+' '+(s.unit||'')+(r.notes?' · '+r.notes:'')+'</span>'+
         stLabel+
         (isPending?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11;white-space:nowrap" onclick="markRequestReceived('+r.id+','+r.qty+')">標記已到貨</button>':'')+
-        (isPending?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="createTaskFromSampleRequest('+id+','+r.id+')">📌 追蹤</button>':'')+
         '</div></div>'
     })
   } else {
@@ -1677,137 +1649,88 @@ async function submitShipFeedback(shipId){
   await loadSamples();_renderSampleModal();renderSamples();showToast('回饋已登記')
 }
 
-// ===== 工作追蹤 =====
-function renderTasks(){
-  const el=document.getElementById('task-list')
-  const sum=document.getElementById('task-summary')
+// ===== 儀表板 =====
+function scanDashboardItems(){
+  const today=new Date()
+  const todayStr=today.toISOString().slice(0,10)
+  const daysDiff=(dateStr)=>Math.floor((today-new Date(dateStr))/(1000*60*60*24))
+  const items=[]
+  inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').forEach(i=>{
+    items.push({group:'inquiry',label:'詢價逾期未回',desc:i.product+(i.supplier?' · '+i.supplier:''),days:inquiryPendingDays(i),urgency:'high',id:i.id})
+  })
+  sampleRequestsIn.filter(r=>r.status==='pending'&&r.requested_date&&daysDiff(r.requested_date)>=7).forEach(r=>{
+    const s=samples.find(x=>x.id===r.sample_id)
+    items.push({group:'sample',label:'樣品逾期未到貨',desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.requested_date),urgency:'high',id:r.sample_id})
+  })
+  sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&daysDiff(r.shipped_date)>=14).forEach(r=>{
+    const s=samples.find(x=>x.id===r.sample_id)
+    items.push({group:'sample',label:'樣品逾期未回饋',desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.shipped_date),urgency:'normal',id:r.sample_id})
+  })
+  orders.filter(o=>o.status==='in_production'&&o.expected_delivery&&daysDiff(o.expected_delivery)>=0).forEach(o=>{
+    items.push({group:'order',label:'生產中但交期已過',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:daysDiff(o.expected_delivery),urgency:'high',id:o.id})
+  })
+  orders.filter(o=>o.status==='shipped'&&o.updated_at&&daysDiff(o.updated_at)>=7).forEach(o=>{
+    items.push({group:'order',label:'出貨超過 7 天未到貨',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:daysDiff(o.updated_at),urgency:'normal',id:o.id})
+  })
+  customers.filter(c=>customerStatus(c)==='overdue').forEach(c=>{
+    items.push({group:'customer',label:'客戶需要回顧',desc:c.company,days:null,urgency:'normal',id:c.id})
+  })
+  const linkedPoIds=new Set(shipmentPurchaseOrders.map(x=>String(x.po_id)))
+  purchaseOrders.filter(po=>!['completed','cancelled'].includes(po.status)&&!linkedPoIds.has(String(po.id))).forEach(po=>{
+    items.push({group:'shipment',label:'採購單未掛船運',desc:'#'+po.id+(po.supplier?' · '+po.supplier:''),days:null,urgency:'normal',id:po.id,gotoModule:'purchases'})
+  })
+  const linkedShipIds=new Set(shipmentPurchaseOrders.map(x=>String(x.shipment_id)))
+  shipments.filter(s=>s.status==='booked'&&!linkedShipIds.has(String(s.id))).forEach(s=>{
+    items.push({group:'shipment',label:'已訂艙但未掛採購單',desc:s.shipment_no,days:null,urgency:'normal',id:s.id,gotoModule:'shipments'})
+  })
+  shipments.filter(s=>s.status==='in_transit'&&s.eta&&s.eta<=todayStr).forEach(s=>{
+    items.push({group:'shipment',label:'ETA 已到，請更新報關狀態',desc:s.shipment_no+(s.eta?' · ETA '+s.eta:''),days:daysDiff(s.eta),urgency:'high',id:s.id,gotoModule:'shipments'})
+  })
+  shipments.filter(s=>s.status==='customs_clearance'&&s.updated_at&&daysDiff(s.updated_at)>=5).forEach(s=>{
+    items.push({group:'shipment',label:'報關中超過 5 天，請確認入庫',desc:s.shipment_no,days:daysDiff(s.updated_at),urgency:'high',id:s.id,gotoModule:'shipments'})
+  })
+  return items
+}
+function renderDashboard(){
+  const el=document.getElementById('dashboard-list')
+  const sum=document.getElementById('dashboard-summary')
   if(!el)return
-  const fSt=document.getElementById('ft-status')?.value||''
-  const fPr=document.getElementById('ft-priority')?.value||''
-  let list=tasks.filter(t=>{
-    if(fSt&&t.status!==fSt)return false
-    if(fPr&&t.priority!==fPr)return false
-    return true
-  })
-  const open=list.filter(t=>t.status==='open')
-  const done=list.filter(t=>t.status==='done')
-  if(sum)sum.textContent=open.length+' 筆進行中 / 共 '+list.length+' 筆'
-  if(!list.length){el.innerHTML='<div class="loading">尚無工作項目</div>';return}
-  const today=new Date().toISOString().slice(0,10)
-  const taskRow=t=>{
-    const pr=PRIORITY_STATUS.find(x=>x.id===t.priority)||PRIORITY_STATUS[0]
-    const overdue=t.due_date&&t.due_date<today&&t.status==='open'
-    return '<div class="row '+(overdue?'overdue':'')+'" onclick="openTaskModalById(\''+t.id+'\')">'+
-      '<div style="flex:1;min-width:0">'+
-      '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
-      '<span style="font-size:13px;font-weight:500'+(t.status==='done'?';text-decoration:line-through;color:#aaa':'')+'">'+(window._jcT?window._jcT(t.title):t.title)+'</span>'+
-      '<span class="badge" style="background:'+pr.bg+';color:'+pr.color+';border:1px solid '+pr.color+'">'+pr.label+'</span>'+
-      '</div>'+
-      '<div style="font-size:11px;color:'+(overdue?'#A32D2D':'#aaa')+'">'+
-      (t.due_date?'到期 '+t.due_date+' '+(overdue?'⚠ 已逾期':''):'無到期日')+
-      (t.ref_module?' · '+t.ref_module+(t.ref_id?' #'+t.ref_id:''):'')+
-      '</div></div>'+
-      '<div style="display:flex;gap:6px;flex-shrink:0">'+
-      (t.status==='open'?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11" onclick="event.stopPropagation();completeTask(\''+t.id+'\')">✓ 完成</button>':'')+
-      '<button class="btn btn-ghost btn-sm" style="color:#aaa" onclick="event.stopPropagation();deleteTask(\''+t.id+'\')">×</button>'+
-      '</div></div>'
+  const items=scanDashboardItems()
+  if(sum)sum.textContent=items.length?items.length+' 項待追蹤':'目前無待追蹤項目'
+  if(!items.length){el.innerHTML='<div class="loading" style="color:#3B6D11">✓ 目前無待追蹤項目</div>';return}
+  const groups=[
+    {key:'inquiry',icon:'📋',label:'詢價'},
+    {key:'sample',icon:'🧪',label:'樣品'},
+    {key:'order',icon:'📦',label:'訂單'},
+    {key:'customer',icon:'👥',label:'客戶'},
+    {key:'shipment',icon:'🚢',label:'船運'},
+  ]
+  let html=''
+  for(const g of groups){
+    const gItems=items.filter(x=>x.group===g.key)
+    if(!gItems.length)continue
+    html+='<div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.5px;margin:16px 0 6px">'+g.icon+' '+g.label+'（'+gItems.length+'）</div>'
+    html+=gItems.map(item=>{
+      const urgColor=item.urgency==='high'?'#A32D2D':'#854F0B'
+      const urgBg=item.urgency==='high'?'#FCEBEB':'#FFF6D8'
+      const mod=item.gotoModule||item.group
+      const gotoFn=mod==='purchases'?"switchTab('purchases')"
+        :mod==='shipments'?"switchTab('shipments');setTimeout(()=>openShipmentModal("+item.id+"),80)"
+        :mod==='inquiry'?"switchTab('inquiry');setTimeout(()=>openInqModal('"+item.id+"'),80)"
+        :mod==='sample'?"switchTab('samples');setTimeout(()=>openSampleModal("+item.id+"),80)"
+        :mod==='order'?"switchTab('orders');setTimeout(()=>openOrderModal('"+item.id+"'),80)"
+        :mod==='customer'?"switchTab('customers')"
+        :"switchTab('"+mod+"')"
+      return '<div class="row" style="border-left:3px solid '+urgColor+';background:'+urgBg+'40;cursor:default">'+
+        '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:13px;font-weight:500;margin-bottom:2px">'+item.label+'</div>'+
+        '<div style="font-size:12px;color:#666">'+esc(item.desc||'')+((item.days!=null)?' · 已 '+item.days+' 天':'')+ '</div>'+
+        '</div>'+
+        '<button class="btn btn-ghost btn-sm" style="flex-shrink:0;color:#185FA5;white-space:nowrap" onclick="'+gotoFn+'">→ 前往</button>'+
+        '</div>'
+    }).join('')
   }
-  let html=open.map(taskRow).join('')
-  if(done.length)html+='<div style="font-size:11px;color:#aaa;margin:12px 0 6px">已完成（'+done.length+'）</div>'+done.map(taskRow).join('')
   el.innerHTML=html
-}
-
-function clearTaskFilters(){
-  ;['ft-status','ft-priority'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
-  renderTasks()
-}
-
-function openTaskModalById(id){
-  const task=tasks.find(t=>String(t.id)===String(id))
-  if(!task)return
-  selectedTaskId=task.id
-  openTaskModal(task)
-}
-
-function openTaskModal(prefill={}){
-  const isEdit=!!prefill.id
-  selectedTaskId=isEdit?prefill.id:null
-  const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
-  const lockRef=isEdit&&!!(prefill.ref_module||prefill.ref_id)
-  document.getElementById('modal-task-hd').innerHTML=
-    '<div style="font-size:14px;font-weight:600">'+(isEdit?'工作詳情':'新增工作')+'</div>'+
-    '<button class="modal-close" onclick="closeModal(\'modal-task\')">×</button>'
-  const hasRef=['inquiry','quote','sample','order'].includes(prefill.ref_module)&&prefill.ref_id
-  const _tkTitleDisplay=(window._jcT?window._jcT(prefill.title||''):prefill.title||'')
-  document.getElementById('modal-task-bd').innerHTML=
-    '<div style="margin-bottom:10px"><label>標題 <span class="req">*</span></label><input id="tk-title" value="'+_tkTitleDisplay+'" '+(isEdit?'readonly style="background:#f8f8f5;color:#666"':'')+' /></div>'+
-    '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>關聯模組</label><select id="tk-module" '+(lockRef?'disabled style="background:#f8f8f5;color:#666"':'')+'>'+
-    buildOptionPairs(TASK_MODULE_OPTION_PAIRS,prefill.ref_module)+
-    '</select></div>'+
-    '<div><label>關聯 ID</label><input id="tk-ref-id" value="'+(prefill.ref_id||'')+'" placeholder="選填" '+(lockRef?'readonly style="background:#f8f8f5;color:#666"':'')+' /></div>'+
-    '<div><label>供應商</label><select id="tk-supplier"><option value="">—</option>'+suppliers.map(s=>'<option value="'+s.id+'" '+(prefill.supplier_id===s.id?'selected':'')+'>'+s.company+'</option>').join('')+'</select></div>'+
-    '<div><label>客戶</label><select id="tk-customer"><option value="">—</option>'+customers.map(c=>'<option value="'+c.id+'" '+(prefill.customer_id===c.id?'selected':'')+'>'+c.company+'</option>').join('')+'</select></div>'+
-    '<div><label>到期日</label><input id="tk-due" type="date" value="'+(prefill.due_date||'')+'" /></div>'+
-    '<div><label>優先級</label><select id="tk-priority">'+PRIORITY_STATUS.map(p=>'<option value="'+p.id+'" '+((prefill.priority||'normal')===p.id?'selected':'')+'>'+(p.label)+'</option>').join('')+'</select></div>'+
-    '</div>'+
-    '<div style="margin-bottom:10px"><label>狀態</label><select id="tk-status"><option value="open" '+((prefill.status||'open')==='open'?'selected':'')+'>進行中</option><option value="done" '+(prefill.status==='done'?'selected':'')+'>已完成</option></select></div>'+
-    '<div style="margin-bottom:14px"><label>備註</label><textarea id="tk-notes">'+(prefill.notes||'')+'</textarea></div>'+
-    '<div class="modal-foot">'+
-    '<button class="btn btn-primary" onclick="'+(isEdit?'saveTask()':'submitTask()')+'">'+(isEdit?'儲存':'新增工作')+'</button>'+
-    (isEdit&&prefill.status==='open'?'<button class="btn btn-ghost" style="color:#3B6D11" onclick="completeTask(\''+prefill.id+'\')">✓ 完成</button>':'')+
-    (hasRef?'<button class="btn btn-ghost" style="color:#185FA5" onclick="goToRef(\''+prefill.ref_module+'\',\''+prefill.ref_id+'\')">→ 前往原單據</button>':'')+
-    (isEdit?'<button class="btn btn-ghost" style="color:#aaa" onclick="deleteTask(\''+prefill.id+'\')">刪除</button>':'')+
-    '</div>'
-  document.getElementById('modal-task').classList.add('open')
-}
-
-async function submitTask(){
-  const title=document.getElementById('tk-title')?.value.trim()
-  if(!title){showToast('請填寫工作標題','error');return}
-  const{error}=await sb.from('tasks').insert({
-    title,
-    ref_module:document.getElementById('tk-module')?.value||null,
-    ref_id:document.getElementById('tk-ref-id')?.value.trim()||null,
-    supplier_id:parseInt(document.getElementById('tk-supplier')?.value)||null,
-    customer_id:parseInt(document.getElementById('tk-customer')?.value)||null,
-    due_date:document.getElementById('tk-due')?.value||null,
-    priority:document.getElementById('tk-priority')?.value||'normal',
-    notes:document.getElementById('tk-notes')?.value.trim()||null,
-    status:document.getElementById('tk-status')?.value||'open'
-  })
-  if(error){showToast('新增失敗：'+error.message,'error');return}
-  await loadTasks();closeModal('modal-task');renderTasks();showToast('工作已新增')
-}
-
-async function saveTask(){
-  if(!selectedTaskId)return
-  const{error}=await sb.from('tasks').update({
-    ref_module:document.getElementById('tk-module')?.value||null,
-    ref_id:document.getElementById('tk-ref-id')?.value.trim()||null,
-    supplier_id:parseInt(document.getElementById('tk-supplier')?.value)||null,
-    customer_id:parseInt(document.getElementById('tk-customer')?.value)||null,
-    due_date:document.getElementById('tk-due')?.value||null,
-    priority:document.getElementById('tk-priority')?.value||'normal',
-    notes:document.getElementById('tk-notes')?.value.trim()||null,
-    status:document.getElementById('tk-status')?.value||'open'
-  }).eq('id',selectedTaskId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
-  await loadTasks();renderTasks();closeModal('modal-task');showToast('工作已更新')
-}
-
-async function completeTask(id){
-  const{error}=await sb.from('tasks').update({status:'done'}).eq('id',id)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
-  await loadTasks();renderTasks();closeModal('modal-task')
-}
-
-async function deleteTask(id){
-  confirmModal('確定要刪除這筆工作嗎？',async()=>{
-    const{error}=await sb.from('tasks').delete().eq('id',id)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
-    await loadTasks();renderTasks();closeModal('modal-task')
-  })
 }
 
 // ===== 訂單管理 =====
@@ -3090,122 +3013,6 @@ async function rejectOrder(orderId){
 
 function daysFromNow(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 
-async function _quickCreateTask(taskData){
-  await loadTasks()
-  const exists=tasks.some(t=>t.status==='open'&&t.ref_module===taskData.ref_module&&String(t.ref_id)===String(taskData.ref_id))
-  if(exists){showToast('已有進行中的追蹤工作');return}
-  const{error}=await sb.from('tasks').insert(taskData)
-  if(error){showToast('建立失敗：'+error.message,'error');return}
-  await loadTasks();renderTasks();showToast('📌 追蹤工作已建立')
-}
-
-async function createTaskFromInquiry(inqId){
-  const i=inquiries.find(x=>x.id===inqId);if(!i)return
-  const sup=suppliers.find(s=>s.company===i.supplier)
-  await _quickCreateTask({title:'追蹤詢價：'+i.product,ref_module:'inquiry',ref_id:String(inqId),supplier_id:sup?.id||null,due_date:daysFromNow(3),priority:'normal',status:'open',auto_generated:false})
-}
-
-async function createTaskFromQuote(headerId){
-  const h=quoteHeaders.find(x=>x.id===headerId);if(!h)return
-  const cust=customers.find(c=>c.company===h.customer)
-  await _quickCreateTask({title:'追蹤報價：'+h.customer,ref_module:'quote',ref_id:String(headerId),customer_id:cust?.id||null,due_date:daysFromNow(5),priority:'normal',status:'open',auto_generated:false})
-}
-
-async function createTaskFromSampleRequest(sampleId,requestId){
-  const s=samples.find(x=>x.id===sampleId)
-  const sup=s?suppliers.find(x=>x.id===s.supplier_id):null
-  await _quickCreateTask({title:'追蹤樣品到貨：'+(s?.product_name||'#'+sampleId),ref_module:'sample',ref_id:String(sampleId),supplier_id:sup?.id||null,due_date:daysFromNow(7),priority:'normal',status:'open',auto_generated:false})
-}
-
-async function createTaskFromShipment(sampleId,shipmentId){
-  const s=samples.find(x=>x.id===sampleId)
-  const ship=sampleShipmentsOut.find(x=>x.id===shipmentId)
-  const cust=ship?.customer_id?customers.find(x=>x.id===ship.customer_id):null
-  await _quickCreateTask({title:'追蹤客戶回饋：'+(s?.product_name||'#'+sampleId),ref_module:'sample',ref_id:String(sampleId),customer_id:cust?.id||null,due_date:daysFromNow(14),priority:'normal',status:'open',auto_generated:false})
-}
-
-function goToRef(module,refId){
-  if(module==='inquiry'){switchTab('inquiry');setTimeout(()=>openInqModal(refId),80)}
-  else if(module==='quote'){switchTab('quotes');setTimeout(()=>openQuoteModal(refId),80)}
-  else if(module==='sample'){switchTab('samples');setTimeout(()=>openSampleModal(parseInt(refId)),80)}
-  else if(module==='order'){switchTab('orders');setTimeout(()=>openOrderModal(refId),80)}
-}
-
-function inquiryPendingDays(i){
-  if(!['pending','asked'].includes(i?.status))return 0
-  const base=i?.updated_at||i?.created_at
-  if(!base)return 0
-  return Math.floor((new Date()-new Date(base))/(1000*60*60*24))
-}
-function inquiryFollowupLevel(i){
-  if(!['pending','asked'].includes(i?.status))return 'ok'
-  const days=inquiryPendingDays(i)
-  if(days>=getInquiryOverdueDays())return 'overdue'
-  if(days>=getInquiryWarnDays())return 'warn'
-  return 'ok'
-}
-
-async function autoScanTasks(){
-  await loadTasks()
-  const today=new Date()
-  const daysDiff=(dateStr)=>Math.floor((today-new Date(dateStr))/(1000*60*60*24))
-  const hasOpen=(module,refId)=>tasks.some(t=>t.status==='open'&&t.ref_module===module&&t.ref_id===refId)
-  const toCreate=[]
-  // 詢價超過 3 天未更新
-  inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').forEach(i=>{
-    if(!hasOpen('inquiry',i.id))toCreate.push({title:'追蹤供應商回覆 - '+i.customer,ref_module:'inquiry',ref_id:i.id,priority:'normal',status:'open'})
-  })
-  // 索取樣品超過 7 天未到貨
-  sampleRequestsIn.filter(r=>r.status==='pending'&&r.requested_date&&daysDiff(r.requested_date)>=7).forEach(r=>{
-    const refId=String(r.sample_id)
-    if(!hasOpen('sample',refId)){
-      const s=samples.find(x=>x.id===r.sample_id)
-      const sup=s?suppliers.find(x=>x.id===s.supplier_id):null
-      toCreate.push({title:'追蹤樣品到貨：'+(s?.product_name||'#'+r.sample_id),ref_module:'sample',ref_id:refId,supplier_id:sup?.id||null,priority:'normal',status:'open'})
-    }
-  })
-  // 寄出樣品超過 14 天未回饋
-  sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&daysDiff(r.shipped_date)>=14).forEach(r=>{
-    const refId=String(r.sample_id)
-    if(!hasOpen('sample',refId)){
-      const s=samples.find(x=>x.id===r.sample_id)
-      const cust=r.customer_id?customers.find(x=>x.id===r.customer_id):null
-      toCreate.push({title:'追蹤客戶樣品回饋：'+(s?.product_name||'#'+r.sample_id),ref_module:'sample',ref_id:refId,customer_id:cust?.id||null,priority:'normal',status:'open'})
-    }
-  })
-  // 訂單生產中且預計交期已過未出貨
-  orders.filter(o=>o.status==='in_production'&&o.expected_delivery&&daysDiff(o.expected_delivery)>=0).forEach(o=>{
-    const refId=String(o.id)
-    if(!hasOpen('order',refId))
-      toCreate.push({title:'追蹤訂單出貨：'+o.id,ref_module:'order',ref_id:refId,supplier_id:o.supplier_id||null,priority:'high',status:'open'})
-  })
-  // 訂單已出貨超過 7 天未到貨
-  orders.filter(o=>o.status==='shipped'&&o.updated_at&&daysDiff(o.updated_at)>=7).forEach(o=>{
-    const refId=String(o.id)
-    if(!hasOpen('order',refId))
-      toCreate.push({title:'追蹤訂單到貨：'+o.id,ref_module:'order',ref_id:refId,customer_id:o.customer_id||null,priority:'normal',status:'open'})
-  })
-  // 客戶資料需要回顧
-  customers.filter(c=>customerStatus(c)==='overdue').forEach(c=>{
-    if(!hasOpen('customer',c.id))
-      toCreate.push({title:'回顧客戶資料：'+c.company,ref_module:'customer',ref_id:c.id,priority:'normal',status:'open'})
-  })
-  // 採購單待審批超過 1 天
-  purchaseOrders.filter(po=>po.status==='pending_approval'&&po.created_at&&daysDiff(po.created_at)>=1).forEach(po=>{
-    if(!hasOpen('purchase',po.id))
-      toCreate.push({title:'待審批採購單：'+po.id,ref_module:'purchase',ref_id:po.id,priority:'high',status:'open'})
-  })
-  // 口頭承諾訂單待審批超過 1 天
-  orders.filter(o=>o.source==='verbal'&&(o.approval_status||'none')==='none'&&o.created_at&&daysDiff(o.created_at)>=1).forEach(o=>{
-    const refId=String(o.id)
-    if(!hasOpen('order',refId))
-      toCreate.push({title:'待審批口頭承諾訂單：'+o.id,ref_module:'order',ref_id:refId,priority:'high',status:'open'})
-  })
-  if(!toCreate.length)return
-  const{error}=await sb.from('tasks').insert(toCreate)
-  if(error){showToast('自動建立工作單失敗：'+error.message,'error');return}
-  await loadTasks()
-}
 
 function updateOverdueAlert(){
   const warn=inquiries.filter(i=>inquiryFollowupLevel(i)==='warn').length
@@ -4207,7 +4014,7 @@ async function confirmShopOrder(){
 }
 // ── end 採購選購 ──────────────────────────────────────────
 
-const TAB_LABELS={inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',tasks:'工作追蹤',orders:'訂單管理',shipments:'船運管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',settings:'系統設定',purchases:'採購單管理','purchase-shop':'採購選購'}
+const TAB_LABELS={dashboard:'儀表板',inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',orders:'訂單管理',shipments:'船運管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',settings:'系統設定',purchases:'採購單管理','purchase-shop':'採購選購'}
 function switchTab(tab,save=true){
   if(tab==='settings'&&!isManager()){
     showToast('只有管理者可以查看系統設定','error')
@@ -4226,7 +4033,7 @@ function switchTab(tab,save=true){
   if(tab==='quotes')renderQuotes()
   if(tab==='products'){populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()}
   if(tab==='samples')renderSamples()
-  if(tab==='tasks'){autoScanTasks();renderTasks()}
+  if(tab==='dashboard')renderDashboard()
   if(tab==='orders')renderOrders()
   if(tab==='shipments')renderShipments()
   if(tab==='users_mgmt'){loadUsers().then(renderUsersMgmt)}
@@ -4439,7 +4246,6 @@ function openFilterDrawer(kind){
     inquiry:{title:'詢價篩選',source:'inquiry-filter-bar'},
     quotes:{title:'報價篩選',source:'quote-filter-bar'},
     samples:{title:'樣品篩選',source:'sample-filter-bar'},
-    tasks:{title:'工作篩選',source:'task-filter-bar'},
     orders:{title:'訂單篩選',source:'order-filter-bar'},
     shipments:{title:'船運篩選',source:'shipment-filter-bar'},
     products:{title:'產品篩選',source:'product-filter-bar'},
@@ -4464,7 +4270,6 @@ function closeFilterDrawer(){
       'inquiry-filter-bar':['tab-inquiry','#inquiry-list'],
       'quote-filter-bar':['tab-quotes','#quote-list'],
       'sample-filter-bar':['tab-samples','#sample-list'],
-      'task-filter-bar':['tab-tasks','#task-list'],
       'order-filter-bar':['tab-orders','#order-list'],
       'shipment-filter-bar':['tab-shipments','#shipment-list'],
       'product-filter-bar':['tab-products','#product-list'],
@@ -4566,7 +4371,6 @@ function renderInqModalBd(){
     '<div style="margin-bottom:14px"><label>備註</label><textarea onchange="updateInqField(\'remarks\',this.value)">'+(i.remarks||'')+'</textarea></div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+
     '<button class="btn btn-ghost btn-sm" onclick="toggleTpl()">'+(showTpl?'收起範本':'產生詢問供應商訊息')+'</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="createTaskFromInquiry(\''+i.id+'\')">📌 建立追蹤工作</button>'+
     (i.supplier_price?'<button class="btn btn-ghost btn-sm" onclick="openAddInqToProduct(\''+i.id+'\')">📦 加入產品目錄</button>':'')+
     (i.supplier_price&&i.from_product_id?'<button class="btn btn-ghost btn-sm" onclick="updateProductCostFromInquiry(\''+i.id+'\')">📦 同步更新產品目錄成本</button>':'')+
     (i.supplier_price?'<button class="btn btn-primary btn-sm" onclick="sendToQuote(\''+i.id+'\')">收到成本 → 送去報價</button>':'')+
