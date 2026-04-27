@@ -3070,6 +3070,19 @@ async function rejectOrder(orderId){
 
 function daysFromNow(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 
+function inquiryPendingDays(i){
+  if(!['pending','asked'].includes(i?.status))return 0
+  const base=i?.updated_at||i?.created_at
+  if(!base)return 0
+  return Math.floor((new Date()-new Date(base))/(1000*60*60*24))
+}
+function inquiryFollowupLevel(i){
+  if(!['pending','asked'].includes(i?.status))return 'ok'
+  const days=inquiryPendingDays(i)
+  if(days>=getInquiryOverdueDays())return 'overdue'
+  if(days>=getInquiryWarnDays())return 'warn'
+  return 'ok'
+}
 
 function updateOverdueAlert(){
   const warn=inquiries.filter(i=>inquiryFollowupLevel(i)==='warn').length
