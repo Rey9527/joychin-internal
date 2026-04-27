@@ -15,6 +15,7 @@
     '設定':'Settings',
     '離型紙業務系統':'Release Liner System',
     '未登入':'Not logged in',
+    '內部詢價':'Internal Inquiry',
 
     // Nav items
     '詢價管理':'Inquiries',
