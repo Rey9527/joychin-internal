@@ -2301,7 +2301,7 @@ function openShipmentModal(id){
       (s.atd?'<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ATD</div><div style="font-size:14px;font-weight:500">'+s.atd+'</div></div>':'')+
       (s.ata?'<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ATA</div><div style="font-size:14px;font-weight:500">'+s.ata+'</div></div>':'')+
     '</div>'+
-    (nextSt&&s.status!=='completed'&&s.status!=='cancelled'?
+    (nextSt&&s.status!=='completed'&&s.status!=='cancelled'&&s.status!=='customs_clearance'?
       '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
       '<span style="font-size:12px;color:#666">推進狀態：</span>'+
       '<button class="btn btn-ghost btn-sm" style="color:#185FA5" onclick="quickUpdateShipmentStatus(\''+id+'\',\''+nextSt+'\')">'+nextStatusLabel[s.status]+'</button>'+
