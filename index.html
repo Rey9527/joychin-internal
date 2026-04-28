@@ -115,7 +115,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 #hamburger-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; color: #1a1a1a; line-height: 1; flex-shrink: 0; margin-right: 10px; }
 #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 299; }
 #sidebar-overlay.open { display: block; }
-.modal-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 16px 20px; background: #fff; }
+.modal-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 12px 20px; background: #fff; border-top: 1px solid #e5e5e0; position: sticky; bottom: 0; z-index: 2; }
 .nf-suggest-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid #e5e5e0; border-radius:6px; margin-top:4px; background:#f9f9f7; font-size:13px; }
 .nf-suggest-item:first-child { margin-top:6px; }
 @keyframes modal-slide-up { from { transform: translateY(60%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -150,8 +150,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   .modal-hd > :first-child { padding-top: 2px; }
   .modal-hd [style*="font-size:14px"] { font-size: 16px !important; line-height: 1.4; }
   .modal-bd { padding: 14px 16px 18px; }
-  .modal-foot { position: sticky; bottom: 0; background: #fff; padding: 12px 20px; margin: 8px -20px -20px; border-top: 1px solid #e5e5e0; z-index: 2; }
-  .modal-foot { padding: 12px 16px; margin: 8px -16px -18px; }
+  .modal-foot { padding: 12px 16px; }
   .modal-foot .btn,
   .modal-bd .btn,
   .row .btn,
@@ -387,6 +386,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <div id="dashboard-summary" style="font-size:12px;color:#888"></div>
         <button class="btn btn-ghost btn-sm" onclick="renderDashboard()">↻ 重新整理</button>
       </div>
+      <div id="dashboard-panels"></div>
       <div id="dashboard-list"></div>
     </div>
 
@@ -537,6 +537,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
             <button id="pvmode-grid" onclick="setProductViewMode('grid')" title="格狀" style="padding:5px 9px;border:none;background:#0F6E56;color:#fff;cursor:pointer;font-size:14px">⊞</button>
             <button id="pvmode-list" onclick="setProductViewMode('list')" title="條列" style="padding:5px 9px;border:none;background:transparent;color:#666;cursor:pointer;font-size:14px">☰</button>
           </div>
+          <button class="btn btn-ghost btn-sm" onclick="openInventoryModal()">📦 庫存管理</button>
           <button class="btn btn-primary" onclick="openProductModal()">+ 新增產品</button>
         </div>
       </div>
@@ -812,6 +813,15 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="modal-box">
     <div class="modal-hd" id="modal-complaint-hd"></div>
     <div class="modal-bd" id="modal-complaint-bd"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-inventory" onclick="closeModalOnBg(event,'modal-inventory')">
+  <div class="modal-box lg">
+    <div class="modal-hd">
+      <div style="font-size:14px;font-weight:600">📦 庫存管理</div>
+      <button class="modal-close" onclick="closeModal('modal-inventory')">×</button>
+    </div>
+    <div class="modal-bd" id="modal-inventory-bd"></div>
   </div>
 </div>
 <div class="modal-overlay" id="modal-new-inq" onclick="closeModalOnBg(event,'modal-new-inq')">
@@ -1262,6 +1272,7 @@ let purchaseOrders=[],purchaseOrderItems=[],purchaseOrderOrderLinks=[]
 let quoteChanges=[]
 let selectedInqId=null,selectedQuoteId=null,selectedSampleId=null,selectedOrderId=null,selectedShipmentId=null,selectedPurchaseId=null,selectedTaskId=null,activeTab='inquiry',showTpl=false
 let _isDirty=false
+let _dbCustomerRange='thisMonth'
 let _qPendingItems={},_qPendingHeader={}
 let _selectedQiId=null
 let _pendingOrderItems=[]
@@ -1720,14 +1731,88 @@ function scanDashboardItems(){
   shipments.filter(s=>s.status==='customs_clearance'&&s.updated_at&&daysDiff(s.updated_at)>=5).forEach(s=>{
     items.push({group:'shipment',label:'報關中超過 5 天，請確認入庫',desc:s.shipment_no,days:daysDiff(s.updated_at),urgency:'high',id:s.id,gotoModule:'shipments'})
   })
+  products.filter(p=>p.min_stock_qty!=null&&p.min_stock_qty>0&&(parseFloat(p.stock_qty)||0)<parseFloat(p.min_stock_qty)).forEach(p=>{
+    const qty=parseFloat(p.stock_qty)||0
+    const safe=parseFloat(p.min_stock_qty)
+    items.push({group:'inventory',label:'庫存低於安全水位',desc:p.product_name+' · 目前 '+qty+(p.unit?' '+p.unit:'')+' / 安全水位 '+safe+(p.unit?' '+p.unit:''),days:null,urgency:'high',id:p.id,gotoModule:'products'})
+  })
   return items
 }
 function renderDashboard(){
   const el=document.getElementById('dashboard-list')
+  const panels=document.getElementById('dashboard-panels')
   const sum=document.getElementById('dashboard-summary')
   if(!el)return
   const items=scanDashboardItems()
   if(sum)sum.textContent=items.length?items.length+' 項待追蹤':'目前無待追蹤項目'
+
+  // ── 上方三區塊 ──
+  if(panels){
+    const now=new Date()
+    const thisMonthStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')
+
+    // 1. 業務總覽卡片
+    const activeInq=inquiries.filter(i=>!['sent_to_quote','closed'].includes(i.status)).length
+    const activeQuotes=quoteHeaders.filter(q=>['draft','sent'].includes(q.status)).length
+    const thisMonthOrders=orders.filter(o=>o.order_date&&o.order_date.startsWith(thisMonthStr)).length
+    const openTasks=(typeof tasks!=='undefined'?tasks:[]).filter(t=>t.status==='open').length
+    const pendingApproval=purchaseOrders.filter(po=>po.status==='pending_approval').length
+    const cardDefs=[
+      {num:activeInq,label:'進行中詢價',tab:'inquiry'},
+      {num:activeQuotes,label:'進行中報價',tab:'quotes'},
+      {num:thisMonthOrders,label:'本月訂單',tab:'orders'},
+      {num:openTasks,label:'待處理工作',tab:null},
+      {num:pendingApproval,label:'待審批採購單',tab:'purchases'},
+    ]
+    let ph='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">'
+    for(const c of cardDefs){
+      const cardStyle='background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:14px 10px;text-align:center;'+(c.tab?'cursor:pointer':'opacity:.6')
+      ph+='<div '+(c.tab?'onclick="switchTab(\''+c.tab+'\')"':'')+' style="'+cardStyle+'">'
+      ph+='<div style="font-size:30px;font-weight:700;color:#0F6E56;line-height:1">'+c.num+'</div>'
+      ph+='<div style="font-size:11px;color:#888;margin-top:6px;line-height:1.4">'+c.label+'</div>'
+      ph+='</div>'
+    }
+    ph+='</div>'
+
+    // 2. 庫存水位警示
+    ph+='<div style="background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:14px 16px;margin-bottom:16px">'
+    ph+='<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:10px">庫存水位</div>'
+    const redProds=products.filter(p=>parseFloat(p.min_stock_qty)>0&&(parseFloat(p.stock_qty)||0)<=parseFloat(p.min_stock_qty))
+    const yellowProds=products.filter(p=>parseFloat(p.min_stock_qty)>0&&(parseFloat(p.stock_qty)||0)>parseFloat(p.min_stock_qty)&&(parseFloat(p.stock_qty)||0)<parseFloat(p.min_stock_qty)*1.5)
+    if(!redProds.length&&!yellowProds.length){
+      ph+='<div style="color:#3B6D11;font-size:13px">庫存水位正常 ✓</div>'
+    } else {
+      ;[...redProds.map(p=>({...p,_lv:'red'})),...yellowProds.map(p=>({...p,_lv:'yellow'}))].forEach(p=>{
+        const col=p._lv==='red'?'#A32D2D':'#854F0B'
+        const bg=p._lv==='red'?'#FCEBEB40':'#FFF6D840'
+        const sup=suppliers.find(s=>s.id===p.supplier_id)
+        ph+='<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:'+bg+';border-left:3px solid '+col+';border-radius:4px;margin-bottom:4px">'
+        ph+='<div style="flex:1;min-width:0">'
+        ph+='<div style="font-size:13px;font-weight:500;color:'+col+'">'+esc(p.product_name)+'</div>'
+        ph+='<div style="font-size:11px;color:#666;margin-top:2px">現有 '+(parseFloat(p.stock_qty)||0)+' 卷 · 安全水位 '+parseFloat(p.min_stock_qty)+' 卷'+(sup?' · '+esc(sup.company):'')+'</div>'
+        ph+='</div>'
+        ph+='<button class="btn btn-ghost btn-sm" onclick="switchTab(\'purchase-shop\')" style="white-space:nowrap;flex-shrink:0">建立採購</button>'
+        ph+='</div>'
+      })
+    }
+    ph+='</div>'
+
+    // 3. 客戶訂單量
+    ph+='<div style="background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:14px 16px;margin-bottom:16px">'
+    ph+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">'
+    ph+='<div style="font-size:12px;font-weight:600;color:#555">客戶訂單量</div>'
+    ;[{k:'thisMonth',l:'本月'},{k:'lastMonth',l:'上月'},{k:'3months',l:'近3個月'},{k:'6months',l:'近6個月'},{k:'thisYear',l:'今年'}].forEach(r=>{
+      const active=_dbCustomerRange===r.k
+      ph+='<button onclick="_dbCustomerRange=\''+r.k+'\';renderDashboard()" style="padding:3px 10px;font-size:11px;border-radius:20px;border:1px solid '+(active?'#0F6E56':'#ddd')+';background:'+(active?'#0F6E56':'transparent')+';color:'+(active?'#fff':'#666')+';cursor:pointer;line-height:1.6">'+r.l+'</button>'
+    })
+    ph+='</div>'
+    ph+=_buildCustomerOrderTable()
+    ph+='</div>'
+
+    panels.innerHTML=ph
+  }
+
+  // ── 現有待追蹤列表 ──
   if(!items.length){el.innerHTML='<div class="loading" style="color:#3B6D11">✓ 目前無待追蹤項目</div>';return}
   const groups=[
     {key:'inquiry',icon:'📋',label:'詢價'},
@@ -1735,6 +1820,7 @@ function renderDashboard(){
     {key:'order',icon:'📦',label:'訂單'},
     {key:'customer',icon:'👥',label:'客戶'},
     {key:'shipment',icon:'🚢',label:'船運'},
+    {key:'inventory',icon:'📦',label:'庫存'},
   ]
   let html=''
   for(const g of groups){
@@ -1751,17 +1837,72 @@ function renderDashboard(){
         :mod==='sample'?"switchTab('samples');setTimeout(()=>openSampleModal("+item.id+"),80)"
         :mod==='order'?"switchTab('orders');setTimeout(()=>openOrderModal('"+item.id+"'),80)"
         :mod==='customer'?"switchTab('customers')"
+        :mod==='products'?"switchTab('products');setTimeout(()=>openInventoryModal(),80)"
         :"switchTab('"+mod+"')"
       return '<div class="row" style="border-left:3px solid '+urgColor+';background:'+urgBg+'40;cursor:default">'+
         '<div style="flex:1;min-width:0">'+
         '<div style="font-size:13px;font-weight:500;margin-bottom:2px">'+item.label+'</div>'+
-        '<div style="font-size:12px;color:#666">'+esc(item.desc||'')+((item.days!=null)?' · 已 '+item.days+' 天':'')+ '</div>'+
+        '<div style="font-size:12px;color:#666">'+esc(item.desc||'')+((item.days!=null)?' · 已 '+item.days+' 天':'')+'</div>'+
         '</div>'+
         '<button class="btn btn-ghost btn-sm" style="flex-shrink:0;color:#185FA5;white-space:nowrap" onclick="'+gotoFn+'">→ 前往</button>'+
         '</div>'
     }).join('')
   }
   el.innerHTML=html
+}
+function _buildCustomerOrderTable(){
+  const now=new Date()
+  const y=now.getFullYear()
+  const m=now.getMonth()
+  const pad=n=>String(n).padStart(2,'0')
+  let fromStr,toStr=null
+  if(_dbCustomerRange==='thisMonth'){
+    fromStr=y+'-'+pad(m+1)+'-01'
+  } else if(_dbCustomerRange==='lastMonth'){
+    const lm=m===0?12:m,ly=m===0?y-1:y
+    fromStr=ly+'-'+pad(lm)+'-01'
+    toStr=ly+'-'+pad(lm)+'-'+pad(new Date(y,m,0).getDate())
+  } else if(_dbCustomerRange==='3months'){
+    const d=new Date(y,m-2,1);fromStr=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-01'
+  } else if(_dbCustomerRange==='6months'){
+    const d=new Date(y,m-5,1);fromStr=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-01'
+  } else {
+    fromStr=y+'-01-01'
+  }
+  const filtered=orders.filter(o=>{
+    if(!o.order_date)return false
+    const d=o.order_date.slice(0,10)
+    return d>=fromStr&&(!toStr||d<=toStr)
+  })
+  if(!filtered.length)return '<div style="color:#aaa;font-size:13px;padding:4px 0">此期間無訂單記錄</div>'
+  const byCustomer=new Map()
+  filtered.forEach(o=>{
+    const custObj=customers.find(c=>c.id===o.customer_id)
+    const name=custObj?.company||o.customer||'未知'
+    if(!byCustomer.has(name))byCustomer.set(name,{cnt:0,qty:0,amount:0})
+    const d=byCustomer.get(name)
+    d.cnt++
+    orderItems.filter(i=>i.order_id===o.id).forEach(i=>{d.qty+=(parseFloat(i.qty)||0);d.amount+=(parseFloat(i.amount)||0)})
+  })
+  const rows=[...byCustomer.entries()].sort((a,b)=>b[1].qty-a[1].qty)
+  const showAmt=isManager()
+  let t='<table style="width:100%;border-collapse:collapse;font-size:12px">'
+  t+='<thead><tr style="border-bottom:1px solid #e5e5e0;color:#888">'
+  t+='<th style="text-align:left;padding:5px 8px;font-weight:500">客戶</th>'
+  t+='<th style="text-align:right;padding:5px 8px;font-weight:500">訂單筆數</th>'
+  t+='<th style="text-align:right;padding:5px 8px;font-weight:500">總數量（米）</th>'
+  if(showAmt)t+='<th style="text-align:right;padding:5px 8px;font-weight:500">總金額</th>'
+  t+='</tr></thead><tbody>'
+  rows.forEach(([name,d])=>{
+    t+='<tr style="border-bottom:1px solid #f0f0ec">'
+    t+='<td style="padding:5px 8px">'+esc(name)+'</td>'
+    t+='<td style="text-align:right;padding:5px 8px">'+d.cnt+'</td>'
+    t+='<td style="text-align:right;padding:5px 8px">'+Math.round(d.qty).toLocaleString()+'</td>'
+    if(showAmt)t+='<td style="text-align:right;padding:5px 8px">'+Math.round(d.amount).toLocaleString()+'</td>'
+    t+='</tr>'
+  })
+  t+='</tbody></table>'
+  return t
 }
 
 // ===== 客訴管理 =====
@@ -2071,7 +2212,7 @@ function purchaseOrderUnallocatedQty(purchaseOrderId){
 function purchaseOrderOrderSummary(purchaseOrderId){
   const linkedOrders=purchaseOrderLinkedOrders(purchaseOrderId)
   if(linkedOrders.length)return linkedOrders.map(o=>o.id).join(', ')
-  return '安全庫存 / 未分配'
+  return '未關聯訂單'
 }
 function makePendingPurchaseItem(item){
   return {...item,temp_key:item?.temp_key||('poi-'+Date.now()+'-'+Math.random().toString(36).slice(2,7))}
@@ -2337,7 +2478,7 @@ function openPurchaseOrderLinkModal(){
     '<div><label>分配數量 <span class="req">*</span></label><input id="pol-qty" type="number" min="0" step="0.01" inputmode="decimal" placeholder="例如 100" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
     '<div><label>備註</label><input id="pol-note" placeholder="選填，例如首批急單" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
     '</div>'+
-    '<div style="font-size:11px;color:#888;margin-bottom:12px">此關聯僅表示這張採購單的一部分數量分配給哪張客戶訂單；未分配數量會視為安全庫存。</div>'+
+    '<div style="font-size:11px;color:#888;margin-bottom:12px">此關聯僅表示這張採購單的一部分數量分配給哪張客戶訂單；未關聯的數量不指定訂單。</div>'+
     '<div class="modal-foot"><button class="btn btn-primary" onclick="submitPurchaseOrderLink()">新增</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">返回</button></div>'
   )
   enableDirtyTracking('modal-subform-bd')
@@ -2446,7 +2587,8 @@ function openShipmentModal(id){
   document.getElementById('modal-shipment-hd').innerHTML=
     '<div style="font-size:14px;font-weight:600">'+esc(s.shipment_no)+'</div>'+
     '<div style="display:flex;align-items:center;gap:8px">'+
-      '<button class="btn btn-ghost btn-sm" onclick="openShipmentEditModal('+id+')">船運詳情 / 編輯</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="openShipmentEditModal('+id+')">🚢 船隻資訊</button>'+
+      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D" onclick="deleteShipment('+id+')">刪除</button>'+
       (s.status==='customs_clearance'?'<button class="btn btn-primary btn-sm" onclick="openShipmentReceivePanel('+id+')">✓ 確認入庫</button>':'')+
       '<button class="modal-close" onclick="closeModal(\'modal-shipment\')">×</button>'+
     '</div>'
@@ -2483,6 +2625,18 @@ function openShipmentModal(id){
   }else{
     html+='<div style="font-size:12px;color:#aaa;padding:8px 0">尚未關聯產品</div>'
   }
+  // 關聯採購單管理（內嵌在詳情 modal）
+  const availablePOs=purchaseOrders.filter(p=>!shipmentPurchaseOrders.some(link=>String(link.purchase_order_id)===String(p.id)&&String(link.shipment_id)===String(id)))
+  const linkedPOs=shipmentLinkedPurchases(id)
+  html+='<div class="divider"></div>'+
+    '<div class="section-title" style="margin-bottom:8px">關聯採購單</div>'+
+    '<div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">'+
+      '<select id="sh-purchase-link" style="flex:1"><option value="">— 選擇採購單 —</option>'+availablePOs.map(p=>'<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+' · '+esc(resolvePurchaseSupplierName(p)||'—')+'</option>').join('')+'</select>'+
+      '<button class="btn btn-ghost btn-sm" onclick="attachPurchaseToShipment()">+ 掛入</button>'+
+    '</div>'+
+    (linkedPOs.length
+      ? linkedPOs.map(p=>'<div class="row" style="cursor:pointer" onclick="openPurchaseModal(\''+esc(String(p.id))+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(String(p.id))+'</div><div style="font-size:11px;color:#888">'+esc(resolvePurchaseSupplierName(p)||'—')+' · '+esc(p.status||'')+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();detachPurchaseFromShipment('+id+',\''+esc(String(p.id))+'\')">移除</button></div>').join('')
+      : '<div style="font-size:12px;color:#aaa;padding:4px 0">尚未關聯採購單</div>')
   document.getElementById('modal-shipment-bd').innerHTML=html
   document.getElementById('modal-shipment').classList.add('open')
 }
@@ -2514,7 +2668,7 @@ function openShipmentReceivePanel(shipmentId){
         (item.spec?'<div style="font-size:11px;color:#888">'+esc(item.spec)+'</div>':'')+
         '<div style="font-size:11px;color:#aaa">訂單量 '+expectedQty+' '+esc(item.unit||'')+(prevReceived>0?' · 前次已到 '+prevReceived:'')+'</div></div>'+
         '<div style="font-size:11px;color:#888;white-space:nowrap">此次實收</div>'+
-        '<input type="number" id="rcv-'+item.id+'" value="'+Math.max(0,expectedQty-prevReceived)+'" min="0" style="width:80px;text-align:right" placeholder="0" />'+
+        '<input type="number" id="rcv-'+item.id+'" value="" min="0" style="width:80px;text-align:right" placeholder="實收" />'+
         '</div>'
     })
     html+='<div style="margin-bottom:12px"></div>'
@@ -2530,6 +2684,7 @@ function openShipmentReceivePanel(shipmentId){
 async function saveShipmentReceive(shipmentId){
   const linked=shipmentLinkedPurchases(shipmentId)
   const updates=[]
+  const stockUpdates=[]
   linked.forEach(po=>{
     purchaseOrderItems.filter(i=>i.po_id===po.id).forEach(item=>{
       const input=document.getElementById('rcv-'+item.id)
@@ -2537,17 +2692,32 @@ async function saveShipmentReceive(shipmentId){
       const thisReceived=parseFloat(input.value)||0
       const prev=parseFloat(item.received_qty||0)
       updates.push({id:item.id,received_qty:prev+thisReceived})
+      if(thisReceived>0&&item.product_id){
+        const existing=stockUpdates.find(x=>x.product_id===item.product_id)
+        if(existing){existing.deltaM+=thisReceived}
+        else stockUpdates.push({product_id:item.product_id,deltaM:thisReceived,unit:item.unit||'m'})
+      }
     })
   })
   for(const u of updates){
     const{error}=await sb.from('purchase_order_items').update({received_qty:u.received_qty}).eq('id',u.id)
     if(error){showToast('更新品項失敗：'+error.message,'error');return}
   }
+  const skipped=[]
+  for(const su of stockUpdates){
+    const prod=products.find(x=>x.id===su.product_id)
+    if(!prod)continue
+    const deltaRolls=poQtyToRolls(su.deltaM,su.unit,prod)
+    if(deltaRolls===null){skipped.push(prod.product_name);continue}
+    await sb.from('products').update({stock_qty:(parseFloat(prod.stock_qty)||0)+deltaRolls}).eq('id',su.product_id)
+  }
+  if(skipped.length)showToast('注意：以下產品未設每卷米數，庫存未自動更新：'+skipped.join('、'),'error')
   const{error:shErr}=await sb.from('shipments').update({status:'completed'}).eq('id',shipmentId)
   if(shErr){showToast('更新船運狀態失敗：'+shErr.message,'error');return}
-  await Promise.all([loadShipments(),loadPurchaseOrders()])
+  await Promise.all([loadShipments(),loadPurchaseOrders(),loadProducts()])
   closeModal('modal-shipment')
   renderShipments()
+  renderDashboard()
   showToast('入庫完成，船運已標記為已完成')
 }
 
@@ -2556,14 +2726,12 @@ function openShipmentEditModal(id){
   const s=isNew?null:shipments.find(x=>String(x.id)===String(id))
   const transportOpts='<option value="sea">海運</option><option value="air">空運</option><option value="land">陸運</option><option value="express">快遞</option>'
   const statusOpts='<option value="planned">已規劃</option><option value="booked">已訂艙</option><option value="in_transit">運送中</option><option value="customs_clearance">報關中</option><option value="completed">已完成</option><option value="cancelled">已取消</option>'
-  const availablePurchases=purchaseOrders.filter(p=>!shipmentPurchaseOrders.some(link=>String(link.purchase_order_id)===String(p.id)&&String(link.shipment_id)===String(s?.id||'')))
-  const linkedPurchases=isNew?[]:shipmentLinkedPurchases(s.id)
   document.getElementById('modal-shipment-edit-hd').innerHTML=
-    '<div style="display:flex;flex-direction:column;gap:10px">'+
-      '<div style="font-size:14px;font-weight:600">'+(isNew?'新增船運批次':'船運詳情 / 編輯')+'</div>'+
-      '<button class="btn btn-primary" style="align-self:flex-start" onclick="saveShipment('+(isNew?'null':id)+')">'+(isNew?'建立船運批次':'儲存船運資料')+'</button>'+
-    '</div>'+
-    '<button class="modal-close" onclick="closeModal(\'modal-shipment-edit\')">×</button>'
+    '<div style="font-size:14px;font-weight:600">'+(isNew?'新增船運批次':'🚢 船隻資訊')+'</div>'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+      '<button class="btn btn-primary btn-sm" onclick="saveShipment('+(isNew?'null':id)+')">'+(isNew?'建立':'儲存')+'</button>'+
+      '<button class="modal-close" onclick="closeModal(\'modal-shipment-edit\')">×</button>'+
+    '</div>'
   let html=
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>船運編號 <span class="req">*</span></label><input id="sh-no" value="'+esc(s?.shipment_no||generateShipmentNo())+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
@@ -2581,21 +2749,7 @@ function openShipmentEditModal(id){
     '<div><label>起運港</label><input id="sh-pol" value="'+esc(s?.port_of_loading||'')+'" /></div>'+
     '<div><label>目的港</label><input id="sh-pod" value="'+esc(s?.port_of_destination||'')+'" /></div>'+
     '</div>'+
-    '<div style="margin-bottom:12px"><label>備註</label><textarea id="sh-notes">'+esc(s?.notes||'')+'</textarea></div>'+
-    '<div class="divider"></div>'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="section-title" style="margin-bottom:0">關聯採購單</div></div>'
-  if(!isNew){
-    html+='<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
-      '<div class="grid-2" style="margin-bottom:8px"><div><label>掛入採購單</label><select id="sh-purchase-link"><option value="">— 選擇採購單 —</option>'+availablePurchases.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.id)+' · '+esc(resolvePurchaseSupplierName(p)||'—')+'</option>').join('')+'</select></div></div>'+
-      '<button class="btn btn-ghost btn-sm" onclick="attachPurchaseToShipment()">+ 加入此船運</button></div>'
-    if(linkedPurchases.length){
-      html+=linkedPurchases.map(p=>'<div class="row" style="cursor:pointer" onclick="openPurchaseModal(\''+esc(p.id)+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(p.id)+'</div><div style="font-size:11px;color:#888">'+esc(resolvePurchaseSupplierName(p)||'—')+' · '+esc(p.status||'')+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();detachPurchaseFromShipment('+(s?.id||'null')+',\''+esc(p.id)+'\')">移除</button></div>').join('')
-    } else {
-      html+='<div style="font-size:12px;color:#aaa;padding:8px 0">尚未關聯採購單</div>'
-    }
-  } else {
-    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">請先建立船運批次，再掛入採購單。</div>'
-  }
+    '<div style="margin-bottom:12px"><label>備註</label><textarea id="sh-notes">'+esc(s?.notes||'')+'</textarea></div>'
   document.getElementById('modal-shipment-edit-bd').innerHTML=html
   enableDirtyTracking('modal-shipment-edit-bd')
   document.getElementById('modal-shipment-edit').classList.add('open')
@@ -2633,6 +2787,21 @@ async function saveShipment(id){
   setTimeout(()=>openShipmentModal(finalId),120)
   showToast(id===null?'船運批次已建立':'船運資料已更新')
 }
+async function deleteShipment(id){
+  const s=shipments.find(x=>String(x.id)===String(id))
+  confirmModal('確定要刪除船運「'+(s?.shipment_no||id)+'」？關聯的採購單連結也會一併移除。',async()=>{
+    const{error:linkErr}=await sb.from('shipment_purchase_orders').delete().eq('shipment_id',id)
+    if(linkErr){showToast('移除關聯失敗：'+linkErr.message,'error');return}
+    const{error}=await sb.from('shipments').delete().eq('id',id)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadShipments()
+    closeModal('modal-shipment-edit')
+    closeModal('modal-shipment')
+    renderShipments()
+    renderDashboard()
+    showToast('船運已刪除')
+  })
+}
 async function attachPurchaseToShipment(){
   const shipmentId=selectedShipmentId
   const purchaseOrderId=document.getElementById('sh-purchase-link')?.value
@@ -2640,7 +2809,7 @@ async function attachPurchaseToShipment(){
   const {error}=await sb.from('shipment_purchase_orders').insert({shipment_id:shipmentId,purchase_order_id:purchaseOrderId})
   if(error){showToast('加入採購單失敗：'+error.message,'error');return}
   await loadShipments()
-  openShipmentEditModal(shipmentId)
+  openShipmentModal(shipmentId)
   if(selectedPurchaseId)await loadPurchaseOrders()
   showToast('採購單已掛入船運批次')
 }
@@ -2648,7 +2817,7 @@ async function detachPurchaseFromShipment(shipmentId,purchaseOrderId){
   const {error}=await sb.from('shipment_purchase_orders').delete().eq('shipment_id',shipmentId).eq('purchase_order_id',purchaseOrderId)
   if(error){showToast('移除採購單失敗：'+error.message,'error');return}
   await loadShipments()
-  openShipmentEditModal(shipmentId)
+  openShipmentModal(shipmentId)
   if(selectedPurchaseId)await loadPurchaseOrders()
   showToast('採購單已移出船運批次')
 }
@@ -3876,7 +4045,11 @@ async function submitArrival(itemId){
   if(item.product_id){
     const prod=products.find(x=>x.id===item.product_id)
     if(prod!=null){
-      await sb.from('products').update({stock_qty:(parseFloat(prod.stock_qty)||0)+arrived}).eq('id',item.product_id)
+      const deltaRolls=poQtyToRolls(arrived,item.unit||'m',prod)
+      if(deltaRolls===null){showToast('注意：'+prod.product_name+' 未設每卷米數，庫存未自動更新','error')}
+      else{
+        await sb.from('products').update({stock_qty:(parseFloat(prod.stock_qty)||0)+deltaRolls}).eq('id',item.product_id)
+      }
       await loadProducts()
     }
   }
@@ -4467,7 +4640,7 @@ async function createInquiry(){
   if(!customer){showToast('請選擇客戶','error');return}
   if(!product){showToast('請填寫產品需求','error');return}
   if(!supplier){showToast('請選擇供應商','error');return}
-  const fromProductId=parseInt(document.getElementById('nf-product-link')?.value)||null
+  const fromProductId=parseInt(document.getElementById('nf-product-id')?.value)||null
   const newInq={id:genInqId(),customer,product,supplier,
     spec:document.getElementById('nf-spec').value.trim(),
     supplier_deadline:null,
@@ -4699,10 +4872,15 @@ async function saveInqToProduct(inqId){
     notes:document.getElementById('atp-notes')?.value.trim()||null,
     is_active:document.getElementById('atp-active')?.value==='true'
   }
-  const{error}=await sb.from('products').insert(data)
+  const{data:inserted,error}=await sb.from('products').insert(data).select().single()
   if(error){showToast('新增失敗：'+error.message,'error');return}
   await loadProducts()
+  if(inserted?.id){
+    await sb.from('inquiries').update({from_product_id:inserted.id}).eq('id',inqId)
+    await loadInquiries()
+  }
   document.getElementById('add-to-product-overlay')?.remove()
+  renderInqModalBd()
   showToast('已加入產品目錄')
 }
 
@@ -5765,6 +5943,70 @@ async function submitNewQuote(){
   setTimeout(()=>openQuoteModal(hId),300)
 }
 
+// ===== 庫存管理 =====
+// 將採購品項數量轉為卷數。若品項已是卷（unit!='m'）直接回傳；
+// 若為米且 prod.meters_per_roll 存在則換算；否則回傳 null（無法換算）。
+function poQtyToRolls(qty,unit,prod){
+  if(unit!=='m')return qty
+  const mpr=parseFloat(prod.meters_per_roll)
+  if(!mpr)return null
+  return qty/mpr
+}
+function openInventoryModal(){
+  const tracked=products.filter(p=>p.min_stock_qty!=null&&p.min_stock_qty>0).sort((a,b)=>(a.product_name||'').localeCompare(b.product_name||''))
+  const bd=document.getElementById('modal-inventory-bd')
+  if(!tracked.length){
+    bd.innerHTML='<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">尚無設定安全庫存水位的產品<br><span style="font-size:11px">在產品目錄編輯產品時填入「安全庫存水位」即可加入追蹤</span></div>'+
+      '<div style="padding:0 0 16px;display:flex;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">關閉</button></div>'
+    document.getElementById('modal-inventory').classList.add('open')
+    return
+  }
+  let html='<div style="font-size:12px;color:#888;margin-bottom:14px">共 '+tracked.length+' 項追蹤產品。填入調整量（正數＝入庫，負數＝出庫）後一次儲存。</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 80px 80px 110px 120px;gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:6px">'+
+    '<div>產品名稱</div><div style="text-align:right">目前庫存（卷）</div><div style="text-align:right">安全水位（卷）</div><div style="text-align:right">調整（卷）</div><div>備註</div></div>'
+  tracked.forEach(p=>{
+    const qty=parseFloat(p.stock_qty)||0
+    const safe=parseFloat(p.min_stock_qty)||0
+    const isLow=qty<safe
+    const sup=suppliers.find(x=>x.id===p.supplier_id)
+    html+='<div style="display:grid;grid-template-columns:1fr 80px 80px 110px 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid #f0f0eb">'+
+      '<div><div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
+      (sup?'<div style="font-size:10px;color:#aaa">'+esc(sup.company||'')+'</div>':'')+
+      '</div>'+
+      '<div style="text-align:right;font-size:13px;font-weight:500;color:'+(isLow?'#A32D2D':'#1a1a1a')+'">'+qty+(p.unit?' '+esc(p.unit):'')+(isLow?' ⚠':'')+'</div>'+
+      '<div style="text-align:right;font-size:12px;color:#666">'+safe+(p.unit?' '+esc(p.unit):'')+'</div>'+
+      '<div><input type="number" id="inv-adj-'+p.id+'" value="" placeholder="0" step="0.01" style="text-align:right" /></div>'+
+      '<div><input type="text" id="inv-note-'+p.id+'" placeholder="備註..." /></div>'+
+      '</div>'
+  })
+  html+='<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">'+
+    '<button class="btn btn-primary" onclick="saveInventoryAdjustments()">儲存調整</button>'+
+    '<button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">取消</button>'+
+    '</div>'
+  bd.innerHTML=html
+  document.getElementById('modal-inventory').classList.add('open')
+}
+async function saveInventoryAdjustments(){
+  const tracked=products.filter(p=>p.min_stock_qty!=null&&p.min_stock_qty>0)
+  const toUpdate=[]
+  tracked.forEach(p=>{
+    const adjInput=document.getElementById('inv-adj-'+p.id)
+    const adj=parseFloat(adjInput?.value)
+    if(!adjInput||isNaN(adj)||adj===0)return
+    toUpdate.push({id:p.id,newQty:(parseFloat(p.stock_qty)||0)+adj,note:document.getElementById('inv-note-'+p.id)?.value?.trim()||null})
+  })
+  if(!toUpdate.length){showToast('沒有填入任何調整量');return}
+  for(const u of toUpdate){
+    const{error}=await sb.from('products').update({stock_qty:u.newQty}).eq('id',u.id)
+    if(error){showToast('更新失敗：'+error.message,'error');return}
+  }
+  await loadProducts()
+  renderProducts()
+  renderDashboard()
+  closeModal('modal-inventory')
+  showToast('庫存已更新（'+toUpdate.length+' 項）')
+}
+
 // ===== 產品目錄 =====
 function populateProductSupplierFilter(){
   const sel=document.getElementById('fp-supplier')
@@ -5877,10 +6119,12 @@ function openProductModal(id){
   document.getElementById('modal-product-bd').innerHTML=
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>產品名稱 <span class="req">*</span></label><input id="pd-name" value="'+(p?.product_name||'')+'" placeholder="例：45g 矽離型紙" /></div>'+
-    '<div><label>料號</label><input id="pd-code" value="'+(p?.product_code||'')+'" placeholder="例：PSA-45G-01" /></div>'+
-    '<div style="grid-column:1/-1"><label>供應商</label><select id="pd-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
+    '<div><label>供應商</label><select id="pd-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>寬幅（mm）</label><input type="number" id="pd-width-mm" value="'+(p?.width_m!=null?Math.round(p.width_m*1000):'')+'" placeholder="例如 1070" step="1" /></div>'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>寬幅（mm）</label><input type="number" id="pd-width-mm" value="'+(p?.width_m!=null?Math.round(p.width_m*1000):'')+'" placeholder="例如 1070" step="1" /></div>'+
+    '<div><label>每卷米數</label><input type="number" id="pd-meters-per-roll" value="'+(p?.meters_per_roll||'')+'" placeholder="固定規格填入，客製化留空" step="0.01" /></div>'+
+    '</div>'+
     '<div class="grid-3" style="margin-bottom:10px">'+
     '<div><label>成本價</label><input type="number" id="pd-cost" value="'+(p?.cost_price||'')+'" placeholder="0.0000" step="0.0001" /></div>'+
     '<div><label>計價單位</label><select id="pd-pricing-unit">'+
@@ -5890,8 +6134,11 @@ function openProductModal(id){
     '</select></div>'+
     '<div><label>幣別</label><select id="pd-currency">'+buildOptions(CURRENCY_OPTIONS,p?.currency)+'</select></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>每卷米數</label><input type="number" id="pd-meters-per-roll" value="'+(p?.meters_per_roll||'')+'" placeholder="固定規格填入，客製化留空" step="0.01" /></div>'+
-    '<div style="margin-bottom:14px"><label>備註</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:10px"><label>備註</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
+    '<div class="grid-2" style="margin-bottom:14px">'+
+    '<div><label>目前庫存（卷）</label><input type="number" id="pd-stock-qty" value="'+(p?.stock_qty??'')+'" placeholder="0" step="0.01" /></div>'+
+    '<div><label>安全庫存水位（卷）<span style="font-size:10px;color:#aaa"> 低於此值儀表板警示</span></label><input type="number" id="pd-safety-stock" value="'+(p?.min_stock_qty??'')+'" placeholder="不設定則留空" step="0.01" /></div>'+
+    '</div>'+
     '<div class="divider"></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>更新週期</label>'+
@@ -5945,7 +6192,6 @@ async function saveProduct(id){
   const today=new Date().toISOString().slice(0,10)
   const data={
     product_name:name,
-    product_code:document.getElementById('pd-code').value.trim()||null,
     supplier_id:parseInt(document.getElementById('pd-supplier').value)||null,
     cost_price:newCost,
     currency:newCurrency,
@@ -5955,7 +6201,9 @@ async function saveProduct(id){
     is_active:document.getElementById('pd-active')?.checked!==false,
     meters_per_roll:parseFloat(document.getElementById('pd-meters-per-roll')?.value)||null,
     width_m:(parseFloat(document.getElementById('pd-width-mm')?.value)||null)!=null?(parseFloat(document.getElementById('pd-width-mm').value)/1000)||null:null,
-    pricing_unit:document.getElementById('pd-pricing-unit')?.value||null
+    pricing_unit:document.getElementById('pd-pricing-unit')?.value||null,
+    stock_qty:parseFloat(document.getElementById('pd-stock-qty')?.value??'')||0,
+    min_stock_qty:document.getElementById('pd-safety-stock')?.value?.trim()?parseFloat(document.getElementById('pd-safety-stock').value):null
   }
   let error
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
@@ -6060,12 +6308,13 @@ async function updateProductCostFromInquiry(inqId){
   const rawCur=priceParts.currency||'USD'
   if(!rawCost){showToast('無法解析成本金額','error');return}
   const today=new Date().toISOString().slice(0,10)
-  const{error}=await sb.from('products').update({
+  const{data:updated,error}=await sb.from('products').update({
     cost_price:rawCost,
     currency:rawCur,
     last_reviewed_at:today
-  }).eq('id',i.from_product_id)
+  }).eq('id',i.from_product_id).select()
   if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(!updated||!updated.length){showToast('找不到對應產品，請重新確認關聯','error');return}
   await loadProducts();renderProducts();updateProductOverdueAlert()
   showToast('產品目錄成本已更新')
 }
