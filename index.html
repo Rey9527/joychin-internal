@@ -4532,7 +4532,7 @@ function inqRowHtml(i){
       (overdue?'<span class="overdue-tag">⚠ 待追詢</span>':warn?'<span class="badge" style="background:#FFF6DA;color:#8A6500;border:1px solid #D2B14A">提醒中</span>':'')+
     '</div>'+
     '<div style="font-size:12px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">'+i.product+'</div>'+
-    '<div style="font-size:11px;color:#aaa">'+(i.supplier||'—')+(['pending','asked'].includes(i.status)?' · '+inquiryPendingDays(i)+' 天未回覆':'')+'</div>'+
+    '<div style="font-size:11px;color:#aaa">'+(i.supplier?i.supplier.split('—')[0].trim():'—')+(['pending','asked'].includes(i.status)?' · '+inquiryPendingDays(i)+' 天未回覆':'')+'</div>'+
     '</div>'+badge(i.status)+'</div>'
 }
 
