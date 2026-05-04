@@ -600,6 +600,11 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <select id="pf-supplier" onchange="renderPurchaseOrders()">
           <option value="">全部供應商</option>
         </select>
+        <select id="pf-sort" onchange="renderPurchaseOrders()">
+          <option value="created_desc">建立日期（新→舊）</option>
+          <option value="accounting_asc">會計編號（升序）</option>
+          <option value="accounting_desc">會計編號（降序）</option>
+        </select>
       </div>
       <div id="purchase-list"></div>
     </div>
@@ -3530,6 +3535,10 @@ function renderPurchaseOrders(){
   let filtered=purchaseOrders
   if(statusFilter)filtered=filtered.filter(p=>p.status===statusFilter)
   if(supplierFilter)filtered=filtered.filter(p=>resolvePurchaseSupplierName(p)===supplierFilter)
+  const sortMode=document.getElementById('pf-sort')?.value||'created_desc'
+  if(sortMode==='accounting_asc')filtered=[...filtered].sort((a,b)=>(a.accounting_no||'').localeCompare(b.accounting_no||''))
+  else if(sortMode==='accounting_desc')filtered=[...filtered].sort((a,b)=>(b.accounting_no||'').localeCompare(a.accounting_no||''))
+  else filtered=[...filtered].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
   if(sum)sum.textContent=filtered.length+' 筆採購單'
   if(!filtered.length){el.innerHTML='<div class="loading">尚無採購單資料</div>';return}
   el.innerHTML=filtered.map(p=>{
@@ -3539,8 +3548,8 @@ function renderPurchaseOrders(){
     return '<div class="row" onclick="openPurchaseModal(\''+p.id+'\')">'+
       '<div style="flex:1;min-width:0">'+
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'+
-          '<span style="font-size:11px;color:#aaa;font-family:monospace">'+p.id+'</span>'+
-          (p.accounting_no?'<span style="font-size:10px;color:#666;background:#f0f0eb;padding:1px 5px;border-radius:4px">'+p.accounting_no+'</span>':'')+
+          (p.accounting_no?'<span style="font-size:13px;font-weight:600">'+esc(p.accounting_no)+'</span>':'')+
+          '<span style="font-size:10px;color:#aaa;font-family:monospace">'+(p.accounting_no?'· ':'')+p.id+'</span>'+
         '</div>'+
         '<div style="font-size:12px;font-weight:500">'+(supplierName||'—')+'</div>'+
         (()=>{const its=purchaseOrderItems.filter(i=>i.po_id===p.id);return its.length?'<div style="font-size:11px;color:#555;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+its.map(i=>i.product_name).join('、')+'</div>':''})()+
@@ -3552,7 +3561,7 @@ function renderPurchaseOrders(){
 }
 
 function clearPurchaseFilters(){
-  ;['pf-status','pf-supplier'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  ;['pf-status','pf-supplier'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});const pfs=document.getElementById('pf-sort');if(pfs)pfs.value='created_desc'
   renderPurchaseOrders()
 }
 
