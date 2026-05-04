@@ -559,11 +559,37 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
     <!-- 使用者管理 -->
     <div id="tab-users_mgmt" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div id="user-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="showNewUserModal()">+ 新增使用者</button>
+      <div style="display:flex;gap:0;border-bottom:1px solid #e5e5e0;margin-bottom:14px">
+        <button id="users-subtab-users" onclick="switchUsersSubtab('users')" style="padding:8px 16px;border:none;border-bottom:2px solid #0F6E56;background:none;cursor:pointer;font-size:13px;font-weight:600;color:#0F6E56">使用者列表</button>
+        <button id="users-subtab-logs" onclick="switchUsersSubtab('logs')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555">操作記錄</button>
       </div>
-      <div id="user-list"></div>
+      <div id="users-pane-users">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div id="user-summary" style="font-size:12px;color:#888"></div>
+          <button class="btn btn-primary" onclick="showNewUserModal()">+ 新增使用者</button>
+        </div>
+        <div id="user-list"></div>
+      </div>
+      <div id="users-pane-logs" style="display:none">
+        <div class="filter-bar" style="margin-bottom:12px">
+          <select id="al-user" onchange="renderActivityLogs()"><option value="">全部使用者</option></select>
+          <select id="al-module" onchange="renderActivityLogs()">
+            <option value="">全部模組</option>
+            <option value="inquiry">詢價</option>
+            <option value="quote">報價</option>
+            <option value="order">訂單</option>
+            <option value="purchase">採購</option>
+            <option value="product">產品</option>
+            <option value="customer">客戶</option>
+            <option value="supplier">供應商</option>
+            <option value="user">使用者</option>
+            <option value="auth">登入</option>
+          </select>
+          <input id="al-date-from" type="date" onchange="renderActivityLogs()" style="max-width:140px" aria-label="起始日期" />
+          <input id="al-date-to" type="date" onchange="renderActivityLogs()" style="max-width:140px" aria-label="結束日期" />
+        </div>
+        <div id="activity-log-list"></div>
+      </div>
     </div>
 
     <!-- 系統設定 -->
@@ -1180,6 +1206,17 @@ function clearLoginErrors(){
   document.getElementById('login-password-error').style.display='none'
 }
 
+async function logActivity(action,module,refId,detail){
+  if(!currentUser)return
+  await sb.from('activity_logs').insert({
+    user_id:currentUser.id,
+    user_name:currentUser.name,
+    action,module,
+    ref_id:String(refId||''),
+    detail:detail||''
+  })
+}
+
 async function doLogin(){
   clearLoginErrors()
   const email=document.getElementById('login-email')?.value.trim()
@@ -1225,6 +1262,7 @@ async function doLogin(){
   persistCurrentUser(data)
   document.getElementById('login-page').style.display='none'
   document.getElementById('main-app').style.display='flex'
+  logActivity('登入','auth','','')
   init()
 }
 
@@ -2929,6 +2967,7 @@ async function _createOrder(){
   selectedOrderId=id
   _renderOrderModal()
   renderOrders()
+  logActivity('建立訂單','order',id,'')
   showToast('訂單已建立')
 }
 
@@ -3791,6 +3830,7 @@ async function createPurchaseOrder(){
   await loadPurchaseOrders()
   closeModal('modal-purchase')
   renderPurchaseOrders()
+  logActivity('確認採購單','purchase',id,'')
   showToast('採購單已建立')
 }
 
@@ -3911,6 +3951,7 @@ async function approvePurchaseOrder(){
   await loadPurchaseOrders()
   renderPurchaseOrders()
   openPurchaseModal(selectedPurchaseId)
+  logActivity('審批採購單','purchase',selectedPurchaseId,'')
   showToast('採購單已審批通過')
 }
 async function rejectPurchaseOrder(){
@@ -4689,6 +4730,7 @@ async function createInquiry(){
     from_product_id:fromProductId}
   const{error}=await sb.from('inquiries').insert(newInq)
   if(error){showToast('建立失敗：'+error.message,'error');return}
+  logActivity('新增詢價','inquiry',newInq.id,'')
   await loadInquiries();hideNewInqForm();populateFilterCustomers();renderInquiries()
   selectedInqId=newInq.id;openInqModal(newInq.id)
 }
@@ -4944,6 +4986,7 @@ function copyTpl(){navigator.clipboard.writeText(window._tpl||'').then(()=>showT
 
 async function updateInqStatus(status){
   await sb.from('inquiries').update({status}).eq('id',selectedInqId)
+  logActivity('更新詢價狀態','inquiry',selectedInqId,status)
   await loadInquiries();renderInquiries();renderInqModalBd();renderInqModalHd()
 }
 async function updateInqField(field,value){
@@ -5051,6 +5094,7 @@ async function _execSendToQuote(inqId){
       changed_at:new Date().toISOString()
     })
     await sb.from('inquiries').update({status:'sent_to_quote'}).eq('id',inqId)
+    logActivity('送去報價','inquiry',inqId,'')
     await Promise.all([loadInquiries(),loadQuotes(),loadQuoteChanges()])
     renderInquiries();closeModal('modal-inq');switchTab('quotes')
     openQuoteModal(newId)
@@ -5067,6 +5111,7 @@ async function _execSendToQuote(inqId){
   const{error:e2}=await sb.from('quote_items').insert({header_id:hId,...newItemBase})
   if(e2){showToast('品項建立失敗：'+e2.message,'error');return}
   await sb.from('inquiries').update({status:'sent_to_quote'}).eq('id',inqId)
+  logActivity('送去報價','inquiry',inqId,'')
   await Promise.all([loadInquiries(),loadQuotes()])
   renderInquiries();closeModal('modal-inq');switchTab('quotes')
   showToast('已送去報價')
@@ -5561,6 +5606,7 @@ async function saveQuote(){
     await loadQuotes()
   }
   renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
+  logActivity('儲存報價','quote',selectedQuoteId,'')
   showToast('報價已儲存')
 }
 
@@ -5980,6 +6026,7 @@ async function submitNewQuote(){
     if(e2){showToast('品項建立失敗：'+e2.message,'error');return}
   }
   await loadQuotes();closeModal('modal-new-quote');renderQuotes()
+  logActivity('新增報價單','quote',hId,'')
   showToast('報價單 '+hId+' 已建立')
   setTimeout(()=>openQuoteModal(hId),300)
 }
@@ -6287,6 +6334,7 @@ async function saveProduct(id){
       }
     }
   }
+  logActivity('更新產品','product',id||'','')
   await _finishSaveProduct(id?'產品已更新':'產品已新增')
 }
 
@@ -6481,6 +6529,7 @@ async function createCustomer(){
     notes:document.getElementById('nc-notes').value.trim()||null,
     review_days:getCustomerReviewDays()})
   if(error){showToast('新增失敗：'+error.message,'error');return}
+  logActivity('新增客戶','customer','','')
   await loadCustomers();hideNewCustomerForm();renderCustomers()
 }
 async function submitCreateCustomerFromModal(prefix='cc',closeTarget='modal-customer',returnToId=null){
@@ -6568,6 +6617,7 @@ async function saveCustomer(id){
   }
   _isDirty=false
   await loadCustomers();closeModal('modal-customer');renderCustomers()
+  logActivity('更新客戶','customer',String(id),'')
   showToast('客戶已更新')
 }
 async function markCustomerReviewed(id){
@@ -6798,6 +6848,7 @@ async function toggleUserActive(userId,currentActive){
     if(error){showToast(action+'失敗：'+error.message,'error');return}
     await loadUsers()
     renderUsersMgmt()
+    logActivity('變更使用者狀態','user',String(userId),action)
     showToast('已'+action)
   })
 }
@@ -6808,15 +6859,71 @@ async function deleteUser(userId,userName){
     if(error){showToast('刪除失敗：'+error.message,'error');return}
     await loadUsers()
     renderUsersMgmt()
+    logActivity('刪除使用者','user',String(userId),userName)
     showToast('已刪除')
   })
+}
+
+let activityLogs=[]
+async function loadActivityLogs(){
+  const{data}=await sb.from('activity_logs').select('*').order('created_at',{ascending:false}).limit(200)
+  activityLogs=data||[]
+  const names=[...new Set(activityLogs.map(l=>l.user_name).filter(Boolean))].sort()
+  const sel=document.getElementById('al-user')
+  if(sel){const cur=sel.value;sel.innerHTML='<option value="">全部使用者</option>'+names.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join('');sel.value=cur}
+  renderActivityLogs()
+}
+function renderActivityLogs(){
+  const el=document.getElementById('activity-log-list')
+  if(!el)return
+  const fUser=document.getElementById('al-user')?.value||''
+  const fModule=document.getElementById('al-module')?.value||''
+  const fFrom=document.getElementById('al-date-from')?.value||''
+  const fTo=document.getElementById('al-date-to')?.value||''
+  const filtered=activityLogs.filter(l=>{
+    if(fUser&&l.user_name!==fUser)return false
+    if(fModule&&l.module!==fModule)return false
+    const d=(l.created_at||'').slice(0,10)
+    if(fFrom&&d<fFrom)return false
+    if(fTo&&d>fTo)return false
+    return true
+  })
+  if(!filtered.length){el.innerHTML='<div class="loading">沒有符合條件的記錄</div>';return}
+  el.innerHTML=filtered.map(l=>{
+    const dt=new Date(l.created_at)
+    const ts=String(dt.getMonth()+1).padStart(2,'0')+'/'+String(dt.getDate()).padStart(2,'0')+' '+String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0')
+    return '<div class="row" style="display:flex;align-items:center;gap:8px;cursor:default;flex-wrap:wrap">'+
+      '<span style="font-size:11px;color:#aaa;font-family:monospace;white-space:nowrap">'+ts+'</span>'+
+      '<span style="font-size:12px;font-weight:500;white-space:nowrap">'+esc(l.user_name||'—')+'</span>'+
+      '<span style="font-size:11px;color:#666;background:#f0f0eb;padding:1px 6px;border-radius:4px;white-space:nowrap">'+esc(l.module||'')+'</span>'+
+      '<span style="font-size:12px">'+esc(l.action||'')+'</span>'+
+      (l.ref_id?'<span style="font-size:11px;color:#888;font-family:monospace">'+esc(l.ref_id)+'</span>':'')+
+      (l.detail?'<span style="font-size:11px;color:#999">'+esc(l.detail)+'</span>':'')+
+      '</div>'
+  }).join('')
+}
+function switchUsersSubtab(tab){
+  const isLogs=tab==='logs'
+  if(isLogs&&!isManager())return
+  document.getElementById('users-pane-users').style.display=isLogs?'none':''
+  document.getElementById('users-pane-logs').style.display=isLogs?'':'none'
+  ;['users','logs'].forEach(t=>{
+    const btn=document.getElementById('users-subtab-'+t)
+    if(!btn)return
+    const active=t===tab
+    btn.style.borderBottomColor=active?'#0F6E56':'transparent'
+    btn.style.color=active?'#0F6E56':'#555'
+    btn.style.fontWeight=active?'600':'400'
+  })
+  if(isLogs)loadActivityLogs()
 }
 
 function renderUsersMgmt(){
   const el=document.getElementById('user-list')
   const sum=document.getElementById('user-summary')
   if(!el)return
-  
+  const logsBtn=document.getElementById('users-subtab-logs')
+  if(logsBtn)logsBtn.style.display=isManager()?'':'none'
   if(sum)sum.textContent=users.length+' 位使用者'
   
   if(!users.length){
@@ -6909,6 +7016,7 @@ async function createSupplier(){
     specialty:document.getElementById('ns-specialty').value.trim()||null,
     salutation:document.getElementById('ns-salutation').value.trim()||null}).select().single()
   if(error){showToast('新增失敗：'+error.message,'error');return}
+  logActivity('新增供應商','supplier','','')
   await loadSuppliers();hideNewSupplierForm();renderSupplierMgmt()
 }
 async function submitCreateSupplierFromModal(prefix='cs',closeTarget='modal-supplier',returnToId=null){
@@ -6992,7 +7100,9 @@ async function saveSupplier(id){
     if(syncError){showToast('供應商名稱同步失敗：'+syncError.message,'error');return}
   }
   _isDirty=false
-  await loadSuppliers();closeModal('modal-supplier');renderSupplierMgmt();showToast('供應商資料已儲存')
+  await loadSuppliers();closeModal('modal-supplier');renderSupplierMgmt()
+  logActivity('更新供應商','supplier',String(id),'')
+  showToast('供應商資料已儲存')
 }
 
 // ===== 技術文件庫 =====
