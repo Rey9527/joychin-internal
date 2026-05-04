@@ -6210,6 +6210,16 @@ async function saveProduct(id){
   else{({error}=await sb.from('products').insert(data))}
   if(error){showToast('儲存失敗：'+error.message,'error');return}
 
+  if(id&&existing&&existing.product_name!==name){
+    await Promise.all([
+      sb.from('inquiries').update({product:name}).eq('from_product_id',parseInt(id)),
+      sb.from('quote_items').update({product:name}).eq('product_id',parseInt(id)),
+      sb.from('order_items').update({product_name:name}).eq('product_id',parseInt(id)),
+      sb.from('purchase_order_items').update({product_name:name}).eq('product_id',parseInt(id)),
+      sb.from('samples').update({product_name:name}).eq('from_product_id',parseInt(id)),
+    ])
+  }
+
   if(id&&costChanged){
     const{data:affectedItems}=await sb.from('quote_items').select('*').eq('product_id',parseInt(id))
     if(affectedItems&&affectedItems.length){
