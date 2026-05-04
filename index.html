@@ -4080,6 +4080,7 @@ async function submitArrival(itemId){
 let _pshopActiveCompany=null  // currently selected supplier company name
 let _pshopCart=[]             // [{product_id,product_name,spec,unit,unit_price,currency,qty,ref_order_id}]
 let _pshopOrderSectionOpen=false
+let _pshopLayout='grid'       // 'grid' | 'list'
 
 function startPurchaseShopping(){
   _pshopCart=[]
@@ -4199,27 +4200,53 @@ function renderPshopProductArea(){
         '</div>'
     }).join('')||'<div style="color:#aaa;font-size:13px;padding:20px 0">此供應商沒有產品目錄</div>'
   } else {
-    el.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px'
-    el.innerHTML=list.map(p=>{
-      const cartItem=_pshopCart.find(c=>c.product_id===p.id&&!c.ref_order_id)
-      const inCart=!!cartItem
-      return '<div style="border:1px solid #e5e5e0;border-radius:10px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:6px">'+
-        '<div style="font-size:13px;font-weight:600">'+esc(p.product_name)+'</div>'+
-        (p.product_code?'<div style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</div>':'')+
-        (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
-        (isManager()&&p.cost_price?'<div style="font-size:12px;color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
-        '<div style="margin-top:auto">'+
-        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'+
-        '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量（米）" style="flex:1;min-width:0" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
-        '<span style="font-size:12px;color:#666;white-space:nowrap;flex-shrink:0">m</span>'+
-        '</div>'+
-        '<div id="pshop-rolls-hint-'+p.id+'" style="font-size:11px;color:#888;min-height:16px;margin-bottom:4px">'+
-        (p.meters_per_roll&&cartItem?'約 '+(Math.round(cartItem.qty/p.meters_per_roll*10)/10).toFixed(1)+' 卷':'')+
-        '</div>'+
-        '<button class="btn btn-primary btn-sm" style="width:100%" onclick="pshopAddToCart('+p.id+')">'+(inCart?'✓ 已加入':'🛒 採購')+'</button>'+
-        '</div>'+
-        '</div>'
-    }).join('')||'<div style="color:#aaa;font-size:13px;grid-column:1/-1;padding:20px 0">此供應商沒有產品目錄</div>'
+    const toggleBar='<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:4px">'+
+      '<button onclick="pshopSetLayout(\'grid\')" style="padding:4px 10px;border:1px solid #ddd;border-radius:6px;background:'+(_pshopLayout==='grid'?'#0F6E56':'#fff')+';color:'+(_pshopLayout==='grid'?'#fff':'#555')+';cursor:pointer;font-size:12px">▦ 方格</button>'+
+      '<button onclick="pshopSetLayout(\'list\')" style="padding:4px 10px;border:1px solid #ddd;border-radius:6px;background:'+(_pshopLayout==='list'?'#0F6E56':'#fff')+';color:'+(_pshopLayout==='list'?'#fff':'#555')+';cursor:pointer;font-size:12px">☰ 列表</button>'+
+      '</div>'
+    if(_pshopLayout==='list'){
+      el.style.cssText=''
+      el.innerHTML=toggleBar+(list.map(p=>{
+        const cartItem=_pshopCart.find(c=>c.product_id===p.id&&!c.ref_order_id)
+        const inCart=!!cartItem
+        return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #e5e5e0;border-radius:8px;background:#fff;margin-bottom:6px">'+
+          '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:13px;font-weight:600">'+esc(p.product_name)+'</div>'+
+          (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
+          (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
+          (isManager()&&p.cost_price?'<div style="font-size:11px;color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+          '</div>'+
+          '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'+
+          '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量" style="width:72px" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
+          '<span style="font-size:12px;color:#666">m</span>'+
+          (p.meters_per_roll?'<span id="pshop-rolls-hint-'+p.id+'" style="font-size:11px;color:#888;min-width:44px">'+(cartItem?'約 '+(Math.round(cartItem.qty/p.meters_per_roll*10)/10).toFixed(1)+' 卷':'')+'</span>':'')+
+          '<button class="btn btn-primary btn-sm" onclick="pshopAddToCart('+p.id+')">'+(inCart?'✓ 已加入':'🛒 採購')+'</button>'+
+          '</div>'+
+          '</div>'
+      }).join('')||'<div style="color:#aaa;font-size:13px;padding:20px 0">此供應商沒有產品目錄</div>')
+    } else {
+      el.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px'
+      el.innerHTML=toggleBar+list.map(p=>{
+        const cartItem=_pshopCart.find(c=>c.product_id===p.id&&!c.ref_order_id)
+        const inCart=!!cartItem
+        return '<div style="border:1px solid #e5e5e0;border-radius:10px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:6px">'+
+          '<div style="font-size:13px;font-weight:600">'+esc(p.product_name)+'</div>'+
+          (p.product_code?'<div style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</div>':'')+
+          (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
+          (isManager()&&p.cost_price?'<div style="font-size:12px;color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+          '<div style="margin-top:auto">'+
+          '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'+
+          '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量（米）" style="flex:1;min-width:0" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
+          '<span style="font-size:12px;color:#666;white-space:nowrap;flex-shrink:0">m</span>'+
+          '</div>'+
+          '<div id="pshop-rolls-hint-'+p.id+'" style="font-size:11px;color:#888;min-height:16px;margin-bottom:4px">'+
+          (p.meters_per_roll&&cartItem?'約 '+(Math.round(cartItem.qty/p.meters_per_roll*10)/10).toFixed(1)+' 卷':'')+
+          '</div>'+
+          '<button class="btn btn-primary btn-sm" style="width:100%" onclick="pshopAddToCart('+p.id+')">'+(inCart?'✓ 已加入':'🛒 採購')+'</button>'+
+          '</div>'+
+          '</div>'
+      }).join('')+'<div style="grid-column:1/-1">'+(!list.length?'<div style="color:#aaa;font-size:13px;padding:20px 0">此供應商沒有產品目錄</div>':'')+'</div>'
+    }
   }
 }
 
@@ -4254,6 +4281,11 @@ function togglePshopOrderSection(){
   const icon=document.getElementById('pshop-order-toggle-icon')
   if(body)body.style.display=_pshopOrderSectionOpen?'block':'none'
   if(icon)icon.textContent=_pshopOrderSectionOpen?'收起 ▴':'展開 ▾'
+}
+
+function pshopSetLayout(layout){
+  _pshopLayout=layout
+  renderPshopProductArea()
 }
 
 function pshopUpdateRollsHint(productId, metersPerRoll){
