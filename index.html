@@ -1207,7 +1207,7 @@ function clearLoginErrors(){
 }
 
 async function logActivity(action,module,refId,detail){
-  if(!currentUser)return
+  if(!currentUser){console.warn('[logActivity] no currentUser',action,module);return}
   const{error}=await sb.from('activity_logs').insert({
     user_id:currentUser.id,
     user_name:currentUser.name,
