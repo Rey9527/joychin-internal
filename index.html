@@ -554,6 +554,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         </select>
         <button class="btn btn-ghost btn-sm" onclick="clearProductFilters()">清除</button>
       </div>
+      <div id="product-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
       <div id="product-list"></div>
     </div>
 
@@ -1310,6 +1311,9 @@ const QUO_STATUS=[
 
 let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteItems=[],settings={},products=[]
 let productViewMode=localStorage.getItem('productViewMode')||'grid'
+let _productTypeFilter=''
+const PRODUCT_TYPES=['Brown','Yellow','White','Film']
+const PRODUCT_TYPE_COLORS={Brown:{bg:'#F5ECD7',color:'#7A4F2A'},Yellow:{bg:'#FFFBDA',color:'#8A7000'},White:{bg:'#F5F5F0',color:'#666'},Film:{bg:'#E6F1FB',color:'#185FA5'}}
 let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[],complaints=[]
 let orders=[],orderItems=[]
 let shipments=[],shipmentPurchaseOrders=[]
@@ -6115,6 +6119,7 @@ function populateProductSupplierFilter(){
 
 function clearProductFilters(){
   ;['fp-search','fp-supplier','fp-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  _productTypeFilter=''
   renderProducts()
 }
 
@@ -6135,11 +6140,22 @@ function renderProducts(){
   const q=(document.getElementById('fp-search')?.value||'').toLowerCase()
   const fSup=document.getElementById('fp-supplier')?.value||''
   const fStatus=document.getElementById('fp-status')?.value||''
+  const chipsEl=document.getElementById('product-type-chips')
+  if(chipsEl){
+    const allActive=!_productTypeFilter
+    chipsEl.innerHTML='<button onclick="_productTypeFilter=\'\';renderProducts()" style="padding:4px 12px;border-radius:20px;border:1px solid '+(allActive?'#0F6E56':'#ddd')+';background:'+(allActive?'#0F6E56':'#fff')+';color:'+(allActive?'#fff':'#555')+';cursor:pointer;font-size:12px;font-weight:'+(allActive?'600':'400')+'">All</button>'+
+    PRODUCT_TYPES.map(t=>{
+      const active=_productTypeFilter===t
+      const c=PRODUCT_TYPE_COLORS[t]||{bg:'#f0f0eb',color:'#555'}
+      return '<button onclick="_productTypeFilter=\''+t+'\';renderProducts()" style="padding:4px 12px;border-radius:20px;border:1px solid '+(active?c.color:'#ddd')+';background:'+(active?c.color:'#fff')+';color:'+(active?'#fff':c.color)+';cursor:pointer;font-size:12px;font-weight:'+(active?'600':'400')+'">'+t+'</button>'
+    }).join('')
+  }
   let list=products.filter(p=>{
     if(q&&!p.product_name.toLowerCase().includes(q)&&!(p.product_code||'').toLowerCase().includes(q))return false
     if(fSup){const s=suppliers.find(x=>x.id===p.supplier_id);if(!s||s.company!==fSup)return false}
-    if(fStatus==='inactive'){return p.is_active===false}
+    if(fStatus==='inactive'){return p.is_active===false&&(!_productTypeFilter||p.product_type===_productTypeFilter)}
     if(fStatus){const st=productStatus(p);if(p.is_active===false||st!==fStatus)return false}
+    if(_productTypeFilter&&p.product_type!==_productTypeFilter)return false
     return true
   })
   if(sum)sum.textContent=list.length+' 個產品'
@@ -6165,6 +6181,7 @@ function renderProducts(){
           '</div>'+
           '<div style="font-size:13px;font-weight:600;margin-bottom:2px;word-break:break-all">'+esc(p.product_name)+'</div>'+
           (p.product_code?'<div style="font-size:10px;color:#aaa;font-family:monospace;margin-bottom:6px">'+esc(p.product_code)+'</div>':'')+
+          (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:10px;background:'+c.bg+';color:'+c.color+';display:inline-block;margin-bottom:4px">'+esc(p.product_type)+'</span>'})():'')+
           '<div style="font-size:12px;color:#666;margin-bottom:4px">'+(sup?esc(sup.company):'—')+'</div>'+
           (isManager()&&p.cost_price?'<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
           '<div style="font-size:11px;color:#aaa;margin-bottom:10px">確認：'+(p.last_reviewed_at||'—')+'</div>'+
@@ -6185,6 +6202,7 @@ function renderProducts(){
         '<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;flex-wrap:wrap">'+
         '<span class="badge" style="background:'+stBg+';color:'+stColor+';border:1px solid '+stColor+'">'+stLabel+'</span>'+
         (!isActive?'<span class="badge" style="background:#f0f0eb;color:#888;border:1px solid #ccc">Inactive</span>':'')+
+        (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:10px;background:'+c.bg+';color:'+c.color+'">'+esc(p.product_type)+'</span>'})():'')+
         (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
         '<span style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</span>'+
         '</div>'+
@@ -6216,6 +6234,13 @@ function openProductModal(id){
     '<div><label>產品名稱 <span class="req">*</span></label><input id="pd-name" value="'+(p?.product_name||'')+'" placeholder="例：45g 矽離型紙" /></div>'+
     '<div><label>供應商</label><select id="pd-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
     '</div>'+
+    '<div style="margin-bottom:10px"><label>類型</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">'+
+    ['','Brown','Yellow','White','Film'].map(t=>{
+      const active=(p?.product_type||'')===(t)
+      const c=t?PRODUCT_TYPE_COLORS[t]:{bg:'#f0f0eb',color:'#555'}
+      return '<label style="cursor:pointer"><input type="radio" name="pd-type" value="'+t+'" '+(active?'checked':'')+' style="display:none" /><span style="display:inline-block;padding:4px 12px;border-radius:20px;border:2px solid '+(active?(c.color):'#ddd')+';background:'+(active?c.bg:'#fff')+';color:'+(active?c.color:'#888')+';font-size:12px" onclick="document.querySelectorAll(\'[name=pd-type]\').forEach(r=>{const s=r.nextElementSibling;const cc=r.value?PRODUCT_TYPE_COLORS[r.value]:{bg:\'#f0f0eb\',color:\'#555\'};s.style.borderColor=r.checked?cc.color:\'#ddd\';s.style.background=r.checked?cc.bg:\'#fff\';s.style.color=r.checked?cc.color:\'#888\'})">'+( t||'無')+'</span></label>'
+    }).join('')+
+    '</div></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>寬幅（mm）</label><input type="number" id="pd-width-mm" value="'+(p?.width_m!=null?Math.round(p.width_m*1000):'')+'" placeholder="例如 1070" step="1" /></div>'+
     '<div><label>每卷米數</label><input type="number" id="pd-meters-per-roll" value="'+(p?.meters_per_roll||'')+'" placeholder="固定規格填入，客製化留空" step="0.01" /></div>'+
@@ -6298,7 +6323,8 @@ async function saveProduct(id){
     width_m:(parseFloat(document.getElementById('pd-width-mm')?.value)||null)!=null?(parseFloat(document.getElementById('pd-width-mm').value)/1000)||null:null,
     pricing_unit:document.getElementById('pd-pricing-unit')?.value||null,
     stock_qty:parseFloat(document.getElementById('pd-stock-qty')?.value??'')||0,
-    min_stock_qty:document.getElementById('pd-safety-stock')?.value?.trim()?parseFloat(document.getElementById('pd-safety-stock').value):null
+    min_stock_qty:document.getElementById('pd-safety-stock')?.value?.trim()?parseFloat(document.getElementById('pd-safety-stock').value):null,
+    product_type:document.querySelector('[name=pd-type]:checked')?.value||null
   }
   let error
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
