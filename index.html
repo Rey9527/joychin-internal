@@ -6166,7 +6166,7 @@ function renderProducts(){
         const isActive=p.is_active!==false
         return '<div class="card" style="padding:14px;cursor:pointer;'+(isActive?'':'opacity:0.5')+'" onclick="openProductModal('+p.id+')">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:6px">'+
-            '<span class="badge" style="background:'+stBg+';color:'+stColor+';border:1px solid '+stColor+';white-space:nowrap">'+stLabel+'</span>'+
+            (st!=='ok'?'<span class="badge" style="background:'+stBg+';color:'+stColor+';border:1px solid '+stColor+';white-space:nowrap">'+stLabel+'</span>':'')+
             (!isActive?'<span class="badge" style="background:#f0f0eb;color:#888;border:1px solid #ccc;white-space:nowrap">Inactive</span>':'')+
           '</div>'+
           '<div style="font-size:13px;font-weight:600;margin-bottom:2px;word-break:break-all">'+esc(p.product_name)+'</div>'+
@@ -6190,7 +6190,7 @@ function renderProducts(){
       return '<div class="row '+(st==='overdue'?'overdue':st==='warn'?'warning':'')+'" style="'+(isActive?'':'opacity:0.5')+'" onclick="openProductModal('+p.id+')">'+
         '<div style="flex:1;min-width:0">'+
         '<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;flex-wrap:wrap">'+
-        '<span class="badge" style="background:'+stBg+';color:'+stColor+';border:1px solid '+stColor+'">'+stLabel+'</span>'+
+        (st!=='ok'?'<span class="badge" style="background:'+stBg+';color:'+stColor+';border:1px solid '+stColor+'">'+stLabel+'</span>':'')+
         (!isActive?'<span class="badge" style="background:#f0f0eb;color:#888;border:1px solid #ccc">Inactive</span>':'')+
         (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:10px;background:'+c.bg+';color:'+c.color+'">'+esc(p.product_type)+'</span>'})():'')+
         (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
