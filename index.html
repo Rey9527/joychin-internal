@@ -344,6 +344,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <option value="">全部狀態</option>
           <option value="draft">草稿</option>
           <option value="sent">已送客戶</option>
+          <option value="sample_review">樣品確認中</option>
           <option value="accepted">客戶接受</option>
           <option value="rejected">客戶拒絕</option>
         </select>
@@ -1306,6 +1307,7 @@ const INQ_STATUS=[
 const QUO_STATUS=[
   {id:'draft',label:'草稿',color:'#854F0B',bg:'#FAEEDA'},
   {id:'sent',label:'已送客戶',color:'#534AB7',bg:'#EEEDFE'},
+  {id:'sample_review',label:'樣品確認中',color:'#7A5800',bg:'#FFF6DA'},
   {id:'accepted',label:'客戶接受',color:'#3B6D11',bg:'#EAF3DE'},
   {id:'rejected',label:'客戶拒絕',color:'#A32D2D',bg:'#FCEBEB'},
 ]
@@ -5138,7 +5140,7 @@ function renderQuotes(){
     if(fTo&&created&&created>fTo)return false
     return true
   })
-  const active=quoteHeaders.filter(h=>!['accepted','rejected'].includes(h.status))
+  const active=quoteHeaders.filter(h=>!['accepted','rejected','sample_review'].includes(h.status))
   if(sum)sum.textContent=filtered.length+' 筆符合 / '+active.length+' 筆進行中 / 共 '+quoteHeaders.length+' 筆'
   if(!quoteHeaders.length){el.innerHTML='<div class="loading">尚無報價，從詢價頁按「收到成本 → 送去報價」，或點「直接新增報價單」</div>';return}
   if(!filtered.length){el.innerHTML='<div class="loading">沒有符合篩選條件的報價</div>';return}
@@ -5218,9 +5220,14 @@ function renderQuoteModalBd(){
 
   const statusBanner=
     h.status==='sent'?'<div style="background:#FEF3E2;border:1px solid #E2C97E;border-radius:8px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⚠ 此報價單已送出，如需修改請點「修改報價」</div>':
+    h.status==='sample_review'?'<div style="background:#FFF6DA;border:1px solid #E2C97E;border-radius:8px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⏳ 客戶已接受報價，等待樣品品質確認中</div>':
     h.status==='accepted'?'<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:8px 12px;font-size:12px;color:#2E7D32;margin-bottom:12px">✓ 客戶已接受，可送去訂單建立正式訂單</div>':
     h.status==='rejected'?'<div style="background:#f5f5f2;border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-size:12px;color:#888;margin-bottom:12px">此報價單已被拒絕</div>':
     ''
+
+  const sampleReviewCheck=(editable||h.status==='sent')?
+    '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#555;margin-bottom:12px;cursor:pointer">'+
+    '<input type="checkbox" '+(h.needs_sample_review?'checked':'')+' onchange="qHeaderChange(\'needs_sample_review\',this.checked)"> 客戶接受後需等待樣品確認</label>':''
 
   const footHtml=
     h.status==='draft'?
@@ -5233,8 +5240,14 @@ function renderQuoteModalBd(){
     :h.status==='sent'?
       '<button class="btn btn-ghost btn-sm" onclick="editQuote()">修改報價</button>'+
       '<div style="display:flex;gap:8px">'+
-      '<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="qSaveAndStatus(\'accepted\')">客戶接受 ✓</button>'+
+      '<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="qAcceptQuote()">客戶接受 ✓</button>'+
       '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="qSaveAndStatus(\'rejected\')">客戶拒絕 ✗</button>'+
+      '</div>'
+    :h.status==='sample_review'?
+      '<div></div>'+
+      '<div style="display:flex;gap:8px">'+
+      '<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="qSaveAndStatus(\'accepted\')">樣品通過 ✓</button>'+
+      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="qSaveAndStatus(\'rejected\')">樣品不通過 ✗</button>'+
       '</div>'
     :h.status==='accepted'?
       '<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">送去訂單 →</button>'+
@@ -5259,6 +5272,7 @@ function renderQuoteModalBd(){
     (items.length?itemsHtml:'<div style="font-size:12px;color:#aaa;margin-bottom:10px">尚無品項</div>')+
     addItemSection+
     '<div class="divider"></div>'+
+    sampleReviewCheck+
     '<div style="margin-bottom:16px"><label>備註</label>'+notesField+'</div>'+
     renderQuoteHistory(h.id)+
     '<div class="modal-foot" style="justify-content:space-between;align-items:center">'+footHtml+'</div>'
@@ -5585,6 +5599,12 @@ async function removeQuoteItem(id){
   renderQuoteModalBd()
 }
 
+async function qAcceptQuote(){
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId)
+  const targetStatus=h?.needs_sample_review?'sample_review':'accepted'
+  qStatusChange(targetStatus)
+  await saveQuote()
+}
 async function qSaveAndStatus(status){
   qStatusChange(status)
   await saveQuote()
