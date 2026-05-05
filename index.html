@@ -6235,7 +6235,7 @@ function openProductModal(id){
     '<div><label>供應商</label><select id="pd-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
     '</div>'+
     '<div style="margin-bottom:10px"><label>類型</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">'+
-    ['','Brown','Yellow','White','Film'].map(t=>{
+    ['',...PRODUCT_TYPES].map(t=>{
       const active=(p?.product_type||'')===(t)
       const c=t?PRODUCT_TYPE_COLORS[t]:{bg:'#f0f0eb',color:'#555'}
       return '<label style="cursor:pointer"><input type="radio" name="pd-type" value="'+t+'" '+(active?'checked':'')+' style="display:none" /><span style="display:inline-block;padding:4px 12px;border-radius:20px;border:2px solid '+(active?(c.color):'#ddd')+';background:'+(active?c.bg:'#fff')+';color:'+(active?c.color:'#888')+';font-size:12px" onclick="document.querySelectorAll(\'[name=pd-type]\').forEach(r=>{const s=r.nextElementSibling;const cc=r.value?PRODUCT_TYPE_COLORS[r.value]:{bg:\'#f0f0eb\',color:\'#555\'};s.style.borderColor=r.checked?cc.color:\'#ddd\';s.style.background=r.checked?cc.bg:\'#fff\';s.style.color=r.checked?cc.color:\'#888\'})">'+( t||'無')+'</span></label>'
