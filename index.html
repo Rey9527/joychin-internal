@@ -4254,7 +4254,7 @@ function renderPshopProductArea(){
       '</div>'
     if(_pshopLayout==='list'){
       el.style.cssText=''
-      el.innerHTML=toggleBar+(list.map(p=>{
+      el.innerHTML=toggleBar+'<div>'+list.map(p=>{
         const cartItem=_pshopCart.find(c=>c.product_id===p.id&&!c.ref_order_id)
         const inCart=!!cartItem
         return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #e5e5e0;border-radius:8px;background:#fff;margin-bottom:6px">'+
@@ -4271,10 +4271,10 @@ function renderPshopProductArea(){
           '<button class="btn btn-primary btn-sm" onclick="pshopAddToCart('+p.id+')">'+(inCart?'✓ 已加入':'🛒 採購')+'</button>'+
           '</div>'+
           '</div>'
-      }).join('')||'<div style="color:#aaa;font-size:13px;padding:20px 0">此供應商沒有產品目錄</div>')
+      }).join('')+(list.length?'':'<div style="color:#aaa;font-size:13px;padding:20px 0">此供應商沒有產品目錄</div>')+'</div>'
     } else {
-      el.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px'
-      el.innerHTML=toggleBar+list.map(p=>{
+      el.style.cssText=''
+      el.innerHTML=toggleBar+'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">'+list.map(p=>{
         const cartItem=_pshopCart.find(c=>c.product_id===p.id&&!c.ref_order_id)
         const inCart=!!cartItem
         return '<div style="border:1px solid #e5e5e0;border-radius:10px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:6px">'+
@@ -4293,7 +4293,7 @@ function renderPshopProductArea(){
           '<button class="btn btn-primary btn-sm" style="width:100%" onclick="pshopAddToCart('+p.id+')">'+(inCart?'✓ 已加入':'🛒 採購')+'</button>'+
           '</div>'+
           '</div>'
-      }).join('')+'<div style="grid-column:1/-1">'+(!list.length?'<div style="color:#aaa;font-size:13px;padding:20px 0">此供應商沒有產品目錄</div>':'')+'</div>'
+      }).join('')+(list.length?'':'<div style="color:#aaa;font-size:13px;padding:20px 0;grid-column:1/-1">此供應商沒有產品目錄</div>')+'</div>'
     }
   }
 }
