@@ -4557,7 +4557,7 @@ function switchTab(tab,save=true){
   if(tab==='dashboard')renderDashboard()
   if(tab==='orders')renderOrders()
   if(tab==='shipments')renderShipments()
-  if(tab==='users_mgmt'){loadUsers().then(renderUsersMgmt)}
+  if(tab==='users_mgmt'){loadUsers().then(()=>{renderUsersMgmt();const sub=sessionStorage.getItem('users_subtab')||'users';switchUsersSubtab(sub)})}
   if(tab==='settings')renderSettingsTab()
   if(tab==='purchases'){populatePurchaseSupplierFilter();renderPurchaseOrders()}
   if(tab==='purchase-shop')pshopInitPage()
@@ -6912,6 +6912,7 @@ function renderActivityLogs(){
 function switchUsersSubtab(tab){
   const isLogs=tab==='logs'
   if(isLogs&&!isManager())return
+  sessionStorage.setItem('users_subtab',tab)
   document.getElementById('users-pane-users').style.display=isLogs?'none':''
   document.getElementById('users-pane-logs').style.display=isLogs?'':'none'
   ;['users','logs'].forEach(t=>{
