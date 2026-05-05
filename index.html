@@ -19,6 +19,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .nav-item:hover { color: #fff; background: #242424; }
 .nav-item.active { color: #fff; background: #0F6E56; }
 .nav-icon { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
+.nav-badge { margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: #A32D2D; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; }
 .sidebar-footer { padding: 14px 18px; border-top: 1px solid #242424; font-size: 10px; color: #444; }
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
 .topbar { background: #fff; border-bottom: 1px solid #e5e5e0; padding: 13px 24px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
@@ -233,7 +234,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <span class="nav-icon">🏠</span><span>儀表板</span>
     </button>
     <button class="nav-item" id="nav-inquiry" onclick="switchTab('inquiry')">
-      <span class="nav-icon">📋</span><span>詢價管理</span>
+      <span class="nav-icon">📋</span><span>詢價管理</span><span class="nav-badge" id="badge-inquiry" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-quotes" onclick="switchTab('quotes')">
       <span class="nav-icon">💰</span><span>報價管理</span>
@@ -251,18 +252,18 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <span class="nav-icon">🧪</span><span>樣品管理</span>
     </button>
     <button class="nav-item" id="nav-complaints" onclick="switchTab('complaints')">
-      <span class="nav-icon">🚨</span><span>客訴管理</span>
+      <span class="nav-icon">🚨</span><span>客訴管理</span><span class="nav-badge" id="badge-complaints" style="display:none"></span>
     </button>
     <div class="nav-section">通訊錄</div>
     <button class="nav-item" id="nav-customers" onclick="switchTab('customers')">
-      <span class="nav-icon">👥</span><span>客戶管理</span>
+      <span class="nav-icon">👥</span><span>客戶管理</span><span class="nav-badge" id="badge-customers" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-suppliers_mgmt" onclick="switchTab('suppliers_mgmt')">
       <span class="nav-icon">🏭</span><span>供應商管理</span>
     </button>
     <div class="nav-section">產品</div>
     <button class="nav-item" id="nav-products" onclick="switchTab('products')">
-      <span class="nav-icon">📦</span><span>產品目錄</span>
+      <span class="nav-icon">📦</span><span>產品目錄</span><span class="nav-badge" id="badge-products" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-docs" onclick="switchTab('docs')">
       <span class="nav-icon">📁</span><span>技術文件庫</span>
@@ -293,7 +294,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <span id="pshop-topbar-summary" style="font-size:12px;color:#666;display:none"></span>
       <button class="btn btn-ghost btn-sm" id="pshop-mobile-cart-btn" onclick="openMobileCart()" style="display:none">🛒 <span id="pshop-mobile-cart-count">0</span> 項</button>
       <button class="btn btn-ghost btn-sm" id="pshop-back-btn" onclick="pshopLeave()" style="display:none">← 返回採購單</button>
-      <div id="overdue-alert" style="display:none" class="badge"></div>
+      <div id="overdue-alert" style="display:none"></div>
       <div id="user-info" style="font-size:11px;color:#888;display:none"></div>
       <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none" onclick="logout()">登出</button>
     </div>
@@ -541,7 +542,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <button class="btn btn-primary" onclick="openProductModal()">+ 新增產品</button>
         </div>
       </div>
-      <div id="product-overdue-alert" style="display:none" class="alert-warn"></div>
+      <div id="product-overdue-alert" style="display:none"></div>
       <div class="filter-bar mobile-drawer-source" id="product-filter-bar">
         <input id="fp-search" type="text" placeholder="搜尋產品名稱、料號..." oninput="renderProducts()" style="max-width:200px" />
         <select id="fp-supplier" onchange="renderProducts()"><option value="">全部供應商</option></select>
@@ -1963,6 +1964,7 @@ function _buildCustomerOrderTable(){
 async function loadComplaints(){
   const{data}=await sb.from('complaints').select('*').order('created_at',{ascending:false})
   complaints=data||[]
+  updateNavBadges()
 }
 const COMPLAINT_SOURCE=[
   {id:'unloading',label:'下貨櫃發現',color:'#854F0B',bg:'#FAEEDA'},
@@ -3496,27 +3498,15 @@ function inquiryFollowupLevel(i){
   return 'ok'
 }
 
-function updateOverdueAlert(){
-  const warn=inquiries.filter(i=>inquiryFollowupLevel(i)==='warn').length
-  const overdue=inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').length
-  const el=document.getElementById('overdue-alert')
-  if(overdue>0){el.style.display='inline-block';el.setAttribute('style','display:inline-block;background:#FCEBEB;color:#A32D2D;border:1px solid #F09595;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:500');el.textContent='⚠ '+overdue+' 筆逾時'}
-  else if(warn>0){el.style.display='inline-block';el.setAttribute('style','display:inline-block;background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:500');el.textContent='🕐 '+warn+' 筆待追詢'}
-  else el.style.display='none'
+function updateNavBadges(){
+  const setB=(id,n)=>{const el=document.getElementById(id);if(!el)return;el.textContent=n;el.style.display=n>0?'flex':'none'}
+  setB('badge-inquiry',inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').length)
+  setB('badge-products',products.filter(p=>productStatus(p)==='overdue').length)
+  setB('badge-customers',customers.filter(c=>customerStatus(c)==='overdue').length)
+  setB('badge-complaints',complaints.filter(c=>c.status!=='resolved').length)
 }
-function updateProductOverdueAlert(){
-  const now=new Date()
-  const overdue=products.filter(p=>productStatus(p)==='overdue').length
-  const warn=products.filter(p=>productStatus(p)==='warn').length
-  const el=document.getElementById('product-overdue-alert')
-  if(!el)return
-  if(overdue>0||warn>0){
-    el.style.display='block'
-    el.textContent=(overdue?'⚠ '+overdue+' 個產品成本需要更新  ':'')+( warn?' 🕐 '+warn+' 個即將到期':'')
-  } else {
-    el.style.display='none'
-  }
-}
+function updateOverdueAlert(){updateNavBadges()}
+function updateProductOverdueAlert(){updateNavBadges()}
 function productStatus(p){
   const reviewDays=getProductReviewDays()
   if(!p.last_reviewed_at||!reviewDays)return 'ok'
@@ -6470,14 +6460,8 @@ function customerDaysLeft(c){
 }
 function updateCustomerReviewAlert(){
   const el=document.getElementById('customer-review-alert')
-  if(!el)return
-  const overdue=customers.filter(c=>customerStatus(c)==='overdue')
-  if(overdue.length){
-    el.style.display='block'
-    el.textContent='⚠️ '+overdue.length+' 位客戶需要回顧：'+overdue.map(c=>c.company).join('、')
-  } else {
-    el.style.display='none'
-  }
+  if(el)el.style.display='none'
+  updateNavBadges()
 }
 function renderCustomers(){
   const el=document.getElementById('customer-list')
