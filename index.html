@@ -582,6 +582,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
             <option value="product">產品</option>
             <option value="customer">客戶</option>
             <option value="supplier">供應商</option>
+            <option value="sample">樣品</option>
             <option value="user">使用者</option>
             <option value="auth">登入</option>
           </select>
@@ -1526,6 +1527,7 @@ async function _createSample(){
     notes:document.getElementById('sm-notes')?.value.trim()||null
   })
   if(error){showToast('新增失敗：'+error.message,'error');return}
+  logActivity('新增樣品','sample',name,'')
   await loadSamples();closeModal('modal-sample');renderSamples();showToast('樣品已新增')
 }
 
@@ -1671,6 +1673,7 @@ async function saveSampleBasic(){
     notes:document.getElementById('sm-e-notes')?.value.trim()||null
   }).eq('id',selectedSampleId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
+  logActivity('更新樣品','sample',String(selectedSampleId),name)
   await loadSamples();_renderSampleModal();renderSamples();showToast('樣品資料已更新')
 }
 
@@ -1678,6 +1681,7 @@ async function deleteSample(){
   confirmModal('確定要刪除這筆樣品嗎？',async()=>{
     const{error}=await sb.from('samples').delete().eq('id',selectedSampleId)
     if(error){showToast('刪除失敗：'+error.message,'error');return}
+    logActivity('刪除樣品','sample',String(selectedSampleId),'')
     await loadSamples();renderSamples();closeModal('modal-sample');showToast('樣品已刪除')
   })
 }
@@ -1693,6 +1697,7 @@ async function submitSampleRequest(){
     status:'pending'
   })
   if(error){showToast('新增失敗：'+error.message,'error');return}
+  logActivity('索取樣品','sample',String(selectedSampleId),'')
   await loadSamples();_renderSampleModal();renderSamples();showToast('索取記錄已新增')
 }
 
@@ -1724,6 +1729,7 @@ async function submitSampleShipment(){
   if(error){showToast('新增失敗：'+error.message,'error');return}
   const newQty=(s?.stock_qty??0)-qty
   await sb.from('samples').update({stock_qty:newQty}).eq('id',selectedSampleId)
+  logActivity('寄出樣品','sample',String(selectedSampleId),'數量 '+qty)
   await loadSamples();_renderSampleModal();renderSamples();showToast('寄出記錄已新增，庫存已扣除')
 }
 
