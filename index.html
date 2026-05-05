@@ -1208,13 +1208,14 @@ function clearLoginErrors(){
 
 async function logActivity(action,module,refId,detail){
   if(!currentUser)return
-  await sb.from('activity_logs').insert({
+  const{error}=await sb.from('activity_logs').insert({
     user_id:currentUser.id,
     user_name:currentUser.name,
     action,module,
     ref_id:String(refId||''),
     detail:detail||''
   })
+  if(error)console.error('[logActivity]',action,module,error.message)
 }
 
 async function doLogin(){
