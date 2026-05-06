@@ -1121,6 +1121,26 @@
     '您好':'Hello',
     '目前不列入未回覆追蹤':'Not tracked for follow-up',
 
+    // Placeholder hints — customer / supplier quick-add
+    '例：David Chen':'e.g. David Chen',
+    '例：ABC Packaging Co.':'e.g. ABC Packaging Co.',
+    '例：包裝、標籤':'e.g. Packaging, Labels',
+    '特殊需求、偏好...':'Special requirements, preferences...',
+    '例：王經理':'e.g. Manager Wang',
+    '例：裕豐紙業':'e.g. Yufeng Paper Co.',
+    '例：業務經理':'e.g. Sales Manager',
+    '矽油離型紙':'Silicone Release Paper',
+    '例：王哥、李總、David':'e.g. Manager Wang, Director Li, David',
+    // Placeholder hints — sample / order / inquiry / product / user
+    '例：pcs, rolls':'e.g. pcs, rolls',
+    '例 1070':'e.g. 1070',
+    '例：30天':'e.g. 30 days',
+    '例：1000m²':'e.g. 1000m²',
+    '例：PSA-45G-01':'e.g. PSA-45G-01',
+    '例：45g 矽離型紙':'e.g. 45g Silicone Release Paper',
+    '顯示名稱':'Display name',
+    '備註...':'Notes...',
+
     // Misc
     '版本號':'Version',
     '確認新增':'Confirm Add',
