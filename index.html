@@ -1323,7 +1323,7 @@ const PRODUCT_TYPES=['Brown','Yellow','White','Film','Other']
 const PRODUCT_TYPE_COLORS={Brown:{bg:'#F5ECD7',color:'#7A4F2A'},Yellow:{bg:'#FFFBDA',color:'#8A7000'},White:{bg:'#F5F5F0',color:'#666'},Film:{bg:'#E6F1FB',color:'#185FA5'},Other:{bg:'#F0EBF5',color:'#6B3FA0'}}
 let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[],complaints=[]
 let orders=[],orderItems=[]
-let shipments=[],shipmentPurchaseOrders=[]
+let shipments=[],shipmentPurchaseOrders=[],shipmentItems=[]
 let purchaseOrders=[],purchaseOrderItems=[],purchaseOrderOrderLinks=[]
 let quoteChanges=[]
 let selectedInqId=null,selectedQuoteId=null,selectedSampleId=null,selectedOrderId=null,selectedShipmentId=null,selectedPurchaseId=null,selectedTaskId=null,activeTab='inquiry',showTpl=false
@@ -1345,14 +1345,17 @@ async function loadOrders(){
   orders=o||[];orderItems=oi||[]
 }
 async function loadShipments(){
-  const [{data:s,error:shipErr},{data:spo,error:linkErr}] = await Promise.all([
+  const [{data:s,error:shipErr},{data:spo,error:linkErr},{data:si,error:siErr}] = await Promise.all([
     sb.from('shipments').select('*').order('created_at',{ascending:false}),
-    sb.from('shipment_purchase_orders').select('*').order('created_at',{ascending:false})
+    sb.from('shipment_purchase_orders').select('*').order('created_at',{ascending:false}),
+    sb.from('shipment_items').select('*').order('created_at',{ascending:true})
   ])
   shipments=s||[]
   shipmentPurchaseOrders=spo||[]
+  shipmentItems=si||[]
   if(shipErr)showToast('載入船運失敗：'+shipErr.message,'error')
   if(linkErr)showToast('載入船運關聯失敗：'+linkErr.message,'error')
+  if(siErr)showToast('載入貨物明細失敗：'+siErr.message,'error')
 }
 
 async function loadPurchaseOrders(){
@@ -2202,6 +2205,23 @@ function purchaseLinkedShipments(purchaseOrderId){
     .filter(Boolean)
 }
 function shipmentProductSummaryRows(shipmentId){
+  // Prefer explicit shipment_items rows; fall back to PO-derived aggregation
+  const explicitItems=shipmentItems.filter(x=>String(x.shipment_id)===String(shipmentId))
+  if(explicitItems.length){
+    const grouped=new Map()
+    explicitItems.forEach(item=>{
+      const key=[item.product_id||'',item.product_name||'',item.spec||'',item.unit||''].join('||')
+      if(!grouped.has(key)){
+        grouped.set(key,{product_name:item.product_name||'—',spec:item.spec||'',unit:item.unit||'',qty:0,purchase_order_ids:new Set()})
+      }
+      const row=grouped.get(key)
+      row.qty+=(parseFloat(item.qty)||0)
+      if(item.po_id)row.purchase_order_ids.add(String(item.po_id))
+    })
+    return Array.from(grouped.values())
+      .map(row=>({...row,purchase_order_ids:Array.from(row.purchase_order_ids),fromExplicit:true}))
+      .sort((a,b)=>String(a.product_name).localeCompare(String(b.product_name),'zh-TW'))
+  }
   const linkedPurchaseIds=shipmentPurchaseOrders
     .filter(x=>String(x.shipment_id)===String(shipmentId))
     .map(link=>String(link.purchase_order_id))
@@ -2209,29 +2229,16 @@ function shipmentProductSummaryRows(shipmentId){
     .filter(item=>linkedPurchaseIds.includes(String(item.po_id)))
   const grouped=new Map()
   rows.forEach(item=>{
-    const key=[
-      item.product_id||'',
-      item.product_name||'',
-      item.spec||'',
-      item.unit||'',
-      item.currency||''
-    ].join('||')
+    const key=[item.product_id||'',item.product_name||'',item.spec||'',item.unit||'',item.currency||''].join('||')
     if(!grouped.has(key)){
-      grouped.set(key,{
-        product_name:item.product_name||'—',
-        spec:item.spec||'',
-        unit:item.unit||'',
-        currency:item.currency||'',
-        qty:0,
-        purchase_order_ids:new Set()
-      })
+      grouped.set(key,{product_name:item.product_name||'—',spec:item.spec||'',unit:item.unit||'',currency:item.currency||'',qty:0,purchase_order_ids:new Set()})
     }
     const row=grouped.get(key)
     row.qty+=(parseFloat(item.qty)||0)
     row.purchase_order_ids.add(String(item.po_id))
   })
   return Array.from(grouped.values())
-    .map(row=>({...row,purchase_order_ids:Array.from(row.purchase_order_ids)}))
+    .map(row=>({...row,purchase_order_ids:Array.from(row.purchase_order_ids),fromExplicit:false}))
     .sort((a,b)=>String(a.product_name).localeCompare(String(b.product_name),'zh-TW'))
 }
 function purchaseOrderLinksForDisplay(purchaseOrderId){
@@ -2681,12 +2688,38 @@ function openShipmentModal(id){
     :'')+
     '<div class="divider"></div>'+
     '<div class="section-title" style="margin-bottom:8px">產品清單</div>'
+  const hasExplicit=productSummary.length&&productSummary[0].fromExplicit
   if(productSummary.length){
-    html+='<div style="overflow:auto;border:1px solid #e5e5e0;border-radius:8px;background:#fff;margin-bottom:8px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f7f7f3;color:#666"><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">產品</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">規格</th><th style="text-align:right;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">總數量</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">來源採購單</th></tr></thead><tbody>'+
-      productSummary.map(row=>'<tr><td style="padding:8px;border-bottom:1px solid #f3f3ef;font-weight:500">'+esc(row.product_name)+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(row.spec||'—')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right">'+esc(String(row.qty))+' '+esc(row.unit||'')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(row.purchase_order_ids.join(', '))+'</td></tr>').join('')+
+    html+=(hasExplicit?'':'<div style="font-size:11px;color:#aaa;margin-bottom:6px">（以採購單品項估算，可新增明細精確記錄）</div>')+
+    '<div style="overflow:auto;border:1px solid #e5e5e0;border-radius:8px;background:#fff;margin-bottom:8px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f7f7f3;color:#666"><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">產品</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">規格</th><th style="text-align:right;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">數量</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">採購單</th>'+(hasExplicit?'<th style="padding:8px;border-bottom:1px solid #ecebe5"></th>':'')+'</tr></thead><tbody>'+
+      (hasExplicit
+        ? shipmentItems.filter(x=>String(x.shipment_id)===String(id)).map(item=>'<tr><td style="padding:8px;border-bottom:1px solid #f3f3ef;font-weight:500">'+esc(item.product_name||'—')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(item.spec||'—')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right">'+esc(String(item.qty||''))+' '+esc(item.unit||'')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(item.po_id||'—')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right"><button class="btn btn-ghost btn-sm" style="color:#A32D2D;padding:2px 6px;font-size:11px" onclick="removeShipmentItem('+item.id+',\''+id+'\')">×</button></td></tr>').join('')
+        : productSummary.map(row=>'<tr><td style="padding:8px;border-bottom:1px solid #f3f3ef;font-weight:500">'+esc(row.product_name)+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(row.spec||'—')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right">'+esc(String(row.qty))+' '+esc(row.unit||'')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(row.purchase_order_ids.join(', '))+'</td></tr>').join('')
+      )+
       '</tbody></table></div>'
   }else{
-    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">尚未關聯產品</div>'
+    html+='<div style="font-size:12px;color:#aaa;padding:8px 0 4px">尚未有明細，可用下方表單新增</div>'
+  }
+  // Add shipment item form
+  const linkedPOsForItems=shipmentLinkedPurchases(id)
+  if(linkedPOsForItems.length){
+    html+='<div id="sh-item-form" style="border:1px dashed #d5d5cf;border-radius:8px;padding:10px 12px;margin-bottom:8px">'+
+      '<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:8px">+ 新增貨物明細</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
+        '<div><div style="font-size:11px;color:#888;margin-bottom:3px">採購單</div>'+
+          '<select id="shi-po" onchange="shItemPoChange(\''+id+'\')" style="width:100%"><option value="">— 選擇採購單 —</option>'+
+          linkedPOsForItems.map(p=>'<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+'</option>').join('')+
+          '</select></div>'+
+        '<div><div style="font-size:11px;color:#888;margin-bottom:3px">產品</div>'+
+          '<select id="shi-product" onchange="shItemProductChange()" style="width:100%"><option value="">— 先選採購單 —</option></select></div>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 80px 80px;gap:8px;margin-bottom:8px">'+
+        '<div><div style="font-size:11px;color:#888;margin-bottom:3px">規格</div><input id="shi-spec" type="text" style="width:100%" placeholder="規格"></div>'+
+        '<div><div style="font-size:11px;color:#888;margin-bottom:3px">數量</div><input id="shi-qty" type="number" min="0" style="width:100%;text-align:right" placeholder="0"></div>'+
+        '<div><div style="font-size:11px;color:#888;margin-bottom:3px">單位</div><input id="shi-unit" type="text" style="width:100%" placeholder="m²"></div>'+
+      '</div>'+
+      '<button class="btn btn-ghost btn-sm" onclick="saveShipmentItem(\''+id+'\')">新增</button>'+
+    '</div>'
   }
   // 關聯採購單管理（內嵌在詳情 modal）
   const availablePOs=purchaseOrders.filter(p=>!shipmentPurchaseOrders.some(link=>String(link.purchase_order_id)===String(p.id)&&String(link.shipment_id)===String(id)))
@@ -2713,55 +2746,137 @@ async function quickUpdateShipmentStatus(shipmentId,newStatus){
   if(newStatus==='customs_clearance')renderDashboard()
 }
 
+function shItemPoChange(shipmentId){
+  const poId=document.getElementById('shi-po')?.value
+  const sel=document.getElementById('shi-product')
+  if(!sel)return
+  if(!poId){sel.innerHTML='<option value="">— 先選採購單 —</option>';return}
+  const items=purchaseOrderItems.filter(i=>String(i.po_id)===String(poId))
+  sel.innerHTML='<option value="">— 選擇產品 —</option>'+
+    items.map(i=>'<option value="'+i.id+'" data-name="'+esc(i.product_name||'')+'" data-spec="'+esc(i.spec||'')+'" data-qty="'+esc(String(i.qty||''))+'" data-unit="'+esc(i.unit||'')+'">'+esc(i.product_name||'—')+(i.spec?' · '+i.spec:'')+'</option>').join('')
+}
+function shItemProductChange(){
+  const sel=document.getElementById('shi-product')
+  const opt=sel?.options[sel.selectedIndex]
+  if(!opt||!opt.value)return
+  const specEl=document.getElementById('shi-spec')
+  const qtyEl=document.getElementById('shi-qty')
+  const unitEl=document.getElementById('shi-unit')
+  if(specEl)specEl.value=opt.dataset.spec||''
+  if(qtyEl)qtyEl.value=opt.dataset.qty||''
+  if(unitEl)unitEl.value=opt.dataset.unit||''
+}
+async function saveShipmentItem(shipmentId){
+  const poId=document.getElementById('shi-po')?.value||''
+  const productSel=document.getElementById('shi-product')
+  const opt=productSel?.options[productSel.selectedIndex]
+  const productName=opt?.dataset.name||document.getElementById('shi-product')?.value||''
+  const productId=opt?.value?purchaseOrderItems.find(i=>String(i.id)===opt.value)?.product_id||null:null
+  const spec=document.getElementById('shi-spec')?.value||''
+  const qty=parseFloat(document.getElementById('shi-qty')?.value)||null
+  const unit=document.getElementById('shi-unit')?.value||''
+  if(!productName&&!qty){showToast('請填寫產品和數量','error');return}
+  const payload={shipment_id:parseInt(shipmentId),po_id:poId||null,product_id:productId||null,product_name:productName,spec,qty,unit}
+  const{error}=await sb.from('shipment_items').insert(payload)
+  if(error){showToast('新增失敗：'+error.message,'error');return}
+  await loadShipments()
+  openShipmentModal(shipmentId)
+}
+async function removeShipmentItem(itemId,shipmentId){
+  const{error}=await sb.from('shipment_items').delete().eq('id',itemId)
+  if(error){showToast('刪除失敗：'+error.message,'error');return}
+  await loadShipments()
+  openShipmentModal(shipmentId)
+}
+
 function openShipmentReceivePanel(shipmentId){
   const s=shipments.find(x=>String(x.id)===String(shipmentId));if(!s)return
+  const explicitItems=shipmentItems.filter(x=>String(x.shipment_id)===String(shipmentId))
+  const useExplicit=explicitItems.length>0
   const linked=shipmentLinkedPurchases(shipmentId)
-  if(!linked.length){showToast('此船運尚未掛載採購單','error');return}
+  if(!useExplicit&&!linked.length){showToast('此船運尚未掛載採購單','error');return}
   let html='<div class="divider"></div>'+
     '<div class="section-title" style="margin:12px 0 10px">確認入庫 — 填寫實收數量</div>'
-  linked.forEach(po=>{
-    const items=purchaseOrderItems.filter(i=>i.po_id===po.id)
-    if(!items.length)return
-    html+='<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px">採購單 '+esc(String(po.id))+'</div>'
-    items.forEach(item=>{
-      const expectedQty=parseFloat(item.qty||item.quantity||0)
-      const prevReceived=parseFloat(item.received_qty||0)
+  if(useExplicit){
+    explicitItems.forEach(item=>{
+      const poItem=purchaseOrderItems.find(i=>item.product_id&&i.product_id===item.product_id&&String(i.po_id)===String(item.po_id||''))
+      const prevReceived=parseFloat(poItem?.received_qty||0)
       html+='<div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0eb">'+
         '<div><div style="font-size:13px;font-weight:500">'+esc(item.product_name||'—')+'</div>'+
         (item.spec?'<div style="font-size:11px;color:#888">'+esc(item.spec)+'</div>':'')+
-        '<div style="font-size:11px;color:#aaa">訂單量 '+expectedQty+' '+esc(item.unit||'')+(prevReceived>0?' · 前次已到 '+prevReceived:'')+'</div></div>'+
+        '<div style="font-size:11px;color:#aaa">此批次 '+esc(String(item.qty||'?'))+' '+esc(item.unit||'')+(item.po_id?' · '+esc(String(item.po_id)):'')+(prevReceived>0?' · 前次已到 '+prevReceived:'')+'</div></div>'+
         '<div style="font-size:11px;color:#888;white-space:nowrap">此次實收</div>'+
-        '<input type="number" id="rcv-'+item.id+'" value="" min="0" style="width:80px;text-align:right" placeholder="實收" />'+
+        '<input type="number" id="rcv-si-'+item.id+'" value="'+esc(String(item.qty||''))+'" min="0" style="width:80px;text-align:right" placeholder="實收" />'+
         '</div>'
     })
-    html+='<div style="margin-bottom:12px"></div>'
-  })
+  }else{
+    linked.forEach(po=>{
+      const items=purchaseOrderItems.filter(i=>i.po_id===po.id)
+      if(!items.length)return
+      html+='<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px">採購單 '+esc(String(po.id))+'</div>'
+      items.forEach(item=>{
+        const expectedQty=parseFloat(item.qty||item.quantity||0)
+        const prevReceived=parseFloat(item.received_qty||0)
+        html+='<div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0eb">'+
+          '<div><div style="font-size:13px;font-weight:500">'+esc(item.product_name||'—')+'</div>'+
+          (item.spec?'<div style="font-size:11px;color:#888">'+esc(item.spec)+'</div>':'')+
+          '<div style="font-size:11px;color:#aaa">訂單量 '+expectedQty+' '+esc(item.unit||'')+(prevReceived>0?' · 前次已到 '+prevReceived:'')+'</div></div>'+
+          '<div style="font-size:11px;color:#888;white-space:nowrap">此次實收</div>'+
+          '<input type="number" id="rcv-'+item.id+'" value="" min="0" style="width:80px;text-align:right" placeholder="實收" />'+
+          '</div>'
+      })
+      html+='<div style="margin-bottom:12px"></div>'
+    })
+  }
   html+='<div style="display:flex;gap:8px;margin-top:8px">'+
-    '<button class="btn btn-primary" onclick="saveShipmentReceive(\''+shipmentId+'\')">儲存入庫紀錄 → 完成</button>'+
+    '<button class="btn btn-primary" onclick="saveShipmentReceive(\''+shipmentId+'\','+useExplicit+')">儲存入庫紀錄 → 完成</button>'+
     '<button class="btn btn-ghost" onclick="openShipmentModal(\''+shipmentId+'\')">取消</button>'+
     '</div>'
   const bd=document.getElementById('modal-shipment-bd')
   bd.innerHTML=bd.innerHTML+html
 }
 
-async function saveShipmentReceive(shipmentId){
+async function saveShipmentReceive(shipmentId,useExplicit){
   const linked=shipmentLinkedPurchases(shipmentId)
+  const explicitItems=shipmentItems.filter(x=>String(x.shipment_id)===String(shipmentId))
   const updates=[]
   const stockUpdates=[]
-  linked.forEach(po=>{
-    purchaseOrderItems.filter(i=>i.po_id===po.id).forEach(item=>{
-      const input=document.getElementById('rcv-'+item.id)
+  if(useExplicit){
+    explicitItems.forEach(item=>{
+      const input=document.getElementById('rcv-si-'+item.id)
       if(!input)return
       const thisReceived=parseFloat(input.value)||0
-      const prev=parseFloat(item.received_qty||0)
-      updates.push({id:item.id,received_qty:prev+thisReceived})
-      if(thisReceived>0&&item.product_id){
+      if(thisReceived<=0)return
+      // find matching po item to update received_qty
+      const poItem=purchaseOrderItems.find(i=>item.product_id&&i.product_id===item.product_id&&String(i.po_id)===String(item.po_id||''))
+      if(poItem){
+        const prev=parseFloat(poItem.received_qty||0)
+        const existing=updates.find(u=>u.id===poItem.id)
+        if(existing)existing.received_qty+=thisReceived
+        else updates.push({id:poItem.id,received_qty:prev+thisReceived})
+      }
+      if(item.product_id){
         const existing=stockUpdates.find(x=>x.product_id===item.product_id)
         if(existing){existing.deltaM+=thisReceived}
         else stockUpdates.push({product_id:item.product_id,deltaM:thisReceived,unit:item.unit||'m'})
       }
     })
-  })
+  }else{
+    linked.forEach(po=>{
+      purchaseOrderItems.filter(i=>i.po_id===po.id).forEach(item=>{
+        const input=document.getElementById('rcv-'+item.id)
+        if(!input)return
+        const thisReceived=parseFloat(input.value)||0
+        const prev=parseFloat(item.received_qty||0)
+        updates.push({id:item.id,received_qty:prev+thisReceived})
+        if(thisReceived>0&&item.product_id){
+          const existing=stockUpdates.find(x=>x.product_id===item.product_id)
+          if(existing){existing.deltaM+=thisReceived}
+          else stockUpdates.push({product_id:item.product_id,deltaM:thisReceived,unit:item.unit||'m'})
+        }
+      })
+    })
+  }
   for(const u of updates){
     const{error}=await sb.from('purchase_order_items').update({received_qty:u.received_qty}).eq('id',u.id)
     if(error){showToast('更新品項失敗：'+error.message,'error');return}
