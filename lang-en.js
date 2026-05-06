@@ -95,6 +95,8 @@
     '樣品確認中':'Sample Review',
     '客戶接受':'Accepted',
     '客戶拒絕':'Rejected',
+    '已取代':'Superseded',
+    '已取代（舊版本）':'Superseded (old version)',
 
     // Filter options — Samples
     '庫存中':'In Stock',

@@ -348,6 +348,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <option value="sample_review">樣品確認中</option>
           <option value="accepted">客戶接受</option>
           <option value="rejected">客戶拒絕</option>
+          <option value="superseded">已取代（舊版本）</option>
         </select>
         <input id="fq-customer" type="text" placeholder="搜尋客戶..." oninput="renderQuotes()" style="max-width:150px" />
         <input id="fq-product" type="text" placeholder="搜尋產品..." oninput="renderQuotes()" style="max-width:150px" />
@@ -1312,6 +1313,7 @@ const QUO_STATUS=[
   {id:'sample_review',label:'樣品確認中',color:'#7A5800',bg:'#FFF6DA'},
   {id:'accepted',label:'客戶接受',color:'#3B6D11',bg:'#EAF3DE'},
   {id:'rejected',label:'客戶拒絕',color:'#A32D2D',bg:'#FCEBEB'},
+  {id:'superseded',label:'已取代',color:'#aaa',bg:'#f5f5f2'},
 ]
 
 let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteItems=[],settings={},products=[]
@@ -5125,6 +5127,7 @@ async function _execSendToQuote(inqId){
       snapshot,
       changed_at:new Date().toISOString()
     })
+    await sb.from('quote_headers').update({status:'superseded'}).eq('id',latest.id)
     await sb.from('inquiries').update({status:'sent_to_quote'}).eq('id',inqId)
     logActivity('送去報價','inquiry',inqId,'')
     await Promise.all([loadInquiries(),loadQuotes(),loadQuoteChanges()])
@@ -5162,6 +5165,7 @@ function renderQuotes(){
   let filtered=quoteHeaders.filter(h=>{
     const items=quoteItems.filter(it=>it.header_id===h.id)
     const created=(h.created_at||'').slice(0,10)
+    if(!fStatus&&h.status==='superseded')return false
     if(fStatus&&h.status!==fStatus)return false
     if(fCustomer&&!String(h.customer||'').toLowerCase().includes(fCustomer))return false
     if(fProduct&&!items.some(it=>String(it.product||'').toLowerCase().includes(fProduct)))return false
@@ -5779,6 +5783,7 @@ async function newQuoteVersion(){
   const{error}=await sb.from('quote_headers').insert({
     id:newId,inquiry_id:h.inquiry_id||null,customer:h.customer,supplier:h.supplier,version:newV,status:'draft',notes:h.notes,source:h.source||null
   })
+  if(!error)await sb.from('quote_headers').update({status:'superseded'}).eq('id',h.id)
   if(error){showToast('建立新版本失敗：'+error.message,'error');return}
   if(items.length){
     let hasStale=false
@@ -6539,6 +6544,7 @@ async function _createNewVersionWithUpdatedCost(headerId,productId,newCost,newCu
     const{error:e2}=await sb.from('quote_items').insert(newItems)
     if(e2)return false
   }
+  await sb.from('quote_headers').update({status:'superseded'}).eq('id',h.id)
   return true
 }
 
