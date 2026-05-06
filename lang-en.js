@@ -91,6 +91,8 @@
     // Filter options — Quotes
     '草稿':'Draft',
     '已送客戶':'Sent to Customer',
+    '待寄樣':'Pending Sample',
+    '樣品確認中':'Sample Review',
     '客戶接受':'Accepted',
     '客戶拒絕':'Rejected',
 
@@ -314,6 +316,8 @@
     '新增採購單':'New Purchase Order',
     '採購日期':'PO Date',
     '會計編號':'Accounting No.',
+    '會計編號（升序）':'Accounting No. (Asc)',
+    '會計編號（降序）':'Accounting No. (Desc)',
     '採購品項':'PO Items',
     '已收數量':'Received Qty',
     '卷數':'Rolls',
@@ -505,8 +509,26 @@
     '客戶拒絕 ✗':'Customer Rejected ✗',
     '送去訂單 →':'Send to Order →',
     '⚠ 此報價單已送出，如需修改請點「修改報價」':'⚠ This quote has been sent. Click "Edit Quote" to modify.',
+    '📦 客戶已接受報價，請登記寄樣後進入確認階段':'📦 Customer accepted. Please record sample shipment to proceed.',
     '✓ 客戶已接受，可送去訂單建立正式訂單':'✓ Accepted by customer. Send to Orders to create a formal order.',
     '此報價單已被拒絕':'This quotation was rejected.',
+    // Sample review flow
+    '客戶接受後需等待樣品確認':'Require sample confirmation after acceptance',
+    '樣品通過 ✓':'Sample Approved ✓',
+    '樣品不通過 ✗':'Sample Rejected ✗',
+    '登記寄樣':'Record Shipment',
+    '選擇樣品':'Select Sample',
+    '運單號（選填）':'Tracking No. (optional)',
+    '登記寄樣並進入確認階段 →':'Record Shipment & Enter Review →',
+    '找不到對應樣品，可從此報價直接建立：':'No matching sample. Create one from this quote:',
+    '找不到對應樣品。請先至':'No matching sample. Please go to',
+    '建立樣品紀錄，再回來登記寄出。':'to create a sample record, then return to record shipment.',
+    '建立新樣品':'Create New Sample',
+    '規格（可修改）':'Spec (editable)',
+    '初始庫存':'Initial Stock',
+    '建立樣品':'Create Sample',
+    '＋ 找不到對應樣品？從此報價建立':'+ No match? Create from this quote',
+    '請選擇樣品':'Please select a sample',
     'PDF 產生功能即將開放':'PDF generation coming soon',
     '郵件範本功能即將開放':'Email template coming soon',
     '▸ 修改歷史（':'▸ Change History (',
@@ -834,6 +856,10 @@
     '逾期提醒':'Overdue Reminder',
 
     // User management
+    '使用者列表':'User List',
+    '操作記錄':'Activity Log',
+    '全部模組':'All Modules',
+    '沒有符合條件的記錄':'No matching records',
     '使用者已新增':'User added',
     '使用者資料已更新':'User updated',
     '已刪除':'Deleted',
@@ -876,6 +902,10 @@
 
     // Quote item modal
     '供應商成本':'Supplier Cost',
+    '供應商成本報價（內部）':'Supplier Cost Quote (Internal)',
+    '— 單位 —':'— Unit —',
+    '格狀':'Grid',
+    '條列':'List',
     '📦 更新目錄成本':'📦 Update Catalog Cost',
     '非目錄':'Not in catalog',
     '清關手續費 %':'Customs Fee %',
@@ -1474,6 +1504,14 @@
     ['載入採購單關聯訂單失敗：','Failed to load PO order links: '],
     ['載入船運關聯失敗：','Failed to load shipment links: '],
     ['寄出數量不能超過目前庫存（','Quantity cannot exceed current stock ('],
+    // Sample review flow
+    ['寄樣已登記，進入樣品確認中','Shipment recorded, entering sample review'],
+    ['樣品已建立，請選擇後登記寄出','Sample created. Select it and record shipment.'],
+    ['寄樣登記失敗：','Failed to record shipment: '],
+    ['建立樣品失敗：','Failed to create sample: '],
+    ['已儲存','Saved'],
+    // Inquiry save
+    ['更新詢價資料失敗：','Failed to update inquiry: '],
   ]
 
   // ── Dynamic pattern translator ────────────────────────────────────────────
@@ -1528,6 +1566,8 @@
     [/^此供應商共有\s*(\d+)\s*位聯絡人：$/,(_,n)=>'This supplier has '+n+' contacts:'],
     // 採購單品項到貨進度："已到 X / 共 Y unit"
     [/^已到\s*(\S+)\s*\/\s*共\s*(\S+)\s*(.*)$/,(_,r,t,u)=>'Received '+r+' / Ordered '+t+(u?' '+u.trim():'')],
+    // Sample review banner: "⏳ 樣品已寄出 · 2026-01-01 · 運單：ABC — 等待客戶確認品質"
+    [/^⏳ 樣品已寄出(.*?)— 等待客戶確認品質$/,(_,mid)=>'⏳ Sample shipped'+mid.replace(/運單：/g,'Tracking: ')+'— awaiting quality confirmation'],
   ]
 
   // Substring patterns: replace Chinese fragments within longer text nodes
