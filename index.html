@@ -118,6 +118,13 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 #sidebar-overlay.open { display: block; }
 .modal-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 16px; background: #fff; border-top: 1px solid #e5e5e0; position: sticky; bottom: 0; z-index: 2; }
 .nf-suggest-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid #e5e5e0; border-radius:6px; margin-top:4px; background:#f9f9f7; font-size:13px; }
+.list-table { border:1px solid #e5e5e0; border-radius:6px; background:#fff; overflow:hidden; margin-bottom:6px; }
+.list-table .row { border:none; border-bottom:1px solid #f0f0eb; border-radius:0; margin-bottom:0; background:transparent; }
+.list-table .row:last-child { border-bottom:none; }
+.list-table .row:hover { background:#f8fffe; border-color:transparent; }
+.list-table .row.overdue { background:#FCEBEB; border-color:#f9d0d0; }
+.list-table .row.warning { background:#FFFBEA; border-color:#f5eec0; }
+.list-table-label { font-size:11px;color:#aaa;padding:8px 12px 4px;border-bottom:1px solid #f0f0eb; }
 .nf-suggest-item:first-child { margin-top:6px; }
 @keyframes modal-slide-up { from { transform: translateY(60%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @media (max-width: 639px) {
@@ -1479,7 +1486,7 @@ function renderSamples(){
   })
   if(sum)sum.textContent=list.length+' 筆樣品'
   if(!list.length){el.innerHTML='<div class="loading">尚無樣品資料</div>';return}
-  el.innerHTML=list.map(s=>{
+  el.innerHTML='<div class="list-table">'+list.map(s=>{
     const sup=suppliers.find(x=>x.id===s.supplier_id)
     const st=calcSampleStatus(s.id,s.stock_qty)
     const riCount=sampleRequestsIn.filter(r=>r.sample_id===s.id).length
@@ -1494,7 +1501,7 @@ function renderSamples(){
       '</div>'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
       '</div>'
-  }).join('')
+  }).join('')+'</div>'
 }
 
 function clearSampleFilters(){
@@ -2006,7 +2013,7 @@ function renderComplaints(){
   const open=list.filter(c=>c.status!=='resolved').length
   if(sum)sum.textContent=open+' 筆處理中 / 共 '+list.length+' 筆'
   if(!list.length){el.innerHTML='<div class="loading">尚無客訴記錄</div>';return}
-  el.innerHTML=list.map(c=>{
+  el.innerHTML='<div class="list-table">'+list.map(c=>{
     const src=complaintSourceObj(c.source)
     const st=complaintStatusObj(c.status)
     return '<div class="row" onclick="openComplaintModal(\''+c.id+'\')">'+
@@ -2019,7 +2026,7 @@ function renderComplaints(){
       '<div style="font-size:12px;color:#666">'+esc(c.product_name||'—')+(c.defect_qty?' · '+c.defect_qty+' '+(c.unit||''):'')+' · '+(c.created_at||'').slice(0,10)+'</div>'+
       (c.defect_description?'<div style="font-size:11px;color:#aaa;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.defect_description)+'</div>':'')+
       '</div></div>'
-  }).join('')
+  }).join('')+'</div>'
 }
 let selectedComplaintId=null
 function openComplaintModal(id){
@@ -2149,7 +2156,7 @@ function renderOrders(){
   })
   if(sum)sum.textContent=list.length+' 筆訂單'
   if(!list.length){el.innerHTML='<div class="loading">尚無訂單資料</div>';return}
-  el.innerHTML=list.map(o=>{
+  el.innerHTML='<div class="list-table">'+list.map(o=>{
     const cust=customers.find(x=>x.id===o.customer_id)
     const sup=suppliers.find(x=>x.id===o.supplier_id)
     const st=sObj(o.status,ORDER_STATUS)
@@ -2171,7 +2178,7 @@ function renderOrders(){
       (o.total_amount?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+Number(o.total_amount).toLocaleString()+' '+(o.currency||'')+'</div>':'')+
       '<div style="font-size:11px;color:#aaa">'+itms.length+' 品項</div>'+
       '</div></div>'
-  }).join('')
+  }).join('')+'</div>'
 }
 
 function clearOrderFilters(){
@@ -2623,7 +2630,7 @@ function renderShipments(){
   })
   if(sum)sum.textContent=list.length+' 筆船運批次'
   if(!list.length){el.innerHTML='<div class="loading">尚無船運資料</div>';return}
-  el.innerHTML=list.map(s=>{
+  el.innerHTML='<div class="list-table">'+list.map(s=>{
     const st=shipmentStatusObj(s.status)
     const linked=shipmentLinkedPurchases(s.id)
     return '<div class="row" onclick="openShipmentModal('+s.id+')">'+
@@ -2639,7 +2646,7 @@ function renderShipments(){
       '<div style="text-align:right;flex-shrink:0">'+
       '<div style="font-size:11px;color:#888">'+linked.length+' 筆採購單</div>'+
       '</div></div>'
-  }).join('')
+  }).join('')+'</div>'
 }
 
 function clearShipmentFilters(){
@@ -3703,7 +3710,7 @@ function renderPurchaseOrders(){
   else filtered=[...filtered].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
   if(sum)sum.textContent=filtered.length+' 筆採購單'
   if(!filtered.length){el.innerHTML='<div class="loading">尚無採購單資料</div>';return}
-  el.innerHTML=filtered.map(p=>{
+  el.innerHTML='<div class="list-table">'+filtered.map(p=>{
     const st=PURCHASE_STATUS.find(s=>s.id===p.status)||{label:p.status,color:'#888',bg:'#f0f0f0'}
     const d=p.created_at?new Date(p.created_at).toLocaleDateString('zh-TW'):''
     const supplierName=resolvePurchaseSupplierName(p)
@@ -3719,7 +3726,7 @@ function renderPurchaseOrders(){
       '</div>'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
     '</div>'
-  }).join('')
+  }).join('')+'</div>'
 }
 
 function clearPurchaseFilters(){
@@ -4710,8 +4717,8 @@ function renderInquiries(){
   const closed=list.filter(i=>i.status==='closed')
   document.getElementById('inq-summary').textContent=active.length+' 筆進行中 / 共 '+list.length+' 筆'
   let html=active.map(i=>inqRowHtml(i)).join('')
-  if(closed.length)html+='<div style="font-size:11px;color:#aaa;margin:12px 0 6px">已結案（'+closed.length+'）</div>'+closed.map(i=>inqRowHtml(i)).join('')
-  document.getElementById('inquiry-list').innerHTML=html||'<div class="loading">無符合條件的詢價</div>'
+  if(closed.length)html+='<div class="list-table-label">已結案（'+closed.length+'）</div>'+closed.map(i=>inqRowHtml(i)).join('')
+  document.getElementById('inquiry-list').innerHTML=html?'<div class="list-table">'+html+'</div>':'<div class="loading">無符合條件的詢價</div>'
 }
 function displayCustomerName(rawName){
   if(!rawName)return '—'
@@ -5292,7 +5299,7 @@ function renderQuotes(){
   if(sum)sum.textContent=filtered.length+' 筆符合 / '+active.length+' 筆進行中 / 共 '+quoteHeaders.length+' 筆'
   if(!quoteHeaders.length){el.innerHTML='<div class="loading">尚無報價，從詢價頁按「收到成本 → 送去報價」，或點「直接新增報價單」</div>';return}
   if(!filtered.length){el.innerHTML='<div class="loading">沒有符合篩選條件的報價</div>';return}
-  el.innerHTML=filtered.map(h=>{
+  el.innerHTML='<div class="list-table">'+filtered.map(h=>{
     const items=quoteItems.filter(it=>it.header_id===h.id)
     const d=new Date(h.created_at).toLocaleDateString('zh-TW')
     return '<div class="row" onclick="openQuoteModal(\''+h.id+'\')">'+
@@ -5305,7 +5312,7 @@ function renderQuotes(){
       '<div style="font-size:12px;color:#666">'+(items.length?items.map(it=>it.product).join('、'):'—')+'</div>'+
       '<div style="font-size:11px;color:#aaa">'+d+' · 供應商：'+(h.supplier||'—')+'</div>'+
       '</div>'+badge(h.status,QUO_STATUS)+'</div>'
-  }).join('')
+  }).join('')+'</div>'
 }
 
 function clearQuoteFilters(){
@@ -6459,7 +6466,7 @@ function renderProducts(){
       }).join('')+
     '</div>'
   } else {
-    el.innerHTML=list.map(p=>{
+    el.innerHTML='<div class="list-table">'+list.map(p=>{
       const st=productStatus(p)
       const daysLeft=productDaysLeft(p)
       const sup=suppliers.find(s=>s.id===p.supplier_id)
@@ -6480,7 +6487,7 @@ function renderProducts(){
         '<div style="font-size:11px;color:#aaa">上次確認：'+(p.last_reviewed_at||'—')+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+' （'+getProductReviewDays()+'天週期）</div>'+
         '</div>'+
         '</div>'
-    }).join('')
+    }).join('')+'</div>'
   }
 }
 
