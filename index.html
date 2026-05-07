@@ -10,7 +10,7 @@
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; }
 #main-app { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; }
 .sidebar { width: 210px; min-height: 100vh; background: #1a1a1a; flex-shrink: 0; display: flex; flex-direction: column; }
-.sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid #2a2a2a; }
+.sidebar-logo { padding: 16px 18px 14px; border-bottom: 1px solid #2a2a2a; }
 .sidebar-logo h1 { font-size: 13px; font-weight: 600; color: #fff; line-height: 1.4; }
 .sidebar-logo p { font-size: 10px; color: #555; margin-top: 3px; }
 .sidebar-nav { flex: 1; padding: 10px 0; }
@@ -19,21 +19,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .nav-item:hover { color: #fff; background: #242424; }
 .nav-item.active { color: #fff; background: #0F6E56; }
 .nav-icon { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
-.nav-badge { margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: #A32D2D; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.nav-badge { margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #A32D2D; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; }
 .sidebar-footer { padding: 14px 18px; border-top: 1px solid #242424; font-size: 10px; color: #444; }
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
-.topbar { background: #fff; border-bottom: 1px solid #e5e5e0; padding: 13px 24px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-.topbar-title { font-size: 14px; font-weight: 600; color: #1a1a1a; }
-.content { padding: 20px 24px; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.card { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #e5e5e0; margin-bottom: 14px; }
-.btn { padding: 7px 14px; border-radius: 8px; border: none; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.12s; }
+.topbar { background: #fff; border-bottom: 1px solid #e5e5e0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.topbar-title { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+.content { padding: 16px 20px; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.card { background: #fff; border-radius: 6px; padding: 14px 16px; border: 1px solid #e5e5e0; margin-bottom: 12px; }
+.btn { padding: 7px 14px; border-radius: 4px; border: none; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.12s; }
 .btn-primary { background: #0F6E56; color: #fff; }
 .btn-primary:hover { background: #085041; }
 .btn-blue { background: #185FA5; color: #fff; }
 .btn-ghost { background: transparent; color: #666; border: 1px solid #e5e5e0; }
 .btn-ghost:hover { background: #f5f5f0; }
 .btn-sm { padding: 4px 10px; font-size: 11px; }
-input, select, textarea { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #e5e5e0; font-size: 12px; color: #1a1a1a; background: #fff; font-family: inherit; transition: border 0.12s; box-sizing: border-box; height: 36px; }
+input, select, textarea { width: 100%; padding: 6px 10px; border-radius: 4px; border: 1px solid #e5e5e0; font-size: 12px; color: #1a1a1a; background: #fff; font-family: inherit; transition: border 0.12s; box-sizing: border-box; height: 32px; }
 select { -webkit-appearance: none; appearance: none; padding-right: 34px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5 6 8l4-3.5' fill='none' stroke='%23888' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; background-size: 12px; }
 input[type=number] { padding-right: 10px; -moz-appearance: textfield; }
 input[type=number]::-webkit-inner-spin-button,
@@ -46,23 +46,23 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .req { color: #A32D2D; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+.badge { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 11px; font-weight: 500; }
 .overdue-tag { color: #A32D2D; font-size: 11px; font-weight: 500; }
-.row { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid #e5e5e0; border-radius: 10px; cursor: pointer; margin-bottom: 7px; background: #fff; transition: all 0.12s; }
+.row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid #e5e5e0; border-radius: 4px; cursor: pointer; margin-bottom: 6px; background: #fff; transition: all 0.12s; }
 .row:hover { border-color: #0F6E56; background: #f8fffc; }
 .row.overdue { border-color: #F09595; background: #FCEBEB; }
 .row.warning { border-color: #F5C842; background: #FFFBEA; }
 .status-btns { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
-.status-btn { padding: 3px 10px; border-radius: 7px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid; }
+.status-btn { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid; }
 .divider { height: 1px; background: #e5e5e0; margin: 14px 0; }
 .section-title { font-size: 12px; font-weight: 500; color: #444; margin-bottom: 8px; }
-.alert-info { background: #E6F1FB; border: 1px solid #B5D4F4; color: #0C447C; padding: 9px 13px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; }
-.alert-warn { background: #FFFBEA; border: 1px solid #F5C842; color: #7A5B00; padding: 9px 13px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; }
+.alert-info { background: #E6F1FB; border: 1px solid #B5D4F4; color: #0C447C; padding: 9px 13px; border-radius: 4px; font-size: 12px; margin-bottom: 12px; }
+.alert-warn { background: #FFFBEA; border: 1px solid #F5C842; color: #7A5B00; padding: 9px 13px; border-radius: 4px; font-size: 12px; margin-bottom: 12px; }
 .loading { text-align: center; padding: 40px; color: #aaa; font-size: 13px; }
-.tag { display: inline-block; padding: 1px 7px; border-radius: 7px; font-size: 10px; background: #f0f0eb; color: #666; border: 1px solid #e5e5e0; margin: 1px; }
-.doc-row { display: flex; align-items: center; gap: 10px; padding: 9px 13px; border: 1px solid #e5e5e0; border-radius: 8px; background: #fff; margin-bottom: 5px; }
+.tag { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 10px; background: #f0f0eb; color: #666; border: 1px solid #e5e5e0; margin: 1px; }
+.doc-row { display: flex; align-items: center; gap: 10px; padding: 9px 13px; border: 1px solid #e5e5e0; border-radius: 4px; background: #fff; margin-bottom: 5px; }
 .pdf-icon { width: 30px; height: 30px; border-radius: 6px; background: #FCEBEB; border: 1px solid #F7C1C1; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #791F1F; flex-shrink: 0; }
-.tpl-box { background: #f8f8f5; border: 1px solid #e5e5e0; border-radius: 9px; padding: 13px 15px; font-size: 11px; line-height: 1.8; white-space: pre-wrap; font-family: monospace; color: #1a1a1a; }
+.tpl-box { background: #f8f8f5; border: 1px solid #e5e5e0; border-radius: 4px; padding: 13px 15px; font-size: 11px; line-height: 1.8; white-space: pre-wrap; font-family: monospace; color: #1a1a1a; }
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
 .filter-bar select, .filter-bar input[type=text], .filter-bar input[type=date] { width: auto; font-size: 12px; padding: 6px 10px; }
 .filter-date-label { display: none; font-size: 11px; color: #666; margin: 0; }
@@ -84,20 +84,20 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
 #modal-cost-impact { z-index: 350; }
 .modal-overlay.open { display: flex; }
-.modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 600px; max-height: 88vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
+.modal-box { background: #fff; border-radius: 6px; width: 100%; max-width: 600px; max-height: 88vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
 .modal-box.sm { max-width: 440px; }
 .modal-box.lg { max-width: 720px; }
 #modal-subform { z-index: 420; }
-.modal-hd { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 18px 20px 12px; position: sticky; top: 0; background: #fff; border-bottom: 1px solid #e5e5e0; border-radius: 14px 14px 0 0; z-index: 1; }
+.modal-hd { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 13px 16px 11px; position: sticky; top: 0; background: #fff; border-bottom: 1px solid #e5e5e0; border-radius: 6px 6px 0 0; z-index: 1; }
 .modal-hd > :first-child { min-width: 0; flex: 1; }
 .modal-hd > :first-child div,
 .modal-hd > :first-child span,
 .modal-hd > :first-child p { word-break: break-word; overflow-wrap: anywhere; }
-.modal-bd { padding: 16px 20px 20px; }
+.modal-bd { padding: 14px 16px 18px; }
 .modal-close { background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border-radius: 999px; flex-shrink: 0; line-height: 1; }
 .modal-close:hover { background: #f5f5f0; }
-.inline-overlay-box { background:#fff; border-radius:14px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.2); }
-.inline-overlay-hd { padding:16px 20px 12px; border-bottom:1px solid #e5e5e0; display:flex; justify-content:space-between; align-items:center; gap:12px; position:sticky; top:0; background:#fff; border-radius:14px 14px 0 0; }
+.inline-overlay-box { background:#fff; border-radius:6px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.2); }
+.inline-overlay-hd { padding:13px 16px 11px; border-bottom:1px solid #e5e5e0; display:flex; justify-content:space-between; align-items:center; gap:12px; position:sticky; top:0; background:#fff; border-radius:6px 6px 0 0; }
 .inline-overlay-hd > :first-child { min-width:0; flex:1; }
 .inline-overlay-hd > :first-child div,
 .inline-overlay-hd > :first-child span,
@@ -106,7 +106,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .inline-overlay-close:hover { background:#f5f5f0; }
 /* 產品選擇 dropdown */
 .product-picker { position: relative; }
-.product-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #e5e5e0; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 100; max-height: 220px; overflow-y: auto; display: none; }
+.product-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #e5e5e0; border-radius: 4px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 100; max-height: 220px; overflow-y: auto; display: none; }
 .product-dropdown.open { display: block; }
 .product-option { padding: 9px 12px; font-size: 12px; cursor: pointer; border-bottom: 1px solid #f0f0eb; }
 .product-option:hover { background: #f8fffc; }
@@ -116,7 +116,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 #hamburger-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; color: #1a1a1a; line-height: 1; flex-shrink: 0; margin-right: 10px; }
 #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 299; }
 #sidebar-overlay.open { display: block; }
-.modal-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 12px 20px; background: #fff; border-top: 1px solid #e5e5e0; position: sticky; bottom: 0; z-index: 2; }
+.modal-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 16px; background: #fff; border-top: 1px solid #e5e5e0; position: sticky; bottom: 0; z-index: 2; }
 .nf-suggest-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid #e5e5e0; border-radius:6px; margin-top:4px; background:#f9f9f7; font-size:13px; }
 .nf-suggest-item:first-child { margin-top:6px; }
 @keyframes modal-slide-up { from { transform: translateY(60%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -145,7 +145,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   .quote-actions .btn-primary { flex: 1 1 100%; min-height: 44px; }
   .quote-actions .btn-ghost { flex: 1 1 auto; }
   .modal-overlay { align-items: flex-end; padding: 0; }
-  .modal-box, .modal-box.sm, .modal-box.lg { max-width: 100%; max-height: calc(100dvh - max(18px, env(safe-area-inset-top))); border-radius: 14px 14px 0 0; }
+  .modal-box, .modal-box.sm, .modal-box.lg { max-width: 100%; max-height: calc(100dvh - max(18px, env(safe-area-inset-top))); border-radius: 6px 6px 0 0; }
   .modal-overlay.open .modal-box { animation: modal-slide-up 0.25s ease; }
   .modal-hd { padding: calc(16px + env(safe-area-inset-top)) 16px 12px; align-items: flex-start; }
   .modal-hd > :first-child { padding-top: 2px; }
@@ -163,14 +163,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   .btn-sm { min-height: 44px; padding: 10px 14px; font-size: 13px; }
   .modal-close { width: 42px; height: 42px; font-size: 24px; }
   .inline-overlay { align-items: flex-end !important; justify-content: center !important; padding: max(12px, env(safe-area-inset-top)) 0 0 !important; }
-  .inline-overlay-box { max-width: 100% !important; max-height: calc(100dvh - max(12px, env(safe-area-inset-top))) !important; border-radius: 14px 14px 0 0 !important; }
+  .inline-overlay-box { max-width: 100% !important; max-height: calc(100dvh - max(12px, env(safe-area-inset-top))) !important; border-radius: 6px 6px 0 0 !important; }
   .inline-overlay-hd { padding: 16px 16px 12px; }
   .inline-overlay-hd [style*="font-size:14px"] { font-size: 16px !important; line-height: 1.4; }
   .inline-overlay-close { width: 42px; height: 42px; font-size: 24px; }
   .btn-doc-copy { min-height: 44px; padding: 0 16px; font-size: 13px; }
 }
 #toast-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
-.toast { padding: 10px 14px; border-radius: 9px; font-size: 12px; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,0.12); display: flex; align-items: flex-start; gap: 10px; animation: toast-in 0.18s ease; }
+.toast { padding: 10px 14px; border-radius: 4px; font-size: 12px; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,0.12); display: flex; align-items: flex-start; gap: 10px; animation: toast-in 0.18s ease; }
 .toast-success { background: #E1F5EE; color: #085041; border: 1px solid #0F6E56; }
 .toast-error { background: #FCEBEB; color: #791F1F; border: 1px solid #F09595; }
 .toast-warn { background: #FEF9EC; color: #7A5800; border: 1px solid #E2C97E; }
@@ -184,7 +184,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 
 <!-- 登入畫面 -->
 <div id="login-page" style="position:fixed;inset:0;background:#f5f5f0;padding:20px;display:flex;align-items:center;justify-content:center;z-index:9999">
-  <div style="background:#fff;border-radius:14px;padding:32px 28px;width:100%;max-width:360px;box-shadow:0 4px 20px rgba(0,0,0,0.08)">
+  <div style="background:#fff;border-radius:6px;padding:32px 28px;width:100%;max-width:360px;box-shadow:0 4px 20px rgba(0,0,0,0.08)">
     <div style="text-align:center;margin-bottom:24px">
       <h1 style="font-size:18px;font-weight:600;color:#1a1a1a;margin-bottom:4px">JOY CHIN PSA</h1>
       <p style="font-size:12px;color:#888">業務系統登入</p>
@@ -650,7 +650,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <!-- products + order import -->
         <div style="flex:1;min-width:0;padding:16px">
           <!-- order import accordion -->
-          <div id="pshop-order-section" style="border:1px solid #e5e5e0;border-radius:8px;margin-bottom:14px;overflow:hidden">
+          <div id="pshop-order-section" style="border:1px solid #e5e5e0;border-radius:4px;margin-bottom:14px;overflow:hidden">
             <div onclick="togglePshopOrderSection()" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;background:#f9f9f7;user-select:none">
               <span style="font-size:13px;font-weight:500">從訂單帶入品項</span>
               <span id="pshop-order-toggle-icon" style="font-size:11px;color:#888">展開 ▾</span>
@@ -672,7 +672,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       </div>
       <!-- mobile cart overlay -->
       <div id="pshop-mobile-cart-overlay" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.5)" onclick="closeMobileCart()">
-        <div onclick="event.stopPropagation()" style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;max-height:80vh;display:flex;flex-direction:column">
+        <div onclick="event.stopPropagation()" style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:6px 6px 0 0;max-height:80vh;display:flex;flex-direction:column">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 10px;border-bottom:1px solid #e5e5e0;flex-shrink:0">
             <div style="font-size:14px;font-weight:600">採購車</div>
             <button class="btn btn-ghost btn-sm" onclick="closeMobileCart()">✕</button>
@@ -696,7 +696,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <button class="modal-close" onclick="closeModal('modal-pshop-checkout')">✕</button>
         </div>
         <div class="modal-bd">
-          <div id="pshop-checkout-summary" style="background:#f9f9f7;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px"></div>
+          <div id="pshop-checkout-summary" style="background:#f9f9f7;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:14px;font-size:12px"></div>
           <div style="display:flex;flex-direction:column;gap:10px">
             <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">會計編號（選填）</label><input id="pshop-accounting" placeholder="ACC-..." style="width:100%" /></div>
             <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">預計交貨日</label><input type="date" id="pshop-delivery" style="width:100%" /></div>
@@ -1586,7 +1586,7 @@ function _renderSampleModal(){
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
     '<div class="section-title" style="margin-bottom:0">索取記錄（向供應商）</div>'+
     '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-req-form\')">+ 向供應商索取</button></div>'+
-    '<div id="sm-req-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
+    '<div id="sm-req-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
     '<div class="grid-2" style="margin-bottom:8px">'+
     '<div><label>數量 <span class="req">*</span></label><input id="smr-qty" type="number" min="0" /></div>'+
     '<div><label>索取日期</label><input id="smr-date" type="date" value="'+today+'" /></div>'+
@@ -1620,7 +1620,7 @@ function _renderSampleModal(){
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
     '<div class="section-title" style="margin-bottom:0">寄出記錄（給客戶）</div>'+
     '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-ship-form\')">+ 寄給客戶</button></div>'+
-    '<div id="sm-ship-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
+    '<div id="sm-ship-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
     '<div class="grid-2" style="margin-bottom:8px">'+
     '<div><label>客戶 <span class="req">*</span></label><select id="sms-customer"><option value="">— 選擇 —</option>'+custOpts+'</select></div>'+
     '<div><label>寄出日期</label><input id="sms-date" type="date" value="'+today+'" /></div>'+
@@ -1651,7 +1651,7 @@ function _renderSampleModal(){
         (isShipped?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="toggleSmForm(\'sm-fb-'+r.id+'\')">登記回饋</button>':'')+
         '</div>'+
         (r.feedback?'<div style="font-size:11px;color:#666;margin-top:3px">回饋：'+esc(r.feedback)+'</div>':'')+
-        '<div id="sm-fb-'+r.id+'" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:10px;margin-top:6px">'+
+        '<div id="sm-fb-'+r.id+'" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:10px;margin-top:6px">'+
         '<div class="grid-2" style="margin-bottom:8px">'+
         '<div><label>回饋結果</label><select id="smfbs-'+r.id+'">'+
         '<option value="approved">客戶接受</option>'+
@@ -1831,7 +1831,7 @@ function renderDashboard(){
     ]
     let ph='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">'
     for(const c of cardDefs){
-      const cardStyle='background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:14px 10px;text-align:center;'+(c.tab?'cursor:pointer':'opacity:.6')
+      const cardStyle='background:#fff;border:1px solid #e5e5e0;border-radius:4px;padding:14px 10px;text-align:center;'+(c.tab?'cursor:pointer':'opacity:.6')
       ph+='<div '+(c.tab?'onclick="switchTab(\''+c.tab+'\')"':'')+' style="'+cardStyle+'">'
       ph+='<div style="font-size:30px;font-weight:700;color:#0F6E56;line-height:1">'+c.num+'</div>'
       ph+='<div style="font-size:11px;color:#888;margin-top:6px;line-height:1.4">'+c.label+'</div>'
@@ -1840,7 +1840,7 @@ function renderDashboard(){
     ph+='</div>'
 
     // 2. 庫存水位警示
-    ph+='<div style="background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:14px 16px;margin-bottom:16px">'
+    ph+='<div style="background:#fff;border:1px solid #e5e5e0;border-radius:4px;padding:14px 16px;margin-bottom:16px">'
     ph+='<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:10px">庫存水位</div>'
     const redProds=products.filter(p=>parseFloat(p.min_stock_qty)>0&&(parseFloat(p.stock_qty)||0)<=parseFloat(p.min_stock_qty))
     const yellowProds=products.filter(p=>parseFloat(p.min_stock_qty)>0&&(parseFloat(p.stock_qty)||0)>parseFloat(p.min_stock_qty)&&(parseFloat(p.stock_qty)||0)<parseFloat(p.min_stock_qty)*1.5)
@@ -1863,12 +1863,12 @@ function renderDashboard(){
     ph+='</div>'
 
     // 3. 客戶訂單量
-    ph+='<div style="background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:14px 16px;margin-bottom:16px">'
+    ph+='<div style="background:#fff;border:1px solid #e5e5e0;border-radius:4px;padding:14px 16px;margin-bottom:16px">'
     ph+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">'
     ph+='<div style="font-size:12px;font-weight:600;color:#555">客戶訂單量</div>'
     ;[{k:'thisMonth',l:'本月'},{k:'lastMonth',l:'上月'},{k:'3months',l:'近3個月'},{k:'6months',l:'近6個月'},{k:'thisYear',l:'今年'}].forEach(r=>{
       const active=_dbCustomerRange===r.k
-      ph+='<button onclick="_dbCustomerRange=\''+r.k+'\';renderDashboard()" style="padding:3px 10px;font-size:11px;border-radius:20px;border:1px solid '+(active?'#0F6E56':'#ddd')+';background:'+(active?'#0F6E56':'transparent')+';color:'+(active?'#fff':'#666')+';cursor:pointer;line-height:1.6">'+r.l+'</button>'
+      ph+='<button onclick="_dbCustomerRange=\''+r.k+'\';renderDashboard()" style="padding:3px 10px;font-size:11px;border-radius:6px;border:1px solid '+(active?'#0F6E56':'#ddd')+';background:'+(active?'#0F6E56':'transparent')+';color:'+(active?'#fff':'#666')+';cursor:pointer;line-height:1.6">'+r.l+'</button>'
     })
     ph+='</div>'
     ph+=_buildCustomerOrderTable()
@@ -2679,7 +2679,7 @@ function openShipmentModal(id){
       (s.ata?'<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ATA</div><div style="font-size:14px;font-weight:500">'+s.ata+'</div></div>':'')+
     '</div>'+
     (nextSt&&s.status!=='completed'&&s.status!=='cancelled'&&s.status!=='customs_clearance'?
-      '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+      '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
       '<span style="font-size:12px;color:#666">推進狀態：</span>'+
       '<button class="btn btn-ghost btn-sm" style="color:#185FA5" onclick="quickUpdateShipmentStatus(\''+id+'\',\''+nextSt+'\')">'+nextStatusLabel[s.status]+'</button>'+
       (s.status==='in_transit'&&s.eta&&s.eta<=today?'<span style="font-size:11px;color:#A32D2D">⚠ ETA 已到</span>':'')+
@@ -2691,7 +2691,7 @@ function openShipmentModal(id){
   const hasExplicit=productSummary.length&&productSummary[0].fromExplicit
   if(productSummary.length){
     html+=(hasExplicit?'':'<div style="font-size:11px;color:#aaa;margin-bottom:6px">（以採購單品項估算，可新增明細精確記錄）</div>')+
-    '<div style="overflow:auto;border:1px solid #e5e5e0;border-radius:8px;background:#fff;margin-bottom:8px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f7f7f3;color:#666"><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">產品</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">規格</th><th style="text-align:right;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">數量</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">採購單</th>'+(hasExplicit?'<th style="padding:8px;border-bottom:1px solid #ecebe5"></th>':'')+'</tr></thead><tbody>'+
+    '<div style="overflow:auto;border:1px solid #e5e5e0;border-radius:4px;background:#fff;margin-bottom:8px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f7f7f3;color:#666"><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">產品</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">規格</th><th style="text-align:right;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">數量</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">採購單</th>'+(hasExplicit?'<th style="padding:8px;border-bottom:1px solid #ecebe5"></th>':'')+'</tr></thead><tbody>'+
       (hasExplicit
         ? shipmentItems.filter(x=>String(x.shipment_id)===String(id)).map(item=>'<tr><td style="padding:8px;border-bottom:1px solid #f3f3ef;font-weight:500">'+esc(item.product_name||'—')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(item.spec||'—')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right">'+esc(String(item.qty||''))+' '+esc(item.unit||'')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(item.po_id||'—')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right"><button class="btn btn-ghost btn-sm" style="color:#A32D2D;padding:2px 6px;font-size:11px" onclick="removeShipmentItem('+item.id+',\''+id+'\')">×</button></td></tr>').join('')
         : productSummary.map(row=>'<tr><td style="padding:8px;border-bottom:1px solid #f3f3ef;font-weight:500">'+esc(row.product_name)+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(row.spec||'—')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right">'+esc(String(row.qty))+' '+esc(row.unit||'')+'</td><td style="padding:8px;border-bottom:1px solid #f3f3ef;color:#666">'+esc(row.purchase_order_ids.join(', '))+'</td></tr>').join('')
@@ -2703,7 +2703,7 @@ function openShipmentModal(id){
   // Add shipment item form
   const linkedPOsForItems=shipmentLinkedPurchases(id)
   if(linkedPOsForItems.length){
-    html+='<div id="sh-item-form" style="border:1px dashed #d5d5cf;border-radius:8px;padding:10px 12px;margin-bottom:8px">'+
+    html+='<div id="sh-item-form" style="border:1px dashed #d5d5cf;border-radius:4px;padding:10px 12px;margin-bottom:8px">'+
       '<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:8px">+ 新增貨物明細</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
         '<div><div style="font-size:11px;color:#888;margin-bottom:3px">採購單</div>'+
@@ -3034,7 +3034,7 @@ function openOrderModal(id){
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
       '<div class="section-title" style="margin-bottom:0">品項明細</div>'+
       '</div>'+
-      '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
+      '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
       '<div class="grid-2" style="margin-bottom:8px">'+
       '<div><label>產品名稱 <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="noi-name" placeholder="可手動輸入或從目錄帶入" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'new\')" style="white-space:nowrap">選自產品目錄</button></div><input id="noi-product-id" type="hidden" /></div>'+
       '<div><label>規格</label><input id="noi-spec" /></div>'+
@@ -3276,7 +3276,7 @@ function _renderOrderModal(){
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
     '<div class="section-title" style="margin-bottom:0">品項明細</div>'+
     '<button class="btn btn-primary btn-sm" onclick="toggleSmForm(\'ord-item-form\')">+ 新增品項</button></div>'+
-    '<div id="ord-item-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:10px">'+
+    '<div id="ord-item-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
     '<div class="grid-2" style="margin-bottom:8px">'+
     '<div><label>產品名稱 <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="oi-name" placeholder="可手動輸入或從目錄帶入" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'edit\')" style="white-space:nowrap">選自產品目錄</button></div><input id="oi-product-id" type="hidden" /></div>'+
     '<div><label>規格</label><input id="oi-spec" /></div>'+
@@ -3345,19 +3345,19 @@ function _renderOrderModal(){
     if(isVerbal){
       if(approvalSt==='none'){
         if(isManager()){
-          html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:8px;padding:12px 14px;margin-bottom:12px">'+
+          html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:12px 14px;margin-bottom:12px">'+
             '<div style="font-size:12px;color:#8A6400;margin-bottom:8px">此為口頭承諾訂單，請審批後才可建立採購單。</div>'+
             '<div style="display:flex;gap:8px">'+
             '<button class="btn btn-primary btn-sm" onclick="approveOrder(\''+o.id+'\')">審批通過 ✓</button>'+
             '<button class="btn btn-ghost btn-sm" style="color:#e55" onclick="rejectOrder(\''+o.id+'\')">拒絕 ✗</button>'+
             '</div></div>'
         } else {
-          html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:8px;padding:10px 14px;font-size:12px;color:#8A6400;margin-bottom:12px">⏳ 等待主管審批</div>'
+          html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:10px 14px;font-size:12px;color:#8A6400;margin-bottom:12px">⏳ 等待主管審批</div>'
         }
       } else if(approvalSt==='approved'){
-        html+='<div style="background:#E1F5EE;border:1px solid #0F6E56;border-radius:8px;padding:8px 14px;font-size:12px;color:#085041;margin-bottom:12px">✓ 已審批通過'+(o.approved_by?' — '+o.approved_by:'')+(o.approved_at?' · '+o.approved_at.slice(0,10):'')+'</div>'
+        html+='<div style="background:#E1F5EE;border:1px solid #0F6E56;border-radius:4px;padding:8px 14px;font-size:12px;color:#085041;margin-bottom:12px">✓ 已審批通過'+(o.approved_by?' — '+o.approved_by:'')+(o.approved_at?' · '+o.approved_at.slice(0,10):'')+'</div>'
       } else if(approvalSt==='rejected'){
-        html+='<div style="background:#FCEBEB;border:1px solid #F09595;border-radius:8px;padding:8px 14px;font-size:12px;color:#A32D2D;margin-bottom:12px">✗ 審批已拒絕</div>'
+        html+='<div style="background:#FCEBEB;border:1px solid #F09595;border-radius:4px;padding:8px 14px;font-size:12px;color:#A32D2D;margin-bottom:12px">✗ 審批已拒絕</div>'
       }
     }
     const purchaseDisabled=!hasItems||needsApproval
@@ -3786,19 +3786,19 @@ function openPurchaseModal(id, prefill={}){
       const totalQty=parseFloat(i.qty||i.quantity||0)||0
       const refOrderId=i.ref_order_id||null
       const canArrival=!isNew&&p?.status==='in_production'
-      const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto);gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:10px;background:#fff">'+
+      const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto);gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:4px;background:#fff">'+
         '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+(receivedQty>=totalQty&&totalQty>0?'#085041':'#8A6400')+'">已到 '+receivedQty+' / 共 '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">數量</div><div style="font-size:12px;font-weight:500">'+(i.qty||i.quantity||0)+' '+(i.unit||'')+'</div></div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+parseFloat(i.unit_price||i.price||0).toFixed(2)+' '+(i.currency||'USD')+'</div></div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">小計</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+lineTotal.toFixed(2)+'</div>'+(i.pricing_unit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+    '</div>'+
       '</div>'
       const linksBlock=renderPurchaseItemLinksBlock(i,{pending:isNew,purchaseOrderId:p?.id||null})
-      const arrivalBlock=(!isNew&&i.id?'<div id="arrival-input-'+i.id+'" style="display:none;padding:8px 12px;background:#f9f9f7;border:1px solid #e5e5e0;border-top:none;border-radius:0 0 10px 10px"><div style="display:flex;gap:8px;align-items:center"><label style="font-size:12px;color:#666;white-space:nowrap">本次到貨</label><input id="arrival-qty-'+i.id+'" type="number" min="0.01" step="0.01" data-no-dirty="true" style="width:80px" placeholder="數量" /><button class="btn btn-primary btn-sm" onclick="submitArrival('+i.id+')">確認</button><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'arrival-input-'+i.id+'\').style.display=\'none\'">取消</button></div></div>':'')
+      const arrivalBlock=(!isNew&&i.id?'<div id="arrival-input-'+i.id+'" style="display:none;padding:8px 12px;background:#f9f9f7;border:1px solid #e5e5e0;border-top:none;border-radius:0 0 4px 4px"><div style="display:flex;gap:8px;align-items:center"><label style="font-size:12px;color:#666;white-space:nowrap">本次到貨</label><input id="arrival-qty-'+i.id+'" type="number" min="0.01" step="0.01" data-no-dirty="true" style="width:80px" placeholder="數量" /><button class="btn btn-primary btn-sm" onclick="submitArrival('+i.id+')">確認</button><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'arrival-input-'+i.id+'\').style.display=\'none\'">取消</button></div></div>':'')
       return '<div style="padding:10px 0;border-bottom:1px solid #f0f0eb"><div>'+itemBody+'</div>'+arrivalBlock+linksBlock+'</div>'
-    }).join(''):'<div style="border:1px dashed #d9d9d2;border-radius:10px;padding:14px;background:#fbfbf8;color:#666;font-size:12px">尚未新增品項</div>')+
+    }).join(''):'<div style="border:1px dashed #d9d9d2;border-radius:4px;padding:14px;background:#fbfbf8;color:#666;font-size:12px">尚未新增品項</div>')+
     (items.length?'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">總金額 '+items.reduce((s,i)=>{const q=parseFloat(i.qty||i.quantity||0)||0,up=parseFloat(i.unit_price||i.price||0)||0,wm=parseFloat(i.width_m||0);return s+(i.pricing_unit==='m2'&&wm>0?q*up*wm:q*up)},0).toFixed(2)+' '+(p?.currency||items[0]?.currency||'')+'</div>':'')
     )+'</div></div>'
-    html+='<div id="po-item-form" style="display:'+(isNew&&!items.length?'block':'none')+';background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:12px;margin-bottom:14px">'+
+    html+='<div id="po-item-form" style="display:'+(isNew&&!items.length?'block':'none')+';background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:14px">'+
       '<div style="display:flex;gap:0;margin-bottom:10px;border-bottom:1px solid #e5e5e0">'+
       '<button id="poi-tab-btn-catalog" onclick="switchPurchaseItemTab(\'catalog\')" style="padding:6px 14px;font-size:12px;font-weight:500;border:none;border-bottom:2px solid #0F6E56;background:transparent;color:#0F6E56;cursor:pointer">從產品目錄選</button>'+
       '<button id="poi-tab-btn-order" onclick="switchPurchaseItemTab(\'order\')" style="padding:6px 14px;font-size:12px;font-weight:500;border:none;border-bottom:2px solid transparent;background:transparent;color:#888;cursor:pointer">從訂單帶入</button>'+
@@ -4373,7 +4373,7 @@ function renderPshopProductArea(){
       el.innerHTML=toggleBar+'<div>'+list.map(p=>{
         const cartItem=_pshopCart.find(c=>c.product_id===p.id&&!c.ref_order_id)
         const inCart=!!cartItem
-        return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #e5e5e0;border-radius:8px;background:#fff;margin-bottom:6px">'+
+        return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #e5e5e0;border-radius:4px;background:#fff;margin-bottom:6px">'+
           '<div style="flex:1;min-width:0">'+
           '<div style="font-size:13px;font-weight:600">'+esc(p.product_name)+'</div>'+
           (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
@@ -4393,7 +4393,7 @@ function renderPshopProductArea(){
       el.innerHTML=toggleBar+'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">'+list.map(p=>{
         const cartItem=_pshopCart.find(c=>c.product_id===p.id&&!c.ref_order_id)
         const inCart=!!cartItem
-        return '<div style="border:1px solid #e5e5e0;border-radius:10px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:6px">'+
+        return '<div style="border:1px solid #e5e5e0;border-radius:4px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:6px">'+
           '<div style="font-size:13px;font-weight:600">'+esc(p.product_name)+'</div>'+
           (p.product_code?'<div style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</div>':'')+
           (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
@@ -4424,7 +4424,7 @@ function renderPshopOrderSection(){
   el.innerHTML=withItems.map(o=>{
     const items=orderItems.filter(i=>i.order_id===o.id&&supIds.includes(i.supplier_id))
     const custName=o.customer_name||o.customer_id||'—'
-    return '<div style="border:1px solid #e5e5e0;border-radius:8px;margin-bottom:8px;overflow:hidden">'+
+    return '<div style="border:1px solid #e5e5e0;border-radius:4px;margin-bottom:8px;overflow:hidden">'+
       '<div style="background:#f9f9f7;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">'+
       '<div><span style="font-size:12px;font-weight:600">'+esc(o.id)+'</span> <span style="font-size:11px;color:#888">— '+esc(custName)+'</span></div>'+
       '<span style="font-size:11px;color:#0F6E56">'+items.length+' 筆</span>'+
@@ -4796,13 +4796,13 @@ function openInqProductPicker(){
   const sorted=[...products].filter(p=>p.is_active!==false).sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW'))
   window._inqPickerProds=sorted
   overlay.innerHTML=
-    '<div style="background:#fff;border-radius:14px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
-    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;border-radius:14px 14px 0 0">'+
+    '<div style="background:#fff;border-radius:6px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
+    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;border-radius:6px 6px 0 0">'+
     '<div style="font-size:14px;font-weight:600">從產品目錄選擇</div>'+
     '<button onclick="document.getElementById(\'catalog-picker-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
     '</div>'+
     '<div style="padding:12px 16px;border-bottom:1px solid #e5e5e0">'+
-    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="filterInqProductPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:7px;border:1px solid #e5e5e0;font-size:12px" />'+
+    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="filterInqProductPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:4px;border:1px solid #e5e5e0;font-size:12px" />'+
     '</div>'+
     '<div id="catalog-picker-list" style="overflow-y:auto;flex:1">'+(_buildInqPickerRows(sorted)||'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">尚無產品目錄</div>')+'</div>'+
     '</div>'
@@ -5346,7 +5346,7 @@ function renderQuoteModalBd(){
     const mgnColor=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'
     const cpu=it.customer_pricing_unit
     const wmmStr=it.width_m!=null?Math.round(it.width_m*1000)+'mm':'—'
-    return '<div onclick="openQuoteItemModal(\''+it.id+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e5e0;border-radius:8px;margin-bottom:6px;background:#fafaf8;cursor:pointer;transition:background .15s" onmouseenter="this.style.background=\'#f0f5f3\'" onmouseleave="this.style.background=\'#fafaf8\'">'+
+    return '<div onclick="openQuoteItemModal(\''+it.id+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e5e0;border-radius:4px;margin-bottom:6px;background:#fafaf8;cursor:pointer;transition:background .15s" onmouseenter="this.style.background=\'#f0f5f3\'" onmouseleave="this.style.background=\'#fafaf8\'">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="font-size:12px;font-weight:500;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+it.product+'</div>'+
       (it.spec?'<div style="font-size:10px;color:#aaa;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+it.spec+'</div>':'')+
@@ -5369,11 +5369,11 @@ function renderQuoteModalBd(){
   const linkedShipment=h.ref_sample_shipment_id?sampleShipmentsOut.find(s=>s.id===h.ref_sample_shipment_id):null
 
   const statusBanner=
-    h.status==='sent'?'<div style="background:#FEF3E2;border:1px solid #E2C97E;border-radius:8px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⚠ 此報價單已送出，如需修改請點「修改報價」</div>':
-    h.status==='sample_pending'?'<div style="background:#FDEBD0;border:1px solid #F0A868;border-radius:8px;padding:8px 12px;font-size:12px;color:#8A4B00;margin-bottom:12px">📦 客戶已接受報價，請登記寄樣後進入確認階段</div>':
-    h.status==='sample_review'?'<div style="background:#FFF6DA;border:1px solid #E2C97E;border-radius:8px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⏳ 樣品已寄出'+(linkedShipment?' · '+(linkedShipment.shipped_date||'')+(linkedShipment.tracking_no?' · 運單：'+linkedShipment.tracking_no:''):'')+' — 等待客戶確認品質</div>':
-    h.status==='accepted'?'<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:8px 12px;font-size:12px;color:#2E7D32;margin-bottom:12px">✓ 客戶已接受，可送去訂單建立正式訂單</div>':
-    h.status==='rejected'?'<div style="background:#f5f5f2;border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-size:12px;color:#888;margin-bottom:12px">此報價單已被拒絕</div>':
+    h.status==='sent'?'<div style="background:#FEF3E2;border:1px solid #E2C97E;border-radius:4px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⚠ 此報價單已送出，如需修改請點「修改報價」</div>':
+    h.status==='sample_pending'?'<div style="background:#FDEBD0;border:1px solid #F0A868;border-radius:4px;padding:8px 12px;font-size:12px;color:#8A4B00;margin-bottom:12px">📦 客戶已接受報價，請登記寄樣後進入確認階段</div>':
+    h.status==='sample_review'?'<div style="background:#FFF6DA;border:1px solid #E2C97E;border-radius:4px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⏳ 樣品已寄出'+(linkedShipment?' · '+(linkedShipment.shipped_date||'')+(linkedShipment.tracking_no?' · 運單：'+linkedShipment.tracking_no:''):'')+' — 等待客戶確認品質</div>':
+    h.status==='accepted'?'<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:4px;padding:8px 12px;font-size:12px;color:#2E7D32;margin-bottom:12px">✓ 客戶已接受，可送去訂單建立正式訂單</div>':
+    h.status==='rejected'?'<div style="background:#f5f5f2;border:1px solid #ddd;border-radius:4px;padding:8px 12px;font-size:12px;color:#888;margin-bottom:12px">此報價單已被拒絕</div>':
     ''
 
   const sampleReviewCheck=(editable||h.status==='sent'||h.status==='sample_pending'||h.status==='sample_review')?
@@ -5386,7 +5386,7 @@ function renderQuoteModalBd(){
     (s.from_product_id&&matchingItemProductIds.includes(s.from_product_id))
   )
   const newSampleFormHtml=
-    '<div id="q-new-sample-form" style="display:none;margin-top:10px;padding:10px 12px;background:#f8f8f5;border-radius:8px;border:1px solid #e0e0d8">'+
+    '<div id="q-new-sample-form" style="display:none;margin-top:10px;padding:10px 12px;background:#f8f8f5;border-radius:4px;border:1px solid #e0e0d8">'+
     '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:8px">建立新樣品</div>'+
     '<div style="display:grid;gap:6px">'+
     '<div><label>產品</label><select id="q-new-sample-product" onchange="qFillNewSampleSpec(this)">'+
@@ -5711,13 +5711,13 @@ function openQuoteCatalogPicker(){
   const sorted=[...products].sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW'))
   const rows=_buildQuoteCatalogRows(sorted)
   overlay.innerHTML=
-    '<div style="background:#fff;border-radius:14px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
-    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;border-radius:14px 14px 0 0">'+
+    '<div style="background:#fff;border-radius:6px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
+    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;border-radius:6px 6px 0 0">'+
     '<div style="font-size:14px;font-weight:600">從產品目錄選擇</div>'+
     '<button onclick="document.getElementById(\'catalog-picker-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
     '</div>'+
     '<div style="padding:12px 16px;border-bottom:1px solid #e5e5e0">'+
-    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="filterQuoteCatalogPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:7px;border:1px solid #e5e5e0;font-size:12px" />'+
+    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="filterQuoteCatalogPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:4px;border:1px solid #e5e5e0;font-size:12px" />'+
     '</div>'+
     '<div id="catalog-picker-list" style="overflow-y:auto;flex:1">'+(rows||'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">尚無產品目錄</div>')+'</div>'+
     '</div>'
@@ -6112,7 +6112,7 @@ function renderNqItems(){
   const el=document.getElementById('nq-items-list')
   if(!el)return
   if(!_nqItems.length){
-    el.innerHTML='<div style="border:1px dashed #e0e0d8;border-radius:8px;padding:16px;text-align:center;font-size:12px;color:#bbb">尚未選擇品項，點右上角按鈕從目錄選擇</div>'
+    el.innerHTML='<div style="border:1px dashed #e0e0d8;border-radius:4px;padding:16px;text-align:center;font-size:12px;color:#bbb">尚未選擇品項，點右上角按鈕從目錄選擇</div>'
     return
   }
   el.innerHTML=_nqItems.map((it,idx)=>{
@@ -6120,7 +6120,7 @@ function renderNqItems(){
     const cur=it.cost_currency||'USD'
     const fp=it.final_price!=null?it.final_price:null
     const hasFp=fp!=null&&cp>0
-    return '<div onclick="openNqItemEdit('+idx+')" style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #e5e5e0;border-radius:8px;margin-bottom:5px;background:#fafaf8;cursor:pointer" onmouseenter="this.style.background=\'#f0f5f3\'" onmouseleave="this.style.background=\'#fafaf8\'">'+
+    return '<div onclick="openNqItemEdit('+idx+')" style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #e5e5e0;border-radius:4px;margin-bottom:5px;background:#fafaf8;cursor:pointer" onmouseenter="this.style.background=\'#f0f5f3\'" onmouseleave="this.style.background=\'#fafaf8\'">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="font-size:12px;font-weight:500;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.product)+'</div>'+
       (it.spec?'<div style="font-size:10px;color:#aaa;margin-top:1px">'+esc(it.spec)+'</div>':'')+
@@ -6143,13 +6143,13 @@ function openNqCatalogPicker(){
   const sorted=[...products].sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW'))
   const rows=_buildQuoteCatalogRows(sorted).replace(/pickCatalogForQuote/g,'pickCatalogForNq')
   overlay.innerHTML=
-    '<div style="background:#fff;border-radius:14px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
-    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;border-radius:14px 14px 0 0">'+
+    '<div style="background:#fff;border-radius:6px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
+    '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;border-radius:6px 6px 0 0">'+
     '<div style="font-size:14px;font-weight:600">從產品目錄選擇</div>'+
     '<button onclick="document.getElementById(\'catalog-picker-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
     '</div>'+
     '<div style="padding:12px 16px;border-bottom:1px solid #e5e5e0">'+
-    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="filterNqCatalogPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:7px;border:1px solid #e5e5e0;font-size:12px" />'+
+    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="filterNqCatalogPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:4px;border:1px solid #e5e5e0;font-size:12px" />'+
     '</div>'+
     '<div id="catalog-picker-list" style="overflow-y:auto;flex:1">'+(rows||'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">尚無產品目錄</div>')+'</div>'+
     '</div>'
@@ -6203,7 +6203,7 @@ function openNqItemEdit(idx){
   overlay.id='nq-item-edit-overlay'
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px'
   overlay.innerHTML=
-    '<div style="background:#fff;border-radius:14px;width:100%;max-width:440px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25)">'+
+    '<div style="background:#fff;border-radius:6px;width:100%;max-width:440px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25)">'+
     '<div style="padding:14px 18px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:flex-start">'+
     '<div><div style="font-size:13px;font-weight:600">'+esc(it.product)+'</div>'+(it.spec?'<div style="font-size:11px;color:#aaa;margin-top:1px">'+esc(it.spec)+'</div>':'')+'</div>'+
     '<button onclick="document.getElementById(\'nq-item-edit-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1;margin-top:-2px">×</button>'+
@@ -6413,11 +6413,11 @@ function renderProducts(){
   const chipsEl=document.getElementById('product-type-chips')
   if(chipsEl){
     const allActive=!_productTypeFilter
-    chipsEl.innerHTML='<button onclick="_productTypeFilter=\'\';renderProducts()" style="padding:4px 12px;border-radius:20px;border:1px solid '+(allActive?'#0F6E56':'#ddd')+';background:'+(allActive?'#0F6E56':'#fff')+';color:'+(allActive?'#fff':'#555')+';cursor:pointer;font-size:12px;font-weight:'+(allActive?'600':'400')+'">All</button>'+
+    chipsEl.innerHTML='<button onclick="_productTypeFilter=\'\';renderProducts()" style="padding:4px 12px;border-radius:6px;border:1px solid '+(allActive?'#0F6E56':'#ddd')+';background:'+(allActive?'#0F6E56':'#fff')+';color:'+(allActive?'#fff':'#555')+';cursor:pointer;font-size:12px;font-weight:'+(allActive?'600':'400')+'">All</button>'+
     PRODUCT_TYPES.map(t=>{
       const active=_productTypeFilter===t
       const c=PRODUCT_TYPE_COLORS[t]||{bg:'#f0f0eb',color:'#555'}
-      return '<button onclick="_productTypeFilter=\''+t+'\';renderProducts()" style="padding:4px 12px;border-radius:20px;border:1px solid '+(active?c.color:'#ddd')+';background:'+(active?c.color:'#fff')+';color:'+(active?'#fff':c.color)+';cursor:pointer;font-size:12px;font-weight:'+(active?'600':'400')+'">'+t+'</button>'
+      return '<button onclick="_productTypeFilter=\''+t+'\';renderProducts()" style="padding:4px 12px;border-radius:6px;border:1px solid '+(active?c.color:'#ddd')+';background:'+(active?c.color:'#fff')+';color:'+(active?'#fff':c.color)+';cursor:pointer;font-size:12px;font-weight:'+(active?'600':'400')+'">'+t+'</button>'
     }).join('')
   }
   let list=products.filter(p=>{
@@ -6451,7 +6451,7 @@ function renderProducts(){
           '</div>'+
           '<div style="font-size:13px;font-weight:600;margin-bottom:2px;word-break:break-all">'+esc(p.product_name)+'</div>'+
           (p.product_code?'<div style="font-size:10px;color:#aaa;font-family:monospace;margin-bottom:6px">'+esc(p.product_code)+'</div>':'')+
-          (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:10px;background:'+c.bg+';color:'+c.color+';display:inline-block;margin-bottom:4px">'+esc(p.product_type)+'</span>'})():'')+
+          (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:4px;background:'+c.bg+';color:'+c.color+';display:inline-block;margin-bottom:4px">'+esc(p.product_type)+'</span>'})():'')+
           '<div style="font-size:12px;color:#666;margin-bottom:4px">'+(sup?esc(sup.company):'—')+'</div>'+
           (isManager()&&p.cost_price?'<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
           '<div style="font-size:11px;color:#aaa;margin-bottom:10px">確認：'+(p.last_reviewed_at||'—')+'</div>'+
@@ -6472,7 +6472,7 @@ function renderProducts(){
         '<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;flex-wrap:wrap">'+
         (st!=='ok'?'<span class="badge" style="background:'+stBg+';color:'+stColor+';border:1px solid '+stColor+'">'+stLabel+'</span>':'')+
         (!isActive?'<span class="badge" style="background:#f0f0eb;color:#888;border:1px solid #ccc">Inactive</span>':'')+
-        (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:10px;background:'+c.bg+';color:'+c.color+'">'+esc(p.product_type)+'</span>'})():'')+
+        (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:4px;background:'+c.bg+';color:'+c.color+'">'+esc(p.product_type)+'</span>'})():'')+
         (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
         '<span style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</span>'+
         '</div>'+
@@ -6508,7 +6508,7 @@ function openProductModal(id){
     ['',...PRODUCT_TYPES].map(t=>{
       const active=(p?.product_type||'')===(t)
       const c=t?PRODUCT_TYPE_COLORS[t]:{bg:'#f0f0eb',color:'#555'}
-      return '<label style="cursor:pointer"><input type="radio" name="pd-type" value="'+t+'" '+(active?'checked':'')+' style="display:none" /><span style="display:inline-block;padding:4px 12px;border-radius:20px;border:2px solid '+(active?(c.color):'#ddd')+';background:'+(active?c.bg:'#fff')+';color:'+(active?c.color:'#888')+';font-size:12px" onclick="document.querySelectorAll(\'[name=pd-type]\').forEach(r=>{const s=r.nextElementSibling;const cc=r.value?PRODUCT_TYPE_COLORS[r.value]:{bg:\'#f0f0eb\',color:\'#555\'};s.style.borderColor=r.checked?cc.color:\'#ddd\';s.style.background=r.checked?cc.bg:\'#fff\';s.style.color=r.checked?cc.color:\'#888\'})">'+( t||'無')+'</span></label>'
+      return '<label style="cursor:pointer"><input type="radio" name="pd-type" value="'+t+'" '+(active?'checked':'')+' style="display:none" /><span style="display:inline-block;padding:4px 12px;border-radius:6px;border:2px solid '+(active?(c.color):'#ddd')+';background:'+(active?c.bg:'#fff')+';color:'+(active?c.color:'#888')+';font-size:12px" onclick="document.querySelectorAll(\'[name=pd-type]\').forEach(r=>{const s=r.nextElementSibling;const cc=r.value?PRODUCT_TYPE_COLORS[r.value]:{bg:\'#f0f0eb\',color:\'#555\'};s.style.borderColor=r.checked?cc.color:\'#ddd\';s.style.background=r.checked?cc.bg:\'#fff\';s.style.color=r.checked?cc.color:\'#888\'})">'+( t||'無')+'</span></label>'
     }).join('')+
     '</div></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
@@ -6550,7 +6550,7 @@ function openProductModal(id){
     '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">'+
     '<input type="checkbox" id="pd-active" '+(_isActive?'checked':'')+' style="display:none" />'+
     '<span id="pd-active-track" onclick="(function(){var cb=document.getElementById(\'pd-active\');cb.checked=!cb.checked;var t=document.getElementById(\'pd-active-track\');var l=document.getElementById(\'pd-active-label\');var k=document.getElementById(\'pd-active-knob\');t.style.background=cb.checked?\'#0F6E56\':\'#ccc\';k.style.left=cb.checked?\'22px\':\'3px\';l.style.color=cb.checked?\'#0F6E56\':\'#aaa\';l.textContent=cb.checked?\'上架中\':\'已下架\'}).call(this)" '+
-    'style="display:inline-block;width:44px;height:24px;border-radius:12px;background:'+(_isActive?'#0F6E56':'#ccc')+';position:relative;transition:background 0.2s;cursor:pointer;flex-shrink:0">'+
+    'style="display:inline-block;width:44px;height:24px;border-radius:6px;background:'+(_isActive?'#0F6E56':'#ccc')+';position:relative;transition:background 0.2s;cursor:pointer;flex-shrink:0">'+
     '<span style="position:absolute;top:3px;left:'+(_isActive?'22px':'3px')+';width:18px;height:18px;border-radius:50%;background:#fff;transition:left 0.2s;pointer-events:none" id="pd-active-knob"></span>'+
     '</span>'+
     '<span id="pd-active-label" style="font-size:13px;color:'+(_isActive?'#0F6E56':'#aaa')+'">'+(_isActive?'上架中':'已下架')+'</span>'+
