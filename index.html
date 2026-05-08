@@ -2736,8 +2736,99 @@ function openShipmentModal(id){
     (linkedPOs.length
       ? linkedPOs.map(p=>'<div class="row" style="cursor:pointer" onclick="openPurchaseModal(\''+esc(String(p.id))+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(String(p.id))+'</div><div style="font-size:11px;color:#888">'+esc(resolvePurchaseSupplierName(p)||'—')+' · '+esc(p.status||'')+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();detachPurchaseFromShipment('+id+',\''+esc(String(p.id))+'\')">移除</button></div>').join('')
       : '<div style="font-size:12px;color:#aaa;padding:4px 0">尚未關聯採購單</div>')
+  html+='<div class="divider"></div>'+
+    '<div class="section-title" style="margin-bottom:8px">文件</div>'+
+    '<div id="sh-docs-list"><div style="font-size:12px;color:#aaa">載入中…</div></div>'+
+    '<div style="margin-top:10px;border:1px dashed #d5d5cf;border-radius:4px;padding:10px 12px">'+
+      '<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:8px">上傳文件</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
+        '<div><label style="font-size:11px;color:#888;margin-bottom:3px;display:block">文件類型</label>'+
+          '<select id="sh-doc-type" style="width:100%">'+
+            '<option value="invoice">商業發票 Invoice</option>'+
+            '<option value="packing_list">裝箱單 Packing List</option>'+
+            '<option value="bl">提單 B/L</option>'+
+            '<option value="certificate">品質證明 Certificate</option>'+
+            '<option value="other">其他 Other</option>'+
+          '</select></div>'+
+        '<div><label style="font-size:11px;color:#888;margin-bottom:3px;display:block">選擇 PDF</label>'+
+          '<input type="file" id="sh-doc-file" accept=".pdf,application/pdf" style="height:auto;padding:4px 8px"></div>'+
+      '</div>'+
+      '<button class="btn btn-ghost btn-sm" id="sh-doc-upload-btn" style="height:32px" onclick="uploadShipmentDocument(\''+id+'\')">上傳</button>'+
+    '</div>'
   document.getElementById('modal-shipment-bd').innerHTML=html
   document.getElementById('modal-shipment').classList.add('open')
+  renderShipmentDocs(id)
+}
+
+const SH_DOC_TYPE_LABEL={invoice:'Invoice',packing_list:'Packing List',bl:'B/L',certificate:'Certificate',other:'Other'}
+
+async function loadShipmentDocuments(shipmentId){
+  const{data,error}=await sb.from('shipment_documents').select('*').eq('ref_module','shipment').eq('ref_id',String(shipmentId)).order('created_at',{ascending:false})
+  if(error)return[]
+  return data||[]
+}
+
+async function renderShipmentDocs(shipmentId){
+  const el=document.getElementById('sh-docs-list')
+  if(!el)return
+  const docs=await loadShipmentDocuments(shipmentId)
+  if(!docs.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:4px 0">尚無文件</div>';return}
+  el.innerHTML=docs.map(d=>{
+    const label=SH_DOC_TYPE_LABEL[d.doc_type]||d.doc_type||'Other'
+    const bg={invoice:'#E6F1FB',packing_list:'#EAF3DE',bl:'#FEF9EC',certificate:'#F0EBF5',other:'#f0f0eb'}[d.doc_type]||'#f0f0eb'
+    const clr={invoice:'#185FA5',packing_list:'#3B6D11',bl:'#7A5B00',certificate:'#6B3FA0',other:'#666'}[d.doc_type]||'#666'
+    const size=d.file_size?(d.file_size>1048576?(d.file_size/1048576).toFixed(1)+' MB':(d.file_size/1024).toFixed(0)+' KB'):''
+    const date=(d.created_at||'').slice(0,10)
+    return '<div class="doc-row">'+
+      '<span class="badge" style="background:'+bg+';color:'+clr+';border:1px solid '+clr+';white-space:nowrap;flex-shrink:0">'+esc(label)+'</span>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.file_name)+'</div>'+
+      '<div style="font-size:10px;color:#aaa">'+date+(d.uploaded_by?' · '+esc(d.uploaded_by):'')+(size?' · '+size:'')+'</div></div>'+
+      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="downloadShipmentDoc(\''+esc(d.file_url||'')+'\')">下載</button>'+
+      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;flex-shrink:0" onclick="deleteShipmentDoc('+d.id+',\''+esc(d.file_url||'')+'\',\''+shipmentId+'\')">刪除</button>'+
+    '</div>'
+  }).join('')
+}
+
+async function uploadShipmentDocument(shipmentId){
+  const fileInput=document.getElementById('sh-doc-file')
+  const docType=document.getElementById('sh-doc-type')?.value||'other'
+  const btn=document.getElementById('sh-doc-upload-btn')
+  const file=fileInput?.files?.[0]
+  if(!file){showToast('請選擇 PDF 檔案','error');return}
+  if(!file.type.includes('pdf')&&!file.name.toLowerCase().endsWith('.pdf')){showToast('只接受 PDF 格式','error');return}
+  if(btn){btn.disabled=true;btn.textContent='上傳中…'}
+  const filePath=shipmentId+'/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._\-一-鿿]/g,'_')
+  const{error:upErr}=await sb.storage.from('shipment-docs').upload(filePath,file,{contentType:'application/pdf',upsert:false})
+  if(upErr){showToast('上傳失敗：'+upErr.message,'error');if(btn){btn.disabled=false;btn.textContent='上傳'};return}
+  const{data:dbData,error:dbErr}=await sb.from('shipment_documents').insert({
+    ref_module:'shipment',ref_id:String(shipmentId),
+    doc_type:docType,file_name:file.name,file_url:filePath,
+    file_size:file.size,uploaded_by:currentUser?.name||''
+  }).select().single()
+  if(dbErr){showToast('記錄失敗：'+dbErr.message,'error');if(btn){btn.disabled=false;btn.textContent='上傳'};return}
+  if(fileInput)fileInput.value=''
+  if(btn){btn.disabled=false;btn.textContent='上傳'}
+  showToast('文件已上傳')
+  renderShipmentDocs(shipmentId)
+}
+
+async function downloadShipmentDoc(filePath){
+  if(!filePath){showToast('找不到檔案路徑','error');return}
+  const{data,error}=await sb.storage.from('shipment-docs').createSignedUrl(filePath,3600)
+  if(error){showToast('無法產生下載連結：'+error.message,'error');return}
+  window.open(data.signedUrl,'_blank')
+}
+
+async function deleteShipmentDoc(docId,filePath,shipmentId){
+  if(!confirm('確定要刪除此文件？'))return
+  if(filePath){
+    const{error:storErr}=await sb.storage.from('shipment-docs').remove([filePath])
+    if(storErr){showToast('Storage 刪除失敗：'+storErr.message,'error');return}
+  }
+  const{error:dbErr}=await sb.from('shipment_documents').delete().eq('id',docId)
+  if(dbErr){showToast('記錄刪除失敗：'+dbErr.message,'error');return}
+  showToast('已刪除')
+  renderShipmentDocs(shipmentId)
 }
 
 async function quickUpdateShipmentStatus(shipmentId,newStatus){
