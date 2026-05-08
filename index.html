@@ -2640,12 +2640,26 @@ function renderShipments(){
       '<div style="font-size:12px;color:#666">'+
       [s.container_no?('櫃號 '+s.container_no):null,s.bl_no?('B/L '+s.bl_no):null,s.etd?('ETD '+s.etd):null,s.eta?('ETA '+s.eta):null].filter(Boolean).join(' · ')+
       '</div></div>'+
-      '<div style="text-align:right;flex-shrink:0">'+
+      '<div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+
       '<div style="font-size:11px;color:#888">'+linked.length+' 筆採購單</div>'+
+      '<select style="font-size:11px;height:26px;padding:2px 24px 2px 6px;width:auto;color:'+(s.container_size?'#1a1a1a':'#aaa')+'" onclick="event.stopPropagation()" onchange="quickSetContainerSize('+s.id+',this.value,this)">'+
+        '<option value=""'+(s.container_size?'':' selected')+'>— 櫃型 —</option>'+
+        '<option value="20gp"'+(s.container_size==='20gp'?' selected':'')+'>20\' GP</option>'+
+        '<option value="40gp"'+(s.container_size==='40gp'?' selected':'')+'>40\' GP</option>'+
+        '<option value="40hc"'+(s.container_size==='40hc'?' selected':'')+'>40\' HC</option>'+
+        '<option value="lcl"'+(s.container_size==='lcl'?' selected':'')+'>LCL</option>'+
+      '</select>'+
       '</div></div>'
   }).join('')
 }
 
+async function quickSetContainerSize(shipmentId,value,selectEl){
+  if(selectEl)selectEl.style.color=value?'#1a1a1a':'#aaa'
+  const{error}=await sb.from('shipments').update({container_size:value||null}).eq('id',shipmentId)
+  if(error){showToast('更新失敗：'+error.message,'error');return}
+  const s=shipments.find(x=>String(x.id)===String(shipmentId))
+  if(s)s.container_size=value||null
+}
 function clearShipmentFilters(){
   ;['fsh-mode','fsh-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
   renderShipments()
