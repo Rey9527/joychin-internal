@@ -2635,6 +2635,7 @@ function renderShipments(){
       '<span style="font-size:13px;font-weight:500">'+esc(s.shipment_no)+'</span>'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
       '<span class="tag">'+shipmentModeLabel(s.transport_mode)+'</span>'+
+      (s.container_size?'<span class="tag" style="font-weight:600">'+esc({'20gp':'20\' GP','40gp':'40\' GP','40hc':'40\' HC',lcl:'LCL'}[s.container_size]||s.container_size)+'</span>':'')+
       '</div>'+
       '<div style="font-size:12px;color:#666">'+
       [s.container_no?('櫃號 '+s.container_no):null,s.bl_no?('B/L '+s.bl_no):null,s.etd?('ETD '+s.etd):null,s.eta?('ETA '+s.eta):null].filter(Boolean).join(' · ')+
@@ -2673,6 +2674,7 @@ function openShipmentModal(id){
     '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
       '<span class="tag">'+shipmentModeLabel(s.transport_mode)+'</span>'+
+      (s.container_size?'<span class="tag" style="font-weight:600">'+esc({gy:'20\' GP',gp:'20\' GP','20gp':'20\' GP','40gp':'40\' GP','40hc':'40\' HC',lcl:'LCL'}[s.container_size]||s.container_size)+'</span>':'')+
       (portLine?'<span style="font-size:13px;color:#555">'+esc(portLine)+'</span>':'')+
     '</div>'+
     '<div style="display:flex;gap:20px;margin-bottom:12px;flex-wrap:wrap">'+
@@ -3013,6 +3015,7 @@ function openShipmentEditModal(id){
     '<div><label>船名 / 航班</label><input id="sh-vessel" value="'+esc(s?.vessel_name||'')+'" /></div>'+
     '<div><label>Voyage No.</label><input id="sh-voyage" value="'+esc(s?.voyage_no||'')+'" /></div>'+
     '<div><label>Container No.</label><input id="sh-container" value="'+esc(s?.container_no||'')+'" /></div>'+
+    '<div><label>櫃型</label><select id="sh-container-size"><option value="">— 未設定 —</option><option value="20gp"'+(s?.container_size==='20gp'?' selected':'')+'>20\' GP（20呎一般）</option><option value="40gp"'+(s?.container_size==='40gp'?' selected':'')+'>40\' GP（40呎一般）</option><option value="40hc"'+(s?.container_size==='40hc'?' selected':'')+'>40\' HC（40呎高櫃）</option><option value="lcl"'+(s?.container_size==='lcl'?' selected':'')+'>LCL 拼箱</option></select></div>'+
     '<div><label>B/L No.</label><input id="sh-bl" value="'+esc(s?.bl_no||'')+'" /></div>'+
     '<div><label>ETD</label><input id="sh-etd" type="date" value="'+esc(s?.etd||'')+'" /></div>'+
     '<div><label>ETA</label><input id="sh-eta" type="date" value="'+esc(s?.eta||'')+'" /></div>'+
@@ -3039,6 +3042,7 @@ async function saveShipment(id){
     vessel_name:document.getElementById('sh-vessel')?.value.trim()||null,
     voyage_no:document.getElementById('sh-voyage')?.value.trim()||null,
     container_no:document.getElementById('sh-container')?.value.trim()||null,
+    container_size:document.getElementById('sh-container-size')?.value||null,
     bl_no:document.getElementById('sh-bl')?.value.trim()||null,
     etd:document.getElementById('sh-etd')?.value||null,
     eta:document.getElementById('sh-eta')?.value||null,
