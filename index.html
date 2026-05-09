@@ -3149,15 +3149,18 @@ function openOrderModal(id){
       '<div class="section-title" style="margin-bottom:0">品項明細</div>'+
       '</div>'+
       '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
+      '<div style="margin-bottom:8px"><label>產品名稱 <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="noi-name" placeholder="可手動輸入或從目錄帶入" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'new\')" style="white-space:nowrap;height:32px">選自產品目錄</button></div><input id="noi-product-id" type="hidden" /></div>'+
       '<div class="grid-2" style="margin-bottom:8px">'+
-      '<div><label>產品名稱 <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="noi-name" placeholder="可手動輸入或從目錄帶入" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'new\')" style="white-space:nowrap;height:32px">選自產品目錄</button></div><input id="noi-product-id" type="hidden" /></div>'+
       '<div><label>規格</label><input id="noi-spec" /></div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
-      '<div><label>數量</label><input id="noi-qty" type="number" min="0" /></div>'+
-      '<div><label>單位</label><select id="noi-unit"><option value="m">m（米）</option><option value="m²">m²（平方米）</option><option value="roll">roll（卷）</option><option value="kg">kg</option><option value="piece">piece</option></select></div></div>'+
-      '<div><label>單價</label><input id="noi-price" type="number" min="0" step="0.01" /></div>'+
-      '<div><label>幣別</label><select id="noi-currency">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
+      '<div></div>'+
+      '<div><label>數量 <span class="req">*</span></label><input id="noi-qty" type="number" min="0" oninput="refreshNoiCalc()" /></div>'+
+      '<div><label>計量單位</label><select id="noi-unit"><option value="m">m</option><option value="roll">roll</option><option value="kg">kg</option><option value="piece">piece</option></select></div>'+
+      '<div><label>單價 <span class="req">*</span></label><input id="noi-price" type="number" min="0" step="0.0001" placeholder="0.0000" oninput="refreshNoiCalc()" /></div>'+
+      '<div><label>計價單位</label><select id="noi-pricing-unit" onchange="noiCpuChange()"><option value="m2">THB/m²</option><option value="m">THB/m</option></select></div>'+
+      '<div id="noi-width-wrap"><label>寬幅（mm）</label><input id="noi-width-mm" type="number" min="0" step="1" placeholder="例如 1070" oninput="refreshNoiCalc()" /></div>'+
+      '<div><label>幣別</label><select id="noi-currency" onchange="refreshNoiCalc()">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
       '</div>'+
+      '<div id="noi-new-calc" style="font-size:12px;color:#555;margin-bottom:4px"></div>'+
       '<div style="display:flex;gap:8px">'+
       '<button class="btn btn-primary btn-sm" onclick="addPendingOrderItem()">加入品項</button>'+
       '</div></div>'+
@@ -3183,7 +3186,7 @@ async function _createOrder(){
   if(!_pendingOrderItems.length){showToast('請先新增至少 1 筆產品品項，再建立訂單','error');return}
   const cust=customers.find(x=>x.id===parseInt(custId))
   const sup=suppliers.find(s=>s.company===supCo)
-  const total=_pendingOrderItems.reduce((sum,it)=>sum+(parseFloat(it.unit_price||0)*parseFloat(it.qty||0)),0)
+  const total=_pendingOrderItems.reduce((sum,it)=>{const wm=parseFloat(it.width_m||0);const up=parseFloat(it.unit_price||0);const q=parseFloat(it.qty||0);return sum+(it.customer_pricing_unit==='m2'&&wm>0?up*wm*q:up*q)},0)
   const{error}=await sb.from('orders').insert({
     id,customer:cust?.company||null,customer_id:parseInt(custId),supplier_id:sup?.id||null,
     order_date:document.getElementById('or-date')?.value||null,
@@ -3197,15 +3200,22 @@ async function _createOrder(){
     approval_status:'none'
   })
   if(error){showToast('建立失敗：'+error.message,'error');return}
-  const {error:itemError}=await sb.from('order_items').insert(_pendingOrderItems.map(it=>({
-    order_id:id,
-    product_name:it.product_name,
-    spec:it.spec||null,
-    qty:it.qty,
-    unit:it.unit||null,
-    unit_price:it.unit_price,
-    currency:it.currency||null
-  })))
+  const {error:itemError}=await sb.from('order_items').insert(_pendingOrderItems.map(it=>{
+    const wm=parseFloat(it.width_m||0);const up=parseFloat(it.unit_price||0);const q=parseFloat(it.qty||0)
+    const amt=it.customer_pricing_unit==='m2'&&wm>0?up*wm*q:up*q
+    return{
+      order_id:id,
+      product_name:it.product_name,
+      spec:it.spec||null,
+      qty:it.qty,
+      unit:it.unit||null,
+      unit_price:it.unit_price,
+      currency:it.currency||null,
+      customer_pricing_unit:it.customer_pricing_unit||null,
+      width_m:it.width_m||null,
+      amount:parseFloat(amt.toFixed(4))
+    }
+  }))
   if(itemError){
     await sb.from('orders').delete().eq('id',id)
     showToast('品項建立失敗，訂單未建立：'+itemError.message,'error')
@@ -3227,14 +3237,22 @@ function renderPendingOrderItems(){
     el.innerHTML='<div style="font-size:12px;color:#aaa">尚未新增品項</div>'
     return
   }
-  const total=_pendingOrderItems.reduce((sum,it)=>sum+(parseFloat(it.unit_price||0)*parseFloat(it.qty||0)),0)
-  el.innerHTML=_pendingOrderItems.map((it,idx)=>
-    '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0eb;font-size:12px">'+
+  function _pendingAmt(it){const wm=parseFloat(it.width_m||0);const up=parseFloat(it.unit_price||0);const q=parseFloat(it.qty||0);return it.customer_pricing_unit==='m2'&&wm>0?up*wm*q:up*q}
+  const total=_pendingOrderItems.reduce((sum,it)=>sum+_pendingAmt(it),0)
+  el.innerHTML=_pendingOrderItems.map((it,idx)=>{
+    const wm=parseFloat(it.width_m||0)
+    const cpu=it.customer_pricing_unit
+    const up=parseFloat(it.unit_price||0)
+    const cur=it.currency||'USD'
+    let priceStr
+    if(cpu==='m2'&&wm>0) priceStr=up.toFixed(2)+'/m² × '+(wm*1000)+'mm'
+    else priceStr=up.toFixed(2)+(cpu==='m2'?'/m²':'/m')
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0eb;font-size:12px">'+
     '<span style="flex:1">'+esc(it.product_name||'—')+(it.spec?' <span style="color:#aaa">'+esc(it.spec)+'</span>':'')+
-    ' · '+(it.qty||'—')+' '+(it.unit||'')+' × '+(it.unit_price!=null?parseFloat(it.unit_price).toFixed(2):'—')+' '+(it.currency||'USD')+'</span>'+
+    ' · '+(it.qty||'—')+' '+(it.unit||'')+' × '+priceStr+' '+cur+' = <strong>'+_pendingAmt(it).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong></span>'+
     '<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0 4px" onclick="removePendingOrderItem('+idx+')">×</button>'+
     '</div>'
-  ).join('')+'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">總計 '+total.toFixed(2)+'</div>'
+  }).join('')+'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">總計 '+total.toFixed(2)+'</div>'
 }
 
 function fillOrderItemFromProduct(mode,pid){
@@ -3251,6 +3269,7 @@ function fillOrderItemFromProduct(mode,pid){
   const widthEl=document.getElementById(prefix+'-width-mm');if(widthEl)widthEl.value=p.width_m!=null?Math.round(p.width_m*1000):''
   const cpuEl=document.getElementById(prefix+'-cpu');if(cpuEl&&p.pricing_unit)cpuEl.value=p.pricing_unit
   if(prefix==='oi')refreshOiNewCalc()
+  else noiCpuChange()
 }
 function openOrderProductPicker(mode){
   const rows=products.filter(p=>p.is_active!==false).map(p=>{
@@ -3286,6 +3305,9 @@ function addPendingOrderItem(){
   const qty=parseFloat(document.getElementById('noi-qty')?.value||0)
   const unitPrice=parseFloat(document.getElementById('noi-price')?.value||0)
   if(!qty||!unitPrice){showToast('請填寫有效的數量與單價','error');return}
+  const cpu=document.getElementById('noi-pricing-unit')?.value||'m2'
+  const wmMm=parseFloat(document.getElementById('noi-width-mm')?.value||0)
+  const widthM=wmMm>0?wmMm/1000:null
   _pendingOrderItems.push({
     product_id:parseInt(document.getElementById('noi-product-id')?.value||0)||null,
     product_name:name,
@@ -3293,10 +3315,15 @@ function addPendingOrderItem(){
     qty,
     unit:document.getElementById('noi-unit')?.value||null,
     unit_price:unitPrice,
-    currency:document.getElementById('noi-currency')?.value||'USD'
+    currency:document.getElementById('noi-currency')?.value||'USD',
+    customer_pricing_unit:cpu,
+    width_m:widthM
   })
-  ;['noi-name','noi-product-id','noi-spec','noi-qty','noi-price'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
+  ;['noi-name','noi-product-id','noi-spec','noi-qty','noi-price','noi-width-mm'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
   const unitEl=document.getElementById('noi-unit');if(unitEl)unitEl.value='m'
+  const cpuEl=document.getElementById('noi-pricing-unit');if(cpuEl)cpuEl.value='m2'
+  const calcEl=document.getElementById('noi-new-calc');if(calcEl)calcEl.innerHTML=''
+  const wrapEl=document.getElementById('noi-width-wrap');if(wrapEl)wrapEl.style.display=''
   renderPendingOrderItems()
   showToast('品項已加入')
 }
@@ -3542,6 +3569,34 @@ async function deleteOrder(){
   })
 }
 
+function noiCpuChange(){
+  const cpu=document.getElementById('noi-pricing-unit')?.value
+  const wrap=document.getElementById('noi-width-wrap')
+  if(wrap)wrap.style.display=cpu==='m2'?'':'none'
+  refreshNoiCalc()
+}
+function refreshNoiCalc(){
+  const qty=parseFloat(document.getElementById('noi-qty')?.value||0)
+  const up=parseFloat(document.getElementById('noi-price')?.value||0)
+  const cpu=document.getElementById('noi-pricing-unit')?.value||'m2'
+  const wmMm=parseFloat(document.getElementById('noi-width-mm')?.value||0)
+  const wm=wmMm/1000
+  const cur=document.getElementById('noi-currency')?.value||''
+  const el=document.getElementById('noi-new-calc')
+  if(!el)return
+  if(!qty||!up){el.innerHTML='';return}
+  let str
+  if(cpu==='m2'&&wm>0){
+    const amt=up*wm*qty
+    str=up.toFixed(2)+' '+cur+'/m² × '+wmMm+'mm × '+qty+'m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+  } else if(cpu==='m2'&&wm===0){
+    str='<span style="color:#e55">⚠ 請填寫寬幅才能計算 m² 金額</span>'
+  } else {
+    const amt=up*qty
+    str=up.toFixed(2)+' '+cur+'/m × '+qty+'m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+  }
+  el.innerHTML=str
+}
 function refreshOiNewCalc(){
   const qty=parseFloat(document.getElementById('oi-qty')?.value||0)
   const up=parseFloat(document.getElementById('oi-price')?.value||0)
