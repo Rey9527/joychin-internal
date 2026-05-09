@@ -2813,7 +2813,8 @@ async function uploadShipmentDocument(shipmentId){
   if(!file){showToast('請選擇 PDF 檔案','error');return}
   if(!file.type.includes('pdf')&&!file.name.toLowerCase().endsWith('.pdf')){showToast('只接受 PDF 格式','error');return}
   if(btn){btn.disabled=true;btn.textContent='上傳中…'}
-  const filePath=shipmentId+'/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._\-一-鿿]/g,'_')
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').replace(/__+/g,'_')
+  const filePath=shipmentId+'/'+Date.now()+'-'+safeName
   const{error:upErr}=await sb.storage.from('shipment-docs').upload(filePath,file,{contentType:'application/pdf',upsert:false})
   if(upErr){showToast('上傳失敗：'+upErr.message,'error');if(btn){btn.disabled=false;btn.textContent='上傳'};return}
   const{data:dbData,error:dbErr}=await sb.from('shipment_documents').insert({
