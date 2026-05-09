@@ -971,6 +971,18 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div class="modal-bd" id="modal-reset-pwd-bd"></div>
   </div>
 </div>
+<!-- 文件預覽 Modal -->
+<div class="modal-overlay" id="modal-doc-preview" onclick="closeModalOnBg(event,'modal-doc-preview')">
+  <div class="modal-box lg">
+    <div class="modal-hd">
+      <div style="font-size:14px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="modal-doc-preview-title"></div>
+      <button class="modal-close" onclick="closeModal('modal-doc-preview')">×</button>
+    </div>
+    <div class="modal-bd" style="padding:0">
+      <iframe id="modal-doc-preview-frame" src="" style="width:100%;height:70vh;border:none;display:block"></iframe>
+    </div>
+  </div>
+</div>
 
 <script>
 function showToast(msg,type='success'){
@@ -2799,7 +2811,7 @@ async function renderShipmentDocs(shipmentId){
       '<span class="badge" style="background:'+bg+';color:'+clr+';border:1px solid '+clr+';white-space:nowrap;flex-shrink:0">'+esc(label)+'</span>'+
       '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.file_name)+'</div>'+
       '<div style="font-size:10px;color:#aaa">'+date+(d.uploaded_by?' · '+esc(d.uploaded_by):'')+(size?' · '+size:'')+'</div></div>'+
-      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="previewShipmentDoc(\''+esc(d.file_url||'')+'\')">預覽</button>'+
+      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="previewShipmentDoc(\''+esc(d.file_url||'')+'\',\''+esc(d.file_name||'')+'\')">預覽</button>'+
       '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="downloadShipmentDoc(\''+esc(d.file_url||'')+'\')">下載</button>'+
       '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;flex-shrink:0" onclick="deleteShipmentDoc('+d.id+',\''+esc(d.file_url||'')+'\',\''+shipmentId+'\')">刪除</button>'+
     '</div>'
@@ -2836,12 +2848,14 @@ function _shDocStoragePath(raw){
   const idx=raw.indexOf(marker)
   return idx>=0?raw.slice(idx+marker.length):raw
 }
-async function previewShipmentDoc(raw){
+async function previewShipmentDoc(raw,fileName){
   const filePath=_shDocStoragePath(raw)
   if(!filePath){showToast('找不到檔案路徑','error');return}
   const{data,error}=await sb.storage.from('shipment-docs').createSignedUrl(filePath,3600)
   if(error){showToast('無法產生預覽連結：'+error.message,'error');return}
-  window.open(data.signedUrl,'_blank')
+  document.getElementById('modal-doc-preview-title').textContent=fileName||filePath
+  document.getElementById('modal-doc-preview-frame').src=data.signedUrl
+  document.getElementById('modal-doc-preview').classList.add('open')
 }
 async function downloadShipmentDoc(raw){
   const filePath=_shDocStoragePath(raw)
@@ -5033,6 +5047,7 @@ function closeModal(id){
     _isDirty=false
     clearErrorToasts()
     document.getElementById(id).classList.remove('open')
+    if(id==='modal-doc-preview'){const f=document.getElementById('modal-doc-preview-frame');if(f)f.src=''}
   }
   if(_isDirty){
     confirmModal('有未儲存的變更，確定要離開嗎？',()=>{
