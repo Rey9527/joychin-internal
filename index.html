@@ -3884,9 +3884,9 @@ function inquiryFollowupLevel(i){
 function updateSampleBadge(){
   const dd=d=>countWorkdays(d,new Date())
   const ids=new Set()
-  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='pending'&&r.status!=='received'&&r.requested_date&&dd(r.requested_date)>=7).forEach(r=>ids.add(r.sample_id))
-  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='shipped'&&r.status!=='received'&&r.shipped_date&&dd(r.shipped_date)>=14).forEach(r=>ids.add(r.sample_id))
-  sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&dd(r.shipped_date)>=14&&!r.feedback).forEach(r=>ids.add(r.sample_id))
+  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='pending'&&r.status!=='received'&&r.requested_date&&dd(r.requested_date)>=3).forEach(r=>ids.add(r.sample_id))
+  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='shipped'&&r.status!=='received'&&r.shipped_date&&dd(r.shipped_date)>=7).forEach(r=>ids.add(r.sample_id))
+  sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&dd(r.shipped_date)>=7&&!r.feedback).forEach(r=>ids.add(r.sample_id))
   const el=document.getElementById('badge-samples')
   if(el){el.textContent=ids.size;el.style.display=ids.size>0?'flex':'none'}
 }
