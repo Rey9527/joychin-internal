@@ -3153,8 +3153,8 @@ function openOrderModal(id){
       '<div class="grid-2" style="margin-bottom:8px">'+
       '<div><label>規格</label><input id="noi-spec" /></div>'+
       '<div></div>'+
-      '<div><label>數量 <span class="req">*</span></label><input id="noi-qty" type="number" min="0" oninput="refreshNoiCalc()" /></div>'+
-      '<div><label>計量單位</label><select id="noi-unit"><option value="m">m</option><option value="roll">roll</option><option value="kg">kg</option><option value="piece">piece</option></select></div>'+
+      '<div><label>數量（米）<span class="req">*</span></label><input id="noi-qty" type="number" min="0" oninput="refreshNoiCalc()" /></div>'+
+      '<div></div>'+
       '<div><label>單價 <span class="req">*</span></label><input id="noi-price" type="number" min="0" step="0.0001" placeholder="0.0000" oninput="refreshNoiCalc()" /></div>'+
       '<div><label>計價單位</label><select id="noi-pricing-unit" onchange="noiCpuChange()"><option value="m2">THB/m²</option><option value="m">THB/m</option></select></div>'+
       '<div id="noi-width-wrap"><label>寬幅（mm）</label><input id="noi-width-mm" type="number" min="0" step="1" placeholder="例如 1070" oninput="refreshNoiCalc()" /></div>'+
@@ -3313,14 +3313,13 @@ function addPendingOrderItem(){
     product_name:name,
     spec:document.getElementById('noi-spec')?.value.trim()||null,
     qty,
-    unit:document.getElementById('noi-unit')?.value||null,
+    unit:'m',
     unit_price:unitPrice,
     currency:document.getElementById('noi-currency')?.value||'USD',
     customer_pricing_unit:cpu,
     width_m:widthM
   })
   ;['noi-name','noi-product-id','noi-spec','noi-qty','noi-price','noi-width-mm'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
-  const unitEl=document.getElementById('noi-unit');if(unitEl)unitEl.value='m'
   const cpuEl=document.getElementById('noi-pricing-unit');if(cpuEl)cpuEl.value='m2'
   const calcEl=document.getElementById('noi-new-calc');if(calcEl)calcEl.innerHTML=''
   const wrapEl=document.getElementById('noi-width-wrap');if(wrapEl)wrapEl.style.display=''
@@ -3588,12 +3587,12 @@ function refreshNoiCalc(){
   let str
   if(cpu==='m2'&&wm>0){
     const amt=up*wm*qty
-    str=up.toFixed(2)+' '+cur+'/m² × '+wmMm+'mm × '+qty+'m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+    str=up.toFixed(4)+' × '+wmMm+'/1000 × '+qty+' m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' THB</strong>'
   } else if(cpu==='m2'&&wm===0){
     str='<span style="color:#e55">⚠ 請填寫寬幅才能計算 m² 金額</span>'
   } else {
     const amt=up*qty
-    str=up.toFixed(2)+' '+cur+'/m × '+qty+'m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+    str=up.toFixed(4)+' × '+qty+' m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' THB</strong>'
   }
   el.innerHTML=str
 }
