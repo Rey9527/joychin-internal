@@ -2827,7 +2827,7 @@ function openShipmentModal(id){
   html+='<div class="divider"></div>'+
     '<div class="section-title" style="margin-bottom:8px">關聯採購單</div>'+
     '<div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">'+
-      '<select id="sh-purchase-link" style="flex:1"><option value="">— 選擇採購單 —</option>'+availablePOs.map(p=>{const sup=esc(resolvePurchaseSupplierName(p)||'—');return '<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+(p.accounting_no?' — '+esc(p.accounting_no):'')+' — '+sup+'</option>'}).join('')+'</select>'+
+      '<select id="sh-purchase-link" style="flex:1"><option value="">— 選擇採購單 —</option>'+availablePOs.map(p=>{const sup=esc(resolvePurchaseSupplierName(p)||'—');const its=purchaseOrderItems.filter(i=>i.po_id===p.id);const prodParts=its.slice(0,2).map(i=>esc(i.product_name||'—'));const prodSummary=prodParts.join('、')+(its.length>2?' (+'+( its.length-2)+')':'');const stLabel=PURCHASE_STATUS.find(s=>s.id===p.status)?.label||p.status||'';return '<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+(p.accounting_no?' — '+esc(p.accounting_no):'')+' — '+sup+(prodSummary?' — '+prodSummary:'')+(stLabel?' — '+stLabel:'')+'</option>'}).join('')+'</select>'+
       '<button class="btn btn-ghost btn-sm" style="height:32px;flex-shrink:0" onclick="attachPurchaseToShipment()">+ 掛入</button>'+
     '</div>'+
     (linkedPOs.length
