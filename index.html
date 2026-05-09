@@ -1535,7 +1535,7 @@ function openSampleModal(id){
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
       '<div><label>庫存數量</label><input id="sm-qty" type="number" value="0" /></div>'+
       '<div><label>單位</label><input id="sm-unit" placeholder="例：pcs, rolls" /></div></div>'+
-      '<div><label>關聯詢價 ID</label><input id="sm-inq" placeholder="選填" /></div>'+
+      '<div><label>關聯詢價</label><select id="sm-inq"><option value="">— 選填 —</option>'+inquiries.map(inq=>'<option value="'+esc(inq.id)+'">'+esc(inq.id)+(inq.customer?' — '+esc(displayCustomerName(inq.customer)):'')+(inq.product?' — '+esc(inq.product):'')+' </option>').join('')+'</select></div>'+
       '</div>'+
       '<div style="margin-bottom:14px"><label>備註</label><textarea id="sm-notes"></textarea></div>'+
       '<button class="btn btn-primary" onclick="_createSample()">新增樣品</button>'
@@ -1578,7 +1578,15 @@ function _renderSampleModal(){
 
   // Section 1: Basic info
   const supOpts=suppliers.map(x=>'<option value="'+x.id+'" '+(x.id===s.supplier_id?'selected':'')+'>'+x.company+'</option>').join('')
-  const inqLink=s.from_inquiry_id?'<div><label>關聯詢價 ID</label><input readonly value="'+s.from_inquiry_id+'" style="background:#f8f8f5;color:#888" /></div>':''
+  const inqObj=s.from_inquiry_id?inquiries.find(x=>String(x.id)===String(s.from_inquiry_id)):null
+  const inqDisplay=inqObj?esc(inqObj.id)+(inqObj.customer?' — '+esc(displayCustomerName(inqObj.customer)):'')+(inqObj.product?' — '+esc(inqObj.product):''):(s.from_inquiry_id?esc(s.from_inquiry_id):'')
+  const inqSelectOpts='<option value="">— 選填 —</option>'+inquiries.map(inq=>'<option value="'+esc(inq.id)+'" '+(String(s.from_inquiry_id)===String(inq.id)?'selected':'')+'>'+esc(inq.id)+(inq.customer?' — '+esc(displayCustomerName(inq.customer)):'')+(inq.product?' — '+esc(inq.product):'')+' </option>').join('')
+  const inqLink='<div><label>關聯詢價</label><div style="display:flex;gap:6px;align-items:center">'+
+    '<select id="sm-e-inq" style="flex:1">'+inqSelectOpts+'</select>'+
+    (s.from_inquiry_id?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="closeModal(\'modal-sample\');switchTab(\'inquiry\');setTimeout(()=>openInqModal(\''+esc(String(s.from_inquiry_id))+'\'),80)">→ 前往詢價單</button>':'')+
+    '</div>'+
+    (inqDisplay?'<div style="font-size:11px;color:#888;margin-top:3px">'+inqDisplay+'</div>':'')+
+    '</div>'
   let html=
     '<div class="section-title">基本資料</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
@@ -1702,6 +1710,7 @@ async function saveSampleBasic(){
     supplier_id:supId?parseInt(supId):null,
     stock_qty:parseFloat(document.getElementById('sm-e-qty')?.value||0),
     unit:document.getElementById('sm-e-unit')?.value.trim()||null,
+    from_inquiry_id:document.getElementById('sm-e-inq')?.value||null,
     notes:document.getElementById('sm-e-notes')?.value.trim()||null
   }).eq('id',selectedSampleId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
