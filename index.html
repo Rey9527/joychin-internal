@@ -2729,7 +2729,7 @@ function openShipmentModal(id){
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
         '<div><div style="font-size:11px;color:#888;margin-bottom:3px">採購單</div>'+
           '<select id="shi-po" onchange="shItemPoChange(\''+id+'\')" style="width:100%"><option value="">— 選擇採購單 —</option>'+
-          linkedPOsForItems.map(p=>'<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+'</option>').join('')+
+          linkedPOsForItems.map(p=>{const sup=esc(resolvePurchaseSupplierName(p)||'—');const acc=p.accounting_no?esc(p.accounting_no)+' — ':'';return '<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+' — '+acc+sup+'</option>'}).join('')+
           '</select></div>'+
         '<div><div style="font-size:11px;color:#888;margin-bottom:3px">產品</div>'+
           '<select id="shi-product" onchange="shItemProductChange()" style="width:100%"><option value="">— 先選採購單 —</option></select></div>'+
@@ -2748,7 +2748,7 @@ function openShipmentModal(id){
   html+='<div class="divider"></div>'+
     '<div class="section-title" style="margin-bottom:8px">關聯採購單</div>'+
     '<div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">'+
-      '<select id="sh-purchase-link" style="flex:1"><option value="">— 選擇採購單 —</option>'+availablePOs.map(p=>'<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+' · '+esc(resolvePurchaseSupplierName(p)||'—')+'</option>').join('')+'</select>'+
+      '<select id="sh-purchase-link" style="flex:1"><option value="">— 選擇採購單 —</option>'+availablePOs.map(p=>{const sup=esc(resolvePurchaseSupplierName(p)||'—');return '<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+(p.accounting_no?' — '+esc(p.accounting_no):'')+' — '+sup+'</option>'}).join('')+'</select>'+
       '<button class="btn btn-ghost btn-sm" style="height:32px;flex-shrink:0" onclick="attachPurchaseToShipment()">+ 掛入</button>'+
     '</div>'+
     (linkedPOs.length
