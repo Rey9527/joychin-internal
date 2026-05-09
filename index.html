@@ -246,7 +246,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <span class="nav-icon"><i data-lucide="package"></i></span><span>訂單管理</span>
     </button>
     <button class="nav-item" id="nav-purchases" onclick="switchTab('purchases')" style="display:none">
-      <span class="nav-icon"><i data-lucide="shopping-cart"></i></span><span>採購單管理</span>
+      <span class="nav-icon"><i data-lucide="shopping-cart"></i></span><span>採購單管理</span><span class="nav-badge" id="badge-purchases" style="display:none;background:#A55A00"></span>
     </button>
     <button class="nav-item" id="nav-shipments" onclick="switchTab('shipments')">
       <span class="nav-icon"><i data-lucide="anchor"></i></span><span>船運管理</span>
@@ -1371,6 +1371,7 @@ async function loadShipments(){
   if(shipErr)showToast('載入船運失敗：'+shipErr.message,'error')
   if(linkErr)showToast('載入船運關聯失敗：'+linkErr.message,'error')
   if(siErr)showToast('載入貨物明細失敗：'+siErr.message,'error')
+  updatePurchaseBadge()
 }
 
 async function loadPurchaseOrders(){
@@ -1385,6 +1386,7 @@ async function loadPurchaseOrders(){
   if(poErr)showToast('載入採購單失敗：'+poErr.message,'error')
   if(poiErr)showToast('載入採購單品項失敗：'+poiErr.message,'error')
   if(poolErr)showToast('載入採購單關聯訂單失敗：'+poolErr.message,'error')
+  updatePurchaseBadge()
 }
 
 async function init(){
@@ -3817,12 +3819,20 @@ function inquiryFollowupLevel(i){
   return 'ok'
 }
 
+function updatePurchaseBadge(){
+  const EXCLUDED=['draft','cancelled','rejected']
+  const linkedPoIds=new Set(shipmentPurchaseOrders.map(x=>String(x.purchase_order_id)))
+  const count=purchaseOrders.filter(p=>!EXCLUDED.includes(p.status)&&!linkedPoIds.has(String(p.id))).length
+  const el=document.getElementById('badge-purchases')
+  if(el){el.textContent=count;el.style.display=count>0?'flex':'none'}
+}
 function updateNavBadges(){
   const setB=(id,n)=>{const el=document.getElementById(id);if(!el)return;el.textContent=n;el.style.display=n>0?'flex':'none'}
   setB('badge-inquiry',inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').length)
   setB('badge-products',products.filter(p=>productStatus(p)==='overdue').length)
   setB('badge-customers',customers.filter(c=>customerStatus(c)==='overdue').length)
   setB('badge-complaints',complaints.filter(c=>c.status!=='resolved').length)
+  updatePurchaseBadge()
 }
 function updateOverdueAlert(){updateNavBadges()}
 function updateProductOverdueAlert(){updateNavBadges()}
@@ -4890,7 +4900,7 @@ function switchTab(tab,save=true){
   if(tab==='shipments')renderShipments()
   if(tab==='users_mgmt'){loadUsers().then(()=>{renderUsersMgmt();const sub=sessionStorage.getItem('users_subtab')||'users';switchUsersSubtab(sub)})}
   if(tab==='settings')renderSettingsTab()
-  if(tab==='purchases'){populatePurchaseSupplierFilter();renderPurchaseOrders()}
+  if(tab==='purchases'){populatePurchaseSupplierFilter();renderPurchaseOrders();updatePurchaseBadge()}
   if(tab==='purchase-shop')pshopInitPage()
   else pshopShowTopbarControls(false)
   closeSidebar()
