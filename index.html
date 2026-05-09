@@ -2964,25 +2964,18 @@ async function saveShipmentReceive(shipmentId,useExplicit){
   const linked=shipmentLinkedPurchases(shipmentId)
   const explicitItems=shipmentItems.filter(x=>String(x.shipment_id)===String(shipmentId))
   const updates=[]
-  const stockUpdates=[]
   if(useExplicit){
     explicitItems.forEach(item=>{
       const input=document.getElementById('rcv-si-'+item.id)
       if(!input)return
       const thisReceived=parseFloat(input.value)||0
       if(thisReceived<=0)return
-      // find matching po item to update received_qty
       const poItem=purchaseOrderItems.find(i=>item.product_id&&i.product_id===item.product_id&&String(i.po_id)===String(item.po_id||''))
       if(poItem){
         const prev=parseFloat(poItem.received_qty||0)
         const existing=updates.find(u=>u.id===poItem.id)
         if(existing)existing.received_qty+=thisReceived
         else updates.push({id:poItem.id,received_qty:prev+thisReceived})
-      }
-      if(item.product_id){
-        const existing=stockUpdates.find(x=>x.product_id===item.product_id)
-        if(existing){existing.deltaM+=thisReceived}
-        else stockUpdates.push({product_id:item.product_id,deltaM:thisReceived,unit:item.unit||'m'})
       }
     })
   }else{
@@ -2991,13 +2984,9 @@ async function saveShipmentReceive(shipmentId,useExplicit){
         const input=document.getElementById('rcv-'+item.id)
         if(!input)return
         const thisReceived=parseFloat(input.value)||0
+        if(thisReceived<=0)return
         const prev=parseFloat(item.received_qty||0)
         updates.push({id:item.id,received_qty:prev+thisReceived})
-        if(thisReceived>0&&item.product_id){
-          const existing=stockUpdates.find(x=>x.product_id===item.product_id)
-          if(existing){existing.deltaM+=thisReceived}
-          else stockUpdates.push({product_id:item.product_id,deltaM:thisReceived,unit:item.unit||'m'})
-        }
       })
     })
   }
@@ -3005,15 +2994,6 @@ async function saveShipmentReceive(shipmentId,useExplicit){
     const{error}=await sb.from('purchase_order_items').update({received_qty:u.received_qty}).eq('id',u.id)
     if(error){showToast('更新品項失敗：'+error.message,'error');return}
   }
-  const skipped=[]
-  for(const su of stockUpdates){
-    const prod=products.find(x=>x.id===su.product_id)
-    if(!prod)continue
-    const deltaRolls=poQtyToRolls(su.deltaM,su.unit,prod)
-    if(deltaRolls===null){skipped.push(prod.product_name);continue}
-    await sb.from('products').update({stock_qty:(parseFloat(prod.stock_qty)||0)+deltaRolls}).eq('id',su.product_id)
-  }
-  if(skipped.length)showToast('注意：以下產品未設每卷米數，庫存未自動更新：'+skipped.join('、'),'error')
   const{error:shErr}=await sb.from('shipments').update({status:'completed'}).eq('id',shipmentId)
   if(shErr){showToast('更新船運狀態失敗：'+shErr.message,'error');return}
   await Promise.all([loadShipments(),loadPurchaseOrders(),loadProducts()])
@@ -3970,8 +3950,10 @@ function openPurchaseModal(id, prefill={}){
       const totalQty=parseFloat(i.qty||i.quantity||0)||0
       const refOrderId=i.ref_order_id||null
       const canArrival=!isNew&&p?.status==='in_production'
+      const rcvLabel=receivedQty===0?'— 未到貨':totalQty>0&&receivedQty>totalQty?'↑ 超量到貨':totalQty>0&&receivedQty>=totalQty?'✓ 全數到貨':'⚠ 部分到貨'
+      const rcvColor=receivedQty===0?'#aaa':totalQty>0&&receivedQty>totalQty?'#185FA5':totalQty>0&&receivedQty>=totalQty?'#0F6E56':'#8A6400'
       const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto);gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:4px;background:#fff">'+
-        '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+(receivedQty>=totalQty&&totalQty>0?'#085041':'#8A6400')+'">已到 '+receivedQty+' / 共 '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
+        '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+rcvColor+'">'+rcvLabel+' — '+receivedQty+' / '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">數量</div><div style="font-size:12px;font-weight:500">'+(i.qty||i.quantity||0)+' '+(i.unit||'')+'</div></div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+parseFloat(i.unit_price||i.price||0).toFixed(2)+' '+(i.currency||'USD')+'</div></div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">小計</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+lineTotal.toFixed(2)+'</div>'+(i.pricing_unit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+    '</div>'+
