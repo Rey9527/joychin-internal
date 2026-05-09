@@ -251,7 +251,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <span class="nav-icon"><i data-lucide="anchor"></i></span><span>船運管理</span>
     </button>
     <button class="nav-item" id="nav-samples" onclick="switchTab('samples')">
-      <span class="nav-icon"><i data-lucide="flask-conical"></i></span><span>樣品管理</span>
+      <span class="nav-icon"><i data-lucide="flask-conical"></i></span><span>樣品管理</span><span class="nav-badge" id="badge-samples" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-complaints" onclick="switchTab('complaints')">
       <span class="nav-icon"><i data-lucide="alert-triangle"></i></span><span>客訴管理</span><span class="nav-badge" id="badge-complaints" style="display:none"></span>
@@ -1456,6 +1456,7 @@ async function loadSamples(){
     sb.from('sample_shipments_out').select('*').order('shipped_date',{ascending:false})
   ])
   samples=s||[];sampleRequestsIn=ri||[];sampleShipmentsOut=so||[]
+  updateSampleBadge()
 }
 // ===== 樣品管理 =====
 function calcSampleStatus(sampleId,stockQty){
@@ -1495,12 +1496,19 @@ function renderSamples(){
   })
   if(sum)sum.textContent=list.length+' 筆樣品'
   if(!list.length){el.innerHTML='<div class="loading">尚無樣品資料</div>';return}
+  const _now=new Date()
+  const _dd=d=>Math.floor((_now-new Date(d))/(1000*60*60*24))
+  const _badIds=new Set()
+  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='pending'&&r.status!=='received'&&r.requested_date&&_dd(r.requested_date)>=7).forEach(r=>_badIds.add(r.sample_id))
+  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='shipped'&&r.status!=='received'&&r.shipped_date&&_dd(r.shipped_date)>=14).forEach(r=>_badIds.add(r.sample_id))
+  sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&_dd(r.shipped_date)>=14&&!r.feedback).forEach(r=>_badIds.add(r.sample_id))
   el.innerHTML=list.map(s=>{
     const sup=suppliers.find(x=>x.id===s.supplier_id)
     const st=calcSampleStatus(s.id,s.stock_qty)
     const riCount=sampleRequestsIn.filter(r=>r.sample_id===s.id).length
     const soCount=sampleShipmentsOut.filter(r=>r.sample_id===s.id).length
-    return '<div class="row" onclick="openSampleModal(\''+s.id+'\')">'+
+    const isProblematic=_badIds.has(s.id)
+    return '<div class="row" onclick="openSampleModal(\''+s.id+'\')" style="'+(isProblematic?'border-left:3px solid #EF4444;background:#FEF2F2;':'')+'" >'+
       '<div style="flex:1;min-width:0">'+
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
       '<span style="font-size:13px;font-weight:500">'+s.product_name+'</span>'+
@@ -1826,15 +1834,15 @@ function scanDashboardItems(){
   })
   sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='pending'&&r.status!=='received'&&r.requested_date&&daysDiff(r.requested_date)>=7).forEach(r=>{
     const s=samples.find(x=>x.id===r.sample_id)
-    items.push({group:'sample',label:'追蹤樣品出貨：'+(s?.product_name||'#'+r.sample_id),desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.requested_date),urgency:'high',id:r.sample_id})
+    items.push({group:'sample',label:'追蹤樣品索取出貨',desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.requested_date),urgency:'high',id:r.sample_id})
   })
   sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='shipped'&&r.status!=='received'&&r.shipped_date&&daysDiff(r.shipped_date)>=14).forEach(r=>{
     const s=samples.find(x=>x.id===r.sample_id)
-    items.push({group:'sample',label:'追蹤樣品到貨：'+(s?.product_name||'#'+r.sample_id),desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.shipped_date),urgency:'high',id:r.sample_id})
+    items.push({group:'sample',label:'追蹤樣品到貨',desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.shipped_date),urgency:'high',id:r.sample_id})
   })
-  sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&daysDiff(r.shipped_date)>=14).forEach(r=>{
+  sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&daysDiff(r.shipped_date)>=14&&!r.feedback).forEach(r=>{
     const s=samples.find(x=>x.id===r.sample_id)
-    items.push({group:'sample',label:'樣品逾期未回饋',desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.shipped_date),urgency:'normal',id:r.sample_id})
+    items.push({group:'sample',label:'追蹤客戶樣品回饋',desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.shipped_date),urgency:'normal',id:r.sample_id})
   })
   orders.filter(o=>o.status==='in_production'&&o.expected_delivery&&daysDiff(o.expected_delivery)>=0).forEach(o=>{
     items.push({group:'order',label:'生產中但交期已過',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:daysDiff(o.expected_delivery),urgency:'high',id:o.id})
@@ -3864,6 +3872,16 @@ function inquiryFollowupLevel(i){
   return 'ok'
 }
 
+function updateSampleBadge(){
+  const now=new Date()
+  const dd=d=>Math.floor((now-new Date(d))/(1000*60*60*24))
+  const ids=new Set()
+  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='pending'&&r.status!=='received'&&r.requested_date&&dd(r.requested_date)>=7).forEach(r=>ids.add(r.sample_id))
+  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='shipped'&&r.status!=='received'&&r.shipped_date&&dd(r.shipped_date)>=14).forEach(r=>ids.add(r.sample_id))
+  sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&dd(r.shipped_date)>=14&&!r.feedback).forEach(r=>ids.add(r.sample_id))
+  const el=document.getElementById('badge-samples')
+  if(el){el.textContent=ids.size;el.style.display=ids.size>0?'flex':'none'}
+}
 function updatePurchaseBadge(){
   const EXCLUDED=['draft','cancelled','rejected']
   const linkedPoIds=new Set(shipmentPurchaseOrders.map(x=>String(x.purchase_order_id)))
@@ -3878,6 +3896,7 @@ function updateNavBadges(){
   setB('badge-customers',customers.filter(c=>customerStatus(c)==='overdue').length)
   setB('badge-complaints',complaints.filter(c=>c.status!=='resolved').length)
   updatePurchaseBadge()
+  updateSampleBadge()
 }
 function updateOverdueAlert(){updateNavBadges()}
 function updateProductOverdueAlert(){updateNavBadges()}
