@@ -2752,7 +2752,10 @@ function openShipmentModal(id){
       '<button class="btn btn-ghost btn-sm" style="height:32px;flex-shrink:0" onclick="attachPurchaseToShipment()">+ 掛入</button>'+
     '</div>'+
     (linkedPOs.length
-      ? linkedPOs.map(p=>'<div class="row" style="cursor:pointer" onclick="openPurchaseModal(\''+esc(String(p.id))+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(String(p.id))+'</div><div style="font-size:11px;color:#888">'+esc(resolvePurchaseSupplierName(p)||'—')+' · '+esc(p.status||'')+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();detachPurchaseFromShipment('+id+',\''+esc(String(p.id))+'\')">移除</button></div>').join('')
+      ? linkedPOs.map(p=>{
+          const poLabel=esc(String(p.id))+(p.accounting_no?' / 會計單號：'+esc(p.accounting_no):'')
+          return '<div class="row" style="cursor:pointer" onclick="openPurchaseModal(\''+esc(String(p.id))+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+poLabel+'</div><div style="font-size:11px;color:#888">'+esc(resolvePurchaseSupplierName(p)||'—')+' · '+esc(p.status||'')+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();detachPurchaseFromShipment('+id+',\''+esc(String(p.id))+'\')">移除</button></div>'
+        }).join('')
       : '<div style="font-size:12px;color:#aaa;padding:4px 0">尚未關聯採購單</div>')
   html+='<div class="divider"></div>'+
     '<div class="section-title" style="margin-bottom:8px">文件</div>'+
