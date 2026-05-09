@@ -1496,8 +1496,7 @@ function renderSamples(){
   })
   if(sum)sum.textContent=list.length+' 筆樣品'
   if(!list.length){el.innerHTML='<div class="loading">尚無樣品資料</div>';return}
-  const _now=new Date()
-  const _dd=d=>Math.floor((_now-new Date(d))/(1000*60*60*24))
+  const _dd=d=>countWorkdays(d,new Date())
   const _badIds=new Set()
   sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='pending'&&r.status!=='received'&&r.requested_date&&_dd(r.requested_date)>=7).forEach(r=>_badIds.add(r.sample_id))
   sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='shipped'&&r.status!=='received'&&r.shipped_date&&_dd(r.shipped_date)>=14).forEach(r=>_badIds.add(r.sample_id))
@@ -1827,7 +1826,7 @@ async function submitShipFeedback(shipId){
 function scanDashboardItems(){
   const today=new Date()
   const todayStr=today.toISOString().slice(0,10)
-  const daysDiff=(dateStr)=>Math.floor((today-new Date(dateStr))/(1000*60*60*24))
+  const daysDiff=(dateStr)=>countWorkdays(dateStr,today)
   const items=[]
   inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').forEach(i=>{
     items.push({group:'inquiry',label:'詢價逾期未回',desc:i.product+(i.supplier?' · '+i.supplier:''),days:inquiryPendingDays(i),urgency:'high',id:i.id})
@@ -3858,11 +3857,21 @@ async function rejectOrder(orderId){
 
 function daysFromNow(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 
+function countWorkdays(startDate,endDate){
+  if(!startDate)return 0
+  const s=new Date(startDate);if(isNaN(s.getTime()))return 0
+  const e=endDate instanceof Date?new Date(endDate):new Date()
+  const cur=new Date(s);cur.setHours(0,0,0,0)
+  const end=new Date(e);end.setHours(0,0,0,0)
+  let count=0
+  while(cur<end){const d=cur.getDay();if(d!==0&&d!==6)count++;cur.setDate(cur.getDate()+1)}
+  return count
+}
 function inquiryPendingDays(i){
   if(!['pending','asked'].includes(i?.status))return 0
   const base=i?.updated_at||i?.created_at
   if(!base)return 0
-  return Math.floor((new Date()-new Date(base))/(1000*60*60*24))
+  return countWorkdays(base,new Date())
 }
 function inquiryFollowupLevel(i){
   if(!['pending','asked'].includes(i?.status))return 'ok'
@@ -3873,8 +3882,7 @@ function inquiryFollowupLevel(i){
 }
 
 function updateSampleBadge(){
-  const now=new Date()
-  const dd=d=>Math.floor((now-new Date(d))/(1000*60*60*24))
+  const dd=d=>countWorkdays(d,new Date())
   const ids=new Set()
   sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='pending'&&r.status!=='received'&&r.requested_date&&dd(r.requested_date)>=7).forEach(r=>ids.add(r.sample_id))
   sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='shipped'&&r.status!=='received'&&r.shipped_date&&dd(r.shipped_date)>=14).forEach(r=>ids.add(r.sample_id))
