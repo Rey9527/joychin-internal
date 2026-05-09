@@ -1504,6 +1504,7 @@ function renderSamples(){
       '<div style="flex:1;min-width:0">'+
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
       '<span style="font-size:13px;font-weight:500">'+s.product_name+'</span>'+
+      (s.sample_no?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(s.sample_no)+'</span>':'')+
       '<span style="font-size:11px;color:#aaa">庫存 '+(s.stock_qty??'—')+' '+(s.unit||'')+'</span>'+
       '</div>'+
       '<div style="font-size:12px;color:#666">'+(sup?sup.company:'—')+(riCount?' · 索取 '+riCount+' 筆':'')+(soCount?' · 寄出 '+soCount+' 筆':'')+'</div>'+
@@ -1553,12 +1554,19 @@ function smInqChange(){
   if(inq.spec){const el=document.getElementById('sm-spec');if(el)el.value=inq.spec}
   if(inq.supplier){const el=document.getElementById('sm-supplier');if(el)el.value=inq.supplier}
 }
+function generateSampleNo(){
+  const d=new Date()
+  const ym=d.getFullYear().toString()+(d.getMonth()+1).toString().padStart(2,'0')
+  const seq=(samples.filter(s=>s.sample_no&&s.sample_no.startsWith('SMP-'+ym)).length+1).toString().padStart(3,'0')
+  return 'SMP-'+ym+'-'+seq
+}
 async function _createSample(){
   const name=document.getElementById('sm-name')?.value.trim()
   if(!name){showToast('請填寫產品名稱','error');return}
   const supCo=document.getElementById('sm-supplier')?.value||null
   const supId=supCo?suppliers.find(s=>s.company===supCo)?.id||null:null
   const{error}=await sb.from('samples').insert({
+    sample_no:generateSampleNo(),
     product_name:name,
     spec:document.getElementById('sm-spec')?.value.trim()||null,
     supplier_id:supId||null,
@@ -1582,7 +1590,7 @@ function _renderSampleModal(){
   const today=new Date().toISOString().slice(0,10)
 
   document.getElementById('modal-sample-hd').innerHTML=
-    '<div style="flex:1"><div style="font-size:15px;font-weight:600">'+s.product_name+'</div>'+
+    '<div style="flex:1"><div style="font-size:15px;font-weight:600">'+s.product_name+(s.sample_no?' <span style="font-size:11px;color:#aaa;font-family:monospace;font-weight:400">'+esc(s.sample_no)+'</span>':'')+'</div>'+
     '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+';margin-top:4px">'+st.label+'</span></div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-sample\')">×</button>'
 
