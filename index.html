@@ -3895,6 +3895,38 @@ function populatePurchaseSupplierFilter(){
   sel.innerHTML='<option value="">全部供應商</option>'+cos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
 }
 
+function poShipmentBadge(poId,poStatus){
+  const EXCLUDED=['draft','cancelled','rejected']
+  const linkedIds=shipmentPurchaseOrders
+    .filter(x=>String(x.purchase_order_id)===String(poId))
+    .map(x=>String(x.shipment_id))
+  const linked=shipments.filter(s=>linkedIds.includes(String(s.id)))
+  if(!linked.length){
+    if(!EXCLUDED.includes(poStatus))
+      return '<span class="badge" style="background:#FFF0E0;color:#A55A00;border:1px solid #A55A00">未歸船運</span>'
+    return ''
+  }
+  const count=linked.length
+  const sorted=[...linked].sort((a,b)=>(b.etd||b.created_at||'').localeCompare(a.etd||a.created_at||''))
+  const latest=sorted[0]
+  const etdStr=latest.etd?latest.etd.slice(0,10):''
+  const prefix='🚢 '+count+' 批次'+(etdStr?' · ETD '+etdStr:'')
+  const allDone=linked.every(s=>s.status==='delivered'||s.status==='completed')
+  const anyTransit=linked.some(s=>s.status==='in_transit')
+  const anyBooked=linked.some(s=>s.status==='booked'||s.status==='planned')
+  let label,color,bg
+  if(allDone){
+    label=prefix+' · ✓ 已到港';color='#0F6E56';bg='#E1F5EE'
+  }else if(anyTransit){
+    const eta=(sorted.find(s=>s.status==='in_transit')?.eta||'')
+    label=prefix+' · 🚢 在途中'+(eta?' · ETA '+eta.slice(0,10):'');color='#185FA5';bg='#E6F1FB'
+  }else if(anyBooked){
+    label=prefix+' · 已訂艙';color='#5F5E5A';bg='#F1EFE8'
+  }else{
+    label=prefix;color='#5F5E5A';bg='#F1EFE8'
+  }
+  return '<span class="badge" style="background:'+bg+';color:'+color+';border:1px solid '+color+'">'+label+'</span>'
+}
 function renderPurchaseOrders(){
   const el=document.getElementById('purchase-list')
   const sum=document.getElementById('purchase-summary')
@@ -3914,6 +3946,7 @@ function renderPurchaseOrders(){
     const st=PURCHASE_STATUS.find(s=>s.id===p.status)||{label:p.status,color:'#888',bg:'#f0f0f0'}
     const d=p.created_at?new Date(p.created_at).toLocaleDateString('zh-TW'):''
     const supplierName=resolvePurchaseSupplierName(p)
+    const shBadge=poShipmentBadge(p.id,p.status)
     return '<div class="row" onclick="openPurchaseModal(\''+p.id+'\')">'+
       '<div style="flex:1;min-width:0">'+
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'+
@@ -3923,6 +3956,7 @@ function renderPurchaseOrders(){
         '<div style="font-size:12px;font-weight:500">'+(supplierName||'—')+'</div>'+
         (()=>{const its=purchaseOrderItems.filter(i=>i.po_id===p.id);return its.length?'<div style="font-size:11px;color:#555;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+its.map(i=>i.product_name).join('、')+'</div>':''})()+
         '<div style="font-size:10px;color:#888">'+p.source+' · '+d+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div>'+
+        (shBadge?'<div style="margin-top:4px">'+shBadge+'</div>':'')+
       '</div>'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
     '</div>'
