@@ -1618,7 +1618,8 @@ function _renderSampleModal(){
   html+='<div class="divider"></div>'
 
   // Section 3: Shipments out
-  const custOpts=customers.map(c=>'<option value="'+c.id+'">'+c.company+'</option>').join('')
+  const custCosShip=[...new Set(customers.map(c=>c.company).filter(Boolean))].sort()
+  const custOpts=custCosShip.map(co=>{const c=customers.find(x=>x.company===co);return '<option value="'+c.id+'">'+esc(co)+'</option>'}).join('')
   html+=
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
     '<div class="section-title" style="margin-bottom:0">寄出記錄（給客戶）</div>'+
@@ -3121,7 +3122,8 @@ function openOrderModal(id){
     _pendingOrderItems=[]
     const newId=generateOrderId()
     const defaultOrderCurrency=getSettingValue('default_quote_currency','USD')
-    const custOpts=customers.map(c=>'<option value="'+c.id+'">'+c.company+'</option>').join('')
+    const custCos=[...new Set(customers.map(c=>c.company).filter(Boolean))].sort()
+    const custOpts=custCos.map(co=>{const c=customers.find(x=>x.company===co);return '<option value="'+c.id+'">'+esc(co)+'</option>'}).join('')
     const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
     const supOpts=supCos.map(c=>'<option>'+c+'</option>').join('')
     document.getElementById('modal-order-hd').innerHTML=
