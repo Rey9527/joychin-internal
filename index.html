@@ -2730,7 +2730,7 @@ function openShipmentModal(id){
         const btnM='<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 8px'+(status==='missing'?';background:#fdf0f0;color:#A32D2D':'')+'" onclick="setShipmentItemStatus('+id+','+item.id+',\'missing\')">✗ 短缺</button>'
         return '<tr>'+
           '<td style="padding:8px;border-bottom:1px solid #f3f3ef;font-weight:500">'+esc(item.product_name||'—')+(item.spec?'<div style="font-size:11px;color:#aaa">'+esc(item.spec)+'</div>':'')+'</td>'+
-          '<td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right;white-space:nowrap">'+esc(String(item.qty||''))+' '+esc(item.unit||'')+'</td>'+
+          '<td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right;white-space:nowrap">'+(()=>{const q=parseFloat(item.qty||0);const w=parseFloat(item.width_m||0);const qFmt=q.toLocaleString('en');return w>0?qFmt+'m（'+Math.round(q*w).toLocaleString('en')+' m²）':qFmt+'m'})()+'</td>'+
           '<td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:center;white-space:nowrap">'+
             '<span style="font-size:11px;'+badgeStyle+';margin-right:8px">'+badgeText+'</span>'+btnR+' '+btnM+
           '</td></tr>'
