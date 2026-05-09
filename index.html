@@ -2851,11 +2851,13 @@ function _shDocStoragePath(raw){
 async function previewShipmentDoc(raw,fileName){
   const filePath=_shDocStoragePath(raw)
   if(!filePath){showToast('找不到檔案路徑','error');return}
+  document.getElementById('modal-doc-preview-title').textContent=fileName||filePath
+  const frame=document.getElementById('modal-doc-preview-frame')
+  frame.src=''
+  document.getElementById('modal-doc-preview').classList.add('open')
   const{data,error}=await sb.storage.from('shipment-docs').createSignedUrl(filePath,3600)
   if(error){showToast('無法產生預覽連結：'+error.message,'error');return}
-  document.getElementById('modal-doc-preview-title').textContent=fileName||filePath
-  document.getElementById('modal-doc-preview-frame').src=data.signedUrl
-  document.getElementById('modal-doc-preview').classList.add('open')
+  frame.src=data.signedUrl
 }
 async function downloadShipmentDoc(raw){
   const filePath=_shDocStoragePath(raw)
