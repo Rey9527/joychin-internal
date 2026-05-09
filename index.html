@@ -2799,6 +2799,7 @@ async function renderShipmentDocs(shipmentId){
       '<span class="badge" style="background:'+bg+';color:'+clr+';border:1px solid '+clr+';white-space:nowrap;flex-shrink:0">'+esc(label)+'</span>'+
       '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.file_name)+'</div>'+
       '<div style="font-size:10px;color:#aaa">'+date+(d.uploaded_by?' · '+esc(d.uploaded_by):'')+(size?' · '+size:'')+'</div></div>'+
+      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="previewShipmentDoc(\''+esc(d.file_url||'')+'\')">預覽</button>'+
       '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="downloadShipmentDoc(\''+esc(d.file_url||'')+'\')">下載</button>'+
       '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;flex-shrink:0" onclick="deleteShipmentDoc('+d.id+',\''+esc(d.file_url||'')+'\',\''+shipmentId+'\')">刪除</button>'+
     '</div>'
@@ -2829,7 +2830,21 @@ async function uploadShipmentDocument(shipmentId){
   renderShipmentDocs(shipmentId)
 }
 
-async function downloadShipmentDoc(filePath){
+function _shDocStoragePath(raw){
+  if(!raw)return raw
+  const marker='/shipment-docs/'
+  const idx=raw.indexOf(marker)
+  return idx>=0?raw.slice(idx+marker.length):raw
+}
+async function previewShipmentDoc(raw){
+  const filePath=_shDocStoragePath(raw)
+  if(!filePath){showToast('找不到檔案路徑','error');return}
+  const{data,error}=await sb.storage.from('shipment-docs').createSignedUrl(filePath,3600)
+  if(error){showToast('無法產生預覽連結：'+error.message,'error');return}
+  window.open(data.signedUrl,'_blank')
+}
+async function downloadShipmentDoc(raw){
+  const filePath=_shDocStoragePath(raw)
   if(!filePath){showToast('找不到檔案路徑','error');return}
   const{data,error}=await sb.storage.from('shipment-docs').createSignedUrl(filePath,3600)
   if(error){showToast('無法產生下載連結：'+error.message,'error');return}
