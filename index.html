@@ -2162,6 +2162,7 @@ function renderOrders(){
       '<div style="flex:1;min-width:0">'+
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
       '<span style="font-size:13px;font-weight:500">'+o.id+'</span>'+
+      (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">客戶單號：'+esc(o.customer_ref_no)+'</span>':'')+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
       (o.source==='verbal'&&(o.approval_status||'none')==='none'?'<span class="badge" style="background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D">待審批</span>':'')+
       '</div>'+
@@ -3140,7 +3141,7 @@ function openOrderModal(id){
       '<div><label>運輸方式</label><select id="or-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS)+'</select></div>'+
       '<div><label>快遞單號</label><input id="or-tracking" /></div>'+
       '<div><label>訂單來源</label><select id="or-source" onchange="onOrderSourceChange()"><option value="confirmed">confirmed — 正式訂單</option><option value="verbal">verbal — 口頭承諾</option></select></div>'+
-      '<div></div>'+
+      '<div><label>客戶訂單號</label><input id="noi-customer-ref" type="text" placeholder="客戶系統的訂單編號（選填）" /></div>'+
       '</div>'+
       '<div id="or-verbal-warn" style="display:none;background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:10px">⚠ 口頭承諾訂單需要主管審批後才能建立採購單</div>'+
       '<div style="margin-bottom:14px"><label>備註</label><textarea id="or-notes"></textarea></div>'+
@@ -3197,7 +3198,8 @@ async function _createOrder(){
     notes:document.getElementById('or-notes')?.value.trim()||null,
     status:'confirmed',total_amount:total,
     source:document.getElementById('or-source')?.value||'confirmed',
-    approval_status:'none'
+    approval_status:'none',
+    customer_ref_no:document.getElementById('noi-customer-ref')?.value.trim()||null
   })
   if(error){showToast('建立失敗：'+error.message,'error');return}
   const {error:itemError}=await sb.from('order_items').insert(_pendingOrderItems.map(it=>{
@@ -3364,6 +3366,7 @@ function _renderOrderModal(){
     '<div><label>實際到貨日</label><input id="ore-actual-del" type="date" value="'+(o.actual_delivery||'')+'" /></div>'+
     '<div><label>運輸方式</label><select id="ore-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS,o.transport_method)+'</select></div>'+
     '<div><label>快遞單號</label><input id="ore-tracking" value="'+esc(o.tracking_no||'')+'" /></div>'+
+    '<div><label>客戶訂單號</label><input id="oi-customer-ref" type="text" placeholder="客戶系統的訂單編號（選填）" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
     '</div>'+
     '<div style="margin-bottom:12px"><label>備註</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
     '<div style="display:flex;gap:8px;margin-bottom:4px">'+
@@ -3552,7 +3555,8 @@ async function saveOrderBasic(){
     actual_delivery:document.getElementById('ore-actual-del')?.value||null,
     transport_method:document.getElementById('ore-transport')?.value||null,
     tracking_no:document.getElementById('ore-tracking')?.value.trim()||null,
-    notes:document.getElementById('ore-notes')?.value.trim()||null
+    notes:document.getElementById('ore-notes')?.value.trim()||null,
+    customer_ref_no:document.getElementById('oi-customer-ref')?.value.trim()||null
   }).eq('id',selectedOrderId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
   _isDirty=false
