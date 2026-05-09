@@ -49,7 +49,6 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .badge { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-.overdue-tag { color: #A32D2D; font-size: 11px; font-weight: 500; }
 .row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid #e5e5e0; border-radius: 4px; cursor: pointer; margin-bottom: 6px; background: #fff; transition: all 0.12s; }
 .row:hover { border-color: #0F6E56; background: #f8fffc; }
 .row.overdue { border-left: 3px solid #EF4444; background: #FEF2F2; }
@@ -4994,7 +4993,7 @@ function inqRowHtml(i){
     '<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;flex-wrap:wrap">'+
     '<span style="font-size:10px;color:#aaa;font-family:monospace">'+i.id+'</span>'+
       '<span style="font-size:13px;font-weight:500">'+displayCustomerName(i.customer)+'</span>'+
-      (overdue?'<span class="overdue-tag">⚠ 待追詢</span>':warn?'<span class="badge" style="background:#FFF6DA;color:#8A6500;border:1px solid #D2B14A">提醒中</span>':'')+
+      (overdue?'<span style="background:#EF4444;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px">⚠ 待追詢</span>':warn?'<span class="badge" style="background:#FFF6DA;color:#8A6500;border:1px solid #D2B14A">提醒中</span>':'')+
     '</div>'+
     '<div style="font-size:12px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">'+i.product+'</div>'+
     '<div style="font-size:11px;color:#aaa">'+(i.supplier?i.supplier.split('—')[0].trim():'—')+(['pending','asked'].includes(i.status)?' · '+inquiryPendingDays(i)+' 天未回覆':'')+'</div>'+
