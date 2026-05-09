@@ -1523,7 +1523,7 @@ function openSampleModal(id){
   document.getElementById('modal-sample').classList.add('open')
   if(id===null){
     // 新增模式
-    const supOpts=suppliers.map(s=>'<option value="'+s.id+'">'+s.company+'</option>').join('')
+    const supOpts=[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort().map(co=>'<option value="'+esc(co)+'">'+esc(co)+'</option>').join('')
     document.getElementById('modal-sample-hd').innerHTML=
       '<div style="font-size:14px;font-weight:600">新增樣品</div>'+
       '<button class="modal-close" onclick="closeModal(\'modal-sample\')">×</button>'
@@ -1547,11 +1547,12 @@ function openSampleModal(id){
 async function _createSample(){
   const name=document.getElementById('sm-name')?.value.trim()
   if(!name){showToast('請填寫產品名稱','error');return}
-  const supId=document.getElementById('sm-supplier')?.value||null
+  const supCo=document.getElementById('sm-supplier')?.value||null
+  const supId=supCo?suppliers.find(s=>s.company===supCo)?.id||null:null
   const{error}=await sb.from('samples').insert({
     product_name:name,
     spec:document.getElementById('sm-spec')?.value.trim()||null,
-    supplier_id:supId?parseInt(supId):null,
+    supplier_id:supId||null,
     stock_qty:parseFloat(document.getElementById('sm-qty')?.value||0),
     unit:document.getElementById('sm-unit')?.value.trim()||null,
     from_inquiry_id:document.getElementById('sm-inq')?.value.trim()||null,
