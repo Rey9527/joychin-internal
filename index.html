@@ -1329,6 +1329,7 @@ let _isDirty=false
 let _dbCustomerRange='thisMonth'
 let _qPendingItems={},_qPendingHeader={}
 let _pendingQuoteItems=[],_qPendingItemSeq=0,_draftNewItem=null
+let _qiProfitQtys=[1000,5000,10000,50000,100000],_qSimQtys={}
 let _selectedQiId=null
 let _pendingOrderItems=[]
 let _pendingPurchaseLinks=[]
@@ -5451,7 +5452,7 @@ function clearQuoteFilters(){
 }
 
 async function openQuoteModal(id){
-  selectedQuoteId=id;_qPendingItems={};_qPendingHeader={};_pendingQuoteItems=[];_qPendingItemSeq=0
+  selectedQuoteId=id;_qPendingItems={};_qPendingHeader={};_pendingQuoteItems=[];_qPendingItemSeq=0;_qSimQtys={}
   await loadQuotes()
   renderQuoteModalHd();renderQuoteModalBd()
   document.getElementById('modal-quote').classList.add('open')
@@ -5671,6 +5672,7 @@ function renderQuoteModalBd(){
     '</div>'+
     (items.length||_pendingQuoteItems.length?itemsHtml+pendingItemsHtml:'<div style="font-size:12px;color:#aaa;margin-bottom:10px">尚無品項</div>')+
     addItemSection+
+    (items.length?buildQSimSection(items):'')+
     sampleShipForm+
     '<div class="divider"></div>'+
     sampleReviewCheck+
@@ -5951,8 +5953,10 @@ function openQuoteItemModal(itemId){
     '<div><label>交期</label><input id="qi-modal-lead" value="'+(it.lead_time||'')+'" placeholder="例：30天" '+(editable?'onchange="qiModalChange(\'lead_time\',this.value)"':ro)+' /></div>'+
     '</div>'+
     '<div style="font-size:10px;color:'+(supplierNeedsCustoms(it.supplier_id)?'#666':'#0F6E56')+';margin-bottom:12px">'+getSupplierCustomsHint(it.supplier_id)+'</div>'+
+    '<div id="qi-profit-section"></div>'+
     (editable?'<div class="modal-foot"><button class="btn btn-primary btn-sm" onclick="saveQuoteItem()">儲存</button><button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote-item\')">取消</button></div>':'')
   document.getElementById('modal-quote-item').classList.add('open')
+  renderQiProfitSection()
 }
 function qiModalChange(field,value){
   const it=quoteItems.find(x=>String(x.id)===_selectedQiId)
@@ -5970,6 +5974,7 @@ function qiModalChange(field,value){
     _qPendingItems[_selectedQiId].margin_pct=mgn
     const mgnEl=document.getElementById('qi-modal-mgn')
     if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent='利潤率 '+mgn.toFixed(2)+'%'}
+    renderQiProfitSection()
   }
 }
 function qiModalCustomsChange(checked){
@@ -5986,6 +5991,7 @@ function qiModalCustomsChange(checked){
     _qPendingItems[_selectedQiId].margin_pct=mgn
     const mgnEl=document.getElementById('qi-modal-mgn')
     if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent='利潤率 '+mgn.toFixed(2)+'%'}
+    renderQiProfitSection()
   }
 }
 function qiModalFpChange(fp){
@@ -6002,6 +6008,7 @@ function qiModalFpChange(fp){
   _qPendingItems[_selectedQiId].margin_pct=mgn
   const mgnEl=document.getElementById('qi-modal-mgn')
   if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent='利潤率 '+mgn.toFixed(2)+'%'}
+  renderQiProfitSection()
 }
 async function saveQuoteItem(){
   if(!_selectedQiId||!_qPendingItems[_selectedQiId])return
@@ -6155,6 +6162,145 @@ function qAddManualItem(){
   })
 }
 
+function renderQiProfitSection(){
+  const el=document.getElementById('qi-profit-section')
+  if(!el)return
+  const it=quoteItems.find(x=>String(x.id)===_selectedQiId)
+  if(!it)return
+  const cp=parseFloat(it.cost_price||0)
+  const fp=it.final_price!=null?parseFloat(it.final_price):null
+  if(!cp||fp==null){el.innerHTML='';return}
+  const applyC=shouldApplyCustoms(it)
+  const costAfterC=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
+  const profitPerUnit=fp-costAfterC
+  const pu=it.pricing_unit||'m2'
+  const wm=parseFloat(it.width_m||0)
+  const cur=it.cost_currency||'USD'
+  const needWidth=pu==='m2'&&!wm
+  const qtys=_qiProfitQtys
+  const profits=qtys.map(q=>needWidth?null:(pu==='m2'?profitPerUnit*wm*q:profitPerUnit*q))
+  const maxAbs=Math.max(...profits.filter(p=>p!=null).map(p=>Math.abs(p)),1)
+  const BAR_MAX=72
+  const fmtQty=q=>q>=1000?(q/1000)+'k':String(q)
+  const bars=qtys.map((q,i)=>{
+    const p=profits[i]
+    if(p==null)return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0">'+
+      '<div style="font-size:9px;color:#ccc">—</div>'+
+      '<div style="width:60%;height:4px;background:#eee;border-radius:2px;margin-bottom:2px"></div>'+
+      '<div style="font-size:9px;color:#aaa">'+fmtQty(q)+'m</div>'+
+      '<button onclick="qiRemoveQtyBreakpoint('+i+')" style="background:none;border:none;color:#ddd;cursor:pointer;font-size:10px;padding:0;line-height:1">×</button></div>'
+    const isNeg=p<0
+    const barH=Math.max(Math.round(Math.abs(p)/maxAbs*BAR_MAX),2)
+    const barColor=isNeg?'#e55':'#4A7C2F'
+    const textColor=isNeg?'#e55':'#2E5A1A'
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0">'+
+      '<div style="font-size:9px;font-weight:600;color:'+textColor+';white-space:nowrap;text-align:center">'+(p>=0?'+':'')+Math.round(p).toLocaleString('en')+'</div>'+
+      '<div style="width:70%;background:'+barColor+';height:'+barH+'px;border-radius:2px 2px 0 0"></div>'+
+      '<div style="font-size:9px;color:#888;white-space:nowrap">'+fmtQty(q)+'m</div>'+
+      '<button onclick="qiRemoveQtyBreakpoint('+i+')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:10px;padding:0;line-height:1" title="移除">×</button></div>'
+  }).join('')
+  el.innerHTML=
+    '<div style="border-top:1px solid #e5e5e0;margin-top:12px;padding:12px 0 4px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+    '<div style="font-size:12px;font-weight:500;color:#444">利潤試算 <span style="font-size:10px;font-weight:400;color:#888">('+cur+')</span>'+
+    (needWidth?'<span style="font-size:10px;color:#e88a00;margin-left:6px">⚠ 需填寬幅</span>':'')+'</div>'+
+    '<div style="display:flex;gap:4px;align-items:center">'+
+    '<input type="number" id="qi-new-bp" placeholder="新增數量" min="1" style="width:90px;font-size:11px;padding:3px 6px;border:1px solid #e5e5e0;border-radius:4px" />'+
+    '<button class="btn btn-ghost btn-sm" onclick="qiAddQtyBreakpoint()" style="font-size:11px;padding:2px 8px">+</button>'+
+    '</div></div>'+
+    '<div style="display:flex;align-items:flex-end;gap:6px;height:'+(BAR_MAX+40)+'px;padding-bottom:4px">'+bars+'</div>'+
+    '</div>'
+}
+function qiAddQtyBreakpoint(){
+  const v=parseFloat(document.getElementById('qi-new-bp')?.value||0)
+  if(!v||v<=0){showToast('請輸入有效數量','error');return}
+  if(_qiProfitQtys.includes(v)){showToast('此數量已存在','error');return}
+  _qiProfitQtys=[..._qiProfitQtys,v].sort((a,b)=>a-b)
+  renderQiProfitSection()
+}
+function qiRemoveQtyBreakpoint(idx){
+  _qiProfitQtys=_qiProfitQtys.filter((_,i)=>i!==idx)
+  renderQiProfitSection()
+}
+function buildQSimSection(items){
+  const eligible=items.filter(it=>parseFloat(it.cost_price||0)>0&&it.final_price!=null)
+  if(!eligible.length)return ''
+  const COLORS=['#4A7C2F','#2196F3','#9C27B0','#FF9800','#00BCD4','#E91E63','#795548']
+  const rows=eligible.map((it,i)=>{
+    const qty=_qSimQtys[it.id]||''
+    const cp=parseFloat(it.cost_price||0)
+    const fp=parseFloat(it.final_price)
+    const applyC=shouldApplyCustoms(it)
+    const costAfterC=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
+    const profitPer=fp-costAfterC
+    const pu=it.pricing_unit||'m2'
+    const wm=parseFloat(it.width_m||0)
+    const cur=it.cost_currency||'USD'
+    let profitStr=''
+    if(qty&&parseFloat(qty)>0){
+      const q=parseFloat(qty)
+      const profit=pu==='m2'&&wm>0?profitPer*wm*q:profitPer*q
+      const isNeg=profit<0
+      profitStr='<span style="font-size:11px;font-weight:600;color:'+(isNeg?'#e55':'#0F6E56')+';white-space:nowrap">'+(profit>=0?'+':'')+Math.round(profit).toLocaleString('en')+' '+cur+'</span>'
+    }
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f3f3ef">'+
+      '<div style="width:8px;height:8px;border-radius:50%;background:'+COLORS[i%COLORS.length]+';flex-shrink:0"></div>'+
+      '<div style="flex:1;min-width:0;font-size:11px;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.product)+'</div>'+
+      '<input type="number" value="'+qty+'" placeholder="數量(m)" min="0" step="100" style="width:90px;font-size:11px;padding:3px 6px;border:1px solid #e5e5e0;border-radius:4px" oninput="qSimQtyChange(\''+it.id+'\',parseFloat(this.value)||0)" />'+
+      '<div style="min-width:90px;text-align:right">'+profitStr+'</div>'+
+      '</div>'
+  }).join('')
+  return '<div style="border-top:1px solid #e5e5e0;margin-top:8px;padding-top:10px">'+
+    '<div class="section-title" style="margin-bottom:8px">整張單試算</div>'+
+    rows+
+    '<div id="q-sim-results" style="padding-top:8px">'+buildQSimResults(eligible)+'</div>'+
+    '</div>'
+}
+function buildQSimResults(eligible){
+  const COLORS=['#4A7C2F','#2196F3','#9C27B0','#FF9800','#00BCD4','#E91E63','#795548']
+  const byCur={}
+  eligible.forEach((it,i)=>{
+    const qty=parseFloat(_qSimQtys[it.id]||0)
+    if(!qty)return
+    const cp=parseFloat(it.cost_price||0)
+    const fp=parseFloat(it.final_price)
+    const applyC=shouldApplyCustoms(it)
+    const costAfterC=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
+    const profitPer=fp-costAfterC
+    const pu=it.pricing_unit||'m2'
+    const wm=parseFloat(it.width_m||0)
+    const cur=it.cost_currency||'USD'
+    const profit=pu==='m2'&&wm>0?profitPer*wm*qty:profitPer*qty
+    if(!byCur[cur])byCur[cur]={total:0,items:[]}
+    byCur[cur].total+=profit
+    byCur[cur].items.push({product:it.product,profit,color:COLORS[i%COLORS.length]})
+  })
+  const currencies=Object.keys(byCur)
+  if(!currencies.length)return '<div style="font-size:11px;color:#aaa">輸入預計數量以試算利潤</div>'
+  return currencies.map(cur=>{
+    const{total,items}=byCur[cur]
+    const posItems=items.filter(x=>x.profit>0)
+    const totalPos=posItems.reduce((s,x)=>s+x.profit,0)
+    const bar=totalPos>0?'<div style="height:10px;border-radius:5px;overflow:hidden;background:#f0f0eb;display:flex;margin-top:4px">'+
+      posItems.map(x=>'<div style="height:100%;width:'+Math.round(x.profit/totalPos*100)+'%;background:'+x.color+'" title="'+esc(x.product)+'"></div>').join('')+
+      '</div>':''
+    const isNeg=total<0
+    return '<div style="margin-bottom:6px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center">'+
+      '<span style="font-size:11px;color:#666">預計總利潤</span>'+
+      '<span style="font-size:13px;font-weight:700;color:'+(isNeg?'#e55':'#0F6E56')+'">'+(total>=0?'+':'')+Math.round(total).toLocaleString('en')+' '+cur+'</span>'+
+      '</div>'+bar+'</div>'
+  }).join('')
+}
+function qSimQtyChange(itemId,qty){
+  _qSimQtys[itemId]=qty
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId)
+  if(!h)return
+  const items=quoteItems.filter(it=>it.header_id===h.id)
+  const eligible=items.filter(it=>parseFloat(it.cost_price||0)>0&&it.final_price!=null)
+  const el=document.getElementById('q-sim-results')
+  if(el)el.innerHTML=buildQSimResults(eligible)
+}
 function openNewPendingItemEdit(data){
   _draftNewItem=data
   document.getElementById('npi-overlay')?.remove()
