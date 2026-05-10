@@ -3910,7 +3910,7 @@ function openPurchaseModal(id, prefill={}){
         ? linkedShipments.map(sh=>{
             const st=shipmentStatusObj(sh.status)
             const meta=[sh.etd?('ETD '+sh.etd):null,sh.eta?('ETA '+sh.eta):null].filter(Boolean).join(' · ')
-            return '<div class="row" style="margin-bottom:8px"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">'+esc(sh.shipment_no||'—')+'</div>'+(meta?'<div style="font-size:11px;color:#888;margin-top:2px">'+meta+'</div>':'')+'</div><span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span><button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="closeModal(\'modal-purchase\');switchTab(\'shipments\');setTimeout(()=>openShipmentModal('+sh.id+'),80)">→ 前往船運</button></div>'
+            return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #e5e5e0;border-radius:4px;background:#fff;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">'+esc(sh.shipment_no||'—')+'</div>'+(meta?'<div style="font-size:11px;color:#888;margin-top:2px">'+meta+'</div>':'')+'</div><span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span><button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="closeModal(\'modal-purchase\');switchTab(\'shipments\');setTimeout(()=>openShipmentModal('+sh.id+'),80)">→ 前往船運</button></div>'
           }).join('')
         : '<div style="font-size:12px;color:#aaa;padding:4px 0 10px">尚未安排船運</div>')+
       '</div>'
