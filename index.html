@@ -5901,6 +5901,11 @@ function openQuoteItemModal(itemId){
   if(!it)return
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId)
   const editable=h?.status==='draft'
+  if(editable&&!it.pricing_unit){
+    it.pricing_unit='m2'
+    if(!_qPendingItems[_selectedQiId])_qPendingItems[_selectedQiId]={}
+    _qPendingItems[_selectedQiId].pricing_unit='m2'
+  }
   const ro=' readonly style="background:#f5f5f2;color:#666;cursor:default"'
   const dis=' disabled style="background:#f5f5f2;color:#666"'
   const cp=parseFloat(it.cost_price||0)
@@ -5934,7 +5939,7 @@ function openQuoteItemModal(itemId){
     '<input type="text" value="'+(it.width_m!=null?Math.round(it.width_m*1000)+'mm':'—')+'"'+ro+' /></div>'+
     '<div><label>計價單位（成本）</label><select '+(editable?'onchange="qiModalChange(\'pricing_unit\',this.value)"':dis)+'>'+
     '<option value="">—</option>'+
-    '<option value="m2"'+(it.pricing_unit==='m2'?' selected':'')+'>平方米 m²</option>'+
+    '<option value="m2"'+(!it.pricing_unit||it.pricing_unit==='m2'?' selected':'')+'>平方米 m²</option>'+
     '<option value="m"'+(it.pricing_unit==='m'?' selected':'')+'>米 m</option>'+
     '</select></div>'+
     '<div><label>報給客戶的單位</label><select '+(editable?'onchange="qiModalChange(\'customer_pricing_unit\',this.value)"':dis)+'>'+
@@ -6001,6 +6006,9 @@ function qiModalFpChange(fp){
 async function saveQuoteItem(){
   if(!_selectedQiId||!_qPendingItems[_selectedQiId])return
   const changes=_qPendingItems[_selectedQiId]
+  const it=quoteItems.find(x=>String(x.id)===_selectedQiId)
+  const pu='pricing_unit' in changes?changes.pricing_unit:it?.pricing_unit
+  if(!pu){showToast('請選擇計價單位','error');return}
   const{error}=await sb.from('quote_items').update(changes).eq('id',_selectedQiId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
   delete _qPendingItems[_selectedQiId]
