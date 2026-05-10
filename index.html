@@ -1328,7 +1328,7 @@ let _pendingInq={}
 let _isDirty=false
 let _dbCustomerRange='thisMonth'
 let _qPendingItems={},_qPendingHeader={}
-let _pendingQuoteItems=[],_qPendingItemSeq=0
+let _pendingQuoteItems=[],_qPendingItemSeq=0,_draftNewItem=null
 let _selectedQiId=null
 let _pendingOrderItems=[]
 let _pendingPurchaseLinks=[]
@@ -6067,19 +6067,14 @@ function filterQuoteCatalogPicker(q){
 function pickCatalogForQuote(productId){
   const p=products.find(x=>x.id===productId);if(!p)return
   document.getElementById('catalog-picker-overlay')?.remove()
-  _pendingQuoteItems.push({
-    _key:++_qPendingItemSeq,
+  openNewPendingItemEdit({
     product:p.product_name,spec:p.notes||null,product_id:p.id,
     supplier_id:p.supplier_id||null,cost_price:p.cost_price||null,
     cost_currency:p.currency||'USD',
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
     apply_customs:supplierNeedsCustoms(p.supplier_id||null),
-    margin_pct:null,final_price:null,
     width_m:p.width_m||null,pricing_unit:p.pricing_unit||null,customer_pricing_unit:null
   })
-  _isDirty=true
-  renderQuoteModalBd()
-  showToast('品項已加入暫存，請按儲存草稿')
 }
 
 async function syncHeaderSupplier(){
@@ -6125,17 +6120,14 @@ function qAddFromInquiry(){
   if(!inqId){showToast('請選擇詢價單','error');return}
   const inq=inquiries.find(i=>i.id===inqId);if(!inq)return
   const pp=getInquirySupplierPriceParts(inq.supplier_price)
-  _pendingQuoteItems.push({
-    _key:++_qPendingItemSeq,
+  const inf=document.getElementById('q-add-inq-form');if(inf)inf.style.display='none'
+  openNewPendingItemEdit({
     product:inq.product||'—',spec:inq.spec||null,product_id:null,
     cost_price:pp.amount||null,
     cost_currency:pp.currency||settings.default_cost_currency||'USD',
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
-    apply_customs:false,margin_pct:null,final_price:null
+    apply_customs:false
   })
-  _isDirty=true
-  renderQuoteModalBd()
-  showToast('品項已加入暫存，請按儲存草稿')
 }
 function qAddManualItem(){
   const product=document.getElementById('q-manual-product')?.value.trim()
@@ -6143,18 +6135,93 @@ function qAddManualItem(){
   const spec=document.getElementById('q-manual-spec')?.value.trim()||null
   const costPrice=parseFloat(document.getElementById('q-manual-price')?.value)||null
   const currency=document.getElementById('q-manual-currency')?.value||'USD'
-  _pendingQuoteItems.push({
-    _key:++_qPendingItemSeq,
+  const mf=document.getElementById('q-add-manual-form');if(mf)mf.style.display='none'
+  openNewPendingItemEdit({
     product,spec,product_id:null,
     cost_price:costPrice,cost_currency:currency,
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
-    apply_customs:false,margin_pct:null,final_price:null
+    apply_customs:false
   })
-  _isDirty=true
-  renderQuoteModalBd()
-  showToast('品項已加入暫存，請按儲存草稿')
 }
 
+function openNewPendingItemEdit(data){
+  _draftNewItem=data
+  document.getElementById('npi-overlay')?.remove()
+  const cp=parseFloat(data.cost_price||0)
+  const applyC=data.apply_customs&&cp>0
+  const cpct=parseFloat(data.customs_fee_pct||7.5)
+  const afterCustoms=applyC?cp*(1+cpct/100):cp
+  const calcFp=cp>0?Math.round(calcQuote(cp,cpct,parseFloat(settings.default_margin_pct||20),applyC).final*100)/100:null
+  const mgn=afterCustoms>0&&calcFp!=null?Math.round((calcFp/afterCustoms-1)*10000)/100:null
+  const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
+  const overlay=document.createElement('div')
+  overlay.id='npi-overlay'
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px'
+  overlay.innerHTML=
+    '<div style="background:#fff;border-radius:6px;width:100%;max-width:440px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25)">'+
+    '<div style="padding:14px 18px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:flex-start">'+
+    '<div><div style="font-size:13px;font-weight:600">'+esc(data.product)+'</div>'+
+    (data.spec?'<div style="font-size:11px;color:#aaa;margin-top:1px">'+esc(data.spec)+'</div>':'')+
+    '<div style="margin-top:4px;font-size:11px;color:#888">填入報價後按確認加入列表</div></div>'+
+    '<button onclick="document.getElementById(\'npi-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1;margin-top:-2px">×</button>'+
+    '</div>'+
+    '<div style="padding:14px 18px" class="grid-2">'+
+    '<div><label>供應商成本</label><input type="number" value="'+(data.cost_price||'')+'" readonly style="background:#f5f5f2;color:#666;cursor:default" /></div>'+
+    '<div><label>幣別</label><select disabled style="background:#f5f5f2;color:#666">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(data.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div><label style="display:flex;justify-content:space-between"><span>清關費 %</span>'+
+    '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
+    '<input type="checkbox" id="npi-ac" '+(applyC?'checked':'')+' onchange="npiCalcMgn()" style="width:auto"> 套用</label></label>'+
+    '<input type="number" id="npi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="npiCalcMgn()" /></div>'+
+    '<div><label>報價（含清關含利潤）</label>'+
+    '<input type="number" id="npi-fp" value="'+(calcFp!=null?parseFloat(calcFp).toFixed(2):'')+'" step="0.01" placeholder="輸入報給客戶的價格" onchange="npiCalcMgn()" />'+
+    '<div id="npi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
+    '<div><label>計價單位（成本）</label><select id="npi-pu"><option value="">—</option><option value="m2"'+(data.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>報給客戶的單位</label><select id="npi-cpu"><option value="">—</option><option value="m2"'+(data.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>MOQ</label><input id="npi-moq" value="" placeholder="例：1000m²" /></div>'+
+    '<div><label>交期</label><input id="npi-lead" value="" placeholder="例：30天" /></div>'+
+    '</div>'+
+    '<div style="padding:0 18px 16px;display:flex;gap:8px">'+
+    '<button class="btn btn-primary btn-sm" onclick="confirmNewPendingItem()">確認加入</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'npi-overlay\').remove()">取消</button>'+
+    '</div></div>'
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
+}
+function npiCalcMgn(){
+  const cp=parseFloat(_draftNewItem?.cost_price||0)
+  const ac=document.getElementById('npi-ac')?.checked
+  const cpct=parseFloat(document.getElementById('npi-cpct')?.value||0)
+  const afterCustoms=ac?cp*(1+cpct/100):cp
+  const fp=parseFloat(document.getElementById('npi-fp')?.value||0)
+  const mgn=afterCustoms>0&&fp?Math.round((fp/afterCustoms-1)*10000)/100:null
+  const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
+  const el=document.getElementById('npi-mgn')
+  if(el){el.style.color=mc;el.textContent=fp?'利潤率 '+mgn.toFixed(2)+'%':''}
+}
+function confirmNewPendingItem(){
+  if(!_draftNewItem)return
+  const cp=parseFloat(_draftNewItem.cost_price||0)
+  const ac=document.getElementById('npi-ac')?.checked||false
+  const cpct=parseFloat(document.getElementById('npi-cpct')?.value||_draftNewItem.customs_fee_pct||7.5)
+  const afterCustoms=ac?cp*(1+cpct/100):cp
+  const fpVal=document.getElementById('npi-fp')?.value
+  const fp=fpVal?Math.round(parseFloat(fpVal)*100)/100:null
+  const mgn=afterCustoms>0&&fp!=null?Math.round((fp/afterCustoms-1)*10000)/100:null
+  _pendingQuoteItems.push({
+    ..._draftNewItem,
+    _key:++_qPendingItemSeq,
+    customs_fee_pct:cpct,apply_customs:ac,
+    final_price:fp,margin_pct:mgn,
+    pricing_unit:document.getElementById('npi-pu')?.value||null,
+    customer_pricing_unit:document.getElementById('npi-cpu')?.value||null,
+    moq:document.getElementById('npi-moq')?.value||null,
+    lead_time:document.getElementById('npi-lead')?.value||null
+  })
+  _draftNewItem=null
+  _isDirty=true
+  document.getElementById('npi-overlay')?.remove()
+  renderQuoteModalBd()
+}
 function qRemovePendingItem(key){
   _pendingQuoteItems=_pendingQuoteItems.filter(x=>x._key!==key)
   if(!_pendingQuoteItems.length&&!Object.keys(_qPendingItems).length&&!Object.keys(_qPendingHeader).length)_isDirty=false
