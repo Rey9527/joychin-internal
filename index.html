@@ -3683,14 +3683,18 @@ function updatePurchaseBadge(){
 }
 function orderAlertIds(){
   const wk=d=>countWorkdays(d,new Date())
-  const today=new Date().toISOString().slice(0,10)
+  const AFTER_SHIPPED=['shipped','delivered','completed','cancelled']
   const ids=new Set()
   orders.forEach(o=>{
     const ref=o.updated_at||o.created_at
-    if(o.status==='confirmed'&&wk(ref)>=3)ids.add(o.id)
-    else if(o.status==='processing'&&wk(ref)>=7)ids.add(o.id)
+    if(o.status==='confirmed'&&wk(ref)>=1)ids.add(o.id)
+    else if(o.status==='processing'&&wk(ref)>=1&&!purchaseOrderItems.some(i=>String(i.ref_order_id)===String(o.id))&&!o.expected_delivery)ids.add(o.id)
     else if(o.status==='ready'&&wk(ref)>=3)ids.add(o.id)
-    else if(o.status==='shipped'&&o.expected_delivery&&o.expected_delivery<today)ids.add(o.id)
+    else if(o.status==='shipped'&&o.expected_delivery&&wk(o.expected_delivery)>0)ids.add(o.id)
+    if(o.expected_delivery&&!AFTER_SHIPPED.includes(o.status)){
+      const rem=countWorkdays(new Date(),new Date(o.expected_delivery))
+      if(rem<=1)ids.add(o.id)
+    }
   })
   return ids
 }
@@ -3706,17 +3710,28 @@ async function autoScanTasks(){
   const wk=d=>countWorkdays(d,new Date())
 
   // Orders
-  const alertIds=orderAlertIds()
+  const AFTER_SHIPPED=['shipped','delivered','completed','cancelled']
   orders.forEach(o=>{
-    if(!alertIds.has(o.id))return
     if(existingSet.has('order|'+String(o.id)))return
-    let title=''
-    if(o.status==='confirmed')title='追蹤訂單推進（已確認未處理）：'+o.id+(o.customer?' — '+o.customer:'')
-    else if(o.status==='processing')title='追蹤訂單推進（處理中）：'+o.id+(o.customer?' — '+o.customer:'')
-    else if(o.status==='ready')title='追蹤訂單出貨（備貨完成）：'+o.id+(o.customer?' — '+o.customer:'')
-    else if(o.status==='shipped')title='追蹤訂單到貨：'+o.id+(o.customer?' — '+o.customer:'')
+    const ref=o.updated_at||o.created_at
+    let title='',priority='normal',custId=null
+    if(o.status==='confirmed'&&wk(ref)>=1){
+      title='訂單尚未開始處理：'+o.id;priority='high';custId=o.customer_id||null
+    }else if(o.status==='processing'&&wk(ref)>=1&&!purchaseOrderItems.some(i=>String(i.ref_order_id)===String(o.id))&&!o.expected_delivery){
+      title='訂單未安排採購或出貨日：'+o.id;priority='high'
+    }else if(o.status==='ready'&&wk(ref)>=3){
+      title='追蹤訂單出貨（備貨完成）：'+o.id+(o.customer?' — '+o.customer:'')
+    }else if(o.status==='shipped'&&o.expected_delivery&&wk(o.expected_delivery)>0){
+      title='訂單出貨逾期：'+o.id;priority='high';custId=o.customer_id||null
+    }
+    if(!title&&o.expected_delivery&&!AFTER_SHIPPED.includes(o.status)){
+      const rem=countWorkdays(new Date(),new Date(o.expected_delivery))
+      if(rem<=1){title='訂單明日應出貨請確認：'+o.id;priority='urgent'}
+    }
     if(!title)return
-    inserts.push({title,source:'auto',ref_module:'order',ref_id:String(o.id),auto_generated:true,priority:'normal',status:'open'})
+    const payload={title,source:'auto',ref_module:'order',ref_id:String(o.id),auto_generated:true,priority,status:'open'}
+    if(custId)payload.customer_id=custId
+    inserts.push(payload)
   })
 
   // Purchase orders not linked to any shipment for >5 workdays
