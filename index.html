@@ -152,7 +152,6 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   .modal-hd { padding: calc(16px + env(safe-area-inset-top)) 16px 12px; align-items: flex-start; }
   .modal-hd > :first-child { padding-top: 2px; }
   .modal-hd [style*="font-size:14px"] { font-size: 16px !important; line-height: 1.4; }
-  .modal-bd { padding: 14px 16px 18px; }
   .modal-foot { padding: 12px 16px; }
   .modal-foot .btn,
   .modal-bd .btn,
@@ -1141,16 +1140,6 @@ function calcQuote(cp,customs_fee_pct,margin_pct,applyCustoms){
   const final=afterCustoms*(1+parseFloat(margin_pct||0)/100)
   return{afterCustoms,final}
 }
-function calcQuoteLabel(cp,customs_fee_pct,margin_pct,applyCustoms,cur){
-  const{afterCustoms,final}=calcQuote(cp,customs_fee_pct,margin_pct,applyCustoms)
-  const cusPct=parseFloat(customs_fee_pct||0)
-  const mgnPct=parseFloat(margin_pct||0)
-  if(applyCustoms){
-    return '成本 '+parseFloat(cp||0).toFixed(2)+' · 含清關 '+afterCustoms.toFixed(2)+' (+'+cusPct+'%) · 報價 '+final.toFixed(2)+' '+cur+' (+'+mgnPct+'%)'
-  }
-  return '成本 '+parseFloat(cp||0).toFixed(2)+' · 報價 '+final.toFixed(2)+' '+cur+' (+'+mgnPct+'%)'
-}
-
 function getSupplierCustomsHint(supplierId){
   return supplierNeedsCustoms(supplierId)?'海外供應商，套用清關費':'泰國供應商，不套用清關費'
 }
@@ -1164,14 +1153,6 @@ function buildSettingCurrencyOptions(selectedValue){
     ['EUR','EUR (European Union)']
   ]
   return buildOptionPairs(pairs,selectedValue)
-}
-
-function openSettingsArea(){
-  if(!isManager()){
-    showToast('只有管理者可以調整系統設定','error')
-    return
-  }
-  openSettingsModal()
 }
 
 function buildOptions(values,selectedValue=null){
@@ -2314,43 +2295,6 @@ function purchaseLinkedShipments(purchaseOrderId){
     .map(link=>shipments.find(s=>String(s.id)===String(link.shipment_id)))
     .filter(Boolean)
 }
-function shipmentProductSummaryRows(shipmentId){
-  // Prefer explicit shipment_items rows; fall back to PO-derived aggregation
-  const explicitItems=shipmentItems.filter(x=>String(x.shipment_id)===String(shipmentId))
-  if(explicitItems.length){
-    const grouped=new Map()
-    explicitItems.forEach(item=>{
-      const key=[item.product_id||'',item.product_name||'',item.spec||'',item.unit||''].join('||')
-      if(!grouped.has(key)){
-        grouped.set(key,{product_name:item.product_name||'—',spec:item.spec||'',unit:item.unit||'',qty:0,purchase_order_ids:new Set()})
-      }
-      const row=grouped.get(key)
-      row.qty+=(parseFloat(item.qty)||0)
-      if(item.po_id)row.purchase_order_ids.add(String(item.po_id))
-    })
-    return Array.from(grouped.values())
-      .map(row=>({...row,purchase_order_ids:Array.from(row.purchase_order_ids),fromExplicit:true}))
-      .sort((a,b)=>String(a.product_name).localeCompare(String(b.product_name),'zh-TW'))
-  }
-  const linkedPurchaseIds=shipmentPurchaseOrders
-    .filter(x=>String(x.shipment_id)===String(shipmentId))
-    .map(link=>String(link.purchase_order_id))
-  const rows=purchaseOrderItems
-    .filter(item=>linkedPurchaseIds.includes(String(item.po_id)))
-  const grouped=new Map()
-  rows.forEach(item=>{
-    const key=[item.product_id||'',item.product_name||'',item.spec||'',item.unit||'',item.currency||''].join('||')
-    if(!grouped.has(key)){
-      grouped.set(key,{product_name:item.product_name||'—',spec:item.spec||'',unit:item.unit||'',currency:item.currency||'',qty:0,purchase_order_ids:new Set()})
-    }
-    const row=grouped.get(key)
-    row.qty+=(parseFloat(item.qty)||0)
-    row.purchase_order_ids.add(String(item.po_id))
-  })
-  return Array.from(grouped.values())
-    .map(row=>({...row,purchase_order_ids:Array.from(row.purchase_order_ids),fromExplicit:false}))
-    .sort((a,b)=>String(a.product_name).localeCompare(String(b.product_name),'zh-TW'))
-}
 function purchaseOrderLinksForDisplay(purchaseOrderId){
   const links=purchaseOrderOrderLinks
     .filter(x=>String(x.po_id)===String(purchaseOrderId))
@@ -2386,9 +2330,6 @@ function purchaseOrderAllocatedQty(purchaseOrderId){
   return purchaseOrderLinksForDisplay(purchaseOrderId)
     .reduce((sum,link)=>sum+(parseFloat(link.qty)||0),0)
 }
-function purchaseOrderUnallocatedQty(purchaseOrderId){
-  return purchaseOrderTotalQty(purchaseOrderId)-purchaseOrderAllocatedQty(purchaseOrderId)
-}
 function purchaseOrderOrderSummary(purchaseOrderId){
   const linkedOrders=purchaseOrderLinkedOrders(purchaseOrderId)
   if(linkedOrders.length)return linkedOrders.map(o=>o.id).join(', ')
@@ -2397,82 +2338,12 @@ function purchaseOrderOrderSummary(purchaseOrderId){
 function makePendingPurchaseItem(item){
   return {...item,temp_key:item?.temp_key||('poi-'+Date.now()+'-'+Math.random().toString(36).slice(2,7))}
 }
-function getPurchaseLinkProductIdFromItemSelect(selectId){
-  const itemSel=document.getElementById(selectId)
-  return itemSel?.options?.[itemSel.selectedIndex]?.getAttribute('data-product-id')||''
-}
 function pendingLinksForItem(tempKey){
   return _pendingPurchaseLinks.filter(link=>String(link.item_key)===String(tempKey))
 }
 function savedLinksForPurchaseItem(purchaseOrderId,item){
   if(item?.product_id==null)return []
   return purchaseOrderLinksForDisplay(purchaseOrderId).filter(link=>String(link.product_id||'')===String(item.product_id))
-}
-function getSuggestedOrderOptionsForProduct(productId,currentOrderId=''){
-  const productIdStr=productId==null?'':String(productId)
-  const rows=orders
-    .filter(o=>o.status!=='cancelled')
-    .map(order=>{
-      let required=0
-      let allocated=0
-      if(productIdStr){
-        required=orderItems
-          .filter(item=>String(item.order_id)===String(order.id)&&String(item.product_id||'')===productIdStr)
-          .reduce((sum,item)=>sum+(parseFloat(item.qty)||0),0)
-        allocated=purchaseOrderOrderLinks
-          .filter(link=>String(link.order_id)===String(order.id)&&String(link.product_id||'')===productIdStr)
-          .reduce((sum,link)=>sum+(parseFloat(link.qty)||0),0)
-      }
-      const remaining=required-allocated
-      return {order,required,allocated,remaining}
-    })
-    .sort((a,b)=>{
-      const aPriority=a.remaining>0?0:1
-      const bPriority=b.remaining>0?0:1
-      if(aPriority!==bPriority)return aPriority-bPriority
-      if((b.remaining||0)!==(a.remaining||0))return (b.remaining||0)-(a.remaining||0)
-      return String(a.order.id).localeCompare(String(b.order.id),'zh-TW')
-    })
-  return '<option value="">— 選擇訂單 —</option>'+rows.map(({order,remaining,required})=>{
-    const label=remaining>0
-      ? order.id+' - '+(order.customer||'—')+' · 未滿足 '+remaining
-      : order.id+' - '+(order.customer||'—')+(required>0?' · 已滿足':'')
-    return '<option value="'+esc(order.id)+'"'+(String(order.id)===String(currentOrderId)?' selected':'')+'>'+esc(label)+'</option>'
-  }).join('')
-}
-function getSuggestedOrderItemOptions(currentValue=''){
-  const rows=orders
-    .filter(order=>order.status!=='cancelled')
-    .flatMap(order=>orderItems
-      .filter(item=>String(item.order_id)===String(order.id))
-      .map(item=>{
-        const required=parseFloat(item.qty)||0
-        const allocated=purchaseOrderOrderLinks
-          .filter(link=>String(link.order_id)===String(order.id)&&String(link.product_id||'')===String(item.product_id||''))
-          .reduce((sum,link)=>sum+(parseFloat(link.qty)||0),0)+
-          _pendingPurchaseLinks
-            .filter(link=>String(link.order_id)===String(order.id)&&String(link.product_id||'')===String(item.product_id||''))
-            .reduce((sum,link)=>sum+(parseFloat(link.qty)||0),0)
-        const remaining=Math.max(0,required-allocated)
-        return {order,item,remaining}
-      }))
-    .sort((a,b)=>{
-      const aPriority=a.remaining>0?0:1
-      const bPriority=b.remaining>0?0:1
-      if(aPriority!==bPriority)return aPriority-bPriority
-      if((b.remaining||0)!==(a.remaining||0))return (b.remaining||0)-(a.remaining||0)
-      return String(a.order.id).localeCompare(String(b.order.id),'zh-TW')
-    })
-  return '<option value="">— 手動輸入 / 從產品目錄帶入 —</option>'+rows.map(({order,item,remaining})=>{
-    const value=String(order.id)+'::'+String(item.id)
-    const label=[
-      order.id,
-      order.customer||'—',
-      item.product_name||'—',
-      remaining>0?('未滿足 '+remaining):'已滿足'
-    ].join(' · ')
-    return '<option value="'+esc(value)+'"'+(String(value)===String(currentValue)?' selected':'')+'>'+esc(label)+'</option>'
-  }).join('')
 }
 function onPurchaseSourceOrderItemChange(){
   const raw=document.getElementById('poi-source-order-item')?.value||''
@@ -2498,11 +2369,6 @@ function onPurchaseSourceOrderItemChange(){
   const priceEl=document.getElementById('poi-price');if(priceEl)priceEl.value=item.unit_price||''
   const currencyEl=document.getElementById('poi-currency');if(currencyEl&&item.currency)currencyEl.value=item.currency
 }
-function togglePurchaseItemAddMenu(){
-  const el=document.getElementById('po-item-add-menu')
-  if(!el)return
-  el.style.display=el.style.display==='none'?'block':'none'
-}
 function openPurchaseItemForm(mode='manual'){
   const menu=document.getElementById('po-item-add-menu')
   if(menu)menu.style.display='none'
@@ -2522,40 +2388,6 @@ function closePurchaseItemForm(){
   if(form)form.style.display='none'
   const menu=document.getElementById('po-item-add-menu')
   if(menu)menu.style.display='none'
-}
-function openPurchaseItemLinkModal(mode,refId){
-  _purchaseLinkTarget=null
-  let item=null
-  let itemLabel='—'
-  let productId=null
-  if(mode==='pending'){
-    item=(window._pendingPurchaseItems||[]).find(x=>String(x.temp_key)===String(refId))
-    if(!item){showToast('找不到採購品項','error');return}
-    itemLabel=(item.product_name||'—')+' · '+(item.qty||0)+' '+(item.unit||'')
-    productId=item.product_id||null
-    _purchaseLinkTarget={mode:'pending',item_key:item.temp_key,product_id:productId,item_label:itemLabel}
-  }else{
-    item=purchaseOrderItems.find(x=>String(x.id)===String(refId))
-    if(!item){showToast('找不到採購品項','error');return}
-    itemLabel=(item.product_name||'—')+' · '+(item.qty||0)+' '+(item.unit||'')
-    productId=item.product_id||null
-    _purchaseLinkTarget={mode:'saved',item_id:item.id,product_id:productId,item_label:itemLabel}
-  }
-  if(productId==null){
-    showToast('此品項尚未綁定產品目錄，暫時無法精準分配訂單','error')
-    return
-  }
-  const availableOrders=orders.filter(o=>o.status!=='cancelled')
-  openSubformModal('為採購品項分配訂單',
-    '<div style="font-size:12px;color:#666;margin-bottom:10px">採購品項：'+esc(itemLabel)+'</div>'+
-    '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>客戶訂單 <span class="req">*</span></label><select id="pol-order-id" onchange="_isDirty=true"><option value="">— 選擇訂單 —</option>'+availableOrders.map(o=>'<option value="'+esc(o.id)+'">'+esc(o.id)+' - '+esc(o.customer||'—')+'</option>').join('')+'</select></div>'+
-    '<div><label>分配數量 <span class="req">*</span></label><input id="pol-qty" type="number" min="0" step="0.01" inputmode="decimal" placeholder="例如 100" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
-    '<div style="grid-column:1 / -1"><label>備註</label><input id="pol-note" placeholder="選填，例如首批急單" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
-    '</div>'+
-    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitPurchaseItemLink()">新增分配</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">返回</button></div>'
-  )
-  enableDirtyTracking('modal-subform-bd')
 }
 function submitPurchaseItemLink(){
   if(!_purchaseLinkTarget){showToast('缺少分配目標','error');return}
@@ -2585,55 +2417,8 @@ function submitPurchaseItemLink(){
   }
   submitPurchaseOrderLink()
 }
-function removePendingPurchaseLink(itemKey,idx){
-  const links=pendingLinksForItem(itemKey)
-  const target=links[idx]
-  if(!target)return
-  const globalIdx=_pendingPurchaseLinks.findIndex(link=>
-    String(link.item_key)===String(target.item_key)&&String(link.order_id)===String(target.order_id)&&String(link.qty)===String(target.qty)&&String(link.note||'')===String(target.note||'')
-  )
-  if(globalIdx>=0)_pendingPurchaseLinks.splice(globalIdx,1)
-  _isDirty=true
-  openPurchaseModal(null,{keepPending:true,keepPendingLinks:true,supplier_id:parseInt(document.getElementById('pp-supplier')?.value||'',10)||null,currency:document.getElementById('pp-currency')?.value||'USD'})
-}
 function renderPurchaseItemLinksBlock(item,ctx={}){
   return ''
-}
-function addInlinePurchaseItemLink(mode,refId){
-  if(mode==='pending'){
-    const item=(window._pendingPurchaseItems||[]).find(x=>String(x.temp_key)===String(refId))
-    if(!item){showToast('找不到採購品項','error');return}
-    const orderId=document.getElementById('pil-order-pending-'+refId)?.value||''
-    const qty=parseFloat(document.getElementById('pil-qty-pending-'+refId)?.value||'')
-    const note=document.getElementById('pil-note-pending-'+refId)?.value?.trim()||null
-    if(!orderId){showToast('請選擇客戶訂單','error');return}
-    if(!Number.isFinite(qty)||qty<=0){showToast('請填寫有效的分配數量','error');return}
-    const duplicate=_pendingPurchaseLinks.some(link=>String(link.item_key)===String(refId)&&String(link.order_id)===String(orderId))
-    if(duplicate){showToast('同一採購品項對同一訂單已存在，請直接調整原本那筆','error');return}
-    _pendingPurchaseLinks.push({item_key:item.temp_key,order_id:orderId,product_id:item.product_id||null,qty,note,item_label:(item.product_name||'—')})
-    _isDirty=true
-    openPurchaseModal(null,{keepPending:true,keepPendingLinks:true,supplier_id:parseInt(document.getElementById('pp-supplier')?.value||'',10)||null,currency:document.getElementById('pp-currency')?.value||'USD'})
-    return
-  }
-  const item=purchaseOrderItems.find(x=>String(x.id)===String(refId))
-  if(!item){showToast('找不到採購品項','error');return}
-  _purchaseLinkTarget={mode:'saved',item_id:item.id,product_id:item.product_id||null,item_label:item.product_name||'—'}
-  const orderId=document.getElementById('pil-order-saved-'+refId)?.value||''
-  const qty=parseFloat(document.getElementById('pil-qty-saved-'+refId)?.value||'')
-  const note=document.getElementById('pil-note-saved-'+refId)?.value?.trim()||null
-  if(!orderId){showToast('請選擇客戶訂單','error');return}
-  if(!Number.isFinite(qty)||qty<=0){showToast('請填寫有效的分配數量','error');return}
-  const duplicate=purchaseOrderOrderLinks.some(link=>String(link.purchase_order_id)===String(selectedPurchaseId)&&String(link.order_id)===String(orderId)&&String(link.product_id||'')===String(item.product_id||''))
-  if(duplicate){showToast('同一採購品項對同一訂單已存在，請直接調整原本那筆','error');return}
-  const payload={po_id:selectedPurchaseId,order_id:orderId,product_id:item.product_id||null,qty,note}
-  sb.from('purchase_order_order_links').insert(payload).then(async({error})=>{
-    if(error){showToast('新增分配失敗：'+error.message,'error');return}
-    _isDirty=false
-    await loadPurchaseOrders()
-    openPurchaseModal(selectedPurchaseId)
-    renderPurchaseOrders()
-    showToast('分配已新增')
-  })
 }
 function getPurchaseLinkItemOptions(purchaseOrderId,selectedValue=''){
   return '<option value="">— 選擇採購單品項 —</option>'+purchaseOrderItems
@@ -2645,23 +2430,6 @@ function getPurchaseLinkItemOptions(purchaseOrderId,selectedValue=''){
       return '<option value="'+esc(itemValue)+'" data-product-id="'+esc(itemProductId)+'"'+(String(itemValue)===String(selectedValue)?' selected':'')+'>'+esc(itemLabel)+'</option>'
     })
     .join('')
-}
-function openPurchaseOrderLinkModal(){
-  if(!selectedPurchaseId)return
-  const po=purchaseOrders.find(x=>String(x.id)===String(selectedPurchaseId))
-  if(!po)return
-  const availableOrders=orders.filter(o=>o.status!=='cancelled')
-  openSubformModal('新增關聯客戶訂單',
-    '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>客戶訂單 <span class="req">*</span></label><select id="pol-order-id" onchange="_isDirty=true"><option value="">— 選擇訂單 —</option>'+availableOrders.map(o=>'<option value="'+esc(o.id)+'">'+esc(o.id)+' - '+esc(o.customer||'—')+'</option>').join('')+'</select></div>'+
-    '<div><label>採購單品項</label><select id="pol-po-item" onchange="_isDirty=true">'+getPurchaseLinkItemOptions(selectedPurchaseId,'')+'</select></div>'+
-    '<div><label>分配數量 <span class="req">*</span></label><input id="pol-qty" type="number" min="0" step="0.01" inputmode="decimal" placeholder="例如 100" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
-    '<div><label>備註</label><input id="pol-note" placeholder="選填，例如首批急單" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
-    '</div>'+
-    '<div style="font-size:11px;color:#888;margin-bottom:12px">此關聯僅表示這張採購單的一部分數量分配給哪張客戶訂單；未關聯的數量不指定訂單。</div>'+
-    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitPurchaseOrderLink()">新增</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">返回</button></div>'
-  )
-  enableDirtyTracking('modal-subform-bd')
 }
 async function submitPurchaseOrderLink(){
   if(!selectedPurchaseId||!_purchaseLinkTarget)return
@@ -2692,19 +2460,6 @@ async function submitPurchaseOrderLink(){
   openPurchaseModal(selectedPurchaseId)
   renderPurchaseOrders()
   showToast('關聯客戶訂單已新增')
-}
-async function removePurchaseOrderLink(linkId){
-  const link=purchaseOrderOrderLinks.find(x=>String(x.id)===String(linkId))
-  if(!link){showToast('找不到要移除的關聯資料','error');return}
-  const label=link.order_id||'此關聯'
-  confirmModal('確定要移除 '+label+' 的關聯嗎？',async()=>{
-    const {error}=await sb.from('purchase_order_order_links').delete().eq('id',linkId)
-    if(error){showToast('移除關聯訂單失敗：'+error.message,'error');return}
-    await loadPurchaseOrders()
-    openPurchaseModal(selectedPurchaseId)
-    renderPurchaseOrders()
-    showToast('關聯客戶訂單已移除')
-  })
 }
 function orderLinkedShipments(orderId){
   const linkedPurchaseIds=purchaseOrders
@@ -2884,7 +2639,7 @@ function openShipmentModal(id){
 const SH_DOC_TYPE_LABEL={invoice:'Invoice',packing_list:'Packing List',bl:'B/L',certificate:'Certificate',other:'Other'}
 
 async function loadShipmentDocuments(shipmentId){
-  const{data,error}=await sb.from('shipment_documents').select('*').eq('ref_module','shipment').eq('ref_id',String(shipmentId)).order('created_at',{ascending:false})
+  const{data,error}=await sb.from('shipment_documents').select('*').eq('shipment_id',shipmentId).order('created_at',{ascending:false})
   if(error)return[]
   return data||[]
 }
@@ -2924,7 +2679,7 @@ async function uploadShipmentDocument(shipmentId){
   const{error:upErr}=await sb.storage.from('shipment-docs').upload(filePath,file,{contentType:'application/pdf',upsert:false})
   if(upErr){showToast('上傳失敗：'+upErr.message,'error');if(btn){btn.disabled=false;btn.textContent='上傳'};return}
   const{data:dbData,error:dbErr}=await sb.from('shipment_documents').insert({
-    ref_module:'shipment',ref_id:String(shipmentId),
+    shipment_id:shipmentId,
     doc_type:docType,file_name:file.name,file_url:filePath,
     file_size:file.size,uploaded_by:currentUser?.name||''
   }).select().single()
@@ -3860,8 +3615,6 @@ async function rejectOrder(orderId){
     await loadOrders();_renderOrderModal();renderOrders();showToast('訂單審批已拒絕')
   })
 }
-
-function daysFromNow(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 
 function countWorkdays(startDate,endDate){
   if(!startDate)return 0
@@ -5826,8 +5579,11 @@ function renderQuoteModalBd(){
       '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="qSaveAndStatus(\'rejected\')">樣品不通過 ✗</button>'+
       '</div>'
     :h.status==='accepted'?
+      '<button class="btn btn-ghost btn-sm" onclick="editQuote()">修改報價</button>'+
+      '<div style="display:flex;gap:8px">'+
       '<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">送去訂單 →</button>'+
-      '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'
+      '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'+
+      '</div>'
     :h.status==='rejected'?
       '<div></div>'+
       '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'
