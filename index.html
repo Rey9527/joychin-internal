@@ -1981,6 +1981,7 @@ function renderDashboard(){
         :mod==='order'?"switchTab('orders');setTimeout(()=>openOrderModal('"+item.id+"'),80)"
         :mod==='customer'?"switchTab('customers')"
         :mod==='products'?"switchTab('products');setTimeout(()=>openInventoryModal(),80)"
+        :mod==='complaint'?"switchTab('complaints');setTimeout(()=>openComplaintModal("+item.id+"),80)"
         :"switchTab('"+mod+"')"
       return '<div class="row" style="border-left:3px solid '+urgColor+';background:'+urgBg+'40;cursor:default">'+
         '<div style="flex:1;min-width:0">'+
@@ -3699,18 +3700,16 @@ function updateOrderBadge(){
   if(el){el.textContent=ids.size;el.style.display=ids.size>0?'flex':'none'}
 }
 async function autoScanTasks(){
-  // Auto-creates DB tasks for orders that have crossed alert thresholds.
-  // Skips if an open auto task for the same order already exists.
-  const {data:existing}=await sb.from('tasks').select('ref_id').eq('ref_module','order').eq('auto_generated',true).eq('status','open')
-  const existingIds=new Set((existing||[]).map(t=>t.ref_id))
-  const alertIds=orderAlertIds()
+  const {data:existing}=await sb.from('tasks').select('ref_module,ref_id').eq('auto_generated',true).eq('status','open')
+  const existingSet=new Set((existing||[]).map(t=>t.ref_module+'|'+t.ref_id))
   const inserts=[]
   const wk=d=>countWorkdays(d,new Date())
-  const today=new Date().toISOString().slice(0,10)
+
+  // Orders
+  const alertIds=orderAlertIds()
   orders.forEach(o=>{
     if(!alertIds.has(o.id))return
-    if(existingIds.has(String(o.id)))return
-    const ref=o.updated_at||o.created_at
+    if(existingSet.has('order|'+String(o.id)))return
     let title=''
     if(o.status==='confirmed')title='追蹤訂單推進（已確認未處理）：'+o.id+(o.customer?' — '+o.customer:'')
     else if(o.status==='processing')title='追蹤訂單推進（處理中）：'+o.id+(o.customer?' — '+o.customer:'')
@@ -3719,6 +3718,34 @@ async function autoScanTasks(){
     if(!title)return
     inserts.push({title,source:'auto',ref_module:'order',ref_id:String(o.id),auto_generated:true,priority:'normal',status:'open'})
   })
+
+  // Purchase orders not linked to any shipment for >5 workdays
+  const PO_EXCL=['draft','cancelled','rejected','completed']
+  const linkedPoIds=new Set(shipmentPurchaseOrders.map(x=>String(x.purchase_order_id)))
+  purchaseOrders.forEach(po=>{
+    if(PO_EXCL.includes(po.status))return
+    if(linkedPoIds.has(String(po.id)))return
+    if(!po.created_at||wk(po.created_at)<5)return
+    if(existingSet.has('purchase|'+String(po.id)))return
+    inserts.push({title:'採購單未安排船運：'+po.id,source:'auto',ref_module:'purchase',ref_id:String(po.id),supplier_id:po.supplier_id||null,auto_generated:true,priority:'normal',status:'open'})
+  })
+
+  // Complaints open >5 workdays
+  complaints.forEach(c=>{
+    if(c.status!=='open')return
+    if(!c.created_at||wk(c.created_at)<5)return
+    if(existingSet.has('complaint|'+String(c.id)))return
+    inserts.push({title:'追蹤客訴處理：'+c.complaint_no,source:'auto',ref_module:'complaint',ref_id:String(c.id),customer_id:c.customer_id||null,supplier_id:c.supplier_id||null,auto_generated:true,priority:'high',status:'open'})
+  })
+
+  // Complaints in_progress >14 workdays
+  complaints.forEach(c=>{
+    if(c.status!=='in_progress')return
+    if(!c.updated_at||wk(c.updated_at)<14)return
+    if(existingSet.has('complaint|'+String(c.id)))return
+    inserts.push({title:'客訴長期未結案：'+c.complaint_no,source:'auto',ref_module:'complaint',ref_id:String(c.id),auto_generated:true,priority:'high',status:'open'})
+  })
+
   if(inserts.length)await sb.from('tasks').insert(inserts)
 }
 function updateNavBadges(){
