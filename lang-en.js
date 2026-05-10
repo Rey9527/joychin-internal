@@ -1344,6 +1344,94 @@
     '品項':'Items',
     '請先新增至少 1 筆產品品項':'Add at least 1 item first',
     '項':'item(s)',
+
+    // Shipment container types & transport options
+    "20' GP（20呎一般）":"20' GP (20ft Standard)",
+    "40' GP（40呎一般）":"40' GP (40ft Standard)",
+    "40' HC（40呎高櫃）":"40' HC (40ft High-Cube)",
+    'LCL 拼箱':'LCL (Consolidated)',
+    '— 未設定 —':'— Not Set —',
+    '— 櫃型 —':'— Container Type —',
+    '— 選填 —':'— Optional —',
+    '櫃型':'Container Type',
+
+    // Shipment document types
+    '商業發票 Invoice':'Commercial Invoice',
+    '裝箱單 Packing List':'Packing List',
+    '提單 B/L':'Bill of Lading',
+    '品質證明 Certificate':'Quality Certificate',
+    '選擇 PDF':'Select PDF',
+    '上傳文件':'Upload Document',
+    '上傳':'Upload',
+    '下載':'Download',
+    '預覽':'Preview',
+    '尚無文件':'No documents yet',
+
+    // Shipment / cargo section labels
+    '貨物明細':'Cargo Details',
+    '請先關聯採購單，貨物明細將自動帶入':'Link a PO first — cargo details will be populated automatically',
+    '預期數量':'Expected Qty',
+    '收貨狀態':'Receipt Status',
+    '追溯鏈':'Traceability Chain',
+    '未歸船運':'No Shipment Linked',
+
+    // Shipment item receipt statuses
+    '✓ 已收到':'✓ Received',
+    '✗ 短缺':'✗ Shortage',
+    '標記已收到':'Mark Received',
+    '實收':'Received Qty',
+
+    // Purchase / shopping flow
+    '採購':'Purchase',
+    '開始採購':'Start Purchasing',
+    '待出貨':'Pending Shipment',
+    '供應商已出貨':'Shipped by Supplier',
+
+    // Purchase order allocation note
+    '此關聯僅表示這張採購單的一部分數量分配給哪張客戶訂單；未關聯的數量不指定訂單。':'This link indicates which customer order a portion of this PO is allocated to; unallocated quantities are not assigned to any order.',
+
+    // Layout toggle buttons
+    '▦ 方格':'▦ Grid',
+    '☰ 列表':'☰ List',
+
+    // Filter / sort options
+    '建立日期（新→舊）':'Created Date (newest first)',
+    '全部使用者':'All Users',
+    '搜尋產品名稱':'Search product name',
+
+    // User management
+    '使用者':'User',
+    '其他 Other':'Other',
+
+    // Order item labels
+    '客戶訂單號':'Customer Order No.',
+    '客戶系統的訂單編號（選填）':"Customer's own order number (optional)",
+    '數量（米）':'Qty (m)',
+
+    // Notes placeholder
+    '給客戶看的備註...':'Notes for customer...',
+    '不設定則留空':'Leave blank to skip',
+
+    // Sample / inquiry field
+    '關聯詢價':'Linked Inquiry',
+    '類型':'Type',
+
+    // Quality / complaint action
+    '品質問題 → 開立客訴':'Quality Issue → File Complaint',
+
+    // UI / nav
+    '選單':'Menu',
+    '設定密碼':'Set Password',
+
+    // Toast / status messages — shipment documents
+    '文件已上傳':'Document uploaded',
+    '上傳中…':'Uploading…',
+    '載入中…':'Loading…',
+    '上傳失敗：':'Upload failed: ',
+    '記錄失敗：':'Record failed: ',
+    '無法產生預覽連結：':'Cannot generate preview link: ',
+    '無法產生下載連結：':'Cannot generate download link: ',
+    '載入貨物明細失敗：':'Load cargo details failed: ',
   }
 
   // Toast prefix map: Chinese prefix → English prefix (for dynamic messages)
@@ -1534,6 +1622,13 @@
     ['已儲存','Saved'],
     // Inquiry save
     ['更新詢價資料失敗：','Failed to update inquiry: '],
+    // Shipment document upload/download
+    ['文件已上傳','Document uploaded'],
+    ['上傳失敗：','Upload failed: '],
+    ['記錄失敗：','Record failed: '],
+    ['無法產生預覽連結：','Cannot generate preview link: '],
+    ['無法產生下載連結：','Cannot generate download link: '],
+    ['載入貨物明細失敗：','Load cargo details failed: '],
   ]
 
   // ── Dynamic pattern translator ────────────────────────────────────────────
