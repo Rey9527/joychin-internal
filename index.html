@@ -1328,6 +1328,7 @@ let _pendingInq={}
 let _isDirty=false
 let _dbCustomerRange='thisMonth'
 let _qPendingItems={},_qPendingHeader={}
+let _pendingQuoteItems=[],_qPendingItemSeq=0
 let _selectedQiId=null
 let _pendingOrderItems=[]
 let _pendingPurchaseLinks=[]
@@ -5450,7 +5451,7 @@ function clearQuoteFilters(){
 }
 
 async function openQuoteModal(id){
-  selectedQuoteId=id;_qPendingItems={};_qPendingHeader={}
+  selectedQuoteId=id;_qPendingItems={};_qPendingHeader={};_pendingQuoteItems=[];_qPendingItemSeq=0
   await loadQuotes()
   renderQuoteModalHd();renderQuoteModalBd()
   document.getElementById('modal-quote').classList.add('open')
@@ -5638,6 +5639,20 @@ function renderQuoteModalBd(){
       '<div><label>Payment Term</label><input'+ro2+' value="'+(h.payment_term||'—')+'"></div>'+
       '</div>'
 
+  const pendingItemsHtml=_pendingQuoteItems.map(pit=>{
+    const fp=pit.cost_price?parseFloat(pit.cost_price):0
+    const cur=pit.cost_currency||'USD'
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px dashed #B5D68A;border-radius:4px;margin-bottom:6px;background:#f4fbec">'+
+      '<div style="flex:1;min-width:0">'+
+      '<div style="font-size:12px;font-weight:500;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(pit.product)+'</div>'+
+      (pit.spec?'<div style="font-size:10px;color:#aaa;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(pit.spec)+'</div>':'')+
+      '</div>'+
+      '<div style="font-size:11px;color:#888;white-space:nowrap">'+(fp>0?fp.toFixed(2)+' '+cur:'—')+'</div>'+
+      '<span style="font-size:10px;color:#3B6D11;background:#EAF3DE;border:1px solid #B5D68A;border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">待儲存</span>'+
+      '<button onclick="qRemovePendingItem('+pit._key+')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;flex-shrink:0">×</button>'+
+      '</div>'
+  }).join('')
+
   document.getElementById('modal-quote-bd').innerHTML=
     '<div style="margin-bottom:10px">'+badge(h.status,QUO_STATUS)+'</div>'+
     statusBanner+
@@ -5645,7 +5660,7 @@ function renderQuoteModalBd(){
     '<span class="section-title" style="margin-bottom:0">品項明細</span>'+
     '<span style="font-size:10px;color:#aaa">點擊品項可編輯</span>'+
     '</div>'+
-    (items.length?itemsHtml:'<div style="font-size:12px;color:#aaa;margin-bottom:10px">尚無品項</div>')+
+    (items.length||_pendingQuoteItems.length?itemsHtml+pendingItemsHtml:'<div style="font-size:12px;color:#aaa;margin-bottom:10px">尚無品項</div>')+
     addItemSection+
     sampleShipForm+
     '<div class="divider"></div>'+
@@ -6040,31 +6055,22 @@ function filterQuoteCatalogPicker(q){
   const filtered=sorted.filter(p=>!kw||p.product_name.toLowerCase().includes(kw)||(p.product_code||'').toLowerCase().includes(kw))
   list.innerHTML=filtered.length?_buildQuoteCatalogRows(filtered):'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">找不到符合產品</div>'
 }
-async function pickCatalogForQuote(productId){
-  const p=products.find(x=>x.id===productId)
-  if(!p)return
+function pickCatalogForQuote(productId){
+  const p=products.find(x=>x.id===productId);if(!p)return
   document.getElementById('catalog-picker-overlay')?.remove()
-  const{data:newItem,error}=await sb.from('quote_items').insert({
-    header_id:selectedQuoteId,
-    product:p.product_name,
-    spec:p.notes||null,
-    product_id:p.id,
-    supplier_id:p.supplier_id||null,
-    cost_price:p.cost_price||null,
+  _pendingQuoteItems.push({
+    _key:++_qPendingItemSeq,
+    product:p.product_name,spec:p.notes||null,product_id:p.id,
+    supplier_id:p.supplier_id||null,cost_price:p.cost_price||null,
     cost_currency:p.currency||'USD',
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
     apply_customs:supplierNeedsCustoms(p.supplier_id||null),
-    margin_pct:null,
-    final_price:null,
-    width_m:p.width_m||null,
-    pricing_unit:p.pricing_unit||null,
-    customer_pricing_unit:null
-  }).select().single()
-  if(error){showToast('新增品項失敗：'+error.message,'error');return}
-  await loadQuotes()
-  await syncHeaderSupplier()
-  renderQuoteModalHd();renderQuoteModalBd()
-  if(newItem?.id)openQuoteItemModal(newItem.id)
+    margin_pct:null,final_price:null,
+    width_m:p.width_m||null,pricing_unit:p.pricing_unit||null,customer_pricing_unit:null
+  })
+  _isDirty=true
+  renderQuoteModalBd()
+  showToast('品項已加入暫存，請按儲存草稿')
 }
 
 async function syncHeaderSupplier(){
@@ -6105,39 +6111,45 @@ function qShowManualForm(){
   const inf=document.getElementById('q-add-inq-form');if(inf)inf.style.display='none'
   const mf=document.getElementById('q-add-manual-form');if(mf)mf.style.display='block'
 }
-async function qAddFromInquiry(){
+function qAddFromInquiry(){
   const inqId=document.getElementById('q-inq-select')?.value
   if(!inqId){showToast('請選擇詢價單','error');return}
   const inq=inquiries.find(i=>i.id===inqId);if(!inq)return
   const pp=getInquirySupplierPriceParts(inq.supplier_price)
-  const{data:newItem,error}=await sb.from('quote_items').insert({
-    header_id:selectedQuoteId,product:inq.product||'—',spec:inq.spec||null,
-    product_id:null,cost_price:pp.amount||null,
+  _pendingQuoteItems.push({
+    _key:++_qPendingItemSeq,
+    product:inq.product||'—',spec:inq.spec||null,product_id:null,
+    cost_price:pp.amount||null,
     cost_currency:pp.currency||settings.default_cost_currency||'USD',
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
     apply_customs:false,margin_pct:null,final_price:null
-  }).select().single()
-  if(error){showToast('帶入失敗：'+error.message,'error');return}
-  await loadQuotes();renderQuoteModalBd()
-  if(newItem?.id)openQuoteItemModal(newItem.id)
-  showToast('已從詢價單帶入品項')
+  })
+  _isDirty=true
+  renderQuoteModalBd()
+  showToast('品項已加入暫存，請按儲存草稿')
 }
-async function qAddManualItem(){
+function qAddManualItem(){
   const product=document.getElementById('q-manual-product')?.value.trim()
   if(!product){showToast('請填寫產品名稱','error');return}
   const spec=document.getElementById('q-manual-spec')?.value.trim()||null
   const costPrice=parseFloat(document.getElementById('q-manual-price')?.value)||null
   const currency=document.getElementById('q-manual-currency')?.value||'USD'
-  const{data:newItem,error}=await sb.from('quote_items').insert({
-    header_id:selectedQuoteId,product,spec,product_id:null,
+  _pendingQuoteItems.push({
+    _key:++_qPendingItemSeq,
+    product,spec,product_id:null,
     cost_price:costPrice,cost_currency:currency,
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
     apply_customs:false,margin_pct:null,final_price:null
-  }).select().single()
-  if(error){showToast('新增失敗：'+error.message,'error');return}
-  await loadQuotes();renderQuoteModalBd()
-  if(newItem?.id)openQuoteItemModal(newItem.id)
-  showToast('品項已新增')
+  })
+  _isDirty=true
+  renderQuoteModalBd()
+  showToast('品項已加入暫存，請按儲存草稿')
+}
+
+function qRemovePendingItem(key){
+  _pendingQuoteItems=_pendingQuoteItems.filter(x=>x._key!==key)
+  if(!_pendingQuoteItems.length&&!Object.keys(_qPendingItems).length&&!Object.keys(_qPendingHeader).length)_isDirty=false
+  renderQuoteModalBd()
 }
 
 async function qAcceptQuote(){
@@ -6222,6 +6234,15 @@ async function saveQuote(){
   const results=await Promise.all(Object.entries(_qPendingItems).map(([id,changes])=>sb.from('quote_items').update(changes).eq('id',id)))
   const fail=results.find(r=>r.error)
   if(fail){showToast('品項儲存失敗：'+fail.error.message,'error');return}
+  if(_pendingQuoteItems.length){
+    const insertResults=await Promise.all(_pendingQuoteItems.map(pit=>{
+      const{_key,...data}=pit
+      return sb.from('quote_items').insert({header_id:selectedQuoteId,...data})
+    }))
+    const insertFail=insertResults.find(r=>r.error)
+    if(insertFail){showToast('新品項儲存失敗：'+insertFail.error.message,'error');return}
+    _pendingQuoteItems=[]
+  }
   _qPendingItems={};_qPendingHeader={}
   _isDirty=false
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId)
