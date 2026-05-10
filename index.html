@@ -5597,6 +5597,22 @@ function renderQuoteModalBd(){
     ?'<textarea onchange="qHeaderChange(\'notes\',this.value)">'+(h.notes||'')+'</textarea>'
     :'<textarea disabled style="background:#f5f5f2;color:#666">'+(h.notes||'')+'</textarea>'
 
+  const incoOpts=['DDP','EXW','FOB','CIF','CFR','DAP']
+  const ro2=' disabled style="background:#f5f5f2;color:#666"'
+  const tradeFields=editable
+    ?'<div class="grid-2" style="margin-bottom:12px">'+
+      '<div><label>Incoterm</label><select onchange="qHeaderChange(\'incoterm\',this.value)">'+incoOpts.map(o=>'<option value="'+o+'"'+((h.incoterm||'DDP')===o?' selected':'')+'>'+o+'</option>').join('')+'</select></div>'+
+      '<div><label>Port（選填）</label><input type="text" value="'+esc(h.port||'')+'" placeholder="e.g. Laem Chabang" onchange="qHeaderChange(\'port\',this.value)"></div>'+
+      '<div><label>Ship From</label><input type="text" value="'+esc(h.ship_from||\'Bangkok, TH\')+'" onchange="qHeaderChange(\'ship_from\',this.value)"></div>'+
+      '<div><label>Payment Term</label><input type="text" value="'+esc(h.payment_term||'')+'" placeholder="e.g. 30 Days" onchange="qHeaderChange(\'payment_term\',this.value)"></div>'+
+      '</div>'
+    :'<div class="grid-2" style="margin-bottom:12px">'+
+      '<div><label>Incoterm</label><input'+ro2+' value="'+(h.incoterm||'DDP')+'"></div>'+
+      '<div><label>Port</label><input'+ro2+' value="'+(h.port||'—')+'"></div>'+
+      '<div><label>Ship From</label><input'+ro2+' value="'+(h.ship_from||'—')+'"></div>'+
+      '<div><label>Payment Term</label><input'+ro2+' value="'+(h.payment_term||'—')+'"></div>'+
+      '</div>'
+
   document.getElementById('modal-quote-bd').innerHTML=
     '<div style="margin-bottom:10px">'+badge(h.status,QUO_STATUS)+'</div>'+
     statusBanner+
@@ -5609,6 +5625,8 @@ function renderQuoteModalBd(){
     sampleShipForm+
     '<div class="divider"></div>'+
     sampleReviewCheck+
+    '<div class="divider"></div>'+
+    tradeFields+
     '<div style="margin-bottom:16px"><label>備註</label>'+notesField+'</div>'+
     renderQuoteHistory(h.id)+
     '<div class="modal-foot" style="justify-content:space-between;align-items:center">'+footHtml+'</div>'
@@ -5722,7 +5740,7 @@ async function generateQuotePDF(headerId){
   // Divider
   doc.setDrawColor(...LG);doc.line(ML,y,PW-MR,y);y+=3
   // Trade terms
-  const terms=[{label:'SALESPERSON',val:currentUser?.name||'—'},{label:'INCOTERMS',val:h.incoterms||'EXW'},{label:'PORT',val:h.port||'—'},{label:'SHIP FROM',val:h.ship_from||'Bangkok, TH'},{label:'PAYMENT TERM',val:h.payment_term||'—'}]
+  const terms=[{label:'SALESPERSON',val:currentUser?.name||'—'},{label:'INCOTERMS',val:h.incoterm||'—'},{label:'PORT',val:h.port||'—'},{label:'SHIP FROM',val:h.ship_from||'—'},{label:'PAYMENT TERM',val:h.payment_term||'—'}]
   const tcw=CW/terms.length
   terms.forEach((t,i)=>{const tx=ML+i*tcw;sf('bold',6.5,G);doc.text(t.label,tx,y);sf('normal',7.5,D);doc.text(t.val,tx,y+4)})
   y+=10
