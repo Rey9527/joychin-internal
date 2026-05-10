@@ -5789,9 +5789,11 @@ async function generateQuotePDF(headerId){
   sf('bold',10,D);doc.text(h.customer||'—',ML,y+6)
   sf('normal',7.5,G)
   let _cy=y+11
-  if(cust?.address){const addrLine=String(cust.address).replace(/\n/g,' ').substring(0,60);doc.text(addrLine,ML,_cy);_cy+=4}
-  const _contact=[cust?.name,cust?.phone?'Tel: '+cust.phone:null,cust?.email].filter(Boolean).join('   |   ')
-  if(_contact){sf('normal',7,G);doc.text(_contact.substring(0,75),ML,_cy)}
+  ;[cust?.address?String(cust.address).replace(/\n/g,' ').substring(0,60):null,
+    cust?.name||null,
+    cust?.phone?'Tel: '+cust.phone:null,
+    cust?.email||null
+  ].filter(Boolean).forEach(l=>{doc.text(l,ML,_cy);_cy+=4})
   y+=26
   // Divider
   doc.setDrawColor(...LG);doc.line(ML,y,PW-MR,y);y+=3
