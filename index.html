@@ -5769,10 +5769,10 @@ async function generateQuotePDF(headerId){
     if(logoH>logoMaxH){logoW=logoMaxH*(img.naturalWidth/img.naturalHeight);logoH=logoMaxH}
     doc.addImage(LOGO_B64,'PNG',ML,y,logoW,logoH)
   }else{sf('bold',13,GREEN);doc.text('JOYCHIN',ML,y+9)}
-  // Company info right
+  // Company info right — y+2.5 aligns text cap-top with logo image top
   sf('normal',7.5,G)
   ;['109/732 Moo 2, Tambol Phrakkasamai,','Amphur Muangsamutprakarn, Samutprakarn 10270','Tel: 02-7093175#6  |  Fax: 02-7093177','Tax ID: 0-1055-56146-97-6 Head Office']
-    .forEach((l,i)=>doc.text(l,PW-MR,y+i*4,{align:'right'}))
+    .forEach((l,i)=>doc.text(l,PW-MR,y+2.5+i*4,{align:'right'}))
   y=34
   doc.setDrawColor(...LG);doc.setLineWidth(0.25);doc.line(ML,y,PW-MR,y);y+=2
   // Banner
