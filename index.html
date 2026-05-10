@@ -5640,16 +5640,25 @@ function renderQuoteModalBd(){
       '</div>'
 
   const pendingItemsHtml=_pendingQuoteItems.map(pit=>{
-    const fp=pit.cost_price?parseFloat(pit.cost_price):0
+    const cp=parseFloat(pit.cost_price||0)
     const cur=pit.cost_currency||'USD'
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px dashed #B5D68A;border-radius:4px;margin-bottom:6px;background:#f4fbec">'+
+    const fp=pit.final_price
+    const applyC=pit.apply_customs&&cp>0
+    const afterCustoms=applyC?cp*(1+parseFloat(pit.customs_fee_pct||0)/100):cp
+    const mgn=afterCustoms>0&&fp!=null?Math.round((fp/afterCustoms-1)*10000)/100:null
+    const mgnColor=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
+    const cpu=pit.customer_pricing_unit||pit.pricing_unit||null
+    return '<div onclick="openPendingItemModal('+pit._key+')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px dashed #B5D68A;border-radius:4px;margin-bottom:6px;background:#f4fbec;cursor:pointer;transition:background .15s" onmouseenter="this.style.background=\'#eaf5dc\'" onmouseleave="this.style.background=\'#f4fbec\'">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="font-size:12px;font-weight:500;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(pit.product)+'</div>'+
       (pit.spec?'<div style="font-size:10px;color:#aaa;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(pit.spec)+'</div>':'')+
       '</div>'+
-      '<div style="font-size:11px;color:#888;white-space:nowrap">'+(fp>0?fp.toFixed(2)+' '+cur:'—')+'</div>'+
+      '<div style="text-align:right;white-space:nowrap">'+
+      (fp!=null?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+parseFloat(fp).toFixed(2)+' '+cur+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">'+(cp>0?'成本 '+cp.toFixed(2)+' '+cur:'未填成本')+'</div>')+
+      '</div>'+
+      (mgn!=null?'<div style="font-size:10px;font-weight:500;color:'+mgnColor+';background:'+mgnColor+'18;padding:2px 6px;border-radius:4px;white-space:nowrap">'+mgn.toFixed(1)+'%</div>':'')+
       '<span style="font-size:10px;color:#3B6D11;background:#EAF3DE;border:1px solid #B5D68A;border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">待儲存</span>'+
-      '<button onclick="qRemovePendingItem('+pit._key+')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;flex-shrink:0">×</button>'+
+      '<button onclick="event.stopPropagation();qRemovePendingItem('+pit._key+')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;flex-shrink:0">×</button>'+
       '</div>'
   }).join('')
 
@@ -6149,6 +6158,86 @@ function qAddManualItem(){
 function qRemovePendingItem(key){
   _pendingQuoteItems=_pendingQuoteItems.filter(x=>x._key!==key)
   if(!_pendingQuoteItems.length&&!Object.keys(_qPendingItems).length&&!Object.keys(_qPendingHeader).length)_isDirty=false
+  renderQuoteModalBd()
+}
+function openPendingItemModal(key){
+  const pit=_pendingQuoteItems.find(x=>x._key===key)
+  if(!pit)return
+  document.getElementById('pmi-overlay')?.remove()
+  const cp=parseFloat(pit.cost_price||0)
+  const canApplyCustoms=pit.supplier_id?supplierNeedsCustoms(pit.supplier_id):true
+  const applyC=pit.apply_customs&&canApplyCustoms
+  const cpct=parseFloat(pit.customs_fee_pct||7.5)
+  const afterCustoms=applyC?cp*(1+cpct/100):cp
+  const calcFp=cp>0?Math.round(calcQuote(cp,cpct,parseFloat(settings.default_margin_pct||20),applyC).final*100)/100:null
+  const fp=pit.final_price!=null?pit.final_price:calcFp
+  const mgn=afterCustoms>0&&fp!=null?Math.round((fp/afterCustoms-1)*10000)/100:null
+  const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
+  const overlay=document.createElement('div')
+  overlay.id='pmi-overlay'
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px'
+  overlay.innerHTML=
+    '<div style="background:#fff;border-radius:6px;width:100%;max-width:440px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25)">'+
+    '<div style="padding:14px 18px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:flex-start">'+
+    '<div><div style="font-size:13px;font-weight:600">'+esc(pit.product)+'</div>'+
+    (pit.spec?'<div style="font-size:11px;color:#aaa;margin-top:1px">'+esc(pit.spec)+'</div>':'')+
+    '<div style="margin-top:4px"><span style="font-size:10px;color:#3B6D11;background:#EAF3DE;border:1px solid #B5D68A;border-radius:3px;padding:1px 6px">待儲存</span></div></div>'+
+    '<button onclick="document.getElementById(\'pmi-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1;margin-top:-2px">×</button>'+
+    '</div>'+
+    '<div style="padding:14px 18px" class="grid-2">'+
+    '<div><label>供應商成本</label><input type="number" value="'+(pit.cost_price||'')+'" readonly style="background:#f5f5f2;color:#666;cursor:default" /></div>'+
+    '<div><label>幣別</label><select disabled style="background:#f5f5f2;color:#666">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(pit.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div><label style="display:flex;justify-content:space-between"><span>清關費 %</span>'+
+    '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
+    '<input type="checkbox" id="pmi-ac" '+(applyC?'checked':'')+' onchange="pmiCalcMgn('+key+')" style="width:auto"> 套用</label></label>'+
+    '<input type="number" id="pmi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="pmiCalcMgn('+key+')" /></div>'+
+    '<div><label>報價（含清關含利潤）</label>'+
+    '<input type="number" id="pmi-fp" value="'+(fp!=null?parseFloat(fp).toFixed(2):'')+'" step="0.01" placeholder="輸入報給客戶的價格" onchange="pmiCalcMgn('+key+')" />'+
+    '<div id="pmi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
+    '<div><label>計價單位（成本）</label><select id="pmi-pu"><option value="">—</option><option value="m2"'+(pit.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>報給客戶的單位</label><select id="pmi-cpu"><option value="">—</option><option value="m2"'+(pit.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>MOQ</label><input id="pmi-moq" value="'+(pit.moq||'')+'" placeholder="例：1000m²" /></div>'+
+    '<div><label>交期</label><input id="pmi-lead" value="'+(pit.lead_time||'')+'" placeholder="例：30天" /></div>'+
+    '</div>'+
+    '<div style="padding:0 18px 16px;display:flex;gap:8px">'+
+    '<button class="btn btn-primary btn-sm" onclick="savePendingItemEdit('+key+')">確認</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pmi-overlay\').remove()">取消</button>'+
+    '</div></div>'
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
+}
+function pmiCalcMgn(key){
+  const pit=_pendingQuoteItems.find(x=>x._key===key)
+  if(!pit)return
+  const cp=parseFloat(pit.cost_price||0)
+  const ac=document.getElementById('pmi-ac')?.checked
+  const cpct=parseFloat(document.getElementById('pmi-cpct')?.value||0)
+  const afterCustoms=ac?cp*(1+cpct/100):cp
+  const fp=parseFloat(document.getElementById('pmi-fp')?.value||0)
+  const mgn=afterCustoms>0&&fp?Math.round((fp/afterCustoms-1)*10000)/100:null
+  const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
+  const el=document.getElementById('pmi-mgn')
+  if(el){el.style.color=mc;el.textContent=fp?'利潤率 '+mgn.toFixed(2)+'%':''}
+}
+function savePendingItemEdit(key){
+  const pit=_pendingQuoteItems.find(x=>x._key===key)
+  if(!pit)return
+  const cp=parseFloat(pit.cost_price||0)
+  const ac=document.getElementById('pmi-ac')?.checked||false
+  const cpct=parseFloat(document.getElementById('pmi-cpct')?.value||pit.customs_fee_pct||7.5)
+  const afterCustoms=ac?cp*(1+cpct/100):cp
+  const fpVal=document.getElementById('pmi-fp')?.value
+  const fp=fpVal?Math.round(parseFloat(fpVal)*100)/100:null
+  const mgn=afterCustoms>0&&fp!=null?Math.round((fp/afterCustoms-1)*10000)/100:null
+  pit.customs_fee_pct=cpct
+  pit.apply_customs=ac
+  pit.final_price=fp
+  pit.margin_pct=mgn
+  pit.pricing_unit=document.getElementById('pmi-pu')?.value||null
+  pit.customer_pricing_unit=document.getElementById('pmi-cpu')?.value||null
+  pit.moq=document.getElementById('pmi-moq')?.value||null
+  pit.lead_time=document.getElementById('pmi-lead')?.value||null
+  document.getElementById('pmi-overlay')?.remove()
   renderQuoteModalBd()
 }
 
