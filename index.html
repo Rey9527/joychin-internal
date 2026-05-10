@@ -5691,8 +5691,12 @@ async function generateQuotePDF(headerId){
   const D=[30,30,30],G=[130,130,130],LG=[200,200,200],W=[255,255,255],NAVY=[22,45,82]
   let y=14
   // Logo
-  if(LOGO_B64){doc.addImage(LOGO_B64,'PNG',ML,y,38,13)}
-  else{sf('bold',13,NAVY);doc.text('JOYCHIN',ML,y+9)}
+  if(LOGO_B64){
+    const img=new Image();img.src=LOGO_B64
+    await new Promise(r=>img.onload=r)
+    const logoW=50,logoH=logoW*(img.naturalHeight/img.naturalWidth)
+    doc.addImage(LOGO_B64,'PNG',ML,y,logoW,logoH)
+  }else{sf('bold',13,NAVY);doc.text('JOYCHIN',ML,y+9)}
   // Company info right
   sf('normal',7.5,G)
   ;['109/732 Moo 2, Tambol Phrakkasamai,','Amphur Muangsamutprakarn, Samutprakarn 10270','Tel: 02-7093175#6  |  Fax: 02-7093177','Tax ID: 0-1055-56146-97-6 Head Office']
