@@ -5937,8 +5937,12 @@ function openQuoteItemModal(itemId){
     '<input type="number" id="qi-modal-fp" value="'+parseFloat(fp).toFixed(2)+'" step="0.01" '+(editable?'onchange="qiModalFpChange(parseFloat(this.value))"':dis)+' />'+
     '<div id="qi-modal-mgn" style="font-size:10px;margin-top:3px;color:'+mgnColor+'">利潤率 '+mgn.toFixed(2)+'%</div>'+
     '</div>'+
-    '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>寬幅</span>'+(it.product_id?'<span style="font-size:10px;color:#aaa">來自目錄</span>':'')+'</label>'+
-    '<input type="text" value="'+(it.width_m!=null?Math.round(it.width_m*1000)+'mm':'—')+'"'+ro+' /></div>'+
+    '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>寬幅</span>'+
+    (it.product_id?'<span style="font-size:10px;color:#aaa">來自目錄</span>':(editable?'<span style="font-size:10px;color:#aaa">mm</span>':''))+'</label>'+
+    (it.product_id||!editable
+      ?'<input type="text" value="'+(it.width_m!=null?Math.round(it.width_m*1000)+'mm':'—')+'"'+ro+' />'
+      :'<input type="number" id="qi-modal-width" value="'+(it.width_m!=null?Math.round(it.width_m*1000):'')+'" placeholder="例：3200" step="1" min="0" onchange="qiModalWidthChange(parseFloat(this.value)||0)" />'
+    )+'</div>'+
     '<div><label>計價單位（成本）<span class="req">*</span></label><select '+(editable?'onchange="qiModalChange(\'pricing_unit\',this.value)"':dis)+'>'+
     '<option value="">—</option>'+
     '<option value="m2"'+(!it.pricing_unit||it.pricing_unit==='m2'?' selected':'')+'>平方米 m²</option>'+
@@ -5993,6 +5997,15 @@ function qiModalCustomsChange(checked){
     if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent='利潤率 '+mgn.toFixed(2)+'%'}
     renderQiProfitSection()
   }
+}
+function qiModalWidthChange(mm){
+  const it=quoteItems.find(x=>String(x.id)===_selectedQiId)
+  if(!it)return
+  if(!_qPendingItems[_selectedQiId])_qPendingItems[_selectedQiId]={}
+  const wm=mm>0?mm/1000:null
+  it.width_m=wm
+  _qPendingItems[_selectedQiId].width_m=wm
+  renderQiProfitSection()
 }
 function qiModalFpChange(fp){
   const it=quoteItems.find(x=>String(x.id)===_selectedQiId)
