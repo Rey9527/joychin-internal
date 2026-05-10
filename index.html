@@ -1647,11 +1647,30 @@ function _renderSampleModal(){
         stBadge='<span class="badge" style="background:#f0f0f0;color:#888;border:1px solid #ccc">待出貨</span>'
         actionBtn='<button class="btn btn-ghost btn-sm" style="color:#185FA5;white-space:nowrap" onclick="markSupplierShipped('+r.id+')">供應商已出貨</button>'
       }
+      let emailTplHtml=''
+      if(!isReceived){
+        const tplId='sm-email-'+r.id
+        const emailSubj='Sample Request — '+(s.sample_no||s.id)+' — '+s.product_name
+        const salut=sup?.salutation||sup?.name||'Sir/Madam'
+        let body='Dear '+salut+',\n\nWe would like to request a sample of the following product for evaluation purposes:\n\n'
+        body+='Product: '+s.product_name+'\n'
+        if(s.spec)body+='Specification: '+s.spec+'\n'
+        body+='Quantity: '+(r.qty||'—')+' '+(s.unit||'')+'\n'
+        body+='Purpose: Customer evaluation\n\n'
+        body+='Please advise on the availability and estimated delivery timeline.\n\n'
+        body+='Thank you for your assistance.\n\nBest regards,\n'+(currentUser?.name||'—')+'\nJOY CHIN PSA INCORPORATION CO., LTD.\nTel: 02-7093175#6'
+        actionBtn+='<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="toggleSmEmailTpl(\''+tplId+'\')">📧 郵件範本</button>'
+        emailTplHtml='<div id="'+tplId+'" style="display:none;margin-top:8px;padding:10px;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px">'+
+          '<div style="font-size:11px;font-weight:500;color:#444;margin-bottom:6px">Subject: '+esc(emailSubj)+'</div>'+
+          '<textarea id="'+tplId+'-body" rows="13" style="width:100%;font-size:11px;font-family:monospace;border:1px solid #e5e5e0;border-radius:4px;padding:8px;resize:vertical;line-height:1.5">'+esc(body)+'</textarea>'+
+          '<div style="margin-top:6px"><button class="btn btn-ghost btn-sm" onclick="copySmEmailTpl(\''+tplId+'-body\')">複製郵件內容</button></div>'+
+          '</div>'
+      }
       html+='<div style="padding:8px 0;border-bottom:1px solid #f0f0eb">'+
-        '<div style="display:flex;align-items:center;gap:8px;font-size:12px">'+
+        '<div style="display:flex;align-items:center;gap:8px;font-size:12px;flex-wrap:wrap">'+
         '<span style="flex:1">'+(r.requested_date||'—')+' · 數量 '+(r.qty||'—')+' '+(s.unit||'')+(r.notes?' · '+r.notes:'')+'</span>'+
         stBadge+actionBtn+
-        '</div></div>'
+        '</div>'+emailTplHtml+'</div>'
     })
   } else {
     html+='<div style="font-size:12px;color:#aaa;padding:8px 0;margin-bottom:4px">尚無索取記錄</div>'
@@ -1720,6 +1739,8 @@ function _renderSampleModal(){
 
 function esc(str){return escapeHtml(str)}
 function toggleSmForm(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none'}
+function toggleSmEmailTpl(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none'}
+function copySmEmailTpl(bodyId){const el=document.getElementById(bodyId);if(!el)return;navigator.clipboard.writeText(el.value).then(()=>showToast('已複製郵件內容')).catch(()=>{el.select();document.execCommand('copy');showToast('已複製郵件內容')})}
 
 async function saveSampleBasic(){
   const name=document.getElementById('sm-e-name')?.value.trim()
