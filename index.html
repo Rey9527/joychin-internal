@@ -242,7 +242,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <span class="nav-icon"><i data-lucide="file-text"></i></span><span>報價管理</span>
     </button>
     <button class="nav-item" id="nav-orders" onclick="switchTab('orders')">
-      <span class="nav-icon"><i data-lucide="package"></i></span><span>訂單管理</span>
+      <span class="nav-icon"><i data-lucide="package"></i></span><span>訂單管理</span><span class="nav-badge" id="badge-orders" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-purchases" onclick="switchTab('purchases')" style="display:none">
       <span class="nav-icon"><i data-lucide="shopping-cart"></i></span><span>採購單管理</span><span class="nav-badge" id="badge-purchases" style="display:none"></span>
@@ -431,9 +431,10 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <select id="fo-status" onchange="renderOrders()">
           <option value="">全部狀態</option>
           <option value="confirmed">已確認</option>
-          <option value="in_production">生產中</option>
+          <option value="processing">處理中</option>
+          <option value="ready">備貨完成</option>
           <option value="shipped">已出貨</option>
-          <option value="delivered">已到貨</option>
+          <option value="delivered">已到客戶</option>
           <option value="completed">已完成</option>
           <option value="cancelled">已取消</option>
         </select>
@@ -1357,6 +1358,8 @@ async function loadOrders(){
     sb.from('order_items').select('*')
   ])
   orders=o||[];orderItems=oi||[]
+  updateOrderBadge()
+  autoScanTasks()
 }
 async function loadShipments(){
   const [{data:s,error:shipErr},{data:spo,error:linkErr},{data:si,error:siErr}] = await Promise.all([
@@ -1843,11 +1846,11 @@ function scanDashboardItems(){
     const s=samples.find(x=>x.id===r.sample_id)
     items.push({group:'sample',label:'追蹤客戶樣品回饋',desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.shipped_date),urgency:'normal',id:r.sample_id})
   })
-  orders.filter(o=>o.status==='in_production'&&o.expected_delivery&&daysDiff(o.expected_delivery)>=0).forEach(o=>{
-    items.push({group:'order',label:'生產中但交期已過',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:daysDiff(o.expected_delivery),urgency:'high',id:o.id})
+  orders.filter(o=>['confirmed','processing','ready'].includes(o.status)&&o.expected_delivery&&daysDiff(o.expected_delivery)>=0).forEach(o=>{
+    items.push({group:'order',label:'未出貨但交期已過',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:daysDiff(o.expected_delivery),urgency:'high',id:o.id})
   })
-  orders.filter(o=>o.status==='shipped'&&o.updated_at&&daysDiff(o.updated_at)>=7).forEach(o=>{
-    items.push({group:'order',label:'出貨超過 7 天未到貨',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:daysDiff(o.updated_at),urgency:'normal',id:o.id})
+  orders.filter(o=>o.status==='shipped'&&o.expected_delivery&&daysDiff(o.expected_delivery)>=0).forEach(o=>{
+    items.push({group:'order',label:'出貨後超預期交期',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:daysDiff(o.expected_delivery),urgency:'normal',id:o.id})
   })
   customers.filter(c=>customerStatus(c)==='overdue').forEach(c=>{
     items.push({group:'customer',label:'客戶需要回顧',desc:c.company,days:null,urgency:'normal',id:c.id})
@@ -2211,10 +2214,11 @@ async function deleteComplaint(id){
 // ===== 訂單管理 =====
 const ORDER_STATUS=[
   {id:'confirmed',label:'已確認',color:'#534AB7',bg:'#EEEDFE'},
-  {id:'in_production',label:'生產中',color:'#854F0B',bg:'#FAEEDA'},
-  {id:'shipped',label:'已出貨',color:'#185FA5',bg:'#E6F1FB'},
-  {id:'delivered',label:'已到貨',color:'#3B6D11',bg:'#EAF3DE'},
-  {id:'completed',label:'已完成',color:'#0F6E56',bg:'#E1F5EE'},
+  {id:'processing',label:'處理中',color:'#854F0B',bg:'#FAEEDA'},
+  {id:'ready',label:'備貨完成',color:'#185FA5',bg:'#E6F1FB'},
+  {id:'shipped',label:'已出貨',color:'#3B6D11',bg:'#EAF3DE'},
+  {id:'delivered',label:'已到客戶',color:'#0F6E56',bg:'#E1F5EE'},
+  {id:'completed',label:'已完成',color:'#0F6E56',bg:'#D4EFE8'},
   {id:'cancelled',label:'已取消',color:'#5F5E5A',bg:'#F1EFE8'},
 ]
 
@@ -2252,12 +2256,14 @@ function renderOrders(){
   })
   if(sum)sum.textContent=list.length+' 筆訂單'
   if(!list.length){el.innerHTML='<div class="loading">尚無訂單資料</div>';return}
+  const _alertIds=orderAlertIds()
   el.innerHTML=list.map(o=>{
     const cust=customers.find(x=>x.id===o.customer_id)
     const sup=suppliers.find(x=>x.id===o.supplier_id)
     const st=sObj(o.status,ORDER_STATUS)
     const itms=orderItems.filter(i=>i.order_id===o.id)
-    return '<div class="row" onclick="openOrderModal(\''+esc(o.id)+'\')">'+
+    const isAlert=_alertIds.has(o.id)
+    return '<div class="row" onclick="openOrderModal(\''+esc(o.id)+'\')" style="'+(isAlert?'border-left:3px solid #EF4444;background:#FEF2F2;':'')+'">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
       '<span style="font-size:13px;font-weight:500">'+o.id+'</span>'+
@@ -3587,15 +3593,19 @@ function _renderOrderModal(){
     html+='<div style="margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>建立採購單</button>'+purchaseHint+'</div>'
   }
 
-  // Section 3: Status workflow (greyed out — not in use)
-  html+='<div class="modal-foot" style="flex-direction:column;align-items:flex-start;gap:10px;opacity:0.4;pointer-events:none">'+
-    '<div class="section-title" style="margin-bottom:0">狀態操作（暫不使用）</div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
-    '<button class="btn btn-ghost btn-sm" disabled>標記生產中 →</button>'+
-    '<button class="btn btn-ghost btn-sm" disabled>標記已出貨 →</button>'+
-    '<button class="btn btn-ghost btn-sm" disabled>標記已到貨 →</button>'+
-    '<button class="btn btn-ghost btn-sm" disabled>標記完成 ✓</button>'+
-    '</div></div>'
+  // Section 3: Status workflow
+  if(!['cancelled','completed'].includes(o.status)){
+    html+='<div class="modal-foot" style="flex-direction:column;align-items:flex-start;gap:8px">'
+    html+='<div class="section-title" style="margin-bottom:0">狀態推進</div>'
+    html+='<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    if(o.status==='confirmed') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'processing\')">開始處理 →</button>'
+    if(o.status==='processing') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'ready\')">備貨完成 →</button>'
+    if(o.status==='ready') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'shipped\')">標記已出貨 →</button>'
+    if(o.status==='shipped') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'delivered\')">客戶已收到 →</button>'
+    if(o.status==='delivered') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'completed\')">完成訂單 ✓</button>'
+    html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="openCancelOrderModal()">取消訂單</button>'
+    html+='</div></div>'
+  }
 
   document.getElementById('modal-order-bd').innerHTML=html
 }
@@ -3825,10 +3835,6 @@ function openShipmentPickerForOrder(orderId){
 }
 
 async function updateOrderStatus(newStatus,extra={}){
-  if(newStatus==='in_production'&&!orderItems.some(i=>i.order_id===selectedOrderId)){
-    showToast('請先新增至少 1 筆產品品項，再標記生產中','error')
-    return
-  }
   const order=orders.find(o=>o.id===selectedOrderId)
   let patch={status:newStatus,...extra}
   if(newStatus==='cancelled'){
@@ -3897,6 +3903,47 @@ function updatePurchaseBadge(){
   const el=document.getElementById('badge-purchases')
   if(el){el.textContent=count;el.style.display=count>0?'flex':'none'}
 }
+function orderAlertIds(){
+  const wk=d=>countWorkdays(d,new Date())
+  const today=new Date().toISOString().slice(0,10)
+  const ids=new Set()
+  orders.forEach(o=>{
+    const ref=o.updated_at||o.created_at
+    if(o.status==='confirmed'&&wk(ref)>=3)ids.add(o.id)
+    else if(o.status==='processing'&&wk(ref)>=7)ids.add(o.id)
+    else if(o.status==='ready'&&wk(ref)>=3)ids.add(o.id)
+    else if(o.status==='shipped'&&o.expected_delivery&&o.expected_delivery<today)ids.add(o.id)
+  })
+  return ids
+}
+function updateOrderBadge(){
+  const ids=orderAlertIds()
+  const el=document.getElementById('badge-orders')
+  if(el){el.textContent=ids.size;el.style.display=ids.size>0?'flex':'none'}
+}
+async function autoScanTasks(){
+  // Auto-creates DB tasks for orders that have crossed alert thresholds.
+  // Skips if an open auto task for the same order already exists.
+  const {data:existing}=await sb.from('tasks').select('ref_id').eq('ref_module','order').eq('auto_generated',true).eq('status','open')
+  const existingIds=new Set((existing||[]).map(t=>t.ref_id))
+  const alertIds=orderAlertIds()
+  const inserts=[]
+  const wk=d=>countWorkdays(d,new Date())
+  const today=new Date().toISOString().slice(0,10)
+  orders.forEach(o=>{
+    if(!alertIds.has(o.id))return
+    if(existingIds.has(String(o.id)))return
+    const ref=o.updated_at||o.created_at
+    let title=''
+    if(o.status==='confirmed')title='追蹤訂單推進（已確認未處理）：'+o.id+(o.customer?' — '+o.customer:'')
+    else if(o.status==='processing')title='追蹤訂單推進（處理中）：'+o.id+(o.customer?' — '+o.customer:'')
+    else if(o.status==='ready')title='追蹤訂單出貨（備貨完成）：'+o.id+(o.customer?' — '+o.customer:'')
+    else if(o.status==='shipped')title='追蹤訂單到貨：'+o.id+(o.customer?' — '+o.customer:'')
+    if(!title)return
+    inserts.push({title,source:'auto',ref_module:'order',ref_id:String(o.id),auto_generated:true,priority:'normal',status:'open'})
+  })
+  if(inserts.length)await sb.from('tasks').insert(inserts)
+}
 function updateNavBadges(){
   const setB=(id,n)=>{const el=document.getElementById(id);if(!el)return;el.textContent=n;el.style.display=n>0?'flex':'none'}
   setB('badge-inquiry',inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').length)
@@ -3905,6 +3952,7 @@ function updateNavBadges(){
   setB('badge-complaints',complaints.filter(c=>c.status!=='resolved').length)
   updatePurchaseBadge()
   updateSampleBadge()
+  updateOrderBadge()
 }
 function updateOverdueAlert(){updateNavBadges()}
 function updateProductOverdueAlert(){updateNavBadges()}

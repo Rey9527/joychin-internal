@@ -171,13 +171,25 @@
     '高':'High',
     '一般':'Normal',
 
-    // Filter options — Orders
+    // Filter options — Orders (new status flow)
     '已確認':'Confirmed',
-    '生產中':'In Production',
+    '處理中':'Processing',
+    '備貨完成':'Ready',
     '已出貨':'Shipped',
-    '已到貨':'Delivered',
+    '已到客戶':'Delivered',
     '已完成':'Completed',
     '已取消':'Cancelled',
+    // Order status action buttons
+    '開始處理 →':'Start Processing →',
+    '備貨完成 →':'Mark Ready →',
+    '標記已出貨 →':'Mark Shipped →',
+    '客戶已收到 →':'Mark Delivered →',
+    '完成訂單 ✓':'Complete Order ✓',
+    '取消訂單':'Cancel Order',
+    '狀態推進':'Status Actions',
+    // Order alert labels
+    '未出貨但交期已過':'Delivery overdue — not shipped',
+    '出貨後超預期交期':'Past expected delivery after shipment',
 
     // Filter options — Shipments
     '已規劃':'Planned',
@@ -1432,6 +1444,15 @@
     '無法產生預覽連結：':'Cannot generate preview link: ',
     '無法產生下載連結：':'Cannot generate download link: ',
     '載入貨物明細失敗：':'Load cargo details failed: ',
+
+    // Dashboard
+    '目前無待追蹤項目':'Nothing to track',
+    '✓ 目前無待追蹤項目':'✓ Nothing to track',
+
+    // Shipment cargo status
+    '✓ 已收到':'✓ Received',
+    '✗ 短缺/未到':'✗ Short/Missing',
+    '— 未確認':'— Unconfirmed',
   }
 
   // Toast prefix map: Chinese prefix → English prefix (for dynamic messages)
@@ -1629,6 +1650,7 @@
     ['無法產生預覽連結：','Cannot generate preview link: '],
     ['無法產生下載連結：','Cannot generate download link: '],
     ['載入貨物明細失敗：','Load cargo details failed: '],
+    ['已標記供應商出貨','Marked as shipped by supplier'],
   ]
 
   // ── Dynamic pattern translator ────────────────────────────────────────────
@@ -1671,6 +1693,25 @@
     [/^確定要(.+)此使用者嗎？$/,(_,action)=>'Confirm '+action+' this user?'],
     // "N 筆" counter generic → "N items"
     [/^(\d+)\s*筆$/,(_,n)=>n+' items'],
+    // Dashboard summary
+    [/^(\d+)\s*項待追蹤$/,(_,n)=>n+' items to track'],
+    // Dashboard group section headers
+    [/^📋\s*詢價（(\d+)）$/,(_,n)=>'📋 Inquiries ('+n+')'],
+    [/^🧪\s*樣品（(\d+)）$/,(_,n)=>'🧪 Samples ('+n+')'],
+    [/^📦\s*訂單（(\d+)）$/,(_,n)=>'📦 Orders ('+n+')'],
+    [/^👥\s*客戶（(\d+)）$/,(_,n)=>'👥 Customers ('+n+')'],
+    [/^🚢\s*船運（(\d+)）$/,(_,n)=>'🚢 Shipments ('+n+')'],
+    [/^📦\s*庫存（(\d+)）$/,(_,n)=>'📦 Inventory ('+n+')'],
+    // Complaint summary
+    [/^(\d+)\s*筆處理中\s*\/\s*共\s*(\d+)\s*筆$/,(_,a,t)=>a+' in progress / '+t+' total'],
+    // Shipment list summary
+    [/^(\d+)\s*筆船運批次$/,(_,n)=>n+' shipment(s)'],
+    // Sample list summary
+    [/^(\d+)\s*筆樣品$/,(_,n)=>n+' sample(s)'],
+    // Product list summary
+    [/^(\d+)\s*個產品$/,(_,n)=>n+' product(s)'],
+    // Order card item count
+    [/^(\d+)\s*品項$/,(_,n)=>n+' item(s)'],
     // Summary bar strings (set via textContent)
     [/^(\d+)\s*筆進行中\s*\/\s*共\s*(\d+)\s*筆$/,(_,a,t)=>a+' active / '+t+' total'],
     [/^(\d+)\s*筆符合\s*\/\s*(\d+)\s*筆進行中\s*\/\s*共\s*(\d+)\s*筆$/,(_,m,a,t)=>m+' matching / '+a+' active / '+t+' total'],
@@ -1701,6 +1742,35 @@
     [/未關聯訂單/g,'No linked order'],
     [/現有\s*([\d.]+)\s*卷/g,(_,n)=>'Stock: '+n+' rolls'],
     [/安全水位\s*([\d.]+)\s*卷/g,(_,n)=>'Min: '+n+' rolls'],
+    // PO item receiving status
+    [/— 未到貨/g,'— Not received'],
+    [/✓ 全數到貨/g,'✓ All received'],
+    [/⚠ 部分到貨/g,'⚠ Partial'],
+    [/↑ 超量到貨/g,'↑ Over-received'],
+    // PO total amount label
+    [/總金額\s*/g,'Total '],
+    // Shipment linked PO accounting number
+    [/\/\s*會計單號：/g,'/ Acct No.: '],
+    // Quote card and modal header supplier label
+    [/供應商：/g,'Supplier: '],
+    // Quote item margin display
+    [/利潤率\s*/g,'Margin '],
+    // Order card fields
+    [/客戶單號：/g,'Cust PO: '],
+    [/預計\s+(\d{4}-\d{2}-\d{2})/g,(_,d)=>'ETA '+d],
+    // Product review date
+    [/上次確認：/g,'Last confirmed: '],
+    [/（(\d+)天週期）/g,(_,n)=>'('+n+'-day cycle)'],
+    // Customer review date
+    [/上次回顧：/g,'Last review: '],
+    // Shared day counter (products & customers)
+    [/剩 (\d+) 天/g,(_,n)=>n+' days left'],
+    [/已過 (\d+) 天/g,(_,n)=>n+' days overdue'],
+    // PO shipment badge status suffixes
+    [/(\d+)\s*批次/g,(_,n)=>n+' batch(es)'],
+    [/ · 已訂艙/g,' · Booked'],
+    [/ · 🚢 在途中/g,' · 🚢 In Transit'],
+    [/ · ✓ 已到港/g,' · ✓ Arrived'],
   ]
 
   function translateDynamic(text){
