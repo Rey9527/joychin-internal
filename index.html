@@ -618,10 +618,6 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <button class="btn btn-primary" onclick="startPurchaseShopping()"><i data-lucide="shopping-cart" style="width:14px;height:14px;margin-right:5px;vertical-align:-2px"></i>開始採購</button>
         </div>
       </div>
-      <div style="display:flex;gap:0;border-bottom:1px solid #e5e5e0;margin-bottom:12px">
-        <button class="po-subtab-btn" data-tab="active" onclick="setPOSubtab('active')" style="padding:6px 16px;background:none;border:none;border-bottom:2px solid #333;font-size:13px;font-weight:600;color:#333;cursor:pointer">進行中</button>
-        <button class="po-subtab-btn" data-tab="completed" onclick="setPOSubtab('completed')" style="padding:6px 16px;background:none;border:none;border-bottom:2px solid transparent;font-size:13px;font-weight:400;color:#888;cursor:pointer">已完成</button>
-      </div>
       <div class="filter-bar mobile-drawer-source" id="purchase-filter-bar">
         <select id="pf-status" onchange="renderPurchaseOrders()">
           <option value="">全部狀態</option>
@@ -1333,7 +1329,6 @@ let _isDirty=false
 let _dbCustomerRange='thisMonth'
 let _qPendingItems={},_qPendingHeader={}
 let _pendingQuoteItems=[],_qPendingItemSeq=0,_draftNewItem=null
-let _poSubtab='active'
 let _qiProfitQtys=[1000,5000,10000,50000,100000],_qSimQtys={}
 let _selectedQiId=null
 let _pendingOrderItems=[]
@@ -3679,7 +3674,7 @@ function updateSampleBadge(){
   if(el){el.textContent=ids.size;el.style.display=ids.size>0?'flex':'none'}
 }
 function updatePurchaseBadge(){
-  const EXCLUDED=['draft','cancelled','rejected','completed']
+  const EXCLUDED=['draft','cancelled','rejected']
   const linkedPoIds=new Set(shipmentPurchaseOrders.map(x=>String(x.purchase_order_id)))
   const count=purchaseOrders.filter(p=>!EXCLUDED.includes(p.status)&&!linkedPoIds.has(String(p.id))).length
   const el=document.getElementById('badge-purchases')
@@ -3797,33 +3792,6 @@ function populatePurchaseSupplierFilter(){
   sel.innerHTML='<option value="">全部供應商</option>'+cos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
 }
 
-function setPOSubtab(tab){
-  _poSubtab=tab
-  document.querySelectorAll('.po-subtab-btn').forEach(b=>{
-    const active=b.dataset.tab===tab
-    b.style.fontWeight=active?'600':'400'
-    b.style.borderBottom=active?'2px solid #333':'2px solid transparent'
-    b.style.color=active?'#333':'#888'
-  })
-  const fb=document.getElementById('purchase-filter-bar')
-  if(fb)fb.style.display=tab==='active'?'':'none'
-  renderPurchaseOrders()
-}
-function poShipmentBadgeSimple(poId,poStatus){
-  const EXCLUDED=['draft','cancelled','rejected','completed']
-  const linkedIds=shipmentPurchaseOrders
-    .filter(x=>String(x.purchase_order_id)===String(poId))
-    .map(x=>String(x.shipment_id))
-  const linked=shipments.filter(s=>linkedIds.includes(String(s.id)))
-  if(!linked.length){
-    if(!EXCLUDED.includes(poStatus))
-      return '<span class="badge" style="background:#EF4444;color:#fff;border:1px solid #EF4444">未安排船運</span>'
-    return ''
-  }
-  const allDone=linked.every(s=>s.status==='delivered'||s.status==='completed')
-  if(allDone)return '<span class="badge" style="background:#E1F5EE;color:#0F6E56;border:1px solid #0F6E56">已到貨</span>'
-  return '<span class="badge" style="background:#FEF3C7;color:#D97706;border:1px solid #D97706">部分到貨</span>'
-}
 function poShipmentBadge(poId,poStatus){
   const EXCLUDED=['draft','cancelled','rejected']
   const linkedIds=shipmentPurchaseOrders
@@ -3860,30 +3828,24 @@ function renderPurchaseOrders(){
   const el=document.getElementById('purchase-list')
   const sum=document.getElementById('purchase-summary')
   if(!el)return
-  const DONE_STATUSES=['completed','cancelled']
+  const statusFilter=document.getElementById('pf-status')?.value||''
+  const supplierFilter=document.getElementById('pf-supplier')?.value||''
+  let filtered=purchaseOrders
+  if(statusFilter)filtered=filtered.filter(p=>p.status===statusFilter)
+  if(supplierFilter)filtered=filtered.filter(p=>resolvePurchaseSupplierName(p)===supplierFilter)
+  const sortMode=document.getElementById('pf-sort')?.value||'accounting_desc'
   const _accSort=(a,b,asc)=>{const an=a.accounting_no||'',bn=b.accounting_no||'';if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return asc?an.localeCompare(bn):bn.localeCompare(an)}
-  let filtered
-  if(_poSubtab==='completed'){
-    filtered=[...purchaseOrders.filter(p=>DONE_STATUSES.includes(p.status))].sort((a,b)=>_accSort(a,b,true))
-  } else {
-    filtered=purchaseOrders.filter(p=>!DONE_STATUSES.includes(p.status))
-    const statusFilter=document.getElementById('pf-status')?.value||''
-    const supplierFilter=document.getElementById('pf-supplier')?.value||''
-    if(statusFilter)filtered=filtered.filter(p=>p.status===statusFilter)
-    if(supplierFilter)filtered=filtered.filter(p=>resolvePurchaseSupplierName(p)===supplierFilter)
-    const sortMode=document.getElementById('pf-sort')?.value||'accounting_desc'
-    if(sortMode==='accounting_asc')filtered=[...filtered].sort((a,b)=>_accSort(a,b,true))
-    else if(sortMode==='accounting_desc')filtered=[...filtered].sort((a,b)=>_accSort(a,b,false))
-    else filtered=[...filtered].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
-  }
+  if(sortMode==='accounting_asc')filtered=[...filtered].sort((a,b)=>_accSort(a,b,true))
+  else if(sortMode==='accounting_desc')filtered=[...filtered].sort((a,b)=>_accSort(a,b,false))
+  else filtered=[...filtered].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
   if(sum)sum.textContent=filtered.length+' 筆採購單'
   if(!filtered.length){el.innerHTML='<div class="loading">尚無採購單資料</div>';return}
   el.innerHTML=filtered.map(p=>{
     const st=PURCHASE_STATUS.find(s=>s.id===p.status)||{label:p.status,color:'#888',bg:'#f0f0f0'}
     const d=p.created_at?new Date(p.created_at).toLocaleDateString('zh-TW'):''
     const supplierName=resolvePurchaseSupplierName(p)
-    const shBadge=_poSubtab==='active'?poShipmentBadgeSimple(p.id,p.status):''
-    const isUnlinked=shBadge.includes('未安排船運')
+    const shBadge=poShipmentBadge(p.id,p.status)
+    const isUnlinked=shBadge.includes('未歸船運')
     return '<div class="row" onclick="openPurchaseModal(\''+p.id+'\')" style="'+(isUnlinked?'border-left:3px solid #EF4444;background:#FEF2F2;':'')+'" >'+
       '<div style="flex:1;min-width:0">'+
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'+
