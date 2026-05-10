@@ -1851,11 +1851,13 @@ function scanDashboardItems(){
     const s=samples.find(x=>x.id===r.sample_id)
     items.push({group:'sample',label:'追蹤客戶樣品回饋',desc:s?.product_name||'#'+r.sample_id,days:daysDiff(r.shipped_date),urgency:'normal',id:r.sample_id})
   })
-  orders.filter(o=>['confirmed','processing','ready'].includes(o.status)&&o.expected_delivery&&daysDiff(o.expected_delivery)>=0).forEach(o=>{
-    items.push({group:'order',label:'未出貨但交期已過',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:daysDiff(o.expected_delivery),urgency:'high',id:o.id})
+  orders.filter(o=>['confirmed','processing','ready'].includes(o.status)&&o.expected_delivery&&String(o.expected_delivery).slice(0,10)<todayStr).forEach(o=>{
+    const d=countWorkdays(String(o.expected_delivery).slice(0,10),today)
+    items.push({group:'order',label:'未出貨但交期已過',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:d||null,urgency:'high',id:o.id})
   })
-  orders.filter(o=>o.status==='shipped'&&o.expected_delivery&&daysDiff(o.expected_delivery)>=0).forEach(o=>{
-    items.push({group:'order',label:'出貨後超預期交期',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:daysDiff(o.expected_delivery),urgency:'normal',id:o.id})
+  orders.filter(o=>o.status==='shipped'&&o.expected_delivery&&String(o.expected_delivery).slice(0,10)<todayStr).forEach(o=>{
+    const d=countWorkdays(String(o.expected_delivery).slice(0,10),today)
+    items.push({group:'order',label:'出貨後超預期交期',desc:'#'+o.id+(o.customer?' · '+o.customer:''),days:d||null,urgency:'normal',id:o.id})
   })
   customers.filter(c=>customerStatus(c)==='overdue').forEach(c=>{
     items.push({group:'customer',label:'客戶需要回顧',desc:c.company,days:null,urgency:'normal',id:c.id})
