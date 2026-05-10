@@ -1860,7 +1860,7 @@ function scanDashboardItems(){
   customers.filter(c=>customerStatus(c)==='overdue').forEach(c=>{
     items.push({group:'customer',label:'客戶需要回顧',desc:c.company,days:null,urgency:'normal',id:c.id})
   })
-  const linkedPoIds=new Set(shipmentPurchaseOrders.map(x=>String(x.po_id)))
+  const linkedPoIds=new Set(shipmentPurchaseOrders.map(x=>String(x.purchase_order_id)))
   purchaseOrders.filter(po=>!['completed','cancelled'].includes(po.status)&&!linkedPoIds.has(String(po.id))).forEach(po=>{
     items.push({group:'shipment',label:'採購單未掛船運',desc:'#'+po.id+(po.supplier?' · '+po.supplier:''),days:null,urgency:'normal',id:po.id,gotoModule:'purchases'})
   })
@@ -2315,7 +2315,7 @@ function shipmentLinkedPurchases(shipmentId){
 }
 function purchaseLinkedShipments(purchaseOrderId){
   return shipmentPurchaseOrders
-    .filter(x=>String(x.po_id)===String(purchaseOrderId))
+    .filter(x=>String(x.purchase_order_id)===String(purchaseOrderId))
     .map(link=>shipments.find(s=>String(s.id)===String(link.shipment_id)))
     .filter(Boolean)
 }
