@@ -1745,6 +1745,9 @@
     [/安全水位\s*([\d.]+)\s*卷/g,(_,n)=>'Min: '+n+' rolls'],
     // Sample listing rows: "· 數量 5 roll" inline display
     [/· 數量 /g,'· Qty: '],
+    // Sample list row: "· 索取 N 筆" / "· 寄出 N 筆"
+    [/· 索取 (\d+) 筆/g,(_,n)=>'· '+n+' inbound'],
+    [/· 寄出 (\d+) 筆/g,(_,n)=>'· '+n+' shipped'],
     // PO item receiving status
     [/— 未到貨/g,'— Not received'],
     [/✓ 全數到貨/g,'✓ All received'],
