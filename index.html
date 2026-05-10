@@ -5939,7 +5939,7 @@ function openQuoteItemModal(itemId){
     '</select></div>'+
     '<div><label>報給客戶的單位</label><select '+(editable?'onchange="qiModalChange(\'customer_pricing_unit\',this.value)"':dis)+'>'+
     '<option value="">—</option>'+
-    '<option value="m2"'+(it.customer_pricing_unit==='m2'?' selected':'')+'>m²</option>'+
+    '<option value="m2"'+(!it.customer_pricing_unit||it.customer_pricing_unit==='m2'?' selected':'')+'>m²</option>'+
     '<option value="m"'+(it.customer_pricing_unit==='m'?' selected':'')+'>m</option>'+
     '</select></div>'+
     '<div><label>MOQ</label><input id="qi-modal-moq" value="'+(it.moq||'')+'" placeholder="例：1000m²" '+(editable?'onchange="qiModalChange(\'moq\',this.value)"':ro)+' /></div>'+
@@ -6120,13 +6120,16 @@ function qAddFromInquiry(){
   if(!inqId){showToast('請選擇詢價單','error');return}
   const inq=inquiries.find(i=>i.id===inqId);if(!inq)return
   const pp=getInquirySupplierPriceParts(inq.supplier_price)
+  const unitRaw=(pp.unit||'').toLowerCase()
+  const pu=unitRaw.includes('m2')||unitRaw.includes('m²')||unitRaw.includes('sqm')?'m2':unitRaw==='m'?'m':'m2'
   const inf=document.getElementById('q-add-inq-form');if(inf)inf.style.display='none'
   openNewPendingItemEdit({
     product:inq.product||'—',spec:inq.spec||null,product_id:null,
     cost_price:pp.amount||null,
     cost_currency:pp.currency||settings.default_cost_currency||'USD',
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
-    apply_customs:false
+    apply_customs:false,
+    pricing_unit:pu,customer_pricing_unit:pu
   })
 }
 function qAddManualItem(){
