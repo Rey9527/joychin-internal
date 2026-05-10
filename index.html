@@ -5937,7 +5937,7 @@ function openQuoteItemModal(itemId){
     '</div>'+
     '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>寬幅</span>'+(it.product_id?'<span style="font-size:10px;color:#aaa">來自目錄</span>':'')+'</label>'+
     '<input type="text" value="'+(it.width_m!=null?Math.round(it.width_m*1000)+'mm':'—')+'"'+ro+' /></div>'+
-    '<div><label>計價單位（成本）</label><select '+(editable?'onchange="qiModalChange(\'pricing_unit\',this.value)"':dis)+'>'+
+    '<div><label>計價單位（成本）<span class="req">*</span></label><select '+(editable?'onchange="qiModalChange(\'pricing_unit\',this.value)"':dis)+'>'+
     '<option value="">—</option>'+
     '<option value="m2"'+(!it.pricing_unit||it.pricing_unit==='m2'?' selected':'')+'>平方米 m²</option>'+
     '<option value="m"'+(it.pricing_unit==='m'?' selected':'')+'>米 m</option>'+
