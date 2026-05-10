@@ -636,8 +636,8 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <option value="">全部供應商</option>
         </select>
         <select id="pf-sort" onchange="renderPurchaseOrders()">
-          <option value="accounting_asc" selected>會計編號（升序）</option>
-          <option value="accounting_desc">會計編號（降序）</option>
+          <option value="accounting_desc" selected>會計編號（降序）</option>
+          <option value="accounting_asc">會計編號（升序）</option>
           <option value="created_desc">建立日期（新→舊）</option>
         </select>
       </div>
@@ -3833,7 +3833,7 @@ function renderPurchaseOrders(){
   let filtered=purchaseOrders
   if(statusFilter)filtered=filtered.filter(p=>p.status===statusFilter)
   if(supplierFilter)filtered=filtered.filter(p=>resolvePurchaseSupplierName(p)===supplierFilter)
-  const sortMode=document.getElementById('pf-sort')?.value||'accounting_asc'
+  const sortMode=document.getElementById('pf-sort')?.value||'accounting_desc'
   const _accSort=(a,b,asc)=>{const an=a.accounting_no||'',bn=b.accounting_no||'';if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return asc?an.localeCompare(bn):bn.localeCompare(an)}
   if(sortMode==='accounting_asc')filtered=[...filtered].sort((a,b)=>_accSort(a,b,true))
   else if(sortMode==='accounting_desc')filtered=[...filtered].sort((a,b)=>_accSort(a,b,false))
