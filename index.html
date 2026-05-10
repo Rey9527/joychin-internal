@@ -4649,10 +4649,11 @@ function renderPshopOrderSection(){
   const supIds=pshopGetActiveSupplierIds()
   const eligible=orders.filter(o=>o.status!=='cancelled'&&(o.approval_status||'none')!=='rejected')
   const withItems=eligible.filter(o=>supIds.includes(o.supplier_id)&&orderItems.some(i=>i.order_id===o.id))
+  console.log('renderPshopOrderSection — supIds:', supIds, 'withItems:', withItems.length, 'total orderItems:', orderItems.length)
   if(!withItems.length){el.innerHTML='<div style="color:#aaa;font-size:12px">此供應商沒有可帶入的訂單品項</div>';return}
   const purchasedOrderIds=new Set(purchaseOrderItems.map(i=>String(i.ref_order_id)).filter(Boolean))
   el.innerHTML=withItems.map(o=>{
-    const items=orderItems.filter(i=>i.order_id===o.id&&supIds.includes(i.supplier_id))
+    const items=orderItems.filter(i=>i.order_id===o.id)
     const custName=o.customer_name||o.customer_id||'—'
     const alreadyPurchased=purchasedOrderIds.has(String(o.id))
     const badge=alreadyPurchased?'<span style="font-size:10px;color:#999;background:#f0f0ec;border:1px solid #ddd;border-radius:3px;padding:1px 6px;margin-left:6px">已採購</span>':''
@@ -4713,7 +4714,12 @@ function pshopAddToCart(productId){
 
 function pshopAddFromOrder(orderId){
   const supIds=pshopGetActiveSupplierIds()
-  const items=orderItems.filter(i=>String(i.order_id)===String(orderId)&&supIds.includes(i.supplier_id))
+  console.log('order id:', orderId)
+  console.log('matching items:', orderItems.filter(i=>String(i.order_id)===String(orderId)))
+  console.log('all orderItems count:', orderItems.length)
+  console.log('supIds:', supIds)
+  console.log('items with supplier filter:', orderItems.filter(i=>String(i.order_id)===String(orderId)&&supIds.includes(i.supplier_id)))
+  const items=orderItems.filter(i=>String(i.order_id)===String(orderId))
   if(!items.length){showToast('No items found for this order','error');return}
   items.forEach(it=>{
     const existing=_pshopCart.findIndex(c=>c.product_id===it.product_id&&c.ref_order_id===orderId)
