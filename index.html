@@ -1660,7 +1660,7 @@ function _renderSampleModal(){
         body+='Purpose: Customer evaluation\n\n'
         body+='Please advise on the availability and estimated delivery timeline.\n\n'
         body+='Thank you for your assistance.\n\nBest regards,\n'+(currentUser?.name||'—')+'\nJOY CHIN PSA INCORPORATION CO., LTD.\nTel: 02-7093175#6'
-        actionBtn+='<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="toggleSmEmailTpl(\''+tplId+'\')">📧 郵件範本</button>'
+        actionBtn+='<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="toggleSmEmailTpl(\''+tplId+'\')">📧 Email Template</button>'
         emailTplHtml='<div id="'+tplId+'" style="display:none;margin-top:8px;padding:10px;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px">'+
           '<div style="font-size:11px;font-weight:500;color:#444;margin-bottom:6px">Subject: '+esc(emailSubj)+'</div>'+
           '<textarea id="'+tplId+'-body" rows="13" style="width:100%;font-size:11px;font-family:monospace;border:1px solid #e5e5e0;border-radius:4px;padding:8px;resize:vertical;line-height:1.5">'+esc(body)+'</textarea>'+
@@ -2912,7 +2912,7 @@ function openShipmentEditModal(id){
   document.getElementById('modal-shipment-edit-hd').innerHTML=
     '<div style="font-size:14px;font-weight:600">'+(isNew?'新增船運批次':'🚢 船隻資訊')+'</div>'+
     '<div style="display:flex;align-items:center;gap:8px">'+
-      '<button class="btn btn-primary btn-sm" onclick="saveShipment('+(isNew?'null':id)+')">'+(isNew?'建立':'儲存')+'</button>'+
+      '<button class="btn btn-primary btn-sm" onclick="saveShipment('+(isNew?'null':id)+')">'+(isNew?'Create':'Save')+'</button>'+
       '<button class="modal-close" onclick="closeModal(\'modal-shipment-edit\')">×</button>'+
     '</div>'
   let html=
@@ -8018,7 +8018,7 @@ function renderUsersMgmt(){
   if(!el)return
   const logsBtn=document.getElementById('users-subtab-logs')
   if(logsBtn)logsBtn.style.display=isManager()?'':'none'
-  if(sum)sum.textContent=users.length+' 位使用者'
+  if(sum)sum.textContent=users.length+' user'+(users.length===1?'':'s')
   
   if(!users.length){
     el.innerHTML='<div class="loading">尚無使用者資料</div>'
