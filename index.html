@@ -1898,13 +1898,12 @@ function renderDashboard(){
     const activeInq=inquiries.filter(i=>!['sent_to_quote','closed'].includes(i.status)).length
     const activeQuotes=quoteHeaders.filter(q=>['draft','sent'].includes(q.status)).length
     const thisMonthOrders=orders.filter(o=>o.order_date&&o.order_date.startsWith(thisMonthStr)).length
-    const openTasks=(typeof tasks!=='undefined'?tasks:[]).filter(t=>t.status==='open').length
     const pendingApproval=purchaseOrders.filter(po=>po.status==='pending_approval').length
     const cardDefs=[
       {num:activeInq,label:'進行中詢價',tab:'inquiry'},
       {num:activeQuotes,label:'進行中報價',tab:'quotes'},
       {num:thisMonthOrders,label:'本月訂單',tab:'orders'},
-      {num:openTasks,label:'待處理工作',tab:null},
+      {num:items.length,label:'待追蹤項目',tab:null},
       {num:pendingApproval,label:'待審批採購單',tab:'purchases'},
     ]
     let ph='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">'
