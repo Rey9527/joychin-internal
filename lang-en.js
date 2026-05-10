@@ -160,6 +160,7 @@
     '入庫完成，船運已標記為已完成':'Receipt saved. Shipment marked as completed.',
     '此船運尚未掛載採購單':'No purchase orders linked to this shipment',
     '→ 前往':'→ Go',
+    '→ 前往詢價單':'→ Go to Inquiry',
     '已 ':'After ',
     ' 天':' days',
     '項待追蹤':' items to follow up',
@@ -1742,6 +1743,8 @@
     [/未關聯訂單/g,'No linked order'],
     [/現有\s*([\d.]+)\s*卷/g,(_,n)=>'Stock: '+n+' rolls'],
     [/安全水位\s*([\d.]+)\s*卷/g,(_,n)=>'Min: '+n+' rolls'],
+    // Sample listing rows: "· 數量 5 roll" inline display
+    [/· 數量 /g,'· Qty: '],
     // PO item receiving status
     [/— 未到貨/g,'— Not received'],
     [/✓ 全數到貨/g,'✓ All received'],
