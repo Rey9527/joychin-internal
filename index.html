@@ -4650,20 +4650,23 @@ function renderPshopOrderSection(){
   const eligible=orders.filter(o=>o.status!=='cancelled'&&(o.approval_status||'none')!=='rejected')
   const withItems=eligible.filter(o=>supIds.includes(o.supplier_id)&&orderItems.some(i=>i.order_id===o.id))
   if(!withItems.length){el.innerHTML='<div style="color:#aaa;font-size:12px">此供應商沒有可帶入的訂單品項</div>';return}
+  const purchasedOrderIds=new Set(purchaseOrderItems.map(i=>String(i.ref_order_id)).filter(Boolean))
   el.innerHTML=withItems.map(o=>{
     const items=orderItems.filter(i=>i.order_id===o.id&&supIds.includes(i.supplier_id))
     const custName=o.customer_name||o.customer_id||'—'
+    const alreadyPurchased=purchasedOrderIds.has(String(o.id))
+    const badge=alreadyPurchased?'<span style="font-size:10px;color:#999;background:#f0f0ec;border:1px solid #ddd;border-radius:3px;padding:1px 6px;margin-left:6px">已採購</span>':''
+    const btn=alreadyPurchased
+      ?'<button class="btn btn-sm" style="margin-top:8px;color:#aaa;border-color:#ddd;cursor:not-allowed" disabled>已有採購單</button>'
+      :'<button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="pshopAddFromOrder(\''+o.id+'\')">Add to Cart</button>'
     return '<div style="border:1px solid #e5e5e0;border-radius:4px;margin-bottom:8px;overflow:hidden">'+
       '<div style="background:#f9f9f7;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">'+
-      '<div><span style="font-size:12px;font-weight:600">'+esc(o.id)+'</span> <span style="font-size:11px;color:#888">— '+esc(custName)+'</span></div>'+
-      '<span style="font-size:11px;color:#0F6E56">'+items.length+' 筆</span>'+
+      '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px"><span style="font-size:12px;font-weight:600">'+esc(o.id)+'</span><span style="font-size:11px;color:#888">— '+esc(custName)+'</span>'+badge+'</div>'+
+      '<span style="font-size:11px;color:#0F6E56">'+items.length+' items</span>'+
       '</div>'+
       '<div style="display:none;padding:10px 12px;border-top:1px solid #f0f0eb">'+
-      items.map(it=>'<label style="display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;cursor:pointer">'+
-        '<input type="checkbox" class="pshop-order-item-chk" data-order-id="'+o.id+'" value="'+it.id+'" />'+
-        '<span>'+esc(it.product_name||'')+(it.qty?' × '+it.qty+' '+(it.unit||''):'')+'</span>'+
-      '</label>').join('')+
-      '<button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="pshopAddFromOrder(\''+o.id+'\')">加入採購車</button>'+
+      items.map(it=>'<div style="font-size:12px;padding:3px 0;color:#555">'+esc(it.product_name||'')+(it.qty?' × '+it.qty+' '+(it.unit||''):'')+'</div>').join('')+
+      btn+
       '</div></div>'
   }).join('')
 }
@@ -4710,11 +4713,9 @@ function pshopAddToCart(productId){
 
 function pshopAddFromOrder(orderId){
   const supIds=pshopGetActiveSupplierIds()
-  const checked=[...document.querySelectorAll('.pshop-order-item-chk[data-order-id="'+orderId+'"]:checked')]
-  if(!checked.length){showToast('請勾選至少一筆品項','error');return}
-  const selectedIds=checked.map(c=>parseInt(c.value))
-  const selectedItems=orderItems.filter(i=>selectedIds.includes(i.id)&&supIds.includes(i.supplier_id))
-  selectedItems.forEach(it=>{
+  const items=orderItems.filter(i=>String(i.order_id)===String(orderId)&&supIds.includes(i.supplier_id))
+  if(!items.length){showToast('No items found for this order','error');return}
+  items.forEach(it=>{
     const existing=_pshopCart.findIndex(c=>c.product_id===it.product_id&&c.ref_order_id===orderId)
     if(existing>=0){_pshopCart[existing].qty=(parseFloat(_pshopCart[existing].qty)||0)+(parseFloat(it.qty)||1)}
     else{_pshopCart.push({product_id:it.product_id||null,product_name:it.product_name,spec:it.spec||null,unit:it.unit||null,unit_price:it.unit_price||0,currency:it.currency||'USD',qty:parseFloat(it.qty)||1,ref_order_id:orderId})}
@@ -4722,7 +4723,7 @@ function pshopAddFromOrder(orderId){
   renderPshopProductArea()
   renderPshopCart()
   pshopSyncResponsive()
-  showToast(selectedItems.length+' 筆品項已加入採購車')
+  showToast(items.length+' items added to cart')
 }
 
 function pshopRemoveFromCart(idx){
