@@ -6,6 +6,7 @@
 <title>JOY CHIN PSA — 業務系統</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; }
@@ -5559,13 +5560,14 @@ function renderQuoteModalBd(){
     h.status==='draft'?
       '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存草稿</button>'+
       '<div style="display:flex;gap:8px">'+
-      '<button class="btn btn-ghost btn-sm" onclick="showToast(\'PDF 產生功能即將開放\')">產生 PDF</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 輸出 PDF</button>'+
       '<button class="btn btn-ghost btn-sm" onclick="showToast(\'郵件範本功能即將開放\')">複製郵件範本</button>'+
       '<button class="btn btn-ghost btn-sm" style="color:#534AB7;border-color:#534AB7" onclick="qSaveAndStatus(\'sent\')">標記為已送客戶</button>'+
       '</div>'
     :h.status==='sent'?
       '<button class="btn btn-ghost btn-sm" onclick="editQuote()">修改報價</button>'+
       '<div style="display:flex;gap:8px">'+
+      '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 輸出 PDF</button>'+
       '<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="qAcceptQuote()">客戶接受 ✓</button>'+
       '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="qSaveAndStatus(\'rejected\')">客戶拒絕 ✗</button>'+
       '</div>'
@@ -5581,6 +5583,7 @@ function renderQuoteModalBd(){
     :h.status==='accepted'?
       '<button class="btn btn-ghost btn-sm" onclick="editQuote()">修改報價</button>'+
       '<div style="display:flex;gap:8px">'+
+      '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 輸出 PDF</button>'+
       '<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">送去訂單 →</button>'+
       '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'+
       '</div>'
@@ -5669,6 +5672,110 @@ async function editQuote(){
   await Promise.all([loadQuotes(),loadQuoteChanges()])
   renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
   showToast('已儲存修改前快照，請更新報價內容後重新送出')
+}
+
+async function generateQuotePDF(headerId){
+  const h=quoteHeaders.find(x=>x.id===headerId);if(!h)return
+  const items=quoteItems.filter(it=>it.header_id===headerId)
+  const cust=customers.find(c=>c.company===h.customer)
+  const toBase64=url=>fetch(url).then(r=>r.blob()).then(b=>new Promise(res=>{
+    const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(b)
+  }))
+  let LOGO_B64=null,SIG_B64=null
+  try{LOGO_B64=await toBase64('assets/logo.png')}catch(e){}
+  try{SIG_B64=await toBase64('assets/signature.png')}catch(e){}
+  const{jsPDF}=window.jspdf
+  const doc=new jsPDF('p','mm','a4')
+  const PW=210,PH=297,ML=14,MR=14,CW=PW-ML-MR
+  const sf=(style,size,rgb)=>{doc.setFont('helvetica',style);doc.setFontSize(size);if(rgb)doc.setTextColor(...rgb)}
+  const D=[30,30,30],G=[130,130,130],LG=[200,200,200],W=[255,255,255],NAVY=[22,45,82]
+  let y=14
+  // Logo
+  if(LOGO_B64){doc.addImage(LOGO_B64,'PNG',ML,y,38,13)}
+  else{sf('bold',13,NAVY);doc.text('JOYCHIN',ML,y+9)}
+  // Company info right
+  sf('normal',7.5,G)
+  ;['109/732 Moo 2, Tambol Phrakkasamai,','Amphur Muangsamutprakarn, Samutprakarn 10270','Tel: 02-7093175#6  |  Fax: 02-7093177','Tax ID: 0-1055-56146-97-6 Head Office']
+    .forEach((l,i)=>doc.text(l,PW-MR,y+i*4,{align:'right'}))
+  y=34
+  doc.setDrawColor(...LG);doc.setLineWidth(0.25);doc.line(ML,y,PW-MR,y);y+=2
+  // Banner
+  doc.setFillColor(...NAVY);doc.rect(ML,y,CW,10,'F')
+  sf('bold',15,W);doc.text('QUOTATION',PW/2,y+7,{align:'center'});y+=14
+  // Doc info right + Customer left
+  const today=new Date()
+  const validUntil=new Date(today);validUntil.setDate(validUntil.getDate()+15)
+  const fmt=d=>d.toISOString().slice(0,10)
+  const docInfo=[['Date:',fmt(today)],['Quotation No:',String(h.id)],['Customer ID:',cust?.id?String(cust.id):'—'],['Valid Until:',fmt(validUntil)],['Prepared By:',currentUser?.name||'—']]
+  const RLX=ML+CW*0.6,RX=PW-MR
+  docInfo.forEach(([label,val],i)=>{sf('bold',7.5,G);doc.text(label,RLX,y+i*4.8);sf('normal',7.5,D);doc.text(val,RX,y+i*4.8,{align:'right'})})
+  sf('bold',7,G);doc.text('QUOTATION FOR',ML,y)
+  sf('bold',10,D);doc.text(h.customer||'—',ML,y+6)
+  sf('normal',8,G);if(cust?.name)doc.text(cust.name,ML,y+11)
+  y+=26
+  // Divider
+  doc.setDrawColor(...LG);doc.line(ML,y,PW-MR,y);y+=3
+  // Trade terms
+  const terms=[{label:'SALESPERSON',val:currentUser?.name||'—'},{label:'INCOTERMS',val:h.incoterms||'EXW'},{label:'PORT',val:h.port||'—'},{label:'SHIP FROM',val:h.ship_from||'Bangkok, TH'},{label:'PAYMENT TERM',val:h.payment_term||'—'}]
+  const tcw=CW/terms.length
+  terms.forEach((t,i)=>{const tx=ML+i*tcw;sf('bold',6.5,G);doc.text(t.label,tx,y);sf('normal',7.5,D);doc.text(t.val,tx,y+4)})
+  y+=10
+  doc.setDrawColor(...LG);doc.line(ML,y,PW-MR,y);y+=2
+  // Items table header
+  const C_NO=8,C_ITEM=80,C_UNIT=34,C_QTY=20,C_AMT=CW-C_NO-C_ITEM-C_UNIT-C_QTY
+  doc.setFillColor(238,238,235);doc.rect(ML,y,CW,6,'F')
+  sf('bold',7,D)
+  let cx=ML
+  doc.text('NO.',cx+C_NO/2,y+4,{align:'center'});cx+=C_NO
+  doc.text('ITEM / DESCRIPTION',cx+1,y+4);cx+=C_ITEM
+  doc.text('UNIT PRICE',cx+C_UNIT-1,y+4,{align:'right'});cx+=C_UNIT
+  doc.text('QTY',cx+C_QTY/2,y+4,{align:'center'});cx+=C_QTY
+  doc.text('AMOUNT',cx+C_AMT-1,y+4,{align:'right'})
+  y+=6
+  // Items rows
+  let total=0
+  const cur=(items[0]?.cost_currency)||'USD'
+  items.forEach((it,idx)=>{
+    const fp=it.final_price!=null?parseFloat(it.final_price):0
+    const qty=parseFloat(it.qty||0)
+    const cpu=it.customer_pricing_unit
+    const wm=parseFloat(it.width_m||0)
+    const unitSuffix=cpu==='m2'?' /m²':cpu==='m'?' /m':it.unit?' /'+it.unit:''
+    const amount=cpu==='m2'&&wm>0?fp*wm*qty:qty>0?fp*qty:0
+    total+=amount
+    const rowH=it.spec?11:8
+    if(idx%2===1){doc.setFillColor(250,250,248);doc.rect(ML,y,CW,rowH,'F')}
+    cx=ML;sf('normal',8,D);doc.text(String(idx+1),cx+C_NO/2,y+5,{align:'center'});cx+=C_NO
+    sf('bold',8,D);doc.text(it.product||'—',cx+1,y+5)
+    if(it.spec){sf('normal',7,G);doc.text(it.spec,cx+1,y+9)}
+    cx+=C_ITEM
+    sf('normal',7.5,D);doc.text(fp.toFixed(2)+' '+cur+unitSuffix,cx+C_UNIT-1,y+5,{align:'right'});cx+=C_UNIT
+    doc.text(qty>0?String(qty):'—',cx+C_QTY/2,y+5,{align:'center'});cx+=C_QTY
+    doc.text(amount>0?amount.toFixed(2):'—',cx+C_AMT-1,y+5,{align:'right'})
+    y+=rowH
+  })
+  doc.setDrawColor(...LG);doc.line(ML,y,PW-MR,y);y+=5
+  // Remarks (left) + Summary (right)
+  const sumY=y
+  sf('bold',7.5,D);doc.text('REMARKS:',ML,sumY)
+  sf('normal',7.5,G)
+  ;['1. Prices may be adjusted due to changes in raw material costs.',
+    '2. Production may result in quantity losses or exceedances, and all must be purchased.',
+    '3. Lead time: 45-60 days due high demand of production.']
+    .forEach((r,i)=>doc.text(r,ML,sumY+5+i*5))
+  const SLX=ML+CW*0.62,SVX=PW-MR
+  ;[['Subtotal',total.toFixed(2)+' '+cur,false],['Tax rate','—',false],['Tax amount','—',false],['Total',total.toFixed(2)+' '+cur,true]]
+    .forEach(([label,val,bold],i)=>{sf(bold?'bold':'normal',bold?9:8,bold?D:G);doc.text(label,SLX,sumY+i*5);doc.text(val,SVX,sumY+i*5,{align:'right'})})
+  doc.setDrawColor(...D);doc.setLineWidth(0.4);doc.line(SLX,sumY+16,SVX,sumY+16)
+  y=sumY+28
+  // Signature
+  const sigW=44,sigH=16,sigX=PW-MR-sigW
+  if(SIG_B64){doc.addImage(SIG_B64,'PNG',sigX,y,sigW,sigH)}
+  y+=sigH+2
+  sf('bold',8,D);doc.text('Business Development',sigX+sigW/2,y,{align:'center'})
+  y+=4;sf('normal',8,G);doc.text('(Rey Huang)',sigX+sigW/2,y,{align:'center'})
+  doc.setDrawColor(...LG);doc.setLineWidth(0.4);doc.line(ML,PH-12,PW-MR,PH-12)
+  doc.save('JC-QT-'+headerId+'.pdf')
 }
 
 function goUpdateProductCost(productId){
