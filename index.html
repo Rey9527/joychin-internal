@@ -1906,7 +1906,7 @@ function renderDashboard(){
       {num:activeInq,label:'進行中詢價',tab:'inquiry'},
       {num:activeQuotes,label:'進行中報價',tab:'quotes'},
       {num:thisMonthOrders,label:'本月訂單',tab:'orders'},
-      {num:items.length,label:'待追蹤項目',tab:null},
+      {num:items.length,label:'Alerts',tab:null},
       {num:pendingApproval,label:'待審批採購單',tab:'purchases'},
     ]
     let ph='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">'
@@ -1958,7 +1958,7 @@ function renderDashboard(){
   }
 
   // ── 模組警示摘要卡片 ──
-  if(sum)sum.innerHTML='<span style="font-size:13px;font-weight:600;color:#333">各模組警示摘要</span><span onclick="toggleDashboardDetail()" style="font-size:12px;color:#185FA5;cursor:pointer;margin-left:10px">前往工作追蹤 →</span>'
+  if(sum)sum.innerHTML='<span style="font-size:13px;font-weight:600;color:#333">Module Alert Summary</span><span onclick="toggleDashboardDetail()" style="font-size:12px;color:#185FA5;cursor:pointer;margin-left:10px">View Task Tracking →</span>'
   const _dd=d=>countWorkdays(d,new Date())
   const _sampleIds=new Set()
   sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='pending'&&r.status!=='received'&&r.requested_date&&_dd(r.requested_date)>=3).forEach(r=>_sampleIds.add(r.sample_id))
@@ -1966,12 +1966,12 @@ function renderDashboard(){
   sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&_dd(r.shipped_date)>=7&&!r.feedback).forEach(r=>_sampleIds.add(r.sample_id))
   const _poEx=['draft','cancelled','rejected','completed'],_poLk=new Set(shipmentPurchaseOrders.map(x=>String(x.purchase_order_id)))
   const moduleCards=[
-    {label:'詢價逾期',count:inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').length,tab:'inquiry'},
-    {label:'報價待回覆',count:quoteHeaders.filter(q=>q.status==='sent'&&_dd(q.updated_at||q.created_at)>=7).length,tab:'quotes'},
-    {label:'訂單需處理',count:orderAlertIds().size,tab:'orders'},
-    {label:'採購未安排船運',count:purchaseOrders.filter(p=>!_poEx.includes(p.status)&&!_poLk.has(String(p.id))).length,tab:'purchases'},
-    {label:'樣品待追蹤',count:_sampleIds.size,tab:'samples'},
-    {label:'客訴未處理',count:complaints.filter(c=>['open','in_progress'].includes(c.status)).length,tab:'complaints'},
+    {label:'Overdue Inquiries',count:inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').length,tab:'inquiry'},
+    {label:'Quotes Awaiting Reply',count:quoteHeaders.filter(q=>q.status==='sent'&&_dd(q.updated_at||q.created_at)>=7).length,tab:'quotes'},
+    {label:'Orders Need Action',count:orderAlertIds().size,tab:'orders'},
+    {label:'PO Without Shipment',count:purchaseOrders.filter(p=>!_poEx.includes(p.status)&&!_poLk.has(String(p.id))).length,tab:'purchases'},
+    {label:'Samples Pending',count:_sampleIds.size,tab:'samples'},
+    {label:'Open Complaints',count:complaints.filter(c=>['open','in_progress'].includes(c.status)).length,tab:'complaints'},
   ]
   const cardsHtml=moduleCards.map(c=>{
     const alert=c.count>0
@@ -2019,7 +2019,7 @@ function renderDashboard(){
   el.innerHTML=
     '<div class="dashboard-module-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'+cardsHtml+'</div>'+
     '<div id="dashboard-detail-panel" style="display:none;margin-top:16px">'+
-      (detailHtml||'<div class="loading" style="color:#3B6D11">✓ 目前無待追蹤項目</div>')+
+      (detailHtml||'<div class="loading" style="color:#3B6D11">✓ No pending items</div>')+
     '</div>'
 }
 function toggleDashboardDetail(){
@@ -2028,7 +2028,7 @@ function toggleDashboardDetail(){
   const open=p.style.display!=='none'
   p.style.display=open?'none':'block'
   const lnk=document.querySelector('#dashboard-list span[onclick*="toggleDashboardDetail"]')
-  if(lnk)lnk.textContent=open?'前往工作追蹤 →':'收起工作追蹤 ↑'
+  if(lnk)lnk.textContent=open?'View Task Tracking →':'Hide Task Tracking ↑'
 }
 function _buildCustomerOrderTable(){
   const now=new Date()
