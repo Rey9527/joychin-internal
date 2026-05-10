@@ -126,6 +126,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 @media (max-width: 639px) {
   #pshop-desktop-cart { display: none !important; }
   #tab-purchase-shop { margin: -14px !important; }
+  .dashboard-module-grid { grid-template-columns: repeat(2,1fr) !important; }
 }
 @media (max-width: 680px) {
   .sidebar { position: fixed; left: 0; top: 0; bottom: auto; z-index: 300; width: 220px; height: 100dvh; max-height: 100dvh; transform: translateX(-100%); transition: transform 0.25s ease; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
@@ -1956,8 +1957,30 @@ function renderDashboard(){
     panels.innerHTML=ph
   }
 
-  // ── 現有待追蹤列表 ──
-  if(!items.length){el.innerHTML='<div class="loading" style="color:#3B6D11">✓ 目前無待追蹤項目</div>';return}
+  // ── 模組警示摘要卡片 ──
+  if(sum)sum.innerHTML='<span style="font-size:13px;font-weight:600;color:#333">各模組警示摘要</span><span onclick="toggleDashboardDetail()" style="font-size:12px;color:#185FA5;cursor:pointer;margin-left:10px">前往工作追蹤 →</span>'
+  const _dd=d=>countWorkdays(d,new Date())
+  const _sampleIds=new Set()
+  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='pending'&&r.status!=='received'&&r.requested_date&&_dd(r.requested_date)>=3).forEach(r=>_sampleIds.add(r.sample_id))
+  sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='shipped'&&r.status!=='received'&&r.shipped_date&&_dd(r.shipped_date)>=7).forEach(r=>_sampleIds.add(r.sample_id))
+  sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&_dd(r.shipped_date)>=7&&!r.feedback).forEach(r=>_sampleIds.add(r.sample_id))
+  const _poEx=['draft','cancelled','rejected','completed'],_poLk=new Set(shipmentPurchaseOrders.map(x=>String(x.purchase_order_id)))
+  const moduleCards=[
+    {label:'詢價逾期',count:inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').length,tab:'inquiry'},
+    {label:'報價待回覆',count:quoteHeaders.filter(q=>q.status==='sent'&&_dd(q.updated_at||q.created_at)>=7).length,tab:'quotes'},
+    {label:'訂單需處理',count:orderAlertIds().size,tab:'orders'},
+    {label:'採購未安排船運',count:purchaseOrders.filter(p=>!_poEx.includes(p.status)&&!_poLk.has(String(p.id))).length,tab:'purchases'},
+    {label:'樣品待追蹤',count:_sampleIds.size,tab:'samples'},
+    {label:'客訴未處理',count:complaints.filter(c=>['open','in_progress'].includes(c.status)).length,tab:'complaints'},
+  ]
+  const cardsHtml=moduleCards.map(c=>{
+    const alert=c.count>0
+    return '<div onclick="switchTab(\''+c.tab+'\')" style="background:'+(alert?'#FEF2F2':'#F0FDF4')+';border:1px solid '+(alert?'#FECACA':'#BBF7D0')+';border-radius:6px;padding:14px 10px;cursor:pointer;text-align:center" onmouseenter="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.08)\'" onmouseleave="this.style.boxShadow=\'\'">'+
+      '<div style="font-size:11px;color:#555;margin-bottom:6px;font-weight:500">'+c.label+'</div>'+
+      '<div style="font-size:26px;font-weight:700;color:'+(alert?'#DC2626':'#16A34A')+'">'+c.count+'</div>'+
+    '</div>'
+  }).join('')
+  // ── 詳細工作追蹤（預設折疊）──
   const groups=[
     {key:'inquiry',icon:'📋',label:'詢價'},
     {key:'sample',icon:'🧪',label:'樣品'},
@@ -1966,12 +1989,12 @@ function renderDashboard(){
     {key:'shipment',icon:'🚢',label:'船運'},
     {key:'inventory',icon:'📦',label:'庫存'},
   ]
-  let html=''
+  let detailHtml=''
   for(const g of groups){
     const gItems=items.filter(x=>x.group===g.key)
     if(!gItems.length)continue
-    html+='<div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.5px;margin:16px 0 6px">'+g.icon+' '+g.label+'（'+gItems.length+'）</div>'
-    html+=gItems.map(item=>{
+    detailHtml+='<div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.5px;margin:16px 0 6px">'+g.icon+' '+g.label+'（'+gItems.length+'）</div>'
+    detailHtml+=gItems.map(item=>{
       const urgColor=item.urgency==='high'?'#A32D2D':'#854F0B'
       const urgBg=item.urgency==='high'?'#FCEBEB':'#FFF6D8'
       const mod=item.gotoModule||item.group
@@ -1993,7 +2016,19 @@ function renderDashboard(){
         '</div>'
     }).join('')
   }
-  el.innerHTML=html
+  el.innerHTML=
+    '<div class="dashboard-module-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'+cardsHtml+'</div>'+
+    '<div id="dashboard-detail-panel" style="display:none;margin-top:16px">'+
+      (detailHtml||'<div class="loading" style="color:#3B6D11">✓ 目前無待追蹤項目</div>')+
+    '</div>'
+}
+function toggleDashboardDetail(){
+  const p=document.getElementById('dashboard-detail-panel')
+  if(!p)return
+  const open=p.style.display!=='none'
+  p.style.display=open?'none':'block'
+  const lnk=document.querySelector('#dashboard-list span[onclick*="toggleDashboardDetail"]')
+  if(lnk)lnk.textContent=open?'前往工作追蹤 →':'收起工作追蹤 ↑'
 }
 function _buildCustomerOrderTable(){
   const now=new Date()
