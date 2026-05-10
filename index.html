@@ -2024,30 +2024,22 @@ function _buildCustomerOrderTable(){
   filtered.forEach(o=>{
     const custObj=customers.find(c=>c.id===o.customer_id)
     const name=custObj?.company||o.customer||'未知'
-    if(!byCustomer.has(name))byCustomer.set(name,{cnt:0,qty:0,amount:0})
+    if(!byCustomer.has(name))byCustomer.set(name,{qty:0,amount:0})
     const d=byCustomer.get(name)
-    d.cnt++
     orderItems.filter(i=>i.order_id===o.id).forEach(i=>{d.qty+=(parseFloat(i.qty)||0);d.amount+=(parseFloat(i.amount)||0)})
   })
   const rows=[...byCustomer.entries()].sort((a,b)=>b[1].qty-a[1].qty)
+  const maxQty=rows[0]?.[1]?.qty||1
   const showAmt=isManager()
-  let t='<table style="width:100%;border-collapse:collapse;font-size:12px">'
-  t+='<thead><tr style="border-bottom:1px solid #e5e5e0;color:#888">'
-  t+='<th style="text-align:left;padding:5px 8px;font-weight:500">客戶</th>'
-  t+='<th style="text-align:right;padding:5px 8px;font-weight:500">訂單筆數</th>'
-  t+='<th style="text-align:right;padding:5px 8px;font-weight:500">總數量（米）</th>'
-  if(showAmt)t+='<th style="text-align:right;padding:5px 8px;font-weight:500">總金額</th>'
-  t+='</tr></thead><tbody>'
-  rows.forEach(([name,d])=>{
-    t+='<tr style="border-bottom:1px solid #f0f0ec">'
-    t+='<td style="padding:5px 8px">'+esc(name)+'</td>'
-    t+='<td style="text-align:right;padding:5px 8px">'+d.cnt+'</td>'
-    t+='<td style="text-align:right;padding:5px 8px">'+Math.round(d.qty).toLocaleString()+'</td>'
-    if(showAmt)t+='<td style="text-align:right;padding:5px 8px">'+Math.round(d.amount).toLocaleString()+'</td>'
-    t+='</tr>'
-  })
-  t+='</tbody></table>'
-  return t
+  return rows.map(([name,d])=>{
+    const pct=Math.max(2,Math.round((d.qty/maxQty)*100))
+    const amtStr=showAmt&&d.amount?'<span style="font-size:10px;color:#aaa;margin-left:5px">'+Math.round(d.amount).toLocaleString()+'</span>':''
+    return '<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid #f5f4f0">'+
+      '<div style="width:110px;flex-shrink:0;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(name)+'">'+esc(name)+'</div>'+
+      '<div style="flex:1;background:#e8f5f0;border-radius:2px;height:8px;min-width:0"><div style="width:'+pct+'%;background:#0F6E56;height:8px;border-radius:2px"></div></div>'+
+      '<div style="width:90px;flex-shrink:0;text-align:right;font-size:12px;font-weight:500;white-space:nowrap">'+Math.round(d.qty).toLocaleString()+' 米'+amtStr+'</div>'+
+    '</div>'
+  }).join('')
 }
 
 // ===== 客訴管理 =====
