@@ -5091,6 +5091,7 @@ function buildCustomerCreateForm(prefix,prefill={}){
     '<div><label>電話</label><input id="'+prefix+'-phone" value="'+escapeHtml(prefill.phone||'')+'" /></div>'+
     '<div><label>國家</label><select id="'+prefix+'-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,prefill.country||'TH')+'</select></div>'+
     '<div><label>行業</label><input id="'+prefix+'-industry" value="'+escapeHtml(prefill.industry||'')+'" /></div>'+
+    '<div style="grid-column:1/-1"><label>地址</label><textarea id="'+prefix+'-address" rows="2" style="resize:vertical">'+escapeHtml(prefill.address||'')+'</textarea></div>'+
     '</div>'+
     '<div style="margin-bottom:14px"><label>備註</label><textarea id="'+prefix+'-notes">'+escapeHtml(prefill.notes||'')+'</textarea></div>'
 }
@@ -5786,7 +5787,11 @@ async function generateQuotePDF(headerId){
   docInfo.forEach(([label,val],i)=>{sf('bold',7.5,G);doc.text(label,RLX,y+i*4.8);sf('normal',7.5,D);doc.text(val,RX,y+i*4.8,{align:'right'})})
   sf('bold',7,G);doc.text('QUOTATION FOR',ML,y)
   sf('bold',10,D);doc.text(h.customer||'—',ML,y+6)
-  sf('normal',8,G);if(cust?.name)doc.text(cust.name,ML,y+11)
+  sf('normal',7.5,G)
+  let _cy=y+11
+  if(cust?.address){const addrLine=String(cust.address).replace(/\n/g,' ').substring(0,60);doc.text(addrLine,ML,_cy);_cy+=4}
+  const _contact=[cust?.name,cust?.phone?'Tel: '+cust.phone:null,cust?.email].filter(Boolean).join('   |   ')
+  if(_contact){sf('normal',7,G);doc.text(_contact.substring(0,75),ML,_cy)}
   y+=26
   // Divider
   doc.setDrawColor(...LG);doc.line(ML,y,PW-MR,y);y+=3
@@ -7532,6 +7537,7 @@ async function submitCreateCustomerFromModal(prefix='cc',closeTarget='modal-cust
     phone:document.getElementById(prefix+'-phone')?.value.trim()||null,
     country:document.getElementById(prefix+'-country')?.value||'TH',
     industry:document.getElementById(prefix+'-industry')?.value.trim()||null,
+    address:document.getElementById(prefix+'-address')?.value.trim()||null,
     notes:document.getElementById(prefix+'-notes')?.value.trim()||null,
     review_days:getCustomerReviewDays()
   }).select().single()
@@ -7565,6 +7571,7 @@ function openEditCustomer(id){
     '<div><label>電話</label><input id="ec-phone" value="'+(c.phone||'')+'" /></div>'+
     '<div><label>國家</label><select id="ec-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,c.country)+'</select></div>'+
     '<div><label>行業</label><input id="ec-industry" value="'+(c.industry||'')+'" /></div>'+
+    '<div style="grid-column:1/-1"><label>地址</label><textarea id="ec-address" rows="2" style="resize:vertical">'+(c.address||'')+'</textarea></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>統一回顧週期（天）</label><input value="'+getCustomerReviewDays()+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
@@ -7591,6 +7598,7 @@ async function saveCustomer(id){
     phone:document.getElementById('ec-phone').value.trim()||null,
     country:document.getElementById('ec-country').value,
     industry:document.getElementById('ec-industry').value.trim()||null,
+    address:document.getElementById('ec-address')?.value.trim()||null,
     notes:document.getElementById('ec-notes').value.trim()||null,
     review_days:getCustomerReviewDays(),
     last_reviewed_at:document.getElementById('ec-reviewed')?.value||null}).eq('id',id)
