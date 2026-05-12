@@ -2575,8 +2575,8 @@
     if(!logoutBtn)return
     const sel=document.createElement('select')
     sel.id='lang-toggle-btn'
-    sel.style.cssText='font-size:12px;flex-shrink:0;cursor:pointer;border:1px solid #ddd;border-radius:4px;padding:2px 6px;background:#fff;color:#333;height:28px;margin-right:4px'
-    sel.innerHTML='<option value="zh">🌐 中文</option><option value="en">🌐 EN</option><option value="th">🌐 ภาษาไทย</option>'
+    sel.style.cssText='font-size:12px;flex-shrink:0;cursor:pointer;border:1px solid #ddd;border-radius:4px;padding:2px 4px;background:#fff;color:#333;height:28px;width:80px;margin-right:4px'
+    sel.innerHTML='<option value="zh">中文</option><option value="en">EN</option><option value="th">ภาษาไทย</option>'
     sel.value=currentLang
     sel.onchange=()=>{
       const newLang=sel.value
