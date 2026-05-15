@@ -61,6 +61,9 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .alert-info { background: #E6F1FB; border: 1px solid #B5D4F4; color: #0C447C; padding: 9px 13px; border-radius: 4px; font-size: 12px; margin-bottom: 12px; }
 .alert-warn { background: #FFFBEA; border: 1px solid #F5C842; color: #7A5B00; padding: 9px 13px; border-radius: 4px; font-size: 12px; margin-bottom: 12px; }
 .loading { text-align: center; padding: 40px; color: #aaa; font-size: 13px; }
+.legend-strip { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; align-items:center; font-size:11px; color:#999; }
+.legend-strip .ls-lbl { margin-right:2px; opacity:0.8; }
+.legend-strip .ls-item { display:inline-flex; align-items:center; padding:2px 8px; border-radius:4px; white-space:nowrap; }
 .tag { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 10px; background: #f0f0eb; color: #666; border: 1px solid #e5e5e0; margin: 1px; }
 .doc-row { display: flex; align-items: center; gap: 10px; padding: 9px 13px; border: 1px solid #e5e5e0; border-radius: 4px; background: #fff; margin-bottom: 5px; }
 .pdf-icon { width: 30px; height: 30px; border-radius: 6px; background: #FCEBEB; border: 1px solid #F7C1C1; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #791F1F; flex-shrink: 0; }
@@ -329,6 +332,11 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <label class="filter-date-label">結束日期</label><input id="f-date-to" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="結束日期" />
         <button class="btn btn-ghost btn-sm" onclick="clearFilters()">清除</button>
       </div>
+      <div class="legend-strip">
+        <span class="ls-lbl">顏色說明</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">追蹤逾期</span>
+        <span class="ls-item" style="background:#FFFBEA;border:1px solid #F5C842;color:#7A5B00">即將逾期</span>
+      </div>
       <div id="inquiry-list"></div>
     </div>
 
@@ -360,6 +368,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <label class="filter-date-label">結束日期</label><input id="fq-date-to" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="結束日期" />
         <button class="btn btn-ghost btn-sm" onclick="clearQuoteFilters()">清除</button>
       </div>
+      <div class="legend-strip">
+        <span class="ls-lbl">狀態顏色</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">草稿</span>
+        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">已送客戶</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">客戶接受</span>
+        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">客戶拒絕</span>
+        <span class="ls-item" style="background:#f5f5f2;color:#aaa">已取代</span>
+      </div>
       <div id="quote-list"></div>
     </div>
 
@@ -383,6 +399,10 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         </select>
         <select id="fs-supplier" onchange="renderSamples()"><option value="">全部供應商</option></select>
         <select id="fs-customer" onchange="renderSamples()"><option value="">全部客戶</option></select>
+      </div>
+      <div class="legend-strip">
+        <span class="ls-lbl">顏色說明</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">樣品逾期（出貨中 &gt;7天未到 / 已出貨 &gt;14天未回饋）</span>
       </div>
       <div id="sample-list"></div>
     </div>
@@ -416,6 +436,12 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <option value="resolved">已結案</option>
         </select>
       </div>
+      <div class="legend-strip">
+        <span class="ls-lbl">狀態顏色</span>
+        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">處理中</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">等待折讓單</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">已結案</span>
+      </div>
       <div id="complaint-list"></div>
     </div>
 
@@ -441,6 +467,10 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         </select>
         <select id="fo-customer" onchange="renderOrders()"><option value="">全部客戶</option></select>
         <select id="fo-supplier" onchange="renderOrders()"><option value="">全部供應商</option></select>
+      </div>
+      <div class="legend-strip">
+        <span class="ls-lbl">顏色說明</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">需要行動（逾期 / 交期剩 ≤1天）</span>
       </div>
       <div id="order-list"></div>
     </div>
@@ -471,6 +501,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <option value="completed">已完成</option>
           <option value="cancelled">已取消</option>
         </select>
+      </div>
+      <div class="legend-strip">
+        <span class="ls-lbl">狀態顏色</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">已規劃</span>
+        <span class="ls-item" style="background:#E6F1FB;color:#185FA5">已訂艙</span>
+        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">運送中</span>
+        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56">報關中</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">已完成</span>
       </div>
       <div id="shipment-list"></div>
     </div>
@@ -563,6 +601,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <button class="btn btn-ghost btn-sm" onclick="clearProductFilters()">清除</button>
       </div>
       <div id="product-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+      <div class="legend-strip">
+        <span class="ls-lbl">分類顏色</span>
+        <span class="ls-item" style="background:#F5ECD7;color:#7A4F2A">Brown</span>
+        <span class="ls-item" style="background:#FFFBDA;color:#8A7000">Yellow</span>
+        <span class="ls-item" style="background:#F5F5F0;color:#666;border:1px solid #e5e5e0">White</span>
+        <span class="ls-item" style="background:#E6F1FB;color:#185FA5">Film</span>
+        <span class="ls-item" style="background:#F0EBF5;color:#6B3FA0">Other</span>
+      </div>
       <div id="product-list"></div>
     </div>
 
@@ -641,6 +687,17 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <option value="accounting_asc">會計編號（升序）</option>
           <option value="created_desc">建立日期（新→舊）</option>
         </select>
+      </div>
+      <div class="legend-strip">
+        <span class="ls-lbl">顏色說明</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">未歸入任何船運批次</span>
+        <span class="ls-lbl" style="margin-left:6px">狀態顏色</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">草稿／生產中</span>
+        <span class="ls-item" style="background:#E6F1FB;color:#185FA5">待審批／已出貨</span>
+        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">已審批</span>
+        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56">已發給供應商</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">已到貨</span>
+        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">已拒絕</span>
       </div>
       <div id="purchase-list"></div>
     </div>
@@ -7134,7 +7191,10 @@ function openInventoryModal(){
   }
   const COL='1fr 90px 90px 110px'
   let html=
-    '<div style="font-size:12px;color:#888;margin-bottom:10px">直接填入實際數量，Enter 跳到下一筆。</div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;font-size:11px;color:#999">'+
+    '<span>直接填入實際數量，Enter 跳下一筆。</span>'+
+    '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;background:#FCEBEB;color:#A32D2D">紅色數字 = 低於安全水位</span>'+
+    '</div>'+
     '<div style="display:grid;grid-template-columns:'+COL+';gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
     '<div>產品</div><div style="text-align:right">安全水位</div><div style="text-align:right">現有數量</div><div>備註</div></div>'
   allProds.forEach((p,i)=>{
