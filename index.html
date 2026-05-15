@@ -617,6 +617,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;gap:0;border-bottom:1px solid #e5e5e0;margin-bottom:14px">
         <button id="users-subtab-users" onclick="switchUsersSubtab('users')" style="padding:8px 16px;border:none;border-bottom:2px solid #0F6E56;background:none;cursor:pointer;font-size:13px;font-weight:600;color:#0F6E56">使用者列表</button>
         <button id="users-subtab-logs" onclick="switchUsersSubtab('logs')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555">操作記錄</button>
+        <button id="users-subtab-groups" onclick="switchUsersSubtab('groups')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555">群組管理</button>
       </div>
       <div id="users-pane-users">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -645,6 +646,13 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <input id="al-date-to" type="date" onchange="renderActivityLogs()" style="max-width:140px" aria-label="結束日期" />
         </div>
         <div id="activity-log-list"></div>
+      </div>
+      <div id="users-pane-groups" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div id="group-summary" style="font-size:12px;color:#888"></div>
+          <button class="btn btn-primary" onclick="openGroupModal(null)">+ 新增群組</button>
+        </div>
+        <div id="group-list"></div>
       </div>
     </div>
 
@@ -976,6 +984,10 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <option value="admin">系統管理員</option>
         </select>
       </div>
+      <div style="margin-bottom:12px">
+        <label>群組</label>
+        <select id="nu-group"><option value="">不指定群組</option></select>
+      </div>
       <div style="margin-bottom:14px">
         <label>初始密碼 <span class="req">*</span></label>
         <input id="nu-password" type="password" placeholder="設定密碼" />
@@ -985,6 +997,17 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <button class="btn btn-ghost" onclick="closeModal('modal-new-user')">取消</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 群組 Modal -->
+<div class="modal-overlay" id="modal-group" onclick="closeModalOnBg(event,'modal-group')">
+  <div class="modal-box sm">
+    <div class="modal-hd">
+      <div id="modal-group-title" style="font-size:14px;font-weight:600">新增群組</div>
+      <button class="modal-close" onclick="closeModal('modal-group')">×</button>
+    </div>
+    <div class="modal-bd" id="modal-group-bd"></div>
   </div>
 </div>
 
@@ -1456,7 +1479,10 @@ async function init(){
       document.getElementById('nav-purchases').style.display='flex'
     }
   }
-  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadQuoteChanges(),loadSettings(),loadProducts(),loadSamples(),loadOrders(),loadShipments(),loadUsers(),loadPurchaseOrders(),loadComplaints()])
+  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadQuoteChanges(),loadSettings(),loadProducts(),loadSamples(),loadOrders(),loadShipments(),loadUsers(),loadUserGroups(),loadPurchaseOrders(),loadComplaints()])
+  if(currentUser&&!isManager()&&hasPermission('manage_users')){
+    document.getElementById('nav-users_mgmt').style.display='flex'
+  }
   const savedTab=sessionStorage.getItem(SESSION_ACTIVE_TAB_KEY)
   if(savedTab&&TAB_LABELS[savedTab]){
     switchTab(savedTab,false)
@@ -2131,7 +2157,7 @@ function _buildCustomerOrderTable(){
   })
   const rows=[...byCustomer.entries()].sort((a,b)=>b[1].qty-a[1].qty)
   const maxQty=rows[0]?.[1]?.qty||1
-  const showAmt=isManager()
+  const showAmt=hasPermission('view_cost')
   return rows.map(([name,d])=>{
     const pct=Math.max(2,Math.round((d.qty/maxQty)*100))
     const amtStr=showAmt&&d.amount?'<span style="font-size:10px;color:#aaa;margin-left:5px">'+Math.round(d.amount).toLocaleString()+'</span>':''
@@ -3446,7 +3472,7 @@ function _renderOrderModal(){
     // approval banner
     if(isVerbal){
       if(approvalSt==='none'){
-        if(isManager()){
+        if(hasPermission('approve')){
           html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:12px 14px;margin-bottom:12px">'+
             '<div style="font-size:12px;color:#8A6400;margin-bottom:8px">此為口頭承諾訂單，請審批後才可建立採購單。</div>'+
             '<div style="display:flex;gap:8px">'+
@@ -4106,10 +4132,10 @@ function openPurchaseModal(id, prefill={}){
   }else{
     const st=p.status
     let actionBtns='<div style="display:flex;gap:8px;flex-wrap:wrap">'
-    if(st==='pending_approval'&&isManager()){
+    if(st==='pending_approval'&&hasPermission('approve')){
       actionBtns+='<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="approvePurchaseOrder()">審批通過 ✓</button>'
       actionBtns+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="rejectPurchaseOrder()">拒絕 ✗</button>'
-    }else if(st==='pending_approval'&&!isManager()){
+    }else if(st==='pending_approval'&&!hasPermission('approve')){
       actionBtns+='<span style="font-size:11px;color:#185FA5;background:#E6F1FB;padding:4px 8px;border-radius:4px">等待主管審批</span>'
     }
     if(st==='draft'){
@@ -4644,7 +4670,7 @@ function renderPshopProductArea(){
         '<div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
         (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
         (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
-        (isManager()&&p.cost_price?'<div style="font-size:11px;color:#0F6E56">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+        (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:11px;color:#0F6E56">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
         '</div>'+
         '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'+
         '<div style="display:flex;align-items:center;gap:4px">'+
@@ -4672,7 +4698,7 @@ function renderPshopProductArea(){
           '<div style="font-size:13px;font-weight:600">'+esc(p.product_name)+'</div>'+
           (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
           (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
-          (isManager()&&p.cost_price?'<div style="font-size:11px;color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+          (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:11px;color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
           '</div>'+
           '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'+
           '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量" style="width:72px" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
@@ -4691,7 +4717,7 @@ function renderPshopProductArea(){
           '<div style="font-size:13px;font-weight:600">'+esc(p.product_name)+'</div>'+
           (p.product_code?'<div style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</div>':'')+
           (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
-          (isManager()&&p.cost_price?'<div style="font-size:12px;color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+          (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
           '<div style="margin-top:auto">'+
           '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'+
           '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量（米）" style="flex:1;min-width:0" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
@@ -4948,7 +4974,7 @@ async function confirmShopOrder(){
 
 const TAB_LABELS={dashboard:'儀表板',inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',complaints:'客訴管理',orders:'訂單管理',shipments:'船運管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',settings:'系統設定',purchases:'採購單管理','purchase-shop':'採購選購'}
 function switchTab(tab,save=true){
-  if(tab==='settings'&&!isManager()){
+  if(tab==='settings'&&!hasPermission('view_settings')){
     showToast('只有管理者可以查看系統設定','error')
     tab='inquiry'
   }
@@ -7373,7 +7399,7 @@ function renderProducts(){
           (p.product_code?'<div style="font-size:10px;color:#aaa;font-family:monospace;margin-bottom:6px">'+esc(p.product_code)+'</div>':'')+
           (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:4px;background:'+c.bg+';color:'+c.color+';display:inline-block;margin-bottom:4px">'+esc(p.product_type)+'</span>'})():'')+
           '<div style="font-size:12px;color:#666;margin-bottom:4px">'+(sup?esc(sup.company):'—')+'</div>'+
-          (isManager()&&p.cost_price?'<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+          (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
           '<div style="font-size:11px;color:#aaa;margin-bottom:10px">確認：'+(p.last_reviewed_at||'—')+'</div>'+
         '</div>'
       }).join('')+
@@ -7396,7 +7422,7 @@ function renderProducts(){
         (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
         '<span style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</span>'+
         '</div>'+
-        '<div style="font-size:12px;color:#666">'+(sup?esc(sup.company):'—')+(isManager()&&p.cost_price?' · 成本 '+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):'')+'</div>'+
+        '<div style="font-size:12px;color:#666">'+(sup?esc(sup.company):'—')+(hasPermission('view_cost')&&p.cost_price?' · 成本 '+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):'')+'</div>'+
         '<div style="font-size:11px;color:#aaa">上次確認：'+(p.last_reviewed_at||'—')+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+' （'+getProductReviewDays()+'天週期）</div>'+
         '</div>'+
         '</div>'
@@ -7898,6 +7924,28 @@ async function _quickCreateCustomer(){
 // ===== 使用者管理 =====
 let users=[]
 
+const GROUP_PERMISSIONS=[
+  {key:'view_cost',label:'查看成本價格',desc:'產品目錄的成本欄位'},
+  {key:'approve',label:'審批採購單',desc:'可審批待審批狀態的採購單'},
+  {key:'manage_users',label:'使用者管理',desc:'可查看及管理使用者帳號'},
+  {key:'view_logs',label:'查看操作記錄',desc:'可查看所有使用者操作記錄'},
+  {key:'view_settings',label:'系統設定',desc:'可查看及修改全域系統參數'},
+]
+let userGroups=[]
+
+async function loadUserGroups(){
+  const{data,error}=await sb.from('user_groups').select('*').order('name')
+  if(!error) userGroups=data||[]
+}
+
+function hasPermission(key){
+  if(!currentUser) return false
+  const r=currentUser.role
+  if(r==='admin'||r==='manager') return true
+  const grp=userGroups.find(g=>String(g.id)===String(currentUser.group_id))
+  return !!(grp?.permissions?.[key])
+}
+
 async function loadUsers(){
   const{data}=await sb.from('users').select('*').order('created_at',{ascending:false})
   users=(data||[]).map(u=>({...u,role:normalizeUserRole(u.role)}))
@@ -7906,6 +7954,11 @@ async function loadUsers(){
 function showNewUserModal(){
   ;['nu-email','nu-name','nu-password'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
   document.getElementById('nu-role').value='user'
+  const grpSel=document.getElementById('nu-group')
+  if(grpSel){
+    grpSel.innerHTML='<option value="">不指定群組</option>'+
+      userGroups.map(g=>'<option value="'+g.id+'">'+esc(g.name)+'</option>').join('')
+  }
   document.getElementById('modal-new-user').classList.add('open')
 }
 
@@ -7916,8 +7969,11 @@ async function createUser(){
   const password=document.getElementById('nu-password')?.value
   
   if(!email||!name||!password){showToast('請填寫必要欄位','error');return}
-  
-  const{error}=await sb.from('users').insert({email,name,role:normalizeUserRole(role),password_hash:password,is_active:true})
+
+  const groupId=document.getElementById('nu-group')?.value
+  const insertPayload={email,name,role:normalizeUserRole(role),password_hash:password,is_active:true}
+  if(groupId)insertPayload.group_id=parseInt(groupId)
+  const{error}=await sb.from('users').insert(insertPayload)
   if(error){showToast('新增失敗：'+error.message,'error');return}
   
   await loadUsers()
@@ -7943,6 +7999,10 @@ function openUserDetail(userId){
       '<option value="user"'+(u.role==='user'?' selected':'')+'>一般使用者</option>'+
       '<option value="manager"'+(u.role==='manager'?' selected':'')+'>經理</option>'+
       '<option value="admin"'+(u.role==='admin'?' selected':'')+'>系統管理員</option>'+
+    '</select></div>'+
+    '<div><label>群組</label><select id="ud-group" '+(isManager&&!isSelf?'':'disabled style="background:#f8f8f5;color:#666"')+'>'+
+      '<option value="">無群組</option>'+
+      userGroups.map(g=>'<option value="'+g.id+'"'+(String(u.group_id)===String(g.id)?' selected':'')+'>'+esc(g.name)+'</option>').join('')+
     '</select></div>'+
     '<div><label>狀態</label><div style="display:flex;align-items:center;gap:10px;padding:8px 0">'+
       '<label style="display:inline-flex;align-items:center;gap:8px;cursor:'+(isManager&&!isSelf?'pointer':'not-allowed')+'">'+
@@ -7977,6 +8037,8 @@ async function saveUserDetail(userId){
   if(isManager&&!isSelf){
     patch.role=normalizeUserRole(document.getElementById('ud-role')?.value)
     patch.is_active=!!document.getElementById('ud-active')?.checked
+    const grpVal=document.getElementById('ud-group')?.value
+    patch.group_id=grpVal?parseInt(grpVal):null
   }
   const{error}=await sb.from('users').update(patch).eq('id',userId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
@@ -8119,11 +8181,15 @@ function renderActivityLogs(){
 }
 function switchUsersSubtab(tab){
   const isLogs=tab==='logs'
-  if(isLogs&&!isManager())return
+  const isGroups=tab==='groups'
+  if(isLogs&&!hasPermission('view_logs'))return
+  if(isGroups&&!isManager())return
   sessionStorage.setItem('users_subtab',tab)
-  document.getElementById('users-pane-users').style.display=isLogs?'none':''
+  document.getElementById('users-pane-users').style.display=tab==='users'?'':'none'
   document.getElementById('users-pane-logs').style.display=isLogs?'':'none'
-  ;['users','logs'].forEach(t=>{
+  const grpPane=document.getElementById('users-pane-groups')
+  if(grpPane)grpPane.style.display=isGroups?'':'none'
+  ;['users','logs','groups'].forEach(t=>{
     const btn=document.getElementById('users-subtab-'+t)
     if(!btn)return
     const active=t===tab
@@ -8132,6 +8198,95 @@ function switchUsersSubtab(tab){
     btn.style.fontWeight=active?'600':'400'
   })
   if(isLogs)loadActivityLogs()
+  if(isGroups)renderUserGroups()
+}
+
+function renderUserGroups(){
+  const el=document.getElementById('group-list')
+  const sum=document.getElementById('group-summary')
+  if(!el)return
+  if(sum)sum.textContent=userGroups.length+' 個群組'
+  if(!userGroups.length){
+    el.innerHTML='<div class="loading">尚無群組，點擊「新增群組」建立第一個群組</div>'
+    return
+  }
+  el.innerHTML=userGroups.map(g=>{
+    const perms=GROUP_PERMISSIONS.filter(p=>g.permissions?.[p.key])
+    const memberCount=users.filter(u=>String(u.group_id)===String(g.id)).length
+    return '<div class="card" style="margin-bottom:8px;cursor:pointer;padding:12px 16px" onclick="openGroupModal('+g.id+')">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+
+      '<div style="font-size:13px;font-weight:600;flex:1">'+esc(g.name)+'</div>'+
+      '<span style="font-size:11px;color:#888">'+memberCount+' 位成員</span>'+
+      '<span style="color:#ccc;font-size:14px">›</span>'+
+      '</div>'+
+      (g.description?'<div style="font-size:11px;color:#888;margin-bottom:6px">'+esc(g.description)+'</div>':'')+
+      (perms.length?'<div style="display:flex;flex-wrap:wrap;gap:4px">'+perms.map(p=>'<span style="font-size:10px;padding:1px 7px;border-radius:4px;background:#E6F1FB;color:#185FA5;border:1px solid #B5D4F4">'+p.label+'</span>').join('')+'</div>':'<div style="font-size:11px;color:#aaa;font-style:italic">無特別權限</div>')+
+    '</div>'
+  }).join('')
+}
+
+let _editingGroupId=null
+function openGroupModal(groupId){
+  _editingGroupId=groupId
+  const g=groupId?userGroups.find(x=>String(x.id)===String(groupId)):null
+  document.getElementById('modal-group-title').textContent=g?'編輯群組':'新增群組'
+  const perms=g?.permissions||{}
+  document.getElementById('modal-group-bd').innerHTML=
+    '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">'+
+    '<div><label>群組名稱 <span class="req">*</span></label><input id="grp-name" value="'+esc(g?.name||'')+'" placeholder="例：業務團隊" /></div>'+
+    '<div><label>說明</label><input id="grp-desc" value="'+esc(g?.description||'')+'" placeholder="選填" /></div>'+
+    '<div><label style="margin-bottom:8px;display:block">群組權限</label>'+
+    GROUP_PERMISSIONS.map(p=>{
+      const on=!!(perms[p.key])
+      return '<label style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f5f4f0;cursor:pointer">'+
+        '<input type="checkbox" id="grp-perm-'+p.key+'" '+(on?'checked':'')+' style="width:auto;height:auto;margin-top:2px;cursor:pointer" />'+
+        '<div><div style="font-size:13px;font-weight:500">'+p.label+'</div><div style="font-size:11px;color:#888">'+p.desc+'</div></div>'+
+      '</label>'
+    }).join('')+
+    '</div>'+
+    '</div>'+
+    '<div class="modal-foot">'+
+    '<button class="btn btn-primary" onclick="saveGroup()">儲存</button>'+
+    (g?'<button class="btn btn-ghost" style="color:#e55" onclick="deleteGroup('+g.id+')">刪除群組</button>':'')+
+    '<button class="btn btn-ghost" onclick="closeModal(\'modal-group\')">取消</button>'+
+    '</div>'
+  document.getElementById('modal-group').classList.add('open')
+}
+
+async function saveGroup(){
+  const name=(document.getElementById('grp-name')?.value||'').trim()
+  if(!name){showToast('請輸入群組名稱','error');return}
+  const desc=(document.getElementById('grp-desc')?.value||'').trim()
+  const permissions={}
+  GROUP_PERMISSIONS.forEach(p=>{permissions[p.key]=!!(document.getElementById('grp-perm-'+p.key)?.checked)})
+  const payload={name,description:desc||null,permissions}
+  let error
+  if(_editingGroupId){
+    ;({error}=await sb.from('user_groups').update(payload).eq('id',_editingGroupId))
+  }else{
+    ;({error}=await sb.from('user_groups').insert(payload))
+  }
+  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  await loadUserGroups()
+  closeModal('modal-group')
+  renderUserGroups()
+  showToast(_editingGroupId?'群組已更新':'群組已建立')
+}
+
+async function deleteGroup(groupId){
+  const g=userGroups.find(x=>String(x.id)===String(groupId))
+  const memberCount=users.filter(u=>String(u.group_id)===String(groupId)).length
+  const msg='確定要刪除群組「'+(g?.name||groupId)+'」嗎？'+(memberCount?'\n（'+memberCount+' 位成員將移除群組）':'')
+  confirmModal(msg,async()=>{
+    const{error}=await sb.from('user_groups').delete().eq('id',groupId)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadUserGroups()
+    await loadUsers()
+    closeModal('modal-group')
+    renderUserGroups()
+    renderUsersMgmt()
+    showToast('群組已刪除')
+  })
 }
 
 function renderUsersMgmt(){
@@ -8140,21 +8295,25 @@ function renderUsersMgmt(){
   if(!el)return
   const logsBtn=document.getElementById('users-subtab-logs')
   if(logsBtn)logsBtn.style.display=isManager()?'':'none'
+  const grpsBtn=document.getElementById('users-subtab-groups')
+  if(grpsBtn)grpsBtn.style.display=isManager()?'':'none'
   if(sum)sum.textContent=users.length+' user'+(users.length===1?'':'s')
-  
+
   if(!users.length){
     el.innerHTML='<div class="loading">尚無使用者資料</div>'
     return
   }
-  
+
   el.innerHTML=users.map(u=>{
     const roleBadge='<span class="badge" style="background:'+userRoleColor(u.role)+'20;color:'+userRoleColor(u.role)+';border:1px solid '+userRoleColor(u.role)+'">'+userRoleLabel(u.role)+'</span>'
     const statusBadge=u.is_active?'<span class="badge" style="background:#E1F5EE;color:#085041;border:1px solid #0F6E56">啟用</span>':'<span class="badge" style="background:#FCEBEB;color:#A32D2D;border:1px solid #F09595">停用</span>'
     const isSelf=currentUser&&currentUser.id===u.id
+    const grp=u.group_id?userGroups.find(g=>String(g.id)===String(u.group_id)):null
     return '<div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer" onclick="openUserDetail('+u.id+')">'+
       '<div style="flex:1;min-width:0">'+
         '<div style="font-size:13px;font-weight:500">'+u.name+(isSelf?' <span style="font-size:10px;color:#888">（我）</span>':'')+'</div>'+
         '<div style="font-size:11px;color:#888">'+u.email+'</div>'+
+        (grp?'<div style="margin-top:3px"><span style="font-size:10px;padding:1px 7px;border-radius:4px;background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">'+esc(grp.name)+'</span></div>':'')+
       '</div>'+
       roleBadge+statusBadge+
       '<span style="color:#ccc;font-size:14px">›</span>'+
