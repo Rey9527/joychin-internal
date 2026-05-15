@@ -865,6 +865,15 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div class="modal-bd" id="modal-inventory-bd"></div>
   </div>
 </div>
+<div class="modal-overlay" id="modal-inv-log" onclick="closeModalOnBg(event,'modal-inv-log')">
+  <div class="modal-box lg">
+    <div class="modal-hd">
+      <div style="font-size:14px;font-weight:600">📋 庫存異動記錄</div>
+      <button class="modal-close" onclick="closeModal('modal-inv-log')">×</button>
+    </div>
+    <div class="modal-bd" id="modal-inv-log-bd"></div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-new-inq" onclick="closeModalOnBg(event,'modal-new-inq')">
   <div class="modal-box sm">
     <div class="modal-hd">
@@ -7114,32 +7123,17 @@ function poQtyToRolls(qty,unit,prod){
   if(!mpr)return null
   return qty/mpr
 }
-let _invModalTab='adjust'
-function openInventoryModal(tab){
-  _invModalTab=tab||'adjust'
+function openInventoryModal(){
   const bd=document.getElementById('modal-inventory-bd')
-  const tabs='<div style="display:flex;gap:0;border-bottom:1px solid #e5e5e0;margin-bottom:16px">'+
-    ['adjust','log'].map(t=>{
-      const label=t==='adjust'?'庫存調整':'異動記錄'
-      const active=_invModalTab===t
-      return '<button onclick="openInventoryModal(\''+t+'\')" style="padding:8px 16px;font-size:13px;font-weight:'+(active?'600':'400')+';color:'+(active?'#0F6E56':'#888')+';border:none;background:none;border-bottom:2px solid '+(active?'#0F6E56':'transparent')+';cursor:pointer;margin-bottom:-1px">'+label+'</button>'
-    }).join('')+'</div>'
-  if(_invModalTab==='log'){
-    bd.innerHTML=tabs+'<div id="inv-log-content"><div style="text-align:center;padding:24px;color:#aaa;font-size:13px">載入中...</div></div>'+
-      '<div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">關閉</button></div>'
-    document.getElementById('modal-inventory').classList.add('open')
-    _renderInventoryLog()
-    return
-  }
   const allProds=products.filter(p=>p.is_active!==false).sort((a,b)=>(a.product_name||'').localeCompare(b.product_name||''))
   if(!allProds.length){
-    bd.innerHTML=tabs+'<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">尚無產品</div>'+
+    bd.innerHTML='<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">尚無產品</div>'+
       '<div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">關閉</button></div>'
     document.getElementById('modal-inventory').classList.add('open')
     return
   }
   const COL='1fr 90px 90px 110px'
-  let html=tabs+
+  let html=
     '<div style="font-size:12px;color:#888;margin-bottom:10px">直接填入實際數量，Enter 跳到下一筆。</div>'+
     '<div style="display:grid;grid-template-columns:'+COL+';gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
     '<div>產品</div><div style="text-align:right">安全水位</div><div style="text-align:right">現有數量</div><div>備註</div></div>'
@@ -7159,7 +7153,8 @@ function openInventoryModal(tab){
       '<div><input type="text" id="inv-note-'+p.id+'" placeholder="備註..." /></div>'+
       '</div>'
   })
-  html+='<div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e5e0;padding:12px 4px 4px;display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+
+  html+='<div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e5e0;padding:12px 4px 4px;display:flex;gap:8px;align-items:center;margin-top:8px">'+
+    '<button class="btn btn-ghost" onclick="openInventoryLogModal()" style="margin-right:auto">📋 異動記錄</button>'+
     '<button class="btn btn-primary" onclick="saveInventoryAdjustments()">儲存</button>'+
     '<button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">取消</button>'+
     '</div>'
@@ -7168,13 +7163,21 @@ function openInventoryModal(tab){
   setTimeout(()=>document.getElementById('inv-qty-'+allProds[0]?.id)?.focus(),80)
 }
 
+function openInventoryLogModal(){
+  const bd=document.getElementById('modal-inv-log-bd')
+  bd.innerHTML='<div style="text-align:center;padding:24px;color:#aaa;font-size:13px">載入中...</div>'
+  document.getElementById('modal-inv-log').classList.add('open')
+  _renderInventoryLog()
+}
+
 async function _renderInventoryLog(){
-  const el=document.getElementById('inv-log-content')
+  const el=document.getElementById('modal-inv-log-bd')
   if(!el)return
   const{data,error}=await sb.from('inventory_logs').select('*').order('created_at',{ascending:false}).limit(200)
-  if(error){el.innerHTML='<div style="color:#A32D2D;font-size:12px">載入失敗：'+error.message+'</div>';return}
-  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:24px;color:#aaa;font-size:13px">尚無庫存異動記錄</div>';return}
-  el.innerHTML='<div style="display:grid;grid-template-columns:1fr 70px 70px 70px 120px 130px;gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
+  if(error){el.innerHTML='<div style="color:#A32D2D;font-size:12px;padding:16px">載入失敗：'+error.message+'</div>';return}
+  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">尚無庫存異動記錄</div>';return}
+  const COL='1fr 70px 70px 70px 120px 130px'
+  el.innerHTML='<div style="display:grid;grid-template-columns:'+COL+';gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
     '<div>產品</div><div style="text-align:right">調整量</div><div style="text-align:right">調整前</div><div style="text-align:right">調整後</div><div>備註</div><div style="text-align:right">時間</div></div>'+
     data.map(r=>{
       const p=products.find(x=>String(x.id)===String(r.product_id))
@@ -7182,7 +7185,7 @@ async function _renderInventoryLog(){
       const color=change>0?'#3B6D11':change<0?'#A32D2D':'#888'
       const sign=change>0?'+':''
       const dt=r.created_at?new Date(r.created_at).toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'
-      return '<div style="display:grid;grid-template-columns:1fr 70px 70px 70px 120px 130px;gap:8px;align-items:center;padding:7px 4px;border-bottom:1px solid #f5f4f0">'+
+      return '<div style="display:grid;grid-template-columns:'+COL+';gap:8px;align-items:center;padding:7px 4px;border-bottom:1px solid #f5f4f0">'+
         '<div style="font-size:12px;font-weight:500">'+esc(p?p.product_name:'#'+r.product_id)+'</div>'+
         '<div style="text-align:right;font-size:13px;font-weight:600;color:'+color+'">'+sign+change+'</div>'+
         '<div style="text-align:right;font-size:12px;color:#666">'+parseFloat(r.qty_before)+'</div>'+
