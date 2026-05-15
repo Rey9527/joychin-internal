@@ -1082,7 +1082,7 @@ function isManager(){
 }
 
 function canAccessPurchases(){
-  return !!(currentUser&&(currentUser.role==='admin'||currentUser.role==='manager'))
+  return !!currentUser
 }
 
 const DEFAULT_APP_SETTINGS={
