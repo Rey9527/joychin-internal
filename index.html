@@ -7222,7 +7222,7 @@ function openInventoryModal(){
     '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;background:#FCEBEB;color:#A32D2D">紅色數字 = 低於安全水位</span>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:'+COL+';gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
-    '<div>產品</div><div style="text-align:right">安全水位</div><div style="text-align:right">現有數量</div><div>備註</div></div>'
+    '<div>產品</div><div style="text-align:right">安全水位（卷）</div><div style="text-align:right">現有數量（卷）</div><div>備註</div></div>'
   allProds.forEach((p,i)=>{
     const qty=parseFloat(p.stock_qty)||0
     const safe=p.min_stock_qty!=null?parseFloat(p.min_stock_qty):null
@@ -7234,8 +7234,8 @@ function openInventoryModal(){
       '<div><div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
       (sup?'<div style="font-size:10px;color:#aaa">'+esc(sup.company||'')+'</div>':'')+
       '</div>'+
-      '<div><input type="number" id="inv-safe-'+p.id+'" value="'+(safe!=null?safe:'')+'" placeholder="—" step="0.01" style="text-align:right;width:100%" /></div>'+
-      '<div><input type="number" id="inv-qty-'+p.id+'" value="'+qty+'" step="0.01" style="text-align:right;width:100%;'+(isLow?'color:#A32D2D;font-weight:600':'')+'" onkeydown="'+enterNav+'" /></div>'+
+      '<div><input type="number" id="inv-safe-'+p.id+'" value="'+(safe!=null?safe:'')+'" placeholder="—" step="1" min="0" style="text-align:right;width:100%" /></div>'+
+      '<div><input type="number" id="inv-qty-'+p.id+'" value="'+Math.round(qty)+'" step="1" min="0" style="text-align:right;width:100%;'+(isLow?'color:#A32D2D;font-weight:600':'')+'" onkeydown="'+enterNav+'" /></div>'+
       '<div><input type="text" id="inv-note-'+p.id+'" placeholder="備註..." /></div>'+
       '</div>'
   })
