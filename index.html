@@ -4692,7 +4692,12 @@ function deletePendingPurchaseItem(tempKey){
 }
 
 async function applyCostPrice(itemId,costPrice,currency){
-  const{error}=await sb.from('purchase_order_items').update({unit_price:costPrice,currency}).eq('id',itemId)
+  const item=purchaseOrderItems.find(i=>i.id===itemId)
+  const prod=item?(item.product_id?products.find(p=>String(p.id)===String(item.product_id)):null)||products.find(p=>p.product_name===item.product_name&&(p.spec||null)===(item.spec||null)):null
+  const update={unit_price:costPrice,currency}
+  if(prod?.pricing_unit)update.pricing_unit=prod.pricing_unit
+  if(prod?.width_m)update.width_m=prod.width_m
+  const{error}=await sb.from('purchase_order_items').update(update).eq('id',itemId)
   if(error){showToast('更新失敗：'+error.message,'error');return}
   await loadPurchaseOrders()
   openPurchaseModal(selectedPurchaseId)
