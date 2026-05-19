@@ -4144,7 +4144,7 @@ function renderPurchaseOrders(){
         '</div>'+
         '<div style="font-size:12px;font-weight:500">'+(supplierName||'—')+'</div>'+
         (()=>{const its=purchaseOrderItems.filter(i=>i.po_id===p.id);return its.length?'<div style="font-size:11px;color:#555;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+its.map(i=>i.product_name).join('、')+'</div>':''})()+
-        '<div style="font-size:10px;color:#888">'+p.source+' · '+d+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div>'+
+        '<div style="font-size:10px;color:#888">'+(p.source==='stock'?'<span style="background:#E8F5E9;color:#2E7D32;border-radius:3px;padding:1px 5px;font-size:10px;margin-right:4px">安全庫存</span>':'')+d+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div>'+
         (shBadge?'<div style="margin-top:4px">'+shBadge+'</div>':'')+
       '</div>'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
@@ -4187,7 +4187,10 @@ function openPurchaseModal(id, prefill={}){
     .join('')
   const currencyOpts=buildOptions(CURRENCY_OPTIONS,p?.currency||prefill.currency)
   document.getElementById('modal-purchase-hd').textContent=isNew?'新增採購單':'採購單詳情'
-  let html='<div class="section-title">基本資料</div><div class="grid-2" style="margin-bottom:12px">'+
+  const isStockSource=(p?.source||'stock')==='stock'&&p?.source!=='order'
+  let html='<div class="section-title">基本資料</div>'+
+    '<div style="margin-bottom:10px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="pp-is-stock" '+(isStockSource?'checked':'')+' style="width:auto;height:auto;cursor:pointer" onchange="_isDirty=true" /> 安全庫存補貨（非對應客戶訂單）</label></div>'+
+    '<div class="grid-2" style="margin-bottom:12px">'+
     '<div><label>供應商 <span class="req">*</span></label><select id="pp-supplier" onchange="_isDirty=true">'+supOpts+'</select></div>'+
     '<div><label>會計編號</label><input id="pp-accounting" value="'+(p?.accounting_no||'')+'" placeholder="選填" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
     '<div><label>預計交貨日</label><input type="date" id="pp-expected" value="'+(p?.expected_delivery||'')+'" onchange="_isDirty=true" /></div>'+
@@ -4353,7 +4356,8 @@ async function createPurchaseOrder(){
     return
   }
   const id=generatePurchaseId()
-  const payload={id,source:'stock',supplier_id:supplierId,status:'draft'}
+  const isStock=document.getElementById('pp-is-stock')?.checked!==false
+  const payload={id,source:isStock?'stock':'order',supplier_id:supplierId,status:'draft'}
   assignIfPresent(payload,'accounting_no',document.getElementById('pp-accounting')?.value?.trim())
   assignIfPresent(payload,'expected_delivery',document.getElementById('pp-expected')?.value)
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value||'USD')
@@ -4488,12 +4492,11 @@ async function savePurchaseOrder(){
   const p=purchaseOrders.find(x=>x.id===selectedPurchaseId)
   if(!p)return
   const supplierId=parseInt(document.getElementById('pp-supplier')?.value||'',10)||null
-  const linkedOrderId=null
+  const isStock=document.getElementById('pp-is-stock')?.checked!==false
   const payload={
-    source:'stock',
+    source:isStock?'stock':'order',
     supplier_id:supplierId
   }
-  payload.customer_order_id=linkedOrderId
   assignIfPresent(payload,'accounting_no',document.getElementById('pp-accounting')?.value?.trim())
   assignIfPresent(payload,'expected_delivery',document.getElementById('pp-expected')?.value)
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value)
