@@ -4216,12 +4216,14 @@ function openPurchaseModal(id, prefill={}){
     html+='<div class="divider"></div><div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="section-title" style="margin-bottom:0">品項明細</div><button class="btn btn-primary btn-sm" onclick="openPurchaseItemForm()">+ 新增品項</button></div><div id="po-items">'+((items.length?items.map(i=>{
       const _qty=parseFloat(i.qty||i.quantity||0)||0
       const _up=parseFloat(i.unit_price||i.price||0)||0
-      const _wm=parseFloat(i.width_m||0)
       const _prod=(i.product_id?products.find(pr=>String(pr.id)===String(i.product_id)):null)||products.find(pr=>pr.product_name===i.product_name&&(pr.spec||null)===(i.spec||null))||null
-      const _costPrice=_prod?.cost_price??null
+      const _costPrice=_prod?.cost_price!=null?parseFloat(_prod.cost_price):null
       const _costCurrency=_prod?.currency||i.currency||'USD'
-      const _hasDiffCost=_costPrice!==null&&Math.abs(parseFloat(_costPrice||0)-_up)>0.001
-      const lineTotal=i.pricing_unit==='m2'&&_wm>0?_qty*_up*_wm:_qty*_up
+      const _hasDiffCost=_costPrice!==null&&Math.abs(_costPrice-_up)>0.001
+      const _dispUp=_costPrice!==null?_costPrice:_up
+      const _wm=parseFloat(i.width_m||_prod?.width_m||0)
+      const _punit=i.pricing_unit||_prod?.pricing_unit||null
+      const lineTotal=_punit==='m2'&&_wm>0?_qty*_dispUp*_wm:_qty*_dispUp
       const itemLinks=isNew?pendingLinksForItem(i.temp_key):savedLinksForPurchaseItem(p?.id||null,i)
       const receivedQty=parseInt(i.received_qty)||0
       const totalQty=parseFloat(i.qty||i.quantity||0)||0
@@ -4235,15 +4237,15 @@ function openPurchaseModal(id, prefill={}){
       const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto) auto;gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:4px;background:#fff">'+
         '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+rcvColor+'">'+rcvLabel+' — '+receivedQty+' / '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">數量</div><div style="font-size:12px;font-weight:500">'+(i.qty||i.quantity||0)+' '+(i.unit||'')+'</div></div>'+
-        '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+parseFloat(i.unit_price||i.price||0).toFixed(2)+' '+(i.currency||'USD')+'</div>'+(!isNew&&_hasDiffCost?'<button onclick="applyCostPrice('+i.id+','+parseFloat(_costPrice).toFixed(4)+',\''+_costCurrency+'\')" style="background:none;border:1px solid #0F6E56;color:#0F6E56;border-radius:3px;cursor:pointer;font-size:10px;padding:2px 5px;margin-top:3px;white-space:nowrap">套用成本 '+parseFloat(_costPrice).toFixed(2)+'</button>':'')+'</div>'+
-        '<div style="text-align:right"><div style="font-size:10px;color:#888">小計</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+lineTotal.toFixed(2)+'</div>'+(i.pricing_unit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+    '</div>'+
+        '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+_dispUp.toFixed(2)+' '+(_costPrice!==null?_costCurrency:(i.currency||'USD'))+(_punit==='m2'?' /m²':'')+(_hasDiffCost?'<span style="font-size:10px;color:#aaa;margin-left:4px;text-decoration:line-through">'+_up.toFixed(2)+'</span>':'')+'</div>'+(!isNew&&_hasDiffCost?'<button onclick="applyCostPrice('+i.id+','+_costPrice.toFixed(4)+',\''+_costCurrency+'\')" style="background:none;border:1px solid #0F6E56;color:#0F6E56;border-radius:3px;cursor:pointer;font-size:10px;padding:2px 5px;margin-top:3px;white-space:nowrap">存入成本價</button>':'')+'</div>'+
+        '<div style="text-align:right"><div style="font-size:10px;color:#888">小計</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+lineTotal.toFixed(2)+'</div>'+(_punit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+'</div>'+
         delBtn+
       '</div>'
       const linksBlock=renderPurchaseItemLinksBlock(i,{pending:isNew,purchaseOrderId:p?.id||null})
       const arrivalBlock=(!isNew&&i.id?'<div id="arrival-input-'+i.id+'" style="display:none;padding:8px 12px;background:#f9f9f7;border:1px solid #e5e5e0;border-top:none;border-radius:0 0 4px 4px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label style="font-size:12px;color:#666;white-space:nowrap">本次到貨</label><input id="arrival-qty-'+i.id+'" type="number" min="0.01" step="0.01" data-no-dirty="true" style="width:80px" placeholder="數量" /><button class="btn btn-primary btn-sm" style="height:32px" onclick="submitArrival('+i.id+')">確認</button><button class="btn btn-ghost btn-sm" style="height:32px" onclick="document.getElementById(\'arrival-input-'+i.id+'\').style.display=\'none\'">取消</button><button class="btn btn-ghost btn-sm" style="height:32px;color:#C0392B;border-color:#C0392B" onclick="openComplaintFromArrival('+i.id+')">品質問題 → 開立客訴</button></div></div>':'')
       return '<div style="padding:10px 0;border-bottom:1px solid #f0f0eb"><div>'+itemBody+'</div>'+arrivalBlock+linksBlock+'</div>'
     }).join(''):'<div style="border:1px dashed #d9d9d2;border-radius:4px;padding:14px;background:#fbfbf8;color:#666;font-size:12px">尚未新增品項</div>')+
-    (items.length?'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">總金額 '+items.reduce((s,i)=>{const q=parseFloat(i.qty||i.quantity||0)||0,up=parseFloat(i.unit_price||i.price||0)||0,wm=parseFloat(i.width_m||0);return s+(i.pricing_unit==='m2'&&wm>0?q*up*wm:q*up)},0).toFixed(2)+' '+(p?.currency||items[0]?.currency||'')+'</div>':'')
+    (items.length?'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">總金額 '+items.reduce((s,i)=>{const q=parseFloat(i.qty||i.quantity||0)||0;const pr=(i.product_id?products.find(x=>String(x.id)===String(i.product_id)):null)||products.find(x=>x.product_name===i.product_name&&(x.spec||null)===(i.spec||null))||null;const up=pr?.cost_price!=null?parseFloat(pr.cost_price):(parseFloat(i.unit_price||i.price||0)||0);const wm=parseFloat(i.width_m||pr?.width_m||0);const pu=i.pricing_unit||pr?.pricing_unit||null;return s+(pu==='m2'&&wm>0?q*up*wm:q*up)},0).toFixed(2)+' '+(p?.currency||items[0]?.currency||'')+'</div>':'')
     )+'</div></div>'
   }
   let buttons='<div class="modal-foot" style="justify-content:space-between">'
