@@ -4456,6 +4456,7 @@ async function submitCreatePurchaseFromOrder(){
   const{error}=await sb.from('purchase_orders').insert(payload)
   if(error){showToast('建立失敗：'+error.message,'error');return}
   for(const oi of oItems){
+    const prod=oi.product_id?products.find(p=>p.id===oi.product_id):null
     await sb.from('purchase_order_items').insert({
       po_id:id,
       product_id:oi.product_id||null,
@@ -4463,10 +4464,10 @@ async function submitCreatePurchaseFromOrder(){
       spec:oi.spec||null,
       qty:oi.qty,
       unit:oi.unit,
-      unit_price:oi.unit_price,
-      currency:oi.currency||o.currency,
-      width_m:oi.width_m||null,
-      pricing_unit:oi.pricing_unit||null
+      unit_price:prod?.cost_price??oi.unit_price,
+      currency:prod?.currency||oi.currency||o.currency,
+      width_m:oi.width_m||prod?.width_m||null,
+      pricing_unit:prod?.pricing_unit||oi.customer_pricing_unit||null
     })
   }
   await sb.from('purchase_order_order_links').insert({po_id:id,order_id:orderId,qty:null,note:'從訂單建立'})
