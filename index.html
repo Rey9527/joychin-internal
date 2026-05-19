@@ -3466,20 +3466,11 @@ function _renderOrderModal(){
     '</div></div>'
 
   if(itms.length){
-    // Auto-fix missing width_m from product catalog by name match
-    const itemsNeedingWidth=itms.filter(it=>it.customer_pricing_unit==='m2'&&!it.width_m)
-    if(itemsNeedingWidth.length){
-      const updates=itemsNeedingWidth.map(it=>{
-        const matched=products.find(p=>p.width_m&&(p.product_name||'').toLowerCase()===(it.product_name||'').toLowerCase())
-        if(!matched)return null
-        return sb.from('order_items').update({width_m:matched.width_m}).eq('id',it.id).then(()=>{it.width_m=matched.width_m})
-      }).filter(Boolean)
-      if(updates.length)Promise.all(updates).then(()=>{_renderOrderModal()})
-    }
     itms.forEach(it=>{
       const sub=calcOiAmount(it)
       const cpu=it.customer_pricing_unit
-      const wm=parseFloat(it.width_m||0)
+      const catalogProd=(it.product_id?products.find(p=>String(p.id)===String(it.product_id)):null)||products.find(p=>p.product_name===it.product_name&&(p.spec||null)===(it.spec||null))||null
+      const wm=parseFloat(it.width_m||catalogProd?.width_m||0)
       const missingWidth=cpu==='m2'&&wm===0
       html+='<div style="padding:10px 0;border-bottom:1px solid #f0f0eb;font-size:12px">'+
         '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">'+
@@ -3562,6 +3553,7 @@ function _renderOrderModal(){
   html+='</div></div>'
 
   document.getElementById('modal-order-bd').innerHTML=html
+  enableDirtyTracking('modal-order-bd')
   if(o.requires_coa) renderOrderCoaDocs(id)
 }
 
@@ -3855,6 +3847,7 @@ async function saveOrderItems(){
   const newTotal=itms.reduce((s,i)=>s+_calcOiAmt(i),0)
   await sb.from('orders').update({total_amount:newTotal}).eq('id',selectedOrderId)
   _oiPending={}
+  _isDirty=false
   await loadOrders();_renderOrderModal();renderOrders();showToast('品項已儲存')
 }
 
