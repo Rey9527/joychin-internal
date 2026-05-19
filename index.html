@@ -4236,29 +4236,25 @@ function openPurchaseModal(id, prefill={}){
     (items.length?'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">總金額 '+items.reduce((s,i)=>{const q=parseFloat(i.qty||i.quantity||0)||0,up=parseFloat(i.unit_price||i.price||0)||0,wm=parseFloat(i.width_m||0);return s+(i.pricing_unit==='m2'&&wm>0?q*up*wm:q*up)},0).toFixed(2)+' '+(p?.currency||items[0]?.currency||'')+'</div>':'')
     )+'</div></div>'
     html+='<div id="po-item-form" style="display:'+(isNew&&!items.length?'block':'none')+';background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:14px">'+
-      '<div style="display:flex;gap:0;margin-bottom:10px;border-bottom:1px solid #e5e5e0">'+
-      '<button id="poi-tab-btn-catalog" onclick="switchPurchaseItemTab(\'catalog\')" style="padding:6px 14px;font-size:12px;font-weight:500;border:none;border-bottom:2px solid #0F6E56;background:transparent;color:#0F6E56;cursor:pointer">從產品目錄選</button>'+
-      '<button id="poi-tab-btn-order" onclick="switchPurchaseItemTab(\'order\')" style="padding:6px 14px;font-size:12px;font-weight:500;border:none;border-bottom:2px solid transparent;background:transparent;color:#888;cursor:pointer">從訂單帶入</button>'+
+      // Mode header: order selector + stock toggle
+      '<div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:12px;flex-wrap:wrap">'+
+        '<div style="flex:1;min-width:160px"><label>客戶訂單</label><select id="poi-order-sel" data-no-dirty="true" onchange="onPurchaseOrderChange()">'+orderDropdownOpts+'</select></div>'+
+        '<label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:400;white-space:nowrap;padding-bottom:6px"><input type="checkbox" id="poi-is-stock" style="width:auto;height:auto;cursor:pointer" onchange="onPoiStockToggle()" /> 安全庫存補貨（不對應訂單）</label>'+
       '</div>'+
-      '<div id="poi-tab-catalog" style="min-height:200px">'+
-      '<div class="grid-2" style="margin-bottom:8px">'+
-      '<div><label>產品名稱 <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="poi-name" placeholder="可手動輸入或從目錄帶入" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openPurchaseProductPicker()" style="white-space:nowrap;height:32px">選自產品目錄</button></div><input id="poi-product-id" type="hidden" /></div>'+
-      '<div><label>規格</label><input id="poi-spec" placeholder="選填" /></div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><label>數量 <span class="req">*</span></label><input id="poi-qty" placeholder="數量" type="number" inputmode="decimal" /></div><div><label>單位 <span class="req">*</span></label><input id="poi-unit" placeholder="單位" /></div></div>'+
-      '<div><label>單價 <span class="req">*</span></label><input id="poi-price" placeholder="單價" type="number" inputmode="decimal" /></div>'+
-      '<div><label>幣別</label><select id="poi-currency">'+currencyOpts+'</select></div>'+
-      '<div><label>計價單位</label><select id="poi-pricing-unit"><option value="">—</option><option value="m2">平方米 m²</option><option value="m">米 m</option></select></div>'+
-      '<div><label>寬幅（mm）</label><input id="poi-width-mm" type="number" step="1" placeholder="例如 1070" /></div>'+
-      '</div>'+
-      '<div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="addPurchaseItem()">加入品項</button><button class="btn btn-ghost btn-sm" onclick="closePurchaseItemForm()">取消</button></div>'+
-      '</div>'+
-      '<div id="poi-tab-order" style="display:none;min-height:200px">'+
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">'+
-        '<div style="flex:1;min-width:160px"><label>選擇客戶訂單</label><select id="poi-order-sel" data-no-dirty="true" onchange="onPurchaseOrderChange()">'+orderDropdownOpts+'</select></div>'+
-        '<label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:400;white-space:nowrap;margin-top:18px"><input type="checkbox" id="poi-is-stock" style="width:auto;height:auto;cursor:pointer" onchange="onPoiStockToggle()" /> 安全庫存補貨</label>'+
-      '</div>'+
+      // Order items list (default)
       '<div id="poi-order-items-list"></div>'+
-      '<div id="poi-stock-hint" style="display:none;font-size:12px;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;border-radius:4px;padding:8px 12px">✓ 此品項將標記為安全庫存補貨，不關聯客戶訂單。請切換到「從產品目錄選」tab 選擇品項。</div>'+
+      // Catalog form (shown when stock is checked)
+      '<div id="poi-catalog-form" style="display:none">'+
+        '<div class="grid-2" style="margin-bottom:8px">'+
+        '<div><label>產品名稱 <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="poi-name" placeholder="可手動輸入或從目錄帶入" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openPurchaseProductPicker()" style="white-space:nowrap;height:32px">選自產品目錄</button></div><input id="poi-product-id" type="hidden" /></div>'+
+        '<div><label>規格</label><input id="poi-spec" placeholder="選填" /></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><label>數量 <span class="req">*</span></label><input id="poi-qty" placeholder="數量" type="number" inputmode="decimal" /></div><div><label>單位 <span class="req">*</span></label><input id="poi-unit" placeholder="單位" /></div></div>'+
+        '<div><label>單價 <span class="req">*</span></label><input id="poi-price" placeholder="單價" type="number" inputmode="decimal" /></div>'+
+        '<div><label>幣別</label><select id="poi-currency">'+currencyOpts+'</select></div>'+
+        '<div><label>計價單位</label><select id="poi-pricing-unit"><option value="">—</option><option value="m2">平方米 m²</option><option value="m">米 m</option></select></div>'+
+        '<div><label>寬幅（mm）</label><input id="poi-width-mm" type="number" step="1" placeholder="例如 1070" /></div>'+
+        '</div>'+
+        '<div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-primary btn-sm" onclick="addPurchaseItem()">加入品項</button><button class="btn btn-ghost btn-sm" onclick="closePurchaseItemForm()">取消</button></div>'+
       '</div>'+
       '</div>'
   }
@@ -4611,12 +4607,12 @@ function onPoiStockToggle(){
   const isStock=document.getElementById('poi-is-stock')?.checked
   const sel=document.getElementById('poi-order-sel')
   const list=document.getElementById('poi-order-items-list')
-  const hint=document.getElementById('poi-stock-hint')
-  if(sel)sel.style.opacity=isStock?'0.4':'1'
-  if(sel)sel.disabled=!!isStock
+  const catalog=document.getElementById('poi-catalog-form')
+  if(sel){sel.style.opacity=isStock?'0.4':'1';sel.disabled=!!isStock}
   if(list)list.style.display=isStock?'none':'block'
-  if(hint)hint.style.display=isStock?'block':'none'
+  if(catalog)catalog.style.display=isStock?'block':'none'
   if(isStock&&sel)sel.value=''
+  if(isStock&&list)list.innerHTML=''
 }
 
 function onPurchaseOrderChange(){
