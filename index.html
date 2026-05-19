@@ -4217,7 +4217,7 @@ function openPurchaseModal(id, prefill={}){
       const _qty=parseFloat(i.qty||i.quantity||0)||0
       const _up=parseFloat(i.unit_price||i.price||0)||0
       const _wm=parseFloat(i.width_m||0)
-      const _prod=i.product_id?products.find(pr=>String(pr.id)===String(i.product_id)):null
+      const _prod=(i.product_id?products.find(pr=>String(pr.id)===String(i.product_id)):null)||products.find(pr=>pr.product_name===i.product_name&&(pr.spec||null)===(i.spec||null))||null
       const _costPrice=_prod?.cost_price??null
       const _costCurrency=_prod?.currency||i.currency||'USD'
       const _hasDiffCost=_costPrice!==null&&Math.abs(parseFloat(_costPrice||0)-_up)>0.001
