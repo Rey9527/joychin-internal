@@ -3200,6 +3200,21 @@ function openOrderModal(id){
       '<button class="btn btn-primary" onclick="_createOrder()">建立訂單</button>'
   } else {
     _renderOrderModal()
+    _backfillOrderPurchaseLinks(id)
+  }
+}
+
+async function _backfillOrderPurchaseLinks(orderId){
+  const affectedPoIds=[...new Set(purchaseOrderItems.filter(i=>String(i.ref_order_id)===String(orderId)).map(i=>String(i.po_id)))]
+  for(const poId of affectedPoIds){
+    const already=purchaseOrderOrderLinks.some(l=>String(l.po_id)===String(poId)&&String(l.order_id)===String(orderId))
+    if(!already){
+      await sb.from('purchase_order_order_links').insert({po_id:poId,order_id:orderId,qty:null,note:'自動補建'})
+    }
+  }
+  if(affectedPoIds.length){
+    await loadPurchaseOrders()
+    _renderOrderModal()
   }
 }
 
@@ -4652,7 +4667,7 @@ async function addItemsFromOrder(orderId){
     return
   }
   for(const it of selectedItems){
-    const prod=it.product_id?products.find(p=>p.id===it.product_id):null
+    const prod=it.product_id?products.find(p=>String(p.id)===String(it.product_id)):null
     const{error}=await sb.from('purchase_order_items').insert({
       po_id:selectedPurchaseId,
       product_id:it.product_id||null,
@@ -4668,6 +4683,8 @@ async function addItemsFromOrder(orderId){
     })
     if(error){showToast('新增品項失敗：'+error.message,'error');return}
   }
+  const alreadyLinked=purchaseOrderOrderLinks.some(l=>String(l.po_id)===String(selectedPurchaseId)&&String(l.order_id)===String(orderId))
+  if(!alreadyLinked)await sb.from('purchase_order_order_links').insert({po_id:selectedPurchaseId,order_id:orderId,qty:null,note:'從訂單品項加入'})
   _isDirty=false
   closeModal('modal-subform')
   await loadPurchaseOrders()
