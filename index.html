@@ -2651,7 +2651,7 @@ function orderLinkedShipments(orderId){
     .filter(p=>purchaseOrderLinksForDisplay(p.id).some(link=>String(link.order_id)===String(orderId)))
     .map(p=>String(p.id))
   return shipmentPurchaseOrders
-    .filter(x=>linkedPurchaseIds.includes(String(x.po_id)))
+    .filter(x=>linkedPurchaseIds.includes(String(x.purchase_order_id)))
     .map(link=>shipments.find(s=>String(s.id)===String(link.shipment_id)))
     .filter(Boolean)
 }
@@ -4342,8 +4342,8 @@ function assignIfPresent(target,key,value){
 }
 
 async function createPurchaseOrder(){
-  const linkedOrderId=null
-  const source='stock'
+  const linkedOrderId=window._pendingLinkedOrderId||null
+  const source=linkedOrderId?'order':'stock'
   const supplierId=parseInt(document.getElementById('pp-supplier')?.value||'',10)||null
   if(!supplierId){showToast('請填寫必要欄位','error');return}
   if(!window._pendingPurchaseItems||!window._pendingPurchaseItems.length){
@@ -4381,7 +4381,11 @@ async function createPurchaseOrder(){
     delete window._pendingPurchaseItems
     _pendingPurchaseLinks=[]
   }
-  
+  if(linkedOrderId){
+    await sb.from('purchase_order_order_links').insert({po_id:id,order_id:linkedOrderId,qty:null,note:'從訂單建立'})
+    delete window._pendingLinkedOrderId
+  }
+
   _isDirty=false
   await loadPurchaseOrders()
   closeModal('modal-purchase')
@@ -4435,6 +4439,7 @@ function createPurchaseFromOrder(orderId){
     }))
   }
   window._pendingPurchaseItems=prefill.items
+  window._pendingLinkedOrderId=orderId
   _isDirty=false
   closeModal('modal-order')
   openPurchaseModal(null, prefill)
@@ -5315,6 +5320,7 @@ function closeModal(id){
     clearErrorToasts()
     document.getElementById(id).classList.remove('open')
     if(id==='modal-doc-preview'){const f=document.getElementById('modal-doc-preview-frame');if(f)f.src=''}
+    if(id==='modal-purchase'){delete window._pendingLinkedOrderId}
   }
   if(_isDirty){
     confirmModal('有未儲存的變更，確定要離開嗎？',()=>{
