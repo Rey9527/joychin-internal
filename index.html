@@ -1759,13 +1759,12 @@ function _renderSampleModal(){
           '<div style="margin-top:6px"><button class="btn btn-ghost btn-sm" onclick="copySmEmailTpl(\''+tplId+'-body\')">複製郵件內容</button></div>'+
           '</div>'
       }
-      html+='<div style="padding:8px 0;border-bottom:1px solid #f0f0eb">'+
-        '<div style="display:flex;align-items:center;gap:6px;font-size:12px;flex-wrap:wrap;margin-bottom:4px">'+
-        '<input type="date" id="smreq-date-'+r.id+'" value="'+(r.requested_date||'')+'" style="font-size:11px;width:130px;height:28px;padding:2px 6px" '+(isReceived?'disabled':'')+' />'+
-        '<input type="number" id="smreq-qty-'+r.id+'" value="'+(r.qty||'')+'" min="0" step="0.01" placeholder="數量" style="font-size:11px;width:70px;height:28px;padding:2px 6px;text-align:right" '+(isReceived?'disabled':'')+' />'+
-        '<span style="font-size:11px;color:#888">'+esc(s.unit||'')+' </span>'+
-        '<input type="text" id="smreq-note-'+r.id+'" value="'+esc(r.notes||'')+'" placeholder="備註" style="font-size:11px;flex:1;min-width:80px;height:28px;padding:2px 6px" '+(isReceived?'disabled':'')+' />'+
-        (!isReceived?'<button class="btn btn-ghost btn-sm" style="height:28px;white-space:nowrap" onclick="saveRequestEdit('+r.id+')">儲存</button>':'')+
+      html+='<div id="smreq-row-'+r.id+'" style="padding:8px 0;border-bottom:1px solid #f0f0eb">'+
+        '<div class="smreq-top" style="display:flex;align-items:center;gap:6px;font-size:12px;flex-wrap:wrap;margin-bottom:4px">'+
+        '<span style="font-size:11px;color:#555">'+(r.requested_date||'—')+'</span>'+
+        '<span style="font-size:11px;color:#555">'+(r.qty!=null?r.qty:'—')+' '+esc(s.unit||'')+'</span>'+
+        '<span style="font-size:11px;color:#888;flex:1">'+esc(r.notes||'')+'</span>'+
+        (!isReceived?'<button class="btn btn-ghost btn-sm" style="height:28px;white-space:nowrap" onclick="editRequestRow('+r.id+')">編輯</button>':'')+
         '<button class="btn btn-ghost btn-sm" style="height:28px;color:#A32D2D;white-space:nowrap" onclick="deleteRequest('+r.id+')">刪除</button>'+
         '</div>'+
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+stBadge+actionBtn+'</div>'+
@@ -1881,6 +1880,22 @@ async function submitSampleRequest(){
   if(error){showToast('新增失敗：'+error.message,'error');return}
   logActivity('索取樣品','sample',String(selectedSampleId),'')
   await loadSamples();_renderSampleModal();renderSamples();showToast('索取記錄已新增')
+}
+
+function editRequestRow(id){
+  const row=document.getElementById('smreq-row-'+id)
+  if(!row)return
+  const r=sampleRequestsIn.find(x=>x.id===id)
+  if(!r)return
+  const s=samples.find(x=>x.id===r.sample_id)
+  const topDiv=row.querySelector('.smreq-top')
+  topDiv.innerHTML=
+    '<input type="date" id="smreq-date-'+id+'" value="'+(r.requested_date||'')+'" style="font-size:11px;width:130px;height:28px;padding:2px 6px;border:1px solid #ddd;border-radius:4px" />'+
+    '<input type="number" id="smreq-qty-'+id+'" value="'+(r.qty||'')+'" min="0" step="0.01" placeholder="數量" style="font-size:11px;width:70px;height:28px;padding:2px 6px;text-align:right;border:1px solid #ddd;border-radius:4px" />'+
+    '<span style="font-size:11px;color:#888">'+esc(s?.unit||'')+'</span>'+
+    '<input type="text" id="smreq-note-'+id+'" value="'+esc(r.notes||'')+'" placeholder="備註" style="font-size:11px;flex:1;min-width:80px;height:28px;padding:2px 6px;border:1px solid #ddd;border-radius:4px" />'+
+    '<button class="btn btn-ghost btn-sm" style="height:28px;white-space:nowrap" onclick="saveRequestEdit('+id+')">儲存</button>'+
+    '<button class="btn btn-ghost btn-sm" style="height:28px;white-space:nowrap" onclick="_renderSampleModal()">取消</button>'
 }
 
 async function saveRequestEdit(reqId){
@@ -3379,11 +3394,8 @@ function _renderOrderModal(){
     '<div><label>客戶訂單號</label><input id="oi-customer-ref" type="text" placeholder="客戶系統的訂單編號（選填）" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
     '</div>'+
     '<div style="margin-bottom:12px"><label>備註</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
-    '<div style="margin-bottom:14px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" /> 此訂單需要 COA（分析證明書）</label></div>'+
-    '<div style="display:flex;gap:8px;margin-bottom:4px">'+
-    '<button class="btn btn-primary btn-sm" onclick="saveOrderBasic()">儲存基本資料</button>'+
-    '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteOrder()">刪除訂單</button>'+
-    '</div><div class="divider"></div>'
+    '<div style="margin-bottom:4px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" /> 此訂單需要 COA（分析證明書）</label></div>'+
+    '<div class="divider"></div>'
 
   const linkedShipments=orderLinkedShipments(o.id)
   const relatedPurchases=purchaseOrders.filter(p=>purchaseOrderLinksForDisplay(p.id).some(link=>String(link.order_id)===String(o.id)))
@@ -3481,8 +3493,7 @@ function _renderOrderModal(){
         '<input type="number" min="0" step="1" value="'+(wm>0?Math.round(wm*1000):'')+'" placeholder="例 1070" style="width:70px;font-size:12px;padding:2px 6px;border:1px solid '+(missingWidth?'#e55':'#ddd')+';border-radius:4px" oninput="oiWidthChange('+it.id+',this.value)" />':'')+
         '</div></div>'
     })
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">'+
-      '<button class="btn btn-primary btn-sm" onclick="saveOrderItems()">儲存品項</button>'+
+    html+='<div style="display:flex;justify-content:flex-end;align-items:center;padding:8px 0">'+
       '<span style="font-size:13px;font-weight:600;color:#0F6E56" id="oi-total-display">Total '+total.toFixed(2)+' '+(o.currency||'')+'</span>'+
       '</div>'
   } else {
@@ -3491,32 +3502,29 @@ function _renderOrderModal(){
 
   html+='<div class="divider"></div>'
 
-  if(!['cancelled','completed'].includes(o.status)){
-    const isVerbal=o.source==='verbal'
-    const approvalSt=o.approval_status||'none'
-    const needsApproval=isVerbal&&approvalSt!=='approved'
-    // approval banner
-    if(isVerbal){
-      if(approvalSt==='none'){
-        if(hasPermission('approve')){
-          html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:12px 14px;margin-bottom:12px">'+
-            '<div style="font-size:12px;color:#8A6400;margin-bottom:8px">此為口頭承諾訂單，請審批後才可建立採購單。</div>'+
-            '<div style="display:flex;gap:8px">'+
-            '<button class="btn btn-primary btn-sm" onclick="approveOrder(\''+o.id+'\')">審批通過 ✓</button>'+
-            '<button class="btn btn-ghost btn-sm" style="color:#e55" onclick="rejectOrder(\''+o.id+'\')">拒絕 ✗</button>'+
-            '</div></div>'
-        } else {
-          html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:10px 14px;font-size:12px;color:#8A6400;margin-bottom:12px">⏳ 等待主管審批</div>'
-        }
-      } else if(approvalSt==='approved'){
-        html+='<div style="background:#E1F5EE;border:1px solid #0F6E56;border-radius:4px;padding:8px 14px;font-size:12px;color:#085041;margin-bottom:12px">✓ 已審批通過'+(o.approved_by?' — '+o.approved_by:'')+(o.approved_at?' · '+o.approved_at.slice(0,10):'')+'</div>'
-      } else if(approvalSt==='rejected'){
-        html+='<div style="background:#FCEBEB;border:1px solid #F09595;border-radius:4px;padding:8px 14px;font-size:12px;color:#A32D2D;margin-bottom:12px">✗ 審批已拒絕</div>'
+  // Approval banner (info only, no action buttons here)
+  const isVerbal=o.source==='verbal'
+  const approvalSt=o.approval_status||'none'
+  const needsApproval=isVerbal&&approvalSt!=='approved'
+  const isActive=!['cancelled','completed'].includes(o.status)
+  const purchaseDisabled=!hasItems||needsApproval
+  if(isActive&&isVerbal){
+    if(approvalSt==='none'){
+      if(hasPermission('approve')){
+        html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:12px 14px;margin-bottom:12px">'+
+          '<div style="font-size:12px;color:#8A6400;margin-bottom:8px">此為口頭承諾訂單，請審批後才可建立採購單。</div>'+
+          '<div style="display:flex;gap:8px">'+
+          '<button class="btn btn-primary btn-sm" onclick="approveOrder(\''+o.id+'\')">審批通過 ✓</button>'+
+          '<button class="btn btn-ghost btn-sm" style="color:#e55" onclick="rejectOrder(\''+o.id+'\')">拒絕 ✗</button>'+
+          '</div></div>'
+      } else {
+        html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:10px 14px;font-size:12px;color:#8A6400;margin-bottom:12px">⏳ 等待主管審批</div>'
       }
+    } else if(approvalSt==='approved'){
+      html+='<div style="background:#E1F5EE;border:1px solid #0F6E56;border-radius:4px;padding:8px 14px;font-size:12px;color:#085041;margin-bottom:12px">✓ 已審批通過'+(o.approved_by?' — '+o.approved_by:'')+(o.approved_at?' · '+o.approved_at.slice(0,10):'')+'</div>'
+    } else if(approvalSt==='rejected'){
+      html+='<div style="background:#FCEBEB;border:1px solid #F09595;border-radius:4px;padding:8px 14px;font-size:12px;color:#A32D2D;margin-bottom:12px">✗ 審批已拒絕</div>'
     }
-    const purchaseDisabled=!hasItems||needsApproval
-    const purchaseHint=needsApproval?'<div style="font-size:11px;color:#A32D2D;margin-top:6px">需審批後才能建立採購單</div>':(hasItems?'':'<div style="font-size:11px;color:#A32D2D;margin-top:6px">請先新增至少 1 筆產品品項</div>')
-    html+='<div style="margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>建立採購單</button>'+purchaseHint+'</div>'
   }
 
   // COA section
@@ -3530,19 +3538,22 @@ function _renderOrderModal(){
     '</div>'
   }
 
-  // Section 3: Status workflow
-  if(!['cancelled','completed'].includes(o.status)){
-    html+='<div class="modal-foot" style="flex-direction:column;align-items:flex-start;gap:8px">'
-    html+='<div class="section-title" style="margin-bottom:0">狀態推進</div>'
-    html+='<div style="display:flex;gap:8px;flex-wrap:wrap">'
+  // Consolidated sticky footer
+  html+='<div class="modal-foot" style="justify-content:space-between;align-items:center">'
+  html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteOrder()">刪除訂單</button>'
+  html+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+  html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderBasic()">儲存基本資料</button>'
+  if(hasItems) html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderItems()">儲存品項</button>'
+  if(isActive){
+    html+='<button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>建立採購單</button>'
     if(o.status==='confirmed') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'processing\')">開始處理 →</button>'
     if(o.status==='processing') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'ready\')">備貨完成 →</button>'
     if(o.status==='ready') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'shipped\')">標記已出貨 →</button>'
     if(o.status==='shipped') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'delivered\')">客戶已收到 →</button>'
     if(o.status==='delivered') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'completed\')">完成訂單 ✓</button>'
     html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="openCancelOrderModal()">取消訂單</button>'
-    html+='</div></div>'
   }
+  html+='</div></div>'
 
   document.getElementById('modal-order-bd').innerHTML=html
   if(o.requires_coa) renderOrderCoaDocs(id)
