@@ -1760,10 +1760,16 @@ function _renderSampleModal(){
           '</div>'
       }
       html+='<div style="padding:8px 0;border-bottom:1px solid #f0f0eb">'+
-        '<div style="display:flex;align-items:center;gap:8px;font-size:12px;flex-wrap:wrap">'+
-        '<span style="flex:1">'+(r.requested_date||'—')+' · 數量 '+(r.qty||'—')+' '+(s.unit||'')+(r.notes?' · '+r.notes:'')+'</span>'+
-        stBadge+actionBtn+
-        '</div>'+emailTplHtml+'</div>'
+        '<div style="display:flex;align-items:center;gap:6px;font-size:12px;flex-wrap:wrap;margin-bottom:4px">'+
+        '<input type="date" id="smreq-date-'+r.id+'" value="'+(r.requested_date||'')+'" style="font-size:11px;width:130px;height:28px;padding:2px 6px" '+(isReceived?'disabled':'')+' />'+
+        '<input type="number" id="smreq-qty-'+r.id+'" value="'+(r.qty||'')+'" min="0" step="0.01" placeholder="數量" style="font-size:11px;width:70px;height:28px;padding:2px 6px;text-align:right" '+(isReceived?'disabled':'')+' />'+
+        '<span style="font-size:11px;color:#888">'+esc(s.unit||'')+' </span>'+
+        '<input type="text" id="smreq-note-'+r.id+'" value="'+esc(r.notes||'')+'" placeholder="備註" style="font-size:11px;flex:1;min-width:80px;height:28px;padding:2px 6px" '+(isReceived?'disabled':'')+' />'+
+        (!isReceived?'<button class="btn btn-ghost btn-sm" style="height:28px;white-space:nowrap" onclick="saveRequestEdit('+r.id+')">儲存</button>':'')+
+        '<button class="btn btn-ghost btn-sm" style="height:28px;color:#A32D2D;white-space:nowrap" onclick="deleteRequest('+r.id+')">刪除</button>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+stBadge+actionBtn+'</div>'+
+        emailTplHtml+'</div>'
     })
   } else {
     html+='<div style="font-size:12px;color:#aaa;padding:8px 0;margin-bottom:4px">尚無索取記錄</div>'
@@ -1875,6 +1881,24 @@ async function submitSampleRequest(){
   if(error){showToast('新增失敗：'+error.message,'error');return}
   logActivity('索取樣品','sample',String(selectedSampleId),'')
   await loadSamples();_renderSampleModal();renderSamples();showToast('索取記錄已新增')
+}
+
+async function saveRequestEdit(reqId){
+  const qty=parseFloat(document.getElementById('smreq-qty-'+reqId)?.value)
+  if(!qty||qty<=0){showToast('請填寫有效數量','error');return}
+  const date=document.getElementById('smreq-date-'+reqId)?.value||null
+  const notes=document.getElementById('smreq-note-'+reqId)?.value.trim()||null
+  const{error}=await sb.from('sample_requests_in').update({qty,requested_date:date,notes}).eq('id',reqId)
+  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  await loadSamples();_renderSampleModal();showToast('已更新')
+}
+
+async function deleteRequest(reqId){
+  confirmModal('確定要刪除此索取記錄嗎？',async()=>{
+    const{error}=await sb.from('sample_requests_in').delete().eq('id',reqId)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadSamples();_renderSampleModal();renderSamples();showToast('已刪除')
+  })
 }
 
 async function markSupplierShipped(reqId){
