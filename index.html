@@ -4615,7 +4615,7 @@ function onPurchaseOrderChange(){
       '<input type="checkbox" class="poi-order-item-chk" value="'+it.id+'" style="width:14px;height:14px;flex-shrink:0;margin:0" />'+
       '<div style="flex:1;min-width:0;overflow:hidden">'+
         '<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.product_name||'—')+(it.spec?' <span style="color:#aaa">'+esc(it.spec)+'</span>':'')+'</div>'+
-        (()=>{const prod=it.product_id?products.find(p=>p.id===it.product_id):null;const costPrice=prod?.cost_price??it.unit_price;return '<div style="color:#888;font-size:11px">'+it.qty+' '+(it.unit||'')+' × '+parseFloat(costPrice||0).toFixed(2)+' '+(prod?.currency||'')+(prod?.cost_price?'（成本）':'')+' <span style="color:#ccc;margin-left:4px">客價 '+parseFloat(it.unit_price||0).toFixed(2)+'</span></div>'})()+'
+        (()=>{const prod=it.product_id?products.find(p=>p.id===it.product_id):null;const cost=prod?.cost_price??it.unit_price;return '<div style="color:#888;font-size:11px">'+it.qty+' '+(it.unit||'')+' × '+parseFloat(cost||0).toFixed(2)+' '+(prod?.currency||'')+(prod?.cost_price?' (成本)':'')+' <span style="color:#ccc;margin-left:4px">客價 '+parseFloat(it.unit_price||0).toFixed(2)+'</span></div>'})()+
       '</div>'+
       '</label>'
     ).join('')+
