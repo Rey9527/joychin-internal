@@ -3209,10 +3209,11 @@ async function _backfillOrderPurchaseLinks(orderId){
   console.log('[backfill] orderId=',orderId,'affectedPoIds=',affectedPoIds,'purchaseOrderItems.length=',purchaseOrderItems.length,'sample ref_order_ids=',purchaseOrderItems.slice(0,5).map(i=>i.ref_order_id))
   for(const poId of affectedPoIds){
     const already=purchaseOrderOrderLinks.some(l=>String(l.po_id)===String(poId)&&String(l.order_id)===String(orderId))
-    console.log('[backfill] poId=',poId,'already linked=',already)
+    const existingForPo=purchaseOrderOrderLinks.filter(l=>String(l.po_id)===String(poId))
+    console.log('[backfill] poId=',poId,'already linked=',already,'existing links for this PO=',existingForPo.map(l=>({po_id:l.po_id,order_id:l.order_id,purchase_order_id:l.purchase_order_id})))
     if(!already){
       const{error}=await sb.from('purchase_order_order_links').insert({po_id:poId,order_id:orderId,qty:null,note:'自動補建'})
-      console.log('[backfill] insert result error=',error)
+      console.log('[backfill] insert result error=',error?.message,error?.code,error?.details,error?.hint)
     }
   }
   const linkedPoIds=purchaseOrders.filter(p=>purchaseOrderLinksForDisplay(p.id).some(l=>String(l.order_id)===String(orderId))).map(p=>p.id)
