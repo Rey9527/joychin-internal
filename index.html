@@ -2396,6 +2396,7 @@ function renderOrders(){
       (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">客戶單號：'+esc(o.customer_ref_no)+'</span>':'')+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
       (o.source==='verbal'&&(o.approval_status||'none')==='none'?'<span class="badge" style="background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D">待審批</span>':'')+
+      (o.requires_coa?'<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>':'')+
       '</div>'+
       '<div style="font-size:12px;color:#666">'+
       (cust?cust.company:'—')+' · '+(sup?sup.company:'—')+
@@ -3354,6 +3355,7 @@ function _renderOrderModal(){
     '<div><label>客戶訂單號</label><input id="oi-customer-ref" type="text" placeholder="客戶系統的訂單編號（選填）" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
     '</div>'+
     '<div style="margin-bottom:12px"><label>備註</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:14px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" /> 此訂單需要 COA（分析證明書）</label></div>'+
     '<div style="display:flex;gap:8px;margin-bottom:4px">'+
     '<button class="btn btn-primary btn-sm" onclick="saveOrderBasic()">儲存基本資料</button>'+
     '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteOrder()">刪除訂單</button>'+
@@ -3493,6 +3495,17 @@ function _renderOrderModal(){
     html+='<div style="margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>建立採購單</button>'+purchaseHint+'</div>'
   }
 
+  // COA section
+  if(o.requires_coa){
+    html+='<div class="divider"></div>'+
+    '<div class="section-title">COA（分析證明書）</div>'+
+    '<div id="order-coa-docs" style="margin-bottom:10px"><div style="font-size:12px;color:#aaa">載入中...</div></div>'+
+    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">'+
+    '<input type="file" id="order-coa-file" accept=".pdf,application/pdf" style="width:auto;font-size:12px" />'+
+    '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">上傳 COA</button>'+
+    '</div>'
+  }
+
   // Section 3: Status workflow
   if(!['cancelled','completed'].includes(o.status)){
     html+='<div class="modal-foot" style="flex-direction:column;align-items:flex-start;gap:8px">'
@@ -3508,6 +3521,7 @@ function _renderOrderModal(){
   }
 
   document.getElementById('modal-order-bd').innerHTML=html
+  if(o.requires_coa) renderOrderCoaDocs(id)
 }
 
 function openCancelOrderModal(){
@@ -3545,11 +3559,90 @@ async function saveOrderBasic(){
     transport_method:document.getElementById('ore-transport')?.value||null,
     tracking_no:document.getElementById('ore-tracking')?.value.trim()||null,
     notes:document.getElementById('ore-notes')?.value.trim()||null,
-    customer_ref_no:document.getElementById('oi-customer-ref')?.value.trim()||null
+    customer_ref_no:document.getElementById('oi-customer-ref')?.value.trim()||null,
+    requires_coa:!!(document.getElementById('ore-requires-coa')?.checked)
   }).eq('id',selectedOrderId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
   _isDirty=false
   await loadOrders();_renderOrderModal();renderOrders();showToast('訂單已更新')
+}
+
+// ── Order COA docs ──
+async function renderOrderCoaDocs(orderId){
+  const el=document.getElementById('order-coa-docs')
+  if(!el)return
+  const{data,error}=await sb.from('order_documents').select('*').eq('order_id',orderId).eq('doc_type','coa').order('created_at',{ascending:false})
+  if(error){el.innerHTML='<div style="font-size:12px;color:#A32D2D">載入失敗</div>';return}
+  if(!data||!data.length){el.innerHTML='<div style="font-size:12px;color:#aaa">尚未上傳 COA</div>';return}
+  el.innerHTML=data.map(d=>{
+    const date=(d.created_at||'').slice(0,10)
+    const size=d.file_size?(d.file_size>1048576?(d.file_size/1048576).toFixed(1)+' MB':(d.file_size/1024).toFixed(0)+' KB'):''
+    return '<div class="doc-row">'+
+      '<div class="pdf-icon">PDF</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.file_name)+'</div>'+
+        '<div style="font-size:10px;color:#aaa">'+date+(d.uploaded_by?' · '+esc(d.uploaded_by):'')+(size?' · '+size:'')+'</div>'+
+      '</div>'+
+      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="previewOrderDoc(\''+esc(d.file_url||'')+'\',\''+esc(d.file_name||'')+'\')">預覽</button>'+
+      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="downloadOrderDoc(\''+esc(d.file_url||'')+'\')">下載</button>'+
+      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;flex-shrink:0" onclick="deleteOrderDoc('+d.id+',\''+esc(d.file_url||'')+'\',\''+orderId+'\')">刪除</button>'+
+    '</div>'
+  }).join('')
+}
+
+async function uploadOrderCoa(orderId){
+  const fileInput=document.getElementById('order-coa-file')
+  const btn=document.getElementById('order-coa-upload-btn')
+  const file=fileInput?.files?.[0]
+  if(!file){showToast('請選擇 PDF 檔案','error');return}
+  if(!file.type.includes('pdf')&&!file.name.toLowerCase().endsWith('.pdf')){showToast('只接受 PDF 格式','error');return}
+  if(btn){btn.disabled=true;btn.textContent='上傳中…'}
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').replace(/__+/g,'_')
+  const filePath=orderId+'/'+Date.now()+'-'+safeName
+  const{error:upErr}=await sb.storage.from('order-docs').upload(filePath,file,{contentType:'application/pdf',upsert:false})
+  if(upErr){showToast('上傳失敗：'+upErr.message,'error');if(btn){btn.disabled=false;btn.textContent='上傳 COA'};return}
+  const{error:dbErr}=await sb.from('order_documents').insert({order_id:orderId,doc_type:'coa',file_name:file.name,file_url:filePath,file_size:file.size,uploaded_by:currentUser?.name||''})
+  if(dbErr){showToast('記錄失敗：'+dbErr.message,'error');if(btn){btn.disabled=false;btn.textContent='上傳 COA'};return}
+  if(fileInput)fileInput.value=''
+  if(btn){btn.disabled=false;btn.textContent='上傳 COA'}
+  showToast('COA 已上傳')
+  renderOrderCoaDocs(orderId)
+}
+
+function _orderDocPath(raw){
+  if(!raw)return raw
+  const marker='/order-docs/'
+  const idx=raw.indexOf(marker)
+  return idx>=0?raw.slice(idx+marker.length):raw
+}
+
+async function previewOrderDoc(raw,fileName){
+  const filePath=_orderDocPath(raw)
+  if(!filePath){showToast('找不到檔案路徑','error');return}
+  document.getElementById('modal-doc-preview-title').textContent=fileName||filePath
+  const frame=document.getElementById('modal-doc-preview-frame')
+  frame.src=''
+  document.getElementById('modal-doc-preview').classList.add('open')
+  const{data,error}=await sb.storage.from('order-docs').createSignedUrl(filePath,3600)
+  if(error){showToast('無法產生預覽連結：'+error.message,'error');return}
+  frame.src=data.signedUrl
+}
+
+async function downloadOrderDoc(raw){
+  const filePath=_orderDocPath(raw)
+  if(!filePath){showToast('找不到檔案路徑','error');return}
+  const{data,error}=await sb.storage.from('order-docs').createSignedUrl(filePath,3600)
+  if(error){showToast('無法產生下載連結：'+error.message,'error');return}
+  window.open(data.signedUrl,'_blank')
+}
+
+async function deleteOrderDoc(docId,filePath,orderId){
+  if(!confirm('確定要刪除此 COA？'))return
+  const path=_orderDocPath(filePath)
+  if(path)await sb.storage.from('order-docs').remove([path])
+  await sb.from('order_documents').delete().eq('id',docId)
+  showToast('已刪除')
+  renderOrderCoaDocs(orderId)
 }
 
 async function deleteOrder(){
