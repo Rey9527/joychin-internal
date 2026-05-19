@@ -4219,11 +4219,15 @@ function openPurchaseModal(id, prefill={}){
       const canArrival=!isNew&&p?.status==='in_production'
       const rcvLabel=receivedQty===0?'— 未到貨':totalQty>0&&receivedQty>totalQty?'↑ 超量到貨':totalQty>0&&receivedQty>=totalQty?'✓ 全數到貨':'⚠ 部分到貨'
       const rcvColor=receivedQty===0?'#aaa':totalQty>0&&receivedQty>totalQty?'#185FA5':totalQty>0&&receivedQty>=totalQty?'#0F6E56':'#8A6400'
-      const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto);gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:4px;background:#fff">'+
+      const delBtn=isNew
+        ?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0;line-height:1;align-self:start" onclick="deletePendingPurchaseItem(\''+esc(String(i.temp_key||''))+'\')">×</button>'
+        :(receivedQty===0?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0;line-height:1;align-self:start" onclick="deletePurchaseItem('+i.id+')">×</button>':'')
+      const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto) auto;gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:4px;background:#fff">'+
         '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+rcvColor+'">'+rcvLabel+' — '+receivedQty+' / '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">數量</div><div style="font-size:12px;font-weight:500">'+(i.qty||i.quantity||0)+' '+(i.unit||'')+'</div></div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+parseFloat(i.unit_price||i.price||0).toFixed(2)+' '+(i.currency||'USD')+'</div></div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">小計</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+lineTotal.toFixed(2)+'</div>'+(i.pricing_unit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+    '</div>'+
+        delBtn+
       '</div>'
       const linksBlock=renderPurchaseItemLinksBlock(i,{pending:isNew,purchaseOrderId:p?.id||null})
       const arrivalBlock=(!isNew&&i.id?'<div id="arrival-input-'+i.id+'" style="display:none;padding:8px 12px;background:#f9f9f7;border:1px solid #e5e5e0;border-top:none;border-radius:0 0 4px 4px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label style="font-size:12px;color:#666;white-space:nowrap">本次到貨</label><input id="arrival-qty-'+i.id+'" type="number" min="0.01" step="0.01" data-no-dirty="true" style="width:80px" placeholder="數量" /><button class="btn btn-primary btn-sm" style="height:32px" onclick="submitArrival('+i.id+')">確認</button><button class="btn btn-ghost btn-sm" style="height:32px" onclick="document.getElementById(\'arrival-input-'+i.id+'\').style.display=\'none\'">取消</button><button class="btn btn-ghost btn-sm" style="height:32px;color:#C0392B;border-color:#C0392B" onclick="openComplaintFromArrival('+i.id+')">品質問題 → 開立客訴</button></div></div>':'')
@@ -4676,6 +4680,22 @@ async function addItemsFromOrder(orderId){
 function showArrivalInput(itemId){
   const el=document.getElementById('arrival-input-'+itemId)
   if(el)el.style.display=el.style.display==='none'?'block':'none'
+}
+
+function deletePendingPurchaseItem(tempKey){
+  if(!window._pendingPurchaseItems)return
+  window._pendingPurchaseItems=window._pendingPurchaseItems.filter(i=>String(i.temp_key||'')!==String(tempKey))
+  openPurchaseModal(null,{keepPending:true,keepPendingLinks:true,supplier_id:parseInt(document.getElementById('pp-supplier')?.value||'',10)||null,currency:document.getElementById('pp-currency')?.value||'USD'})
+}
+
+async function deletePurchaseItem(itemId){
+  confirmModal('確定要刪除此品項嗎？',async()=>{
+    const{error}=await sb.from('purchase_order_items').delete().eq('id',itemId)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadPurchaseOrders()
+    openPurchaseModal(selectedPurchaseId)
+    showToast('品項已刪除')
+  })
 }
 
 async function submitArrival(itemId){
