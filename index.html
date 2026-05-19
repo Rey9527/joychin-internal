@@ -4342,8 +4342,6 @@ function assignIfPresent(target,key,value){
 }
 
 async function createPurchaseOrder(){
-  const linkedOrderId=window._pendingLinkedOrderId||null
-  const source=linkedOrderId?'order':'stock'
   const supplierId=parseInt(document.getElementById('pp-supplier')?.value||'',10)||null
   if(!supplierId){showToast('請填寫必要欄位','error');return}
   if(!window._pendingPurchaseItems||!window._pendingPurchaseItems.length){
@@ -4351,16 +4349,13 @@ async function createPurchaseOrder(){
     return
   }
   const id=generatePurchaseId()
-  const status='draft'
-  const payload={id,source,supplier_id:supplierId,status}
-  payload.customer_order_id=linkedOrderId
+  const payload={id,source:'stock',supplier_id:supplierId,status:'draft'}
   assignIfPresent(payload,'accounting_no',document.getElementById('pp-accounting')?.value?.trim())
   assignIfPresent(payload,'expected_delivery',document.getElementById('pp-expected')?.value)
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value||'USD')
   assignIfPresent(payload,'notes',document.getElementById('pp-notes')?.value?.trim())
   const{error}=await sb.from('purchase_orders').insert(payload)
   if(error){showToast('建立失敗：'+error.message,'error');return}
-  
   const po=await sb.from('purchase_orders').select('*').eq('id',id).single()
   if(po.data&&window._pendingPurchaseItems){
     for(const item of window._pendingPurchaseItems){
@@ -4381,11 +4376,6 @@ async function createPurchaseOrder(){
     delete window._pendingPurchaseItems
     _pendingPurchaseLinks=[]
   }
-  if(linkedOrderId){
-    await sb.from('purchase_order_order_links').insert({po_id:id,order_id:linkedOrderId,qty:null,note:'從訂單建立'})
-    delete window._pendingLinkedOrderId
-  }
-
   _isDirty=false
   await loadPurchaseOrders()
   closeModal('modal-purchase')
@@ -4418,31 +4408,74 @@ function createPurchaseFromOrder(orderId){
   const o=orders.find(x=>x.id===orderId)
   if(!o)return
   const oItems=orderItems.filter(oi=>oi.order_id===o.id)
-  if(!oItems.length){
-    showToast('請先新增至少 1 筆產品品項，再建立採購單','error')
-    return
+  if(!oItems.length){showToast('請先新增至少 1 筆產品品項，再建立採購單','error');return}
+  window._pendingLinkedOrderId=orderId
+  const supOpts=suppliers.slice().sort((a,b)=>a.company.localeCompare(b.company,'zh-TW')).map(s=>'<option value="'+s.id+'"'+(String(s.id)===String(o.supplier_id||'')?' selected':'')+'>'+esc(s.company)+'</option>').join('')
+  const itemRows=oItems.map(oi=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0f0eb;font-size:12px">'+
+    '<span>'+esc(oi.product_name||'—')+(oi.spec?' <span style="color:#aaa">'+esc(oi.spec)+'</span>':'')+'</span>'+
+    '<span style="color:#666;white-space:nowrap;margin-left:12px">'+(oi.qty||'')+(oi.unit?' '+oi.unit:'')+'</span>'+
+    '</div>').join('')
+  const body=
+    '<div style="margin-bottom:12px"><label>品項</label><div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:8px 12px">'+itemRows+'</div></div>'+
+    '<div class="grid-2" style="margin-bottom:12px">'+
+    '<div><label>供應商 <span class="req">*</span></label><select id="cpo-supplier"><option value="">— 選擇 —</option>'+supOpts+'</select></div>'+
+    '<div><label>幣別</label><select id="cpo-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency||'USD')+'</select></div>'+
+    '</div>'+
+    '<div class="grid-2" style="margin-bottom:12px">'+
+    '<div><label>預計交期</label><input type="date" id="cpo-expected" /></div>'+
+    '<div><label>會計單號</label><input type="text" id="cpo-accounting" placeholder="選填" /></div>'+
+    '</div>'+
+    '<div style="margin-bottom:12px"><label>備註</label><textarea id="cpo-notes" rows="2" placeholder="選填"></textarea></div>'+
+    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreatePurchaseFromOrder()">建立採購單</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">取消</button></div>'
+  openSubformModal('建立採購單', body)
+}
+
+async function submitCreatePurchaseFromOrder(){
+  const orderId=window._pendingLinkedOrderId
+  if(!orderId)return
+  const o=orders.find(x=>x.id===orderId)
+  if(!o)return
+  const supplierId=parseInt(document.getElementById('cpo-supplier')?.value||'',10)||null
+  if(!supplierId){showToast('請選擇供應商','error');return}
+  const oItems=orderItems.filter(oi=>oi.order_id===o.id)
+  const id=generatePurchaseId()
+  const payload={
+    id,
+    source:'order',
+    supplier_id:supplierId,
+    status:'draft',
+    customer_order_id:orderId,
+    currency:document.getElementById('cpo-currency')?.value||o.currency||'USD'
   }
-  const prefill={
-    supplier_id:o.supplier_id??null,
-    currency:o.currency,
-    links:[],
-    items:oItems.map(oi=>({
+  const accounting=document.getElementById('cpo-accounting')?.value?.trim()
+  const expected=document.getElementById('cpo-expected')?.value
+  const notes=document.getElementById('cpo-notes')?.value?.trim()
+  if(accounting)payload.accounting_no=accounting
+  if(expected)payload.expected_delivery=expected
+  if(notes)payload.notes=notes
+  const{error}=await sb.from('purchase_orders').insert(payload)
+  if(error){showToast('建立失敗：'+error.message,'error');return}
+  for(const oi of oItems){
+    await sb.from('purchase_order_items').insert({
+      po_id:id,
       product_id:oi.product_id||null,
       product_name:oi.product_name,
-      spec:oi.spec,
+      spec:oi.spec||null,
       qty:oi.qty,
       unit:oi.unit,
       unit_price:oi.unit_price,
       currency:oi.currency||o.currency,
       width_m:oi.width_m||null,
       pricing_unit:oi.pricing_unit||null
-    }))
+    })
   }
-  window._pendingPurchaseItems=prefill.items
-  window._pendingLinkedOrderId=orderId
+  await sb.from('purchase_order_order_links').insert({po_id:id,order_id:orderId,qty:null,note:'從訂單建立'})
+  delete window._pendingLinkedOrderId
   _isDirty=false
-  closeModal('modal-order')
-  openPurchaseModal(null, prefill)
+  closeModal('modal-subform')
+  await loadPurchaseOrders()
+  _renderOrderModal()
+  showToast('採購單 '+id+' 已建立')
 }
 
 async function savePurchaseOrder(){
