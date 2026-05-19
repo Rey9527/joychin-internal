@@ -4217,6 +4217,10 @@ function openPurchaseModal(id, prefill={}){
       const _qty=parseFloat(i.qty||i.quantity||0)||0
       const _up=parseFloat(i.unit_price||i.price||0)||0
       const _wm=parseFloat(i.width_m||0)
+      const _prod=i.product_id?products.find(pr=>String(pr.id)===String(i.product_id)):null
+      const _costPrice=_prod?.cost_price??null
+      const _costCurrency=_prod?.currency||i.currency||'USD'
+      const _hasDiffCost=_costPrice!==null&&Math.abs(parseFloat(_costPrice||0)-_up)>0.001
       const lineTotal=i.pricing_unit==='m2'&&_wm>0?_qty*_up*_wm:_qty*_up
       const itemLinks=isNew?pendingLinksForItem(i.temp_key):savedLinksForPurchaseItem(p?.id||null,i)
       const receivedQty=parseInt(i.received_qty)||0
@@ -4231,7 +4235,7 @@ function openPurchaseModal(id, prefill={}){
       const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto) auto;gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:4px;background:#fff">'+
         '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+rcvColor+'">'+rcvLabel+' — '+receivedQty+' / '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">數量</div><div style="font-size:12px;font-weight:500">'+(i.qty||i.quantity||0)+' '+(i.unit||'')+'</div></div>'+
-        '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+parseFloat(i.unit_price||i.price||0).toFixed(2)+' '+(i.currency||'USD')+'</div></div>'+
+        '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+parseFloat(i.unit_price||i.price||0).toFixed(2)+' '+(i.currency||'USD')+'</div>'+(!isNew&&_hasDiffCost?'<button onclick="applyCostPrice('+i.id+','+parseFloat(_costPrice).toFixed(4)+',\''+_costCurrency+'\')" style="background:none;border:1px solid #0F6E56;color:#0F6E56;border-radius:3px;cursor:pointer;font-size:10px;padding:2px 5px;margin-top:3px;white-space:nowrap">套用成本 '+parseFloat(_costPrice).toFixed(2)+'</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">小計</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+lineTotal.toFixed(2)+'</div>'+(i.pricing_unit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+    '</div>'+
         delBtn+
       '</div>'
@@ -4444,7 +4448,7 @@ async function submitCreatePurchaseFromOrder(){
   const{error}=await sb.from('purchase_orders').insert(payload)
   if(error){showToast('建立失敗：'+error.message,'error');return}
   for(const oi of oItems){
-    const prod=oi.product_id?products.find(p=>p.id===oi.product_id):null
+    const prod=oi.product_id?products.find(p=>String(p.id)===String(oi.product_id)):null
     await sb.from('purchase_order_items').insert({
       po_id:id,
       product_id:oi.product_id||null,
@@ -4615,7 +4619,7 @@ function onPurchaseOrderChange(){
       '<input type="checkbox" class="poi-order-item-chk" value="'+it.id+'" style="width:14px;height:14px;flex-shrink:0;margin:0" />'+
       '<div style="flex:1;min-width:0;overflow:hidden">'+
         '<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.product_name||'—')+(it.spec?' <span style="color:#aaa">'+esc(it.spec)+'</span>':'')+'</div>'+
-        (()=>{const prod=it.product_id?products.find(p=>p.id===it.product_id):null;const cost=prod?.cost_price??it.unit_price;return '<div style="color:#888;font-size:11px">'+it.qty+' '+(it.unit||'')+' × '+parseFloat(cost||0).toFixed(2)+' '+(prod?.currency||'')+(prod?.cost_price?' (成本)':'')+' <span style="color:#ccc;margin-left:4px">客價 '+parseFloat(it.unit_price||0).toFixed(2)+'</span></div>'})()+
+        (()=>{const prod=it.product_id?products.find(p=>String(p.id)===String(it.product_id)):null;const cost=prod?.cost_price??it.unit_price;return '<div style="color:#888;font-size:11px">'+it.qty+' '+(it.unit||'')+' × '+parseFloat(cost||0).toFixed(2)+' '+(prod?.currency||'')+(prod?.cost_price?' (成本)':'')+' <span style="color:#ccc;margin-left:4px">客價 '+parseFloat(it.unit_price||0).toFixed(2)+'</span></div>'})()+
       '</div>'+
       '</label>'
     ).join('')+
@@ -4632,7 +4636,7 @@ async function addItemsFromOrder(orderId){
   if(!selectedPurchaseId){
     if(!window._pendingPurchaseItems)window._pendingPurchaseItems=[]
     selectedItems.forEach(it=>{
-      const prod=it.product_id?products.find(p=>p.id===it.product_id):null
+      const prod=it.product_id?products.find(p=>String(p.id)===String(it.product_id)):null
       window._pendingPurchaseItems.push(makePendingPurchaseItem({
         product_id:it.product_id||null,
         product_name:it.product_name,
@@ -4687,6 +4691,13 @@ function deletePendingPurchaseItem(tempKey){
   openPurchaseModal(null,{keepPending:true,keepPendingLinks:true,supplier_id:parseInt(document.getElementById('pp-supplier')?.value||'',10)||null,currency:document.getElementById('pp-currency')?.value||'USD'})
 }
 
+async function applyCostPrice(itemId,costPrice,currency){
+  const{error}=await sb.from('purchase_order_items').update({unit_price:costPrice,currency}).eq('id',itemId)
+  if(error){showToast('更新失敗：'+error.message,'error');return}
+  await loadPurchaseOrders()
+  openPurchaseModal(selectedPurchaseId)
+  showToast('已套用成本價 '+parseFloat(costPrice).toFixed(2))
+}
 async function deletePurchaseItem(itemId){
   confirmModal('確定要刪除此品項嗎？',async()=>{
     const{error}=await sb.from('purchase_order_items').delete().eq('id',itemId)
