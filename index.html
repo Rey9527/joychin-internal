@@ -4144,7 +4144,7 @@ function renderPurchaseOrders(){
         '</div>'+
         '<div style="font-size:12px;font-weight:500">'+(supplierName||'—')+'</div>'+
         (()=>{const its=purchaseOrderItems.filter(i=>i.po_id===p.id);return its.length?'<div style="font-size:11px;color:#555;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+its.map(i=>i.product_name).join('、')+'</div>':''})()+
-        '<div style="font-size:10px;color:#888">'+(p.source==='stock'?'<span style="background:#E8F5E9;color:#2E7D32;border-radius:3px;padding:1px 5px;font-size:10px;margin-right:4px">安全庫存</span>':'')+d+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div>'+
+        '<div style="font-size:10px;color:#888">'+d+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div>'+
         (shBadge?'<div style="margin-top:4px">'+shBadge+'</div>':'')+
       '</div>'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
@@ -4187,10 +4187,7 @@ function openPurchaseModal(id, prefill={}){
     .join('')
   const currencyOpts=buildOptions(CURRENCY_OPTIONS,p?.currency||prefill.currency)
   document.getElementById('modal-purchase-hd').textContent=isNew?'新增採購單':'採購單詳情'
-  const isStockSource=(p?.source||'stock')==='stock'&&p?.source!=='order'
-  let html='<div class="section-title">基本資料</div>'+
-    '<div style="margin-bottom:10px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="pp-is-stock" '+(isStockSource?'checked':'')+' style="width:auto;height:auto;cursor:pointer" onchange="_isDirty=true" /> 安全庫存補貨（非對應客戶訂單）</label></div>'+
-    '<div class="grid-2" style="margin-bottom:12px">'+
+  let html='<div class="section-title">基本資料</div><div class="grid-2" style="margin-bottom:12px">'+
     '<div><label>供應商 <span class="req">*</span></label><select id="pp-supplier" onchange="_isDirty=true">'+supOpts+'</select></div>'+
     '<div><label>會計編號</label><input id="pp-accounting" value="'+(p?.accounting_no||'')+'" placeholder="選填" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
     '<div><label>預計交貨日</label><input type="date" id="pp-expected" value="'+(p?.expected_delivery||'')+'" onchange="_isDirty=true" /></div>'+
@@ -4256,8 +4253,12 @@ function openPurchaseModal(id, prefill={}){
       '<div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="addPurchaseItem()">加入品項</button><button class="btn btn-ghost btn-sm" onclick="closePurchaseItemForm()">取消</button></div>'+
       '</div>'+
       '<div id="poi-tab-order" style="display:none;min-height:200px">'+
-      '<div style="margin-bottom:8px"><label>選擇訂單</label><select id="poi-order-sel" data-no-dirty="true" onchange="onPurchaseOrderChange()">'+orderDropdownOpts+'</select></div>'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">'+
+        '<div style="flex:1;min-width:160px"><label>選擇客戶訂單</label><select id="poi-order-sel" data-no-dirty="true" onchange="onPurchaseOrderChange()">'+orderDropdownOpts+'</select></div>'+
+        '<label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:400;white-space:nowrap;margin-top:18px"><input type="checkbox" id="poi-is-stock" style="width:auto;height:auto;cursor:pointer" onchange="onPoiStockToggle()" /> 安全庫存補貨</label>'+
+      '</div>'+
       '<div id="poi-order-items-list"></div>'+
+      '<div id="poi-stock-hint" style="display:none;font-size:12px;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;border-radius:4px;padding:8px 12px">✓ 此品項將標記為安全庫存補貨，不關聯客戶訂單。請切換到「從產品目錄選」tab 選擇品項。</div>'+
       '</div>'+
       '</div>'
   }
@@ -4356,8 +4357,7 @@ async function createPurchaseOrder(){
     return
   }
   const id=generatePurchaseId()
-  const isStock=document.getElementById('pp-is-stock')?.checked!==false
-  const payload={id,source:isStock?'stock':'order',supplier_id:supplierId,status:'draft'}
+  const payload={id,source:'stock',supplier_id:supplierId,status:'draft'}
   assignIfPresent(payload,'accounting_no',document.getElementById('pp-accounting')?.value?.trim())
   assignIfPresent(payload,'expected_delivery',document.getElementById('pp-expected')?.value)
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value||'USD')
@@ -4492,9 +4492,8 @@ async function savePurchaseOrder(){
   const p=purchaseOrders.find(x=>x.id===selectedPurchaseId)
   if(!p)return
   const supplierId=parseInt(document.getElementById('pp-supplier')?.value||'',10)||null
-  const isStock=document.getElementById('pp-is-stock')?.checked!==false
   const payload={
-    source:isStock?'stock':'order',
+    source:'stock',
     supplier_id:supplierId
   }
   assignIfPresent(payload,'accounting_no',document.getElementById('pp-accounting')?.value?.trim())
@@ -4606,6 +4605,18 @@ function switchPurchaseItemTab(tab){
     if(btnCatalog){btnCatalog.style.borderBottom='2px solid transparent';btnCatalog.style.color='#888'}
     if(btnOrder){btnOrder.style.borderBottom='2px solid #0F6E56';btnOrder.style.color='#0F6E56'}
   }
+}
+
+function onPoiStockToggle(){
+  const isStock=document.getElementById('poi-is-stock')?.checked
+  const sel=document.getElementById('poi-order-sel')
+  const list=document.getElementById('poi-order-items-list')
+  const hint=document.getElementById('poi-stock-hint')
+  if(sel)sel.style.opacity=isStock?'0.4':'1'
+  if(sel)sel.disabled=!!isStock
+  if(list)list.style.display=isStock?'none':'block'
+  if(hint)hint.style.display=isStock?'block':'none'
+  if(isStock&&sel)sel.value=''
 }
 
 function onPurchaseOrderChange(){
