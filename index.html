@@ -7429,7 +7429,7 @@ function poQtyToRolls(qty,unit,prod){
   if(!mpr)return null
   return qty/mpr
 }
-function openInventoryModal(){
+function openInventoryModal(editMode){
   const bd=document.getElementById('modal-inventory-bd')
   const allProds=products.filter(p=>p.is_active!==false).sort((a,b)=>(a.product_name||'').localeCompare(b.product_name||''))
   if(!allProds.length){
@@ -7438,10 +7438,14 @@ function openInventoryModal(){
     document.getElementById('modal-inventory').classList.add('open')
     return
   }
-  const COL='1fr 90px 120px 80px'
-  let html='<div style="display:grid;grid-template-columns:'+COL+';gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
-    '<div>產品</div><div style="text-align:right">安全水位</div><div style="text-align:right">現有庫存</div><div></div></div>'
-  allProds.forEach(p=>{
+  const COL=editMode?'1fr 90px 90px 110px':'1fr 90px 130px'
+  let html=''
+  if(editMode){
+    html+='<div style="font-size:12px;color:#888;background:#FFF6D8;border:1px solid #E2B36D;border-radius:6px;padding:8px 12px;margin-bottom:10px">編輯模式：直接填入實際盤點數量，Enter 跳下一筆，完成後按「確認儲存」</div>'
+  }
+  html+='<div style="display:grid;grid-template-columns:'+COL+';gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
+    '<div>產品</div><div style="text-align:right">安全水位</div><div style="text-align:right">現有庫存</div>'+(editMode?'<div>備註</div>':'')+'</div>'
+  allProds.forEach((p,i)=>{
     const qty=parseFloat(p.stock_qty)||0
     const safe=p.min_stock_qty!=null?parseFloat(p.min_stock_qty):null
     const isLow=safe!=null&&qty<=safe
@@ -7449,72 +7453,61 @@ function openInventoryModal(){
     const sup=suppliers.find(x=>x.id===p.supplier_id)
     const col=isLow?'#A32D2D':isWarn?'#7A5B00':'#333'
     const updAt=p.stock_updated_at?new Date(p.stock_updated_at).toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'}):null
+    const nextId=editMode&&allProds[i+1]?'inv-qty-'+allProds[i+1].id:null
+    const enterNav=nextId?'if(event.key===\'Enter\'){event.preventDefault();document.getElementById(\''+nextId+'\')?.focus()}':''
     html+='<div style="display:grid;grid-template-columns:'+COL+';gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid #f5f4f0">'+
       '<div><div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
       '<div style="font-size:10px;color:#aaa">'+(sup?esc(sup.company||''):'')+(updAt?' · 更新 '+updAt:'')+'</div></div>'+
       '<div style="text-align:right;font-size:12px;color:#888">'+(safe!=null?safe+' '+(p.unit||''):'—')+'</div>'+
-      '<div style="text-align:right;font-size:13px;font-weight:600;color:'+col+'">'+(isLow?'⚠ ':isWarn?'● ':'')+qty+' '+(p.unit||'')+'</div>'+
-      '<div style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="openInventoryAdjust('+p.id+')">調整</button></div>'+
+      (editMode
+        ?'<div><input type="number" id="inv-qty-'+p.id+'" value="'+Math.round(qty)+'" step="0.01" min="0" style="text-align:right;width:100%;'+(isLow?'color:#A32D2D;font-weight:600':'')+'" onkeydown="'+enterNav+'" /></div>'+
+         '<div><input type="text" id="inv-note-'+p.id+'" placeholder="備註..." style="font-size:12px" /></div>'
+        :'<div style="text-align:right;font-size:13px;font-weight:600;color:'+col+'">'+(isLow?'⚠ ':isWarn?'● ':'')+qty+' '+(p.unit||'')+'</div>'
+      )+
       '</div>'
   })
   html+='<div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e5e0;padding:12px 4px 4px;display:flex;gap:8px;align-items:center;margin-top:8px">'+
     '<button class="btn btn-ghost" onclick="openInventoryLogModal()" style="margin-right:auto">📋 異動記錄</button>'+
-    '<button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">關閉</button>'+
+    (editMode
+      ?'<button class="btn btn-ghost" onclick="openInventoryModal()">取消</button>'+
+       '<button class="btn btn-primary" onclick="saveInventoryAdjustments()">確認儲存</button>'
+      :'<button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">關閉</button>'+
+       '<button class="btn btn-primary" onclick="openInventoryModal(true)">更新庫存</button>'
+    )+
     '</div>'
   bd.innerHTML=html
   document.getElementById('modal-inventory').classList.add('open')
+  if(editMode)setTimeout(()=>document.getElementById('inv-qty-'+allProds[0]?.id)?.focus(),80)
 }
 
-function openInventoryAdjust(productId){
-  const p=products.find(x=>x.id===productId)
-  if(!p)return
-  const sup=suppliers.find(s=>s.id===p.supplier_id)
-  const currentQty=parseFloat(p.stock_qty)||0
-  const body=
-    '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(p.product_name)+'</div>'+
-    (p.spec?'<div style="font-size:11px;color:#888;margin-bottom:4px">'+esc(p.spec)+'</div>':'')+
-    (sup?'<div style="font-size:11px;color:#aaa;margin-bottom:12px">'+esc(sup.company)+'</div>':'')+
-    '<div style="padding:10px 14px;background:#f8f8f5;border-radius:6px;margin-bottom:14px;font-size:12px;color:#555">'+
-    '目前庫存：<strong style="font-size:16px;color:#333;margin-left:6px">'+currentQty+' '+(p.unit||'')+'</strong></div>'+
-    '<div class="grid-2" style="margin-bottom:12px">'+
-    '<div><label>調整後數量 <span class="req">*</span></label>'+
-    '<input id="iadj-qty" type="number" min="0" step="0.01" value="'+currentQty+'" /></div>'+
-    '<div><label>單位</label><input readonly value="'+(p.unit||'—')+'" style="background:#f8f8f5;color:#666" /></div>'+
-    '</div>'+
-    '<div style="margin-bottom:14px"><label>調整原因／備註</label>'+
-    '<textarea id="iadj-note" rows="2" placeholder="例如：盤點調整、進貨確認、損耗..."></textarea></div>'+
-    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitInventoryAdjust('+productId+')">確認調整</button>'+
-    '<button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">取消</button></div>'
-  openSubformModal('調整庫存',body)
-  setTimeout(()=>{const el=document.getElementById('iadj-qty');if(el){el.focus();el.select()}},80)
-}
-
-async function submitInventoryAdjust(productId){
-  const p=products.find(x=>x.id===productId)
-  if(!p)return
-  const newQty=parseFloat(document.getElementById('iadj-qty')?.value)
-  if(isNaN(newQty)||newQty<0){showToast('請填入有效數量','error');return}
-  const note=document.getElementById('iadj-note')?.value?.trim()||null
-  const qtyBefore=parseFloat(p.stock_qty)||0
-  if(newQty===qtyBefore){showToast('數量未改變，無需儲存');return}
-  const change=newQty-qtyBefore
-  const sign=change>0?'+':''
-  confirmModal(
-    '確認將「'+p.product_name+'」庫存從 '+qtyBefore+' 調整為 '+newQty+' '+(p.unit||'')+'？',
-    async()=>{
-      const now=new Date().toISOString()
-      const{error}=await sb.from('products').update({stock_qty:newQty,stock_updated_at:now}).eq('id',productId)
-      if(error){showToast('更新失敗：'+error.message,'error');return}
-      await sb.from('inventory_logs').insert({product_id:productId,change_qty:change,qty_before:qtyBefore,qty_after:newQty,note,source:'manual',created_by:currentUser?.auth_id||null})
-      await logActivity('調整庫存','inventory',String(productId),p.product_name+' '+qtyBefore+' → '+newQty+' '+(p.unit||'')+(note?' ('+note+')':''))
-      closeModal('modal-subform')
-      await loadProducts()
-      renderProducts()
-      renderDashboard()
-      openInventoryModal()
-      showToast('庫存已更新：'+sign+change+' '+(p.unit||'')+' → 現為 '+newQty)
+async function saveInventoryAdjustments(){
+  const allProds=products.filter(p=>p.is_active!==false)
+  const updates=[]
+  allProds.forEach(p=>{
+    const qtyEl=document.getElementById('inv-qty-'+p.id)
+    if(!qtyEl)return
+    const newQty=parseFloat(qtyEl.value)
+    const qtyBefore=parseFloat(p.stock_qty)||0
+    if(!isNaN(newQty)&&Math.abs(newQty-qtyBefore)>0.001){
+      updates.push({p,qtyBefore,newQty,change:newQty-qtyBefore,note:document.getElementById('inv-note-'+p.id)?.value?.trim()||null})
     }
-  )
+  })
+  if(!updates.length){showToast('沒有任何變更');return}
+  const summary=updates.map(u=>(u.change>0?'+':'')+u.change.toFixed(0)+' '+u.p.product_name).join('、')
+  confirmModal('確認更新 '+updates.length+' 筆庫存？\n'+summary,async()=>{
+    const now=new Date().toISOString()
+    for(const u of updates){
+      const{error}=await sb.from('products').update({stock_qty:u.newQty,stock_updated_at:now}).eq('id',u.p.id)
+      if(error){showToast('更新失敗：'+error.message,'error');return}
+      await sb.from('inventory_logs').insert({product_id:u.p.id,change_qty:u.change,qty_before:u.qtyBefore,qty_after:u.newQty,note:u.note,source:'manual',created_by:currentUser?.auth_id||null})
+    }
+    await logActivity('更新庫存','inventory','batch',updates.length+' 筆 — '+summary)
+    await loadProducts()
+    renderProducts()
+    renderDashboard()
+    openInventoryModal()
+    showToast('庫存已更新 '+updates.length+' 筆')
+  })
 }
 
 function openInventoryLogModal(){
