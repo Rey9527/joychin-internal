@@ -2482,7 +2482,7 @@ function purchaseLinkedShipments(purchaseOrderId){
 }
 function purchaseOrderLinksForDisplay(purchaseOrderId){
   const links=purchaseOrderOrderLinks
-    .filter(x=>String(x.po_id)===String(purchaseOrderId))
+    .filter(x=>String(x.purchase_order_id)===String(purchaseOrderId))
     .map(link=>{
       const order=orders.find(o=>String(o.id)===String(link.order_id))
       const product=products.find(p=>String(p.id)===String(link.product_id))
@@ -2508,7 +2508,7 @@ function purchaseOrderLinkedOrders(purchaseOrderId){
 }
 function purchaseOrderTotalQty(purchaseOrderId){
   return purchaseOrderItems
-    .filter(x=>String(x.po_id)===String(purchaseOrderId))
+    .filter(x=>String(x.purchase_order_id)===String(purchaseOrderId))
     .reduce((sum,item)=>sum+(parseFloat(item.qty)||0),0)
 }
 function purchaseOrderAllocatedQty(purchaseOrderId){
@@ -2636,7 +2636,7 @@ async function submitPurchaseOrderLink(){
   )
   if(duplicate){showToast('同一張訂單與同一採購品項已存在，請直接調整原本那筆','error');return}
   const payload={
-    po_id:selectedPurchaseId,
+    purchase_order_id:selectedPurchaseId,
     order_id:orderId,
     product_id:_purchaseLinkTarget.product_id||null,
     qty,
@@ -3206,19 +3206,12 @@ function openOrderModal(id){
 
 async function _backfillOrderPurchaseLinks(orderId){
   const affectedPoIds=[...new Set(purchaseOrderItems.filter(i=>String(i.ref_order_id)===String(orderId)).map(i=>String(i.po_id)))]
-  console.log('[backfill] orderId=',orderId,'affectedPoIds=',affectedPoIds,'purchaseOrderItems.length=',purchaseOrderItems.length,'sample ref_order_ids=',purchaseOrderItems.slice(0,5).map(i=>i.ref_order_id))
   for(const poId of affectedPoIds){
-    const already=purchaseOrderOrderLinks.some(l=>String(l.po_id)===String(poId)&&String(l.order_id)===String(orderId))
-    const existingForPo=purchaseOrderOrderLinks.filter(l=>String(l.po_id)===String(poId))
-    console.log('[backfill] poId=',poId,'already linked=',already,'existing links for this PO=',existingForPo.map(l=>({po_id:l.po_id,order_id:l.order_id,purchase_order_id:l.purchase_order_id})))
+    const already=purchaseOrderOrderLinks.some(l=>String(l.purchase_order_id)===String(poId)&&String(l.order_id)===String(orderId))
     if(!already){
-      const{error}=await sb.from('purchase_order_order_links').insert({po_id:poId,order_id:orderId,qty:null,note:'自動補建'})
-      console.log('[backfill] insert result error=',error?.message,error?.code,error?.details,error?.hint)
+      await sb.from('purchase_order_order_links').insert({purchase_order_id:poId,order_id:orderId,qty:null,note:'自動補建'})
     }
   }
-  const linkedPoIds=purchaseOrders.filter(p=>purchaseOrderLinksForDisplay(p.id).some(l=>String(l.order_id)===String(orderId))).map(p=>p.id)
-  const linkedShipments=shipmentPurchaseOrders.filter(x=>linkedPoIds.map(String).includes(String(x.purchase_order_id)))
-  console.log('[backfill] linkedPoIds after reload=',linkedPoIds,'shipmentPurchaseOrders.length=',shipmentPurchaseOrders.length,'linkedShipments=',linkedShipments)
   if(affectedPoIds.length){
     await loadPurchaseOrders()
     _renderOrderModal()
@@ -4479,7 +4472,7 @@ async function submitCreatePurchaseFromOrder(){
       pricing_unit:prod?.pricing_unit||oi.customer_pricing_unit||null
     })
   }
-  await sb.from('purchase_order_order_links').insert({po_id:id,order_id:orderId,qty:null,note:'從訂單建立'})
+  await sb.from('purchase_order_order_links').insert({purchase_order_id:id,order_id:orderId,qty:null,note:'從訂單建立'})
   delete window._pendingLinkedOrderId
   _isDirty=false
   closeModal('modal-subform')
@@ -4690,8 +4683,8 @@ async function addItemsFromOrder(orderId){
     })
     if(error){showToast('新增品項失敗：'+error.message,'error');return}
   }
-  const alreadyLinked=purchaseOrderOrderLinks.some(l=>String(l.po_id)===String(selectedPurchaseId)&&String(l.order_id)===String(orderId))
-  if(!alreadyLinked)await sb.from('purchase_order_order_links').insert({po_id:selectedPurchaseId,order_id:orderId,qty:null,note:'從訂單品項加入'})
+  const alreadyLinked=purchaseOrderOrderLinks.some(l=>String(l.purchase_order_id)===String(selectedPurchaseId)&&String(l.order_id)===String(orderId))
+  if(!alreadyLinked)await sb.from('purchase_order_order_links').insert({purchase_order_id:selectedPurchaseId,order_id:orderId,qty:null,note:'從訂單品項加入'})
   _isDirty=false
   closeModal('modal-subform')
   await loadPurchaseOrders()
