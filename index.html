@@ -7623,6 +7623,7 @@ function renderProducts(){
           (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:4px;background:'+c.bg+';color:'+c.color+';display:inline-block;margin-bottom:4px">'+esc(p.product_type)+'</span>'})():'')+
           '<div style="font-size:12px;color:#666;margin-bottom:4px">'+(sup?esc(sup.company):'—')+'</div>'+
           (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+          (()=>{const sq=parseFloat(p.stock_qty)||0;const mq=parseFloat(p.min_stock_qty)||0;if(p.stock_qty==null)return '';const low=mq>0&&sq<=mq;const warn=mq>0&&sq>mq&&sq<mq*1.5;const col=low?'#A32D2D':warn?'#7A5B00':'#555';return '<div style="font-size:11px;color:'+col+';margin-bottom:4px">'+(low?'⚠ ':warn?'● ':'')+'庫存 '+sq+' '+(p.unit||'')+(mq>0?' / 安全 '+mq:'')+' </div>'})()+
           '<div style="font-size:11px;color:#aaa;margin-bottom:10px">確認：'+(p.last_reviewed_at||'—')+'</div>'+
         '</div>'
       }).join('')+
@@ -7645,7 +7646,8 @@ function renderProducts(){
         (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
         '<span style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</span>'+
         '</div>'+
-        '<div style="font-size:12px;color:#666">'+(sup?esc(sup.company):'—')+(hasPermission('view_cost')&&p.cost_price?' · 成本 '+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):'')+'</div>'+
+        '<div style="font-size:12px;color:#666">'+(sup?esc(sup.company):'—')+(hasPermission('view_cost')&&p.cost_price?' · 成本 '+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):'')+
+        (()=>{const sq=parseFloat(p.stock_qty)||0;const mq=parseFloat(p.min_stock_qty)||0;if(p.stock_qty==null)return '';const low=mq>0&&sq<=mq;const warn=mq>0&&sq>mq&&sq<mq*1.5;const col=low?'#A32D2D':warn?'#7A5B00':'#aaa';return ' · <span style="color:'+col+'">'+(low?'⚠ ':warn?'● ':'')+'庫存 '+sq+' '+(p.unit||'')+(mq>0?' / 安全 '+mq:'')+' </span>'})()+'</div>'+
         '<div style="font-size:11px;color:#aaa">上次確認：'+(p.last_reviewed_at||'—')+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+' （'+getProductReviewDays()+'天週期）</div>'+
         '</div>'+
         '</div>'
