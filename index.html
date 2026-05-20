@@ -3420,6 +3420,9 @@ function _renderOrderModal(){
 
   const linkedShipments=orderLinkedShipments(o.id)
   const relatedPurchases=purchaseOrders.filter(p=>purchaseOrderLinksForDisplay(p.id).some(link=>String(link.order_id)===String(o.id)))
+  const _dbgPoLinks=purchaseOrders.filter(p=>purchaseOrderLinksForDisplay(p.id).some(l=>String(l.order_id)===String(o.id))).map(p=>p.id)
+  const _dbgSpo=shipmentPurchaseOrders.filter(x=>_dbgPoLinks.map(String).includes(String(x.purchase_order_id)))
+  console.log('[order-modal] orderId=',o.id,'relatedPOs=',_dbgPoLinks,'shipmentPurchaseOrders hits=',_dbgSpo,'purchaseOrderOrderLinks count=',purchaseOrderOrderLinks.length,'links for order=',purchaseOrderOrderLinks.filter(l=>String(l.order_id)===String(o.id)))
   html+='<div class="section-title">船運資訊</div>'
   if(linkedShipments.length){
     html+=linkedShipments.map(sh=>{
