@@ -263,6 +263,9 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <button class="nav-item" id="nav-customer-portal" onclick="switchTab('customer-portal')">
       <span class="nav-icon"><i data-lucide="eye"></i></span><span data-i18n="tab_customer_portal">客戶視角</span>
     </button>
+    <button class="nav-item" id="nav-supplier-portal" onclick="switchTab('supplier-portal')">
+      <span class="nav-icon"><i data-lucide="building-2"></i></span><span data-i18n="tab_supplier_portal">供應商視角</span>
+    </button>
     <div class="nav-section" data-i18n="nav_contacts">通訊錄</div>
     <button class="nav-item" id="nav-customers" onclick="switchTab('customers')">
       <span class="nav-icon"><i data-lucide="users"></i></span><span data-i18n="tab_customers">客戶管理</span><span class="nav-badge" id="badge-customers" style="display:none"></span>
@@ -798,6 +801,16 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <button class="btn btn-ghost" style="width:100%;margin-top:8px;border-style:dashed" onclick="showToast('Upload feature coming soon')" data-i18n="docs_upload">+ 上傳新文件</button>
     </div>
 
+    <div id="tab-supplier-portal" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <select id="sp-supplier-sel" style="min-width:220px" onchange="renderSupplierPortal()">
+          <option value="">— 選擇供應商 —</option>
+        </select>
+        <div id="sp-item-count" style="font-size:12px;color:#888"></div>
+      </div>
+      <div id="supplier-portal-list"><div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇供應商以查看資料</div></div>
+    </div>
+
     <div id="tab-customer-portal" style="display:none">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
         <select id="cp-customer-sel" style="min-width:220px" onchange="renderCustomerPortal()">
@@ -1101,7 +1114,7 @@ const I18N={
     tab_complaints:'客訴管理',tab_orders:'訂單管理',tab_shipments:'船運管理',
     tab_customers:'客戶管理',tab_suppliers_mgmt:'供應商管理',tab_products:'產品目錄',
     tab_docs:'技術文件庫',tab_users_mgmt:'使用者管理',tab_settings:'系統設定',
-    tab_purchases:'採購單管理','tab_purchase-shop':'採購選購',tab_customer_portal:'客戶視角',
+    tab_purchases:'採購單管理','tab_purchase-shop':'採購選購',tab_customer_portal:'客戶視角',tab_supplier_portal:'供應商視角',
     btn_filter:'☰ 篩選',btn_clear:'清除',btn_refresh:'↻ 重新整理',
     btn_new_inquiry:'+ 新增詢價',btn_new_quote:'+ 新增報價單',btn_new_sample:'+ 新增樣品',
     btn_new_order:'+ 新增訂單',btn_new_shipment:'+ 新增船運批次',btn_new_customer:'+ 新增客戶',
@@ -1189,7 +1202,7 @@ const I18N={
     tab_complaints:'Complaints',tab_orders:'Orders',tab_shipments:'Shipments',
     tab_customers:'Customers',tab_suppliers_mgmt:'Suppliers',tab_products:'Products',
     tab_docs:'Documents',tab_users_mgmt:'Users',tab_settings:'Settings',
-    tab_purchases:'Purchase Orders','tab_purchase-shop':'Purchase Shop',tab_customer_portal:'Customer View',
+    tab_purchases:'Purchase Orders','tab_purchase-shop':'Purchase Shop',tab_customer_portal:'Customer View',tab_supplier_portal:'Supplier View',
     btn_filter:'☰ Filter',btn_clear:'Clear',btn_refresh:'↻ Refresh',
     btn_new_inquiry:'+ New Inquiry',btn_new_quote:'+ New Quotation',btn_new_sample:'+ New Sample',
     btn_new_order:'+ New Order',btn_new_shipment:'+ New Shipment',btn_new_customer:'+ New Customer',
@@ -1277,7 +1290,7 @@ const I18N={
     tab_complaints:'ร้องเรียน',tab_orders:'คำสั่งซื้อ',tab_shipments:'การขนส่ง',
     tab_customers:'ลูกค้า',tab_suppliers_mgmt:'ซัพพลายเออร์',tab_products:'สินค้า',
     tab_docs:'เอกสาร',tab_users_mgmt:'ผู้ใช้',tab_settings:'การตั้งค่า',
-    tab_purchases:'ใบสั่งซื้อ','tab_purchase-shop':'ร้านค้า',tab_customer_portal:'มุมมองลูกค้า',
+    tab_purchases:'ใบสั่งซื้อ','tab_purchase-shop':'ร้านค้า',tab_customer_portal:'มุมมองลูกค้า',tab_supplier_portal:'มุมมองซัพพลายเออร์',
     btn_filter:'☰ กรอง',btn_clear:'ล้าง',btn_refresh:'↻ รีเฟรช',
     btn_new_inquiry:'+ ใบสอบถามใหม่',btn_new_quote:'+ ใบเสนอราคาใหม่',btn_new_sample:'+ ตัวอย่างใหม่',
     btn_new_order:'+ คำสั่งซื้อใหม่',btn_new_shipment:'+ การจัดส่งใหม่',btn_new_customer:'+ ลูกค้าใหม่',
@@ -5553,7 +5566,7 @@ async function confirmShopOrder(){
 }
 // ── end 採購選購 ──────────────────────────────────────────
 
-const TAB_LABELS={dashboard:1,inquiry:1,quotes:1,samples:1,complaints:1,orders:1,shipments:1,customers:1,suppliers_mgmt:1,products:1,docs:1,users_mgmt:1,settings:1,purchases:1,'purchase-shop':1,'customer-portal':1}
+const TAB_LABELS={dashboard:1,inquiry:1,quotes:1,samples:1,complaints:1,orders:1,shipments:1,customers:1,suppliers_mgmt:1,products:1,docs:1,users_mgmt:1,settings:1,purchases:1,'purchase-shop':1,'customer-portal':1,'supplier-portal':1}
 function switchTab(tab,save=true){
   if(tab==='settings'&&!hasPermission('view_settings')){
     showToast('只有管理者可以查看系統設定','error')
@@ -5582,6 +5595,7 @@ function switchTab(tab,save=true){
   if(tab==='purchase-shop')pshopInitPage()
   else pshopShowTopbarControls(false)
   if(tab==='customer-portal')renderCustomerPortal()
+  if(tab==='supplier-portal')renderSupplierPortal()
   closeSidebar()
 }
 
@@ -9087,6 +9101,70 @@ function copyDocLink(url,name){
   navigator.clipboard.writeText(url)
     .then(()=>showToast('已複製：'+name+' 的連結'))
     .catch(()=>showToast('請手動複製','error'))
+}
+
+function renderSupplierPortal(){
+  const el=document.getElementById('supplier-portal-list')
+  const countEl=document.getElementById('sp-item-count')
+  if(!el)return
+  const sel=document.getElementById('sp-supplier-sel')
+  if(sel&&sel.options.length<=1){
+    const cos=[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort()
+    cos.forEach(co=>{const opt=document.createElement('option');opt.value=co;opt.textContent=co;sel.appendChild(opt)})
+  }
+  const co=sel?.value
+  if(!co){
+    if(countEl)countEl.textContent=''
+    el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇供應商以查看資料</div>'
+    return
+  }
+  const sup=suppliers.find(s=>s.company===co)
+  const supIds=new Set(suppliers.filter(s=>s.company===co).map(s=>String(s.id)))
+
+  // ── 詢價 section ──
+  const supInqs=inquiries.filter(i=>i.supplier===co).sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''))
+  const inqHtml=supInqs.length
+    ?supInqs.map(inq=>{
+        const st=sObj(inq.status,INQ_STATUS)
+        return '<div style="padding:10px 12px;background:#fff;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:8px">'+
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+          '<span style="font-weight:600;font-size:13px">'+esc(inq.id)+'</span>'+
+          '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
+          (inq.product?'<span style="font-size:12px;color:#555">'+esc(inq.product)+'</span>':'')+
+          (inq.created_at?'<span style="font-size:11px;color:#aaa">'+inq.created_at.slice(0,10)+'</span>':'')+
+          (inq.notes?'<div style="font-size:12px;color:#666;margin-top:4px;width:100%">'+esc(inq.notes)+'</div>':'')+
+          '</div></div>'
+      }).join('')
+    :'<div style="font-size:12px;color:#aaa;padding:6px 0">此供應商尚無詢價記錄</div>'
+
+  // ── 採購單 section ──
+  const supPOs=purchaseOrders.filter(p=>supIds.has(String(p.supplier_id))&&p.status!=='draft').sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''))
+  const poHtml=supPOs.length
+    ?supPOs.map(p=>{
+        const st=PURCHASE_STATUS.find(s=>s.id===p.status)||{label:p.status,color:'#888',bg:'#f0f0f0'}
+        const poItms=purchaseOrderItems.filter(i=>i.po_id===p.id)
+        const itemRow=poItms.map(i=>esc(i.product_name||'—')+(i.quantity?' × '+i.quantity+(i.unit?' '+i.unit:''):'')).join(' / ')||'—'
+        const linkedShs=purchaseLinkedShipments(p.id).filter(Boolean)
+        const shipRows=linkedShs.map(sh=>{
+          const sst=shipmentStatusObj(sh.status)
+          return '└─ '+esc(sh.shipment_no||'—')+' · <span class="badge" style="background:'+sst.bg+';color:'+sst.color+';border:1px solid '+sst.color+'">'+sst.label+'</span>'+(sh.etd?' · ETD '+sh.etd:'')+(sh.eta?' · ETA '+sh.eta:'')
+        }).join('<br>')||'└─ <span style="color:#aaa">尚未安排船運</span>'
+        return '<div style="padding:10px 12px;background:#fff;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:8px">'+
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
+          '<span style="font-weight:600;font-size:13px">'+esc(p.id)+'</span>'+
+          '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
+          (p.accounting_no?'<span style="font-size:11px;color:#aaa">會計單號：'+esc(p.accounting_no)+'</span>':'')+
+          (p.created_at?'<span style="font-size:11px;color:#aaa">'+p.created_at.slice(0,10)+'</span>':'')+
+          '</div>'+
+          '<div style="font-size:12px;color:#555;margin-bottom:5px">'+itemRow+'</div>'+
+          '<div style="font-size:12px;color:#555;line-height:1.8">'+shipRows+'</div>'+
+        '</div>'
+      }).join('')
+    :'<div style="font-size:12px;color:#aaa;padding:6px 0">此供應商尚無採購單</div>'
+
+  if(countEl)countEl.textContent=supInqs.length+' 筆詢價 · '+supPOs.length+' 筆採購單'
+  const section=(icon,title,body)=>'<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;color:#888;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px">'+icon+' '+title+'</div>'+body+'</div>'
+  el.innerHTML=section('📋','詢價',inqHtml)+section('📦','採購單',poHtml)
 }
 
 function renderCustomerPortal(){
