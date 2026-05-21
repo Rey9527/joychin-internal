@@ -3713,7 +3713,14 @@ function _renderOrderModal(){
     '<div><label>'+t('lbl_customer_po')+'</label><input id="oi-customer-ref" type="text" placeholder="'+t('lbl_customer_po_placeholder')+'" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
     '</div>'+
     '<div style="margin-bottom:12px"><label>'+t('lbl_notes')+'</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
-    '<div style="margin-bottom:4px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" /> '+t('lbl_requires_coa')+'</label></div>'+
+    '<div style="margin-bottom:4px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" onchange="document.getElementById(\'ord-coa-section\').style.display=this.checked?\'block\':\'none\'" /> '+t('lbl_requires_coa')+'</label></div>'+
+    '<div id="ord-coa-section" style="'+(o.requires_coa?'':'display:none')+';background:#f8f5ff;border:1px solid #D4BFEA;border-radius:6px;padding:12px;margin-top:8px;margin-bottom:4px">'+
+    '<div style="font-size:12px;font-weight:600;color:#6B3FA0;margin-bottom:8px">'+t('ord_coa_section')+'</div>'+
+    '<div id="order-coa-docs" style="margin-bottom:10px"><div style="font-size:12px;color:#aaa">Loading...</div></div>'+
+    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+    '<input type="file" id="order-coa-file" accept=".pdf,application/pdf" style="width:auto;font-size:12px" />'+
+    '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">'+t('btn_upload_coa')+'</button>'+
+    '</div></div>'+
     '<div class="divider"></div>'
 
   const linkedShipments=orderLinkedShipments(o.id)
@@ -3851,16 +3858,6 @@ function _renderOrderModal(){
   }
 
   // COA section
-  if(o.requires_coa){
-    html+='<div class="divider"></div>'+
-    '<div class="section-title">'+t('ord_coa_section')+'</div>'+
-    '<div id="order-coa-docs" style="margin-bottom:10px"><div style="font-size:12px;color:#aaa">Loading...</div></div>'+
-    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">'+
-    '<input type="file" id="order-coa-file" accept=".pdf,application/pdf" style="width:auto;font-size:12px" />'+
-    '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">'+t('btn_upload_coa')+'</button>'+
-    '</div>'
-  }
-
   // Consolidated sticky footer
   html+='<div class="modal-foot" style="justify-content:space-between;align-items:center">'
   html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteOrder()">'+t('btn_delete_order')+'</button>'
@@ -3880,7 +3877,7 @@ function _renderOrderModal(){
 
   document.getElementById('modal-order-bd').innerHTML=html
   enableDirtyTracking('modal-order-bd')
-  if(o.requires_coa) renderOrderCoaDocs(id)
+  renderOrderCoaDocs(id)
 }
 
 function openCancelOrderModal(){
