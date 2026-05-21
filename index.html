@@ -2375,6 +2375,32 @@ function renderDashboard(){
     ph+=_buildCustomerOrderTable()
     ph+='</div>'
 
+    // 4. COA 待收追蹤
+    const today=new Date().toISOString().slice(0,10)
+    const coaPendingOrders=orders.filter(o=>{
+      if(!o.requires_coa)return false
+      if(orderCoaDocs.some(d=>String(d.order_id)===String(o.id)))return false
+      return orderLinkedShipments(o.id).some(sh=>sh.etd&&sh.etd<=today)
+    })
+    ph+='<div style="background:#fff;border:1px solid '+(coaPendingOrders.length?'#FCA5A5':'#e5e5e0')+';border-radius:4px;padding:14px 16px;margin-bottom:16px">'
+    ph+='<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:10px">'+(coaPendingOrders.length?'⚠ ':'')+'COA 待收追蹤</div>'
+    if(!coaPendingOrders.length){
+      ph+='<div style="color:#3B6D11;font-size:13px">無待收 COA ✓</div>'
+    }else{
+      coaPendingOrders.forEach(o=>{
+        const cust=customers.find(c=>String(c.id)===String(o.customer_id))
+        const passedShs=orderLinkedShipments(o.id).filter(sh=>sh.etd&&sh.etd<=today)
+        ph+='<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#FEE2E240;border-left:3px solid #EF4444;border-radius:4px;margin-bottom:4px">'
+        ph+='<div style="flex:1;min-width:0">'
+        ph+='<div style="font-size:13px;font-weight:500;color:#991B1B">'+esc(o.id)+'</div>'
+        ph+='<div style="font-size:11px;color:#666;margin-top:2px">'+(cust?esc(cust.company):'—')+' · ETD: '+passedShs.map(sh=>sh.etd).join(', ')+'</div>'
+        ph+='</div>'
+        ph+='<button class="btn btn-ghost btn-sm" style="white-space:nowrap;flex-shrink:0" onclick="switchTab(\'orders\');setTimeout(()=>openOrderModal(\''+esc(o.id)+'\'),80)">開啟訂單</button>'
+        ph+='</div>'
+      })
+    }
+    ph+='</div>'
+
     panels.innerHTML=ph
   }
 
@@ -2386,13 +2412,15 @@ function renderDashboard(){
   sampleRequestsIn.filter(r=>(r.supplier_shipped_status||'pending')==='shipped'&&r.status!=='received'&&r.shipped_date&&_dd(r.shipped_date)>=7).forEach(r=>_sampleIds.add(r.sample_id))
   sampleShipmentsOut.filter(r=>r.status==='shipped'&&r.shipped_date&&_dd(r.shipped_date)>=7&&!r.feedback).forEach(r=>_sampleIds.add(r.sample_id))
   const _poEx=['draft','cancelled','rejected','completed'],_poLk=new Set(shipmentPurchaseOrders.map(x=>String(x.purchase_order_id)))
+  const _today2=new Date().toISOString().slice(0,10)
+  const _coaPendingCnt=orders.filter(o=>o.requires_coa&&!orderCoaDocs.some(d=>String(d.order_id)===String(o.id))&&orderLinkedShipments(o.id).some(sh=>sh.etd&&sh.etd<=_today2)).length
   const moduleCards=[
     {label:'Overdue Inquiries',count:inquiries.filter(i=>inquiryFollowupLevel(i)==='overdue').length,tab:'inquiry'},
     {label:'Quotes Awaiting Reply',count:quoteHeaders.filter(q=>q.status==='sent'&&_dd(q.updated_at||q.created_at)>=7).length,tab:'quotes'},
     {label:'Orders Need Action',count:orderAlertIds().size,tab:'orders'},
     {label:'PO Without Shipment',count:purchaseOrders.filter(p=>!_poEx.includes(p.status)&&!_poLk.has(String(p.id))).length,tab:'purchases'},
     {label:'Samples Pending',count:_sampleIds.size,tab:'samples'},
-    {label:'Open Complaints',count:complaints.filter(c=>['open','in_progress'].includes(c.status)).length,tab:'complaints'},
+    {label:'COA 待收',count:_coaPendingCnt,tab:'orders'},
   ]
   const cardsHtml=moduleCards.map(c=>{
     const alert=c.count>0
