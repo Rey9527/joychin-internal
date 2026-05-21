@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.8.2</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.8.3</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1159,6 +1159,10 @@ const I18N={
     docs_search:'搜尋產品、文件類型、標籤...',
     docs_info:'業務助理可直接搜尋並複製連結給客戶',docs_upload:'+ 上傳新文件',
     not_logged_in:'未登入',
+    cp_select:'— 選擇客戶 —',cp_empty:'請選擇客戶以查看資料',cp_no_inq:'此客戶尚無詢價記錄',cp_no_order:'此客戶尚無訂單',cp_sec_inq:'詢價',cp_sec_order:'訂單',cp_sample_shipped:'樣品已寄出',cp_sample_not_shipped:'尚未寄出',cp_no_ship:'尚無船運',
+    sp_select:'— 選擇供應商 —',sp_empty:'請選擇供應商以查看資料',sp_no_inq:'此供應商尚無詢價記錄',sp_no_po:'此供應商尚無採購單',sp_no_sh:'此供應商尚無船運記錄',sp_no_ship_linked:'尚未安排船運',sp_tab_inq:'詢價',sp_tab_po:'採購單',sp_tab_sh:'船運',
+    coa_badge_ok:'COA ✓',coa_badge_warn:'⚠ COA 待確認',
+    po_supplier_instr:'供應商特殊指示',po_instr_hint:'（裝載方式、包裝要求等）— 填寫後將強制顯示警示',po_instr_set:'⚠ 此採購單已有特殊指示',po_instr_prefix:'⚠ 特殊指示：',
     nc_title:'新增客戶',lbl_contact_name:'聯絡人姓名',lbl_company_name:'公司名稱',
     lbl_phone:'電話',lbl_country:'國家',lbl_industry:'行業',lbl_notes:'備註',
     ns_title:'新增供應商聯絡人',lbl_name:'姓名',lbl_role:'職務',
@@ -1245,6 +1249,10 @@ const I18N={
     pshop_delivery:'Est. Delivery Date',pshop_currency:'Currency',pshop_notes:'Notes',
     pshop_cancel_btn:'Cancel',pshop_confirm_btn:'Confirm PO',
     docs_search:'Search product, doc type, tag...',
+    cp_select:'— Select Customer —',cp_empty:'Select a customer to view data',cp_no_inq:'No inquiries for this customer',cp_no_order:'No orders for this customer',cp_sec_inq:'Inquiries',cp_sec_order:'Orders',cp_sample_shipped:'Sample shipped',cp_sample_not_shipped:'Not yet shipped',cp_no_ship:'No shipment',
+    sp_select:'— Select Supplier —',sp_empty:'Select a supplier to view data',sp_no_inq:'No inquiries for this supplier',sp_no_po:'No purchase orders for this supplier',sp_no_sh:'No shipment records for this supplier',sp_no_ship_linked:'No shipment scheduled',sp_tab_inq:'Inquiries',sp_tab_po:'Purchase Orders',sp_tab_sh:'Shipments',
+    coa_badge_ok:'COA ✓',coa_badge_warn:'⚠ COA Pending',
+    po_supplier_instr:'Supplier Special Instructions',po_instr_hint:'(Loading method, packaging requirements, etc.) — Will show alert when filled',po_instr_set:'⚠ This PO has special instructions',po_instr_prefix:'⚠ Instructions: ',
     docs_info:'Search and copy links to share with customers',docs_upload:'+ Upload Document',
     not_logged_in:'Not logged in',
     nc_title:'New Customer',lbl_contact_name:'Contact Name',lbl_company_name:'Company',
@@ -1333,6 +1341,10 @@ const I18N={
     pshop_delivery:'วันส่งมอบโดยประมาณ',pshop_currency:'สกุลเงิน',pshop_notes:'หมายเหตุ',
     pshop_cancel_btn:'ยกเลิก',pshop_confirm_btn:'สร้างใบสั่งซื้อ',
     docs_search:'ค้นหาสินค้า, ประเภทเอกสาร, แท็ก...',
+    cp_select:'— เลือกลูกค้า —',cp_empty:'เลือกลูกค้าเพื่อดูข้อมูล',cp_no_inq:'ลูกค้านี้ยังไม่มีการสอบถาม',cp_no_order:'ลูกค้านี้ยังไม่มีคำสั่งซื้อ',cp_sec_inq:'การสอบถาม',cp_sec_order:'คำสั่งซื้อ',cp_sample_shipped:'ส่งตัวอย่างแล้ว',cp_sample_not_shipped:'ยังไม่ได้ส่ง',cp_no_ship:'ยังไม่มีการขนส่ง',
+    sp_select:'— เลือกซัพพลายเออร์ —',sp_empty:'เลือกซัพพลายเออร์เพื่อดูข้อมูล',sp_no_inq:'ซัพพลายเออร์นี้ยังไม่มีการสอบถาม',sp_no_po:'ซัพพลายเออร์นี้ยังไม่มีใบสั่งซื้อ',sp_no_sh:'ซัพพลายเออร์นี้ยังไม่มีบันทึกการขนส่ง',sp_no_ship_linked:'ยังไม่ได้จัดการขนส่ง',sp_tab_inq:'การสอบถาม',sp_tab_po:'ใบสั่งซื้อ',sp_tab_sh:'การขนส่ง',
+    coa_badge_ok:'COA ✓',coa_badge_warn:'⚠ COA รอยืนยัน',
+    po_supplier_instr:'คำแนะนำพิเศษสำหรับซัพพลายเออร์',po_instr_hint:'(วิธีบรรทุก, ข้อกำหนดบรรจุภัณฑ์ ฯลฯ)',po_instr_set:'⚠ ใบสั่งซื้อนี้มีคำแนะนำพิเศษ',po_instr_prefix:'⚠ คำแนะนำพิเศษ: ',
     docs_info:'ค้นหาและคัดลอกลิงก์ส่งให้ลูกค้า',docs_upload:'+ อัพโหลดเอกสาร',
     not_logged_in:'ยังไม่ได้เข้าสู่ระบบ',
     nc_title:'ลูกค้าใหม่',lbl_contact_name:'ชื่อผู้ติดต่อ',lbl_company_name:'บริษัท',
@@ -4590,9 +4602,9 @@ function openPurchaseModal(id, prefill={}){
     '</div>'+
     '<div style="margin-bottom:10px"><label>備註</label><textarea id="pp-notes" oninput="_isDirty=true" onchange="_isDirty=true">'+(p?.notes||'')+'</textarea></div>'+
     '<div style="margin-bottom:14px">'+
-    '<label style="display:flex;align-items:center;gap:6px;color:#854F0B;font-weight:600">⚠ 供應商特殊指示 <span style="font-size:11px;font-weight:400;color:#888">（裝載方式、包裝要求等）— 填寫後將強制顯示警示</span></label>'+
+    '<label style="display:flex;align-items:center;gap:6px;color:#854F0B;font-weight:600">⚠ '+t('po_supplier_instr')+' <span style="font-size:11px;font-weight:400;color:#888">'+t('po_instr_hint')+'</span></label>'+
     '<textarea id="pp-supplier-instr" rows="2" style="border-color:#E2B36D;background:#FFFBF3" oninput="_isDirty=true" onchange="_isDirty=true" placeholder="例：此批貨需橫放，不可疊高超過3層；請以防潮袋包裝每捲...">'+(p?.supplier_instructions||'')+'</textarea>'+
-    (p?.supplier_instructions?'<div style="font-size:11px;color:#854F0B;margin-top:4px">⚠ 此採購單已有特殊指示</div>':'')+
+    (p?.supplier_instructions?'<div style="font-size:11px;color:#854F0B;margin-top:4px">'+t('po_instr_set')+'</div>':'')+
     '</div>'
   if(p){
     html+='<div class="divider"></div><div style="margin-bottom:12px"><div class="section-title">關聯船運</div>'+
@@ -9129,9 +9141,9 @@ function _renderSpTabBar(){
   const poPending=supPOs.filter(p=>['sent','in_production','shipped'].includes(p.status)).length
   const shPending=supShs.filter(s=>['booked','in_transit','customs_clearance'].includes(s.status)).length
   const tabs=[
-    {k:'inq',label:'詢價',n:inqPending},
-    {k:'po',label:'採購單',n:poPending},
-    {k:'sh',label:'船運',n:shPending},
+    {k:'inq',label:t('sp_tab_inq'),n:inqPending},
+    {k:'po',label:t('sp_tab_po'),n:poPending},
+    {k:'sh',label:t('sp_tab_sh'),n:shPending},
   ]
   bar.innerHTML=tabs.map(t=>{
     const active=_spTab===t.k
@@ -9143,12 +9155,12 @@ function _renderSpContent(){
   const el=document.getElementById('supplier-portal-list')
   if(!el)return
   const co=document.getElementById('sp-supplier-sel')?.value
-  if(!co){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇供應商以查看資料</div>';return}
+  if(!co){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">'+t('sp_empty')+'</div>';return}
   const supIds=new Set(suppliers.filter(s=>s.company===co).map(s=>String(s.id)))
 
   if(_spTab==='inq'){
     const list=inquiries.filter(i=>i.supplier===co).sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''))
-    if(!list.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">此供應商尚無詢價記錄</div>';return}
+    if(!list.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">'+t('sp_no_inq')+'</div>';return}
     el.innerHTML=list.map(inq=>{
       const st=sObj(inq.status,INQ_STATUS)
       const pending=['pending','asked'].includes(inq.status)
@@ -9164,7 +9176,7 @@ function _renderSpContent(){
   }
   else if(_spTab==='po'){
     const list=purchaseOrders.filter(p=>supIds.has(String(p.supplier_id))&&p.status!=='draft').sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''))
-    if(!list.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">此供應商尚無採購單</div>';return}
+    if(!list.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">'+t('sp_no_po')+'</div>';return}
     el.innerHTML=list.map(p=>{
       const st=PURCHASE_STATUS.find(s=>s.id===p.status)||{label:p.status,color:'#888',bg:'#f0f0f0'}
       const pending=['sent','in_production','shipped'].includes(p.status)
@@ -9194,7 +9206,7 @@ function _renderSpContent(){
     const list=allPOs.flatMap(p=>purchaseLinkedShipments(p.id).filter(Boolean))
       .filter(s=>{if(seen.has(s.id))return false;seen.add(s.id);return true})
       .sort((a,b)=>(b.etd||b.created_at||'').localeCompare(a.etd||a.created_at||''))
-    if(!list.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">此供應商尚無船運記錄</div>';return}
+    if(!list.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">'+t('sp_no_sh')+'</div>';return}
     el.innerHTML=list.map(sh=>{
       const sst=shipmentStatusObj(sh.status)
       const pending=['booked','in_transit','customs_clearance'].includes(sh.status)
@@ -9234,7 +9246,7 @@ function renderCustomerPortal(){
   const co=sel?.value
   if(!co){
     if(countEl)countEl.textContent=''
-    el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇客戶以查看資料</div>'
+    el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">'+t('cp_empty')+'</div>'
     return
   }
   const custIds=new Set(customers.filter(c=>c.company===co).map(c=>String(c.id)))
@@ -9265,7 +9277,7 @@ function renderCustomerPortal(){
         '</div>'+smpsHtml+'</div>'
     }).join('')
   }else{
-    inqHtml='<div style="font-size:12px;color:#aaa;padding:6px 0">此客戶尚無詢價記錄</div>'
+    inqHtml='<div style="font-size:12px;color:#aaa;padding:6px 0">'+t('cp_no_inq')+'</div>'
   }
 
   // ── 訂單 section ──
@@ -9303,12 +9315,12 @@ function renderCustomerPortal(){
       '</div>'
     }).join('')
   }else{
-    ordHtml='<div style="font-size:12px;color:#aaa;padding:6px 0">此客戶尚無訂單</div>'
+    ordHtml='<div style="font-size:12px;color:#aaa;padding:6px 0">'+t('cp_no_order')+'</div>'
   }
 
   if(countEl)countEl.textContent=custInqs.length+' 筆詢價 · '+custOrders.length+' 筆訂單'
   const section=(icon,title,body)=>'<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;color:#888;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px">'+icon+' '+title+'</div>'+body+'</div>'
-  el.innerHTML=section('📋','詢價',inqHtml)+section('📦','訂單',ordHtml)
+  el.innerHTML=section('📋',t('cp_sec_inq'),inqHtml)+section('📦',t('cp_sec_order'),ordHtml)
 }
 
 checkAuth()
