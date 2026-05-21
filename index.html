@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.9.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.9.1</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -313,7 +313,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         <option value="th">ไทย</option>
       </select>
       <div id="user-info" style="font-size:11px;color:#888;display:none"></div>
-      <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none" onclick="logout()">登出 Logout</button>
+      <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none" onclick="logout()" data-i18n="btn_logout">登出</button>
     </div>
   </div>
   <div class="content">
@@ -807,7 +807,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <option value="">— 選擇供應商 —</option>
         </select>
       </div>
-      <div style="display:flex;gap:0;border-bottom:2px solid #e5e5e0;margin-bottom:14px" id="sp-tab-bar"></div>
+      <div id="sp-tab-bar" style="margin-bottom:16px"></div>
       <div id="supplier-portal-list"><div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇供應商以查看資料</div></div>
     </div>
 
@@ -1121,7 +1121,7 @@ const I18N={
     btn_new_supplier:'+ 新增供應商',btn_new_product:'+ 新增產品',btn_new_user:'+ 新增使用者',
     btn_new_group:'+ 新增群組',btn_new_complaint:'+ 新增客訴',
     btn_quote_defaults:'⚙ 報價預設值',btn_inventory:'📦 庫存管理',btn_start_purchase:'開始採購',
-    btn_add:'新增',btn_cancel:'取消',
+    btn_add:'新增',btn_cancel:'取消',btn_logout:'登出',
     lbl_all_statuses:'全部狀態',lbl_all_customers:'全部客戶',lbl_all_suppliers:'全部供應商',
     lbl_all_modes:'全部方式',lbl_all_sources:'全部來源',lbl_all_modules:'全部模組',
     lbl_all_users:'全部使用者',lbl_from:'起始日期',lbl_to:'結束日期',
@@ -1213,7 +1213,7 @@ const I18N={
     btn_new_supplier:'+ New Supplier',btn_new_product:'+ New Product',btn_new_user:'+ New User',
     btn_new_group:'+ New Group',btn_new_complaint:'+ New Complaint',
     btn_quote_defaults:'⚙ Quote Defaults',btn_inventory:'📦 Inventory',btn_start_purchase:'Start Purchasing',
-    btn_add:'Add',btn_cancel:'Cancel',
+    btn_add:'Add',btn_cancel:'Cancel',btn_logout:'Logout',
     lbl_all_statuses:'All Statuses',lbl_all_customers:'All Customers',lbl_all_suppliers:'All Suppliers',
     lbl_all_modes:'All Modes',lbl_all_sources:'All Sources',lbl_all_modules:'All Modules',
     lbl_all_users:'All Users',lbl_from:'From',lbl_to:'To',
@@ -1305,7 +1305,7 @@ const I18N={
     btn_new_supplier:'+ ซัพพลายเออร์ใหม่',btn_new_product:'+ สินค้าใหม่',btn_new_user:'+ ผู้ใช้ใหม่',
     btn_new_group:'+ กลุ่มใหม่',btn_new_complaint:'+ ร้องเรียนใหม่',
     btn_quote_defaults:'⚙ ค่าเริ่มต้น',btn_inventory:'📦 สินค้าคงคลัง',btn_start_purchase:'เริ่มสั่งซื้อ',
-    btn_add:'เพิ่ม',btn_cancel:'ยกเลิก',
+    btn_add:'เพิ่ม',btn_cancel:'ยกเลิก',btn_logout:'ออกจากระบบ',
     lbl_all_statuses:'ทุกสถานะ',lbl_all_customers:'ทุกลูกค้า',lbl_all_suppliers:'ทุกซัพพลายเออร์',
     lbl_all_modes:'ทุกวิธี',lbl_all_sources:'ทุกแหล่ง',lbl_all_modules:'ทุกโมดูล',
     lbl_all_users:'ทุกผู้ใช้',lbl_from:'ตั้งแต่',lbl_to:'ถึง',
@@ -2717,6 +2717,7 @@ async function saveComplaint(){
     ?await sb.from('complaints').insert(payload)
     :await sb.from('complaints').update(payload).eq('id',selectedComplaintId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
+  logActivity(isNew?'建立客訴':'更新客訴','complaint',String(selectedComplaintId||payload.complaint_no||''),'')
   await loadComplaints();renderComplaints();closeModal('modal-complaint')
   showToast(isNew?'客訴已建立':'客訴已更新')
 }
@@ -2724,6 +2725,7 @@ async function deleteComplaint(id){
   confirmModal('確定要刪除這筆客訴嗎？',async()=>{
     const{error}=await sb.from('complaints').delete().eq('id',id)
     if(error){showToast('刪除失敗：'+error.message,'error');return}
+    logActivity('刪除客訴','complaint',String(id),'')
     await loadComplaints();renderComplaints();closeModal('modal-complaint')
   })
 }
@@ -3463,10 +3465,11 @@ async function saveShipment(id){
   const resp=id===null?await sb.from('shipments').insert(payload).select().single():await sb.from('shipments').update(payload).eq('id',id).select().single()
   if(resp.error){showToast('儲存船運失敗：'+resp.error.message,'error');return}
   _isDirty=false
+  const finalId=resp.data?.id??id
+  logActivity(id===null?'建立船運':'更新船運','shipment',String(finalId),'')
   await loadShipments()
   renderShipments()
   closeModal('modal-shipment-edit')
-  const finalId=resp.data?.id??id
   setTimeout(()=>openShipmentModal(finalId),120)
   showToast(id===null?'船運批次已建立':'船運資料已更新')
 }
@@ -3477,6 +3480,7 @@ async function deleteShipment(id){
     if(linkErr){showToast('移除關聯失敗：'+linkErr.message,'error');return}
     const{error}=await sb.from('shipments').delete().eq('id',id)
     if(error){showToast('刪除失敗：'+error.message,'error');return}
+    logActivity('刪除船運','shipment',String(id),s?.shipment_no||'')
     await loadShipments()
     closeModal('modal-shipment-edit')
     closeModal('modal-shipment')
@@ -3993,6 +3997,7 @@ async function saveOrderBasic(){
   }).eq('id',selectedOrderId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
   _isDirty=false
+  logActivity('更新訂單','order',String(selectedOrderId),'')
   await loadOrders();_renderOrderModal();renderOrders();showToast('訂單已更新')
 }
 
@@ -4035,6 +4040,7 @@ async function uploadOrderCoa(orderId){
   if(fileInput)fileInput.value=''
   if(btn){btn.disabled=false;btn.textContent='上傳 COA'}
   if(!orderCoaDocs.find(d=>String(d.order_id)===String(orderId)))orderCoaDocs.push({order_id:orderId})
+  logActivity('上傳 COA','order',String(orderId),'')
   showToast('COA 已上傳')
   renderOrderCoaDocs(orderId)
   renderOrders()
@@ -4074,6 +4080,7 @@ async function deleteOrderDoc(docId,filePath,orderId){
   await sb.from('order_documents').delete().eq('id',docId)
   const{data:rem}=await sb.from('order_documents').select('order_id').eq('doc_type','coa').eq('order_id',orderId)
   if(!rem||rem.length===0)orderCoaDocs=orderCoaDocs.filter(d=>String(d.order_id)!==String(orderId))
+  logActivity('刪除 COA','order',String(orderId),'')
   showToast('已刪除')
   renderOrderCoaDocs(orderId)
   renderOrders()
@@ -4084,6 +4091,7 @@ async function deleteOrder(){
     await sb.from('order_items').delete().eq('order_id',selectedOrderId)
     const{error}=await sb.from('orders').delete().eq('id',selectedOrderId)
     if(error){showToast('刪除失敗：'+error.message,'error');return}
+    logActivity('刪除訂單','order',String(selectedOrderId),'')
     await loadOrders();closeModal('modal-order');renderOrders();showToast('訂單已刪除')
   })
 }
@@ -4273,6 +4281,7 @@ async function updateOrderStatus(newStatus,extra={}){
   }
   const{error}=await sb.from('orders').update(patch).eq('id',selectedOrderId)
   if(error){showToast('更新失敗：'+error.message,'error');return}
+  logActivity('更新訂單狀態','order',String(selectedOrderId),newStatus)
   await loadOrders();_renderOrderModal();renderOrders();showToast('狀態已更新')
 }
 
@@ -4280,6 +4289,7 @@ async function approveOrder(orderId){
   const now=new Date().toISOString()
   const{error}=await sb.from('orders').update({approval_status:'approved',approved_by:currentUser?.name||null,approved_at:now}).eq('id',orderId)
   if(error){showToast('審批失敗：'+error.message,'error');return}
+  logActivity('審批訂單','order',String(orderId),'approved')
   await loadOrders();_renderOrderModal();renderOrders();showToast('訂單審批通過')
 }
 
@@ -4287,6 +4297,7 @@ async function rejectOrder(orderId){
   confirmModal('確定要拒絕此口頭承諾訂單嗎？',async()=>{
     const{error}=await sb.from('orders').update({approval_status:'rejected'}).eq('id',orderId)
     if(error){showToast('操作失敗：'+error.message,'error');return}
+    logActivity('退回訂單','order',String(orderId),'rejected')
     await loadOrders();_renderOrderModal();renderOrders();showToast('訂單審批已拒絕')
   })
 }
@@ -4893,6 +4904,7 @@ async function savePurchaseOrder(){
   const{error}=await sb.from('purchase_orders').update(payload).eq('id',selectedPurchaseId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
   _isDirty=false
+  logActivity('更新採購單','purchase',String(selectedPurchaseId),'')
   await loadPurchaseOrders()
   renderPurchaseOrders()
   openPurchaseModal(selectedPurchaseId)
@@ -9136,16 +9148,28 @@ function _renderSpTabBar(){
   const inqPending=supInqs.filter(i=>['pending','asked'].includes(i.status)).length
   const poPending=supPOs.filter(p=>['sent','in_production','shipped'].includes(p.status)).length
   const shPending=supShs.filter(s=>['booked','in_transit','customs_clearance'].includes(s.status)).length
-  const tabs=[
-    {k:'inq',label:t('sp_tab_inq'),n:inqPending},
-    {k:'po',label:t('sp_tab_po'),n:poPending},
-    {k:'sh',label:t('sp_tab_sh'),n:shPending},
+  const steps=[
+    {k:'inq',num:1,label:t('sp_tab_inq'),n:inqPending},
+    {k:'po', num:2,label:t('sp_tab_po'), n:poPending},
+    {k:'sh', num:3,label:t('sp_tab_sh'), n:shPending},
   ]
-  bar.innerHTML=tabs.map(t=>{
-    const active=_spTab===t.k
-    const badge=t.n>0?'<span style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;font-size:10px;font-weight:700;background:'+(active?'#fff':'#EF4444')+';color:'+(active?'#0F6E56':'#fff')+';margin-left:5px">'+t.n+'</span>':''
-    return '<button onclick="_spSwitchTab(\''+t.k+'\')" style="padding:7px 18px;font-size:13px;font-weight:'+(active?'600':'400')+';border:none;background:none;cursor:pointer;color:'+(active?'#0F6E56':'#888')+';border-bottom:2px solid '+(active?'#0F6E56':'transparent')+';margin-bottom:-2px;display:flex;align-items:center">'+t.label+badge+'</button>'
+  const stepHtml=steps.map((s,idx)=>{
+    const active=_spTab===s.k
+    const done=steps.slice(0,idx).some(x=>x.k===_spTab)===false&&idx<steps.findIndex(x=>x.k===_spTab)
+    const bg=active?'#0F6E56':done?'#D1FAE5':'#f8f8f5'
+    const textColor=active?'#fff':done?'#065F46':'#888'
+    const border=active?'#0F6E56':done?'#6EE7B7':'#e5e5e0'
+    const numBg=active?'rgba(255,255,255,0.25)':done?'#A7F3D0':'#e5e5e0'
+    const numColor=active?'#fff':done?'#065F46':'#aaa'
+    const badge=s.n>0?'<span style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;font-size:10px;font-weight:700;background:'+(active?'rgba(255,255,255,0.3)':'#EF4444')+';color:'+(active?'#fff':'#fff')+';margin-left:6px">'+s.n+'</span>':''
+    const arrow=idx<steps.length-1?'<div style="display:flex;align-items:center;color:#ccc;font-size:18px;flex-shrink:0">›</div>':''
+    const step='<button onclick="_spSwitchTab(\''+s.k+'\')" style="display:flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid '+border+';border-radius:8px;background:'+bg+';cursor:pointer;flex:1;min-width:0;transition:all .15s">'+
+      '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:'+numBg+';font-size:11px;font-weight:700;color:'+numColor+';flex-shrink:0">'+s.num+'</span>'+
+      '<span style="font-size:13px;font-weight:'+(active?'600':'500')+';color:'+textColor+';white-space:nowrap">'+s.label+badge+'</span>'+
+    '</button>'
+    return step+(idx<steps.length-1?'<div style="display:flex;align-items:center;color:#ccc;font-size:20px;padding:0 4px;flex-shrink:0">›</div>':'')
   }).join('')
+  bar.innerHTML='<div style="display:flex;align-items:stretch;gap:4px;width:100%">'+stepHtml+'</div>'
 }
 function _renderSpContent(){
   const el=document.getElementById('supplier-portal-list')
@@ -9203,97 +9227,127 @@ function _renderSpContent(){
   }
   else if(_spTab==='sh'){
     const allPOs=purchaseOrders.filter(p=>supIds.has(String(p.supplier_id)))
+    const activePOs=allPOs.filter(p=>!['draft','cancelled','rejected','completed'].includes(p.status))
     const allPoIds=new Set(allPOs.map(p=>String(p.id)))
-    // shipments that have at least one shipment_item belonging to this supplier's POs
+    // left column: all active PO items
+    let leftRows=''
+    activePOs.forEach(p=>{
+      const itms=purchaseOrderItems.filter(i=>i.po_id===p.id)
+      if(!itms.length)return
+      leftRows+='<div style="font-size:11px;font-weight:600;color:#888;margin:8px 0 4px 0">'+esc(p.id)+(p.accounting_no?' · '+esc(p.accounting_no):'')+'</div>'
+      itms.forEach(i=>{
+        const si=shipmentItems.find(x=>x.po_item_id===i.id)
+        const sh=si?shipments.find(s=>s.id===si.shipment_id):null
+        const staged=_spStagedItems.includes(i.id)
+        if(sh){
+          leftRows+='<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:#f8f8f5;margin-bottom:4px;opacity:.5">'+
+            '<span style="font-size:13px;color:#ccc">⠿</span>'+
+            '<span style="font-size:12px;flex:1;color:#888">'+esc(i.product_name||'—')+(i.qty?' · '+i.qty+(i.unit?' '+i.unit:''):'')+'</span>'+
+            '<span class="badge" style="background:#E1F5EE;color:#0F6E56;border:1px solid #A7F3D0;font-size:10px">📦 '+esc(sh.shipment_no)+'</span>'+
+          '</div>'
+        } else if(staged){
+          leftRows+='<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:#F0FDF4;border:1px solid #A7F3D0;margin-bottom:4px;cursor:default">'+
+            '<span style="font-size:13px;color:#0F6E56">⠿</span>'+
+            '<span style="font-size:12px;flex:1;color:#0F6E56">'+esc(i.product_name||'—')+(i.qty?' · '+i.qty+(i.unit?' '+i.unit:''):'')+'</span>'+
+            '<span style="font-size:10px;color:#0F6E56;white-space:nowrap">✓ 已加入</span>'+
+          '</div>'
+        } else {
+          leftRows+='<div draggable="true" ondragstart="event.dataTransfer.setData(\'text\',\''+i.id+'\')" '+
+            'onclick="_spSyncDraft();_spStagedItems.push('+i.id+');_renderSpContent()" '+
+            'style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:#fff;border:1px solid #e5e5e0;margin-bottom:4px;cursor:grab" '+
+            'onmouseenter="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.08)\'" onmouseleave="this.style.boxShadow=\'\'">'+
+            '<span style="font-size:13px;color:#ccc">⠿</span>'+
+            '<span style="font-size:12px;flex:1">'+esc(i.product_name||'—')+(i.qty?' · '+i.qty+(i.unit?' '+i.unit:''):'')+'</span>'+
+            '<span style="font-size:10px;color:#aaa">拖曳</span>'+
+          '</div>'
+        }
+      })
+    })
+    if(!leftRows)leftRows='<div style="font-size:12px;color:#aaa;padding:16px 0;text-align:center">無可用品項</div>'
+    // right column: shipment builder
+    const stagedItemHtml=_spStagedItems.map(id=>{
+      const item=purchaseOrderItems.find(i=>i.id===id)
+      if(!item)return ''
+      return '<div style="display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:6px;background:#F0FDF4;border:1px solid #A7F3D0;margin-bottom:4px">'+
+        '<span style="font-size:12px;flex:1">'+esc(item.product_name||'—')+(item.qty?' · '+item.qty+(item.unit?' '+item.unit:''):'')+'</span>'+
+        '<button onclick="_spStagedItems=_spStagedItems.filter(x=>x!=='+id+');_renderSpContent()" style="border:none;background:transparent;color:#aaa;cursor:pointer;font-size:16px;line-height:1;padding:0">×</button>'+
+      '</div>'
+    }).join('')
+    const dropZone=_spStagedItems.length
+      ?'<div ondragover="event.preventDefault()" ondrop="_spOnDrop(event)">'+stagedItemHtml+
+        '<div ondragover="event.preventDefault()" ondrop="_spOnDrop(event)" style="border:2px dashed #d0e8ff;border-radius:6px;padding:6px;text-align:center;color:#aaa;font-size:11px;margin-top:4px">+ 繼續拖曳</div></div>'
+      :'<div ondragover="event.preventDefault()" ondrop="_spOnDrop(event)" style="border:2px dashed #d0e8ff;border-radius:8px;padding:24px;text-align:center;color:#aaa;font-size:12px;min-height:80px;display:flex;align-items:center;justify-content:center">將品項拖曳至此，或點擊左側品項</div>'
+    const rightPanel='<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:8px;padding:14px;position:sticky;top:0">'+
+      '<div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:12px">📦 新建船運</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+
+      '<div><label style="font-size:11px;color:#555">ETD <span style="color:#e55">*</span></label>'+
+      '<input type="date" id="sp-etd" value="'+(_spDraftEtd||'')+'" style="margin-top:2px" onchange="_spDraftEtd=this.value" /></div>'+
+      '<div><label style="font-size:11px;color:#555">船名（選填）</label>'+
+      '<input id="sp-vessel" value="'+esc(_spDraftVessel||'')+'" placeholder="vessel name" style="margin-top:2px" oninput="_spDraftVessel=this.value" /></div>'+
+      '</div>'+
+      '<div style="font-size:11px;font-weight:600;color:#555;margin-bottom:6px">加入品項</div>'+
+      dropZone+
+      (_spStagedItems.length?'<div style="margin-top:12px"><button class="btn btn-primary btn-sm" onclick="_spSubmitShipment()" style="width:100%">建立船運</button></div>':'')+
+    '</div>'
+    // existing shipment cards
     const seen=new Set()
-    const list=shipmentItems
+    const shList=shipmentItems
       .filter(si=>allPoIds.has(String(si.po_id)))
       .map(si=>shipments.find(s=>s.id===si.shipment_id))
       .filter(s=>{if(!s||seen.has(s.id))return false;seen.add(s.id);return true})
       .sort((a,b)=>(b.etd||b.created_at||'').localeCompare(a.etd||a.created_at||''))
-    // Create form
-    const createForm=_spCreatingShipment?_spBuildCreateForm(allPOs):''
-    const createBtn=_spCreatingShipment?'':
-      '<button class="btn btn-primary btn-sm" style="margin-bottom:14px" onclick="_spCreatingShipment=true;_renderSpContent()">+ 新建船運</button>'
-    if(!list.length&&!_spCreatingShipment){
-      el.innerHTML=createBtn+'<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">'+t('sp_no_sh')+'</div>'
-      return
-    }
-    const shCards=list.map(sh=>{
-      const sst=shipmentStatusObj(sh.status)
-      const pending=['booked','in_transit','customs_clearance'].includes(sh.status)
-      const shItms=shipmentItems.filter(si=>si.shipment_id===sh.id&&allPoIds.has(String(si.po_id)))
-      const itemsHtml=shItms.length
-        ?'<div style="border:1px solid #f0f0ec;border-radius:4px;overflow:hidden;margin-top:6px">'+
-          shItms.map((si,idx)=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;font-size:12px;'+(idx?'border-top:1px solid #f0f0ec':'')+'">'+'<span>'+esc(si.product_name||'—')+'</span>'+(si.qty?'<span style="color:#666">'+si.qty+(si.unit?' '+si.unit:'')+'</span>':'')+'</div>').join('')+'</div>'
-        :''
-      return '<div style="padding:10px 12px;background:#fff;border:1px solid '+(pending?'#FBBF24':'#e5e5e0')+';border-left:3px solid '+(pending?'#F59E0B':'#e5e5e0')+';border-radius:6px;margin-bottom:8px">'+
-        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'+
-        '<span style="font-weight:600;font-size:13px">'+esc(sh.shipment_no||'—')+'</span>'+
-        '<span class="badge" style="background:'+sst.bg+';color:'+sst.color+';border:1px solid '+sst.color+'">'+sst.label+'</span>'+
-        '</div>'+
-        '<div style="font-size:12px;color:#666">'+
-        (sh.etd?'ETD '+sh.etd:'')+(sh.eta?' · ETA '+sh.eta:'')+(sh.vessel_name?' · '+esc(sh.vessel_name):'')+(sh.bl_no?' · B/L '+esc(sh.bl_no):'')+
-        '</div>'+itemsHtml+'</div>'
-    }).join('')
-    el.innerHTML=createBtn+createForm+shCards
+    const shCards=shList.length
+      ?'<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;color:#888;margin-bottom:8px">已建立的船運</div>'+
+        shList.map(sh=>{
+          const sst=shipmentStatusObj(sh.status)
+          const shItms=shipmentItems.filter(si=>si.shipment_id===sh.id&&allPoIds.has(String(si.po_id)))
+          const itemsHtml=shItms.length?'<div style="border:1px solid #f0f0ec;border-radius:4px;overflow:hidden;margin-top:6px">'+
+            shItms.map((si,idx)=>'<div style="display:flex;justify-content:space-between;padding:5px 10px;font-size:12px;'+(idx?'border-top:1px solid #f0f0ec':'')+'">'+'<span>'+esc(si.product_name||'—')+'</span>'+(si.qty?'<span style="color:#666">'+si.qty+(si.unit?' '+si.unit:'')+'</span>':'')+'</div>').join('')+'</div>':''
+          return '<div style="padding:10px 12px;background:#fff;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:8px">'+
+            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'+
+            '<span style="font-weight:600;font-size:13px">'+esc(sh.shipment_no||'—')+'</span>'+
+            '<span class="badge" style="background:'+sst.bg+';color:'+sst.color+';border:1px solid '+sst.color+'">'+sst.label+'</span>'+
+            '</div>'+
+            '<div style="font-size:12px;color:#666">'+
+            (sh.etd?'ETD '+sh.etd:'')+(sh.eta?' · ETA '+sh.eta:'')+(sh.vessel_name?' · '+esc(sh.vessel_name):'')+(sh.bl_no?' · B/L '+esc(sh.bl_no):'')+
+            '</div>'+itemsHtml+'</div>'
+        }).join('')+'</div>'
+      :''
+    el.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">'+
+      '<div><div style="font-size:12px;font-weight:600;color:#888;margin-bottom:6px">採購單品項</div>'+leftRows+'</div>'+
+      '<div>'+rightPanel+'</div>'+
+    '</div>'+shCards
   }
 }
-let _spCreatingShipment=false
-function _spBuildCreateForm(allPOs){
-  const allPoIds=new Set(allPOs.map(p=>String(p.id)))
-  const activePOs=allPOs.filter(p=>!['draft','cancelled','rejected','completed'].includes(p.status))
-  if(!activePOs.length)return '<div style="font-size:12px;color:#aaa;padding:8px 0">此供應商無可用的採購單品項</div>'
-  let rows=''
-  activePOs.forEach(p=>{
-    const itms=purchaseOrderItems.filter(i=>i.po_id===p.id)
-    if(!itms.length)return
-    rows+='<div style="font-size:11px;font-weight:600;color:#888;margin:10px 0 4px">'+esc(p.id)+(p.accounting_no?' · '+esc(p.accounting_no):'')+'</div>'
-    itms.forEach(i=>{
-      const si=shipmentItems.find(x=>x.po_item_id===i.id)
-      const sh=si?shipments.find(s=>s.id===si.shipment_id):null
-      if(sh){
-        rows+='<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;background:#f8f8f5;margin-bottom:3px;opacity:.5">'+
-          '<input type="checkbox" disabled />'+
-          '<span style="font-size:12px;flex:1">'+esc(i.product_name||'—')+(i.qty?' · '+i.qty+(i.unit?' '+i.unit:''):'')+'</span>'+
-          '<span class="badge" style="background:#E1F5EE;color:#0F6E56;border:1px solid #A7F3D0">📦 '+esc(sh.shipment_no)+'</span>'+
-        '</div>'
-      }else{
-        rows+='<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;background:#fff;border:1px solid #f0f0ec;margin-bottom:3px">'+
-          '<input type="checkbox" id="sp-item-'+i.id+'" data-po-id="'+p.id+'" data-product="'+esc(i.product_name||'')+'" data-qty="'+(i.qty||'')+'" data-unit="'+(i.unit||'')+'" />'+
-          '<label for="sp-item-'+i.id+'" style="font-size:12px;flex:1;cursor:pointer;margin:0">'+esc(i.product_name||'—')+(i.qty?' · '+i.qty+(i.unit?' '+i.unit:''):'')+'</label>'+
-        '</div>'
-      }
-    })
-  })
-  return '<div style="background:#f0f7ff;border:1px solid #BFDBFE;border-radius:6px;padding:14px;margin-bottom:14px">'+
-    '<div style="font-size:13px;font-weight:600;color:#1E40AF;margin-bottom:10px">新建船運</div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'+
-    '<div><label style="font-size:11px;color:#555">ETD <span style="color:#e55">*</span></label><input type="date" id="sp-etd" style="margin-top:2px" /></div>'+
-    '<div><label style="font-size:11px;color:#555">船名（選填）</label><input id="sp-vessel" placeholder="vessel name" style="margin-top:2px" /></div>'+
-    '</div>'+
-    '<div style="font-size:11px;font-weight:600;color:#555;margin-bottom:4px">選擇要放入此船運的產品：</div>'+
-    rows+
-    '<div style="display:flex;gap:8px;margin-top:12px">'+
-    '<button class="btn btn-primary btn-sm" onclick="_spSubmitShipment()">建立船運</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="_spCreatingShipment=false;_renderSpContent()">取消</button>'+
-    '</div></div>'
+let _spStagedItems=[]
+let _spDraftEtd=''
+let _spDraftVessel=''
+function _spSyncDraft(){
+  const etd=document.getElementById('sp-etd')?.value
+  const vessel=document.getElementById('sp-vessel')?.value
+  if(etd!==undefined)_spDraftEtd=etd
+  if(vessel!==undefined)_spDraftVessel=vessel
+}
+function _spOnDrop(e){
+  e.preventDefault()
+  const itemId=parseInt(e.dataTransfer.getData('text'))
+  if(!itemId)return
+  _spSyncDraft()
+  if(!_spStagedItems.includes(itemId))_spStagedItems.push(itemId)
+  _renderSpContent()
 }
 async function _spSubmitShipment(){
-  const etd=document.getElementById('sp-etd')?.value
-  if(!etd){showToast('請填寫 ETD','error');return}
-  const vessel=document.getElementById('sp-vessel')?.value.trim()||null
-  const checked=[...document.querySelectorAll('[id^="sp-item-"]:checked')]
-  if(!checked.length){showToast('請選擇至少一項產品','error');return}
+  _spSyncDraft()
+  if(!_spDraftEtd){showToast('請填寫 ETD','error');return}
+  if(!_spStagedItems.length){showToast('請選擇至少一項產品','error');return}
   const shipNo=generateShipmentNo()
-  const{data:sh,error:shErr}=await sb.from('shipments').insert({shipment_no:shipNo,status:'planned',etd,vessel_name:vessel}).select().single()
+  const{data:sh,error:shErr}=await sb.from('shipments').insert({shipment_no:shipNo,status:'planned',etd:_spDraftEtd,vessel_name:_spDraftVessel||null}).select().single()
   if(shErr){showToast('建立失敗：'+shErr.message,'error');return}
-  const uniquePoIds=new Set(checked.map(c=>c.dataset.poId))
+  const uniquePoIds=new Set(_spStagedItems.map(id=>{const i=purchaseOrderItems.find(x=>x.id===id);return i?String(i.po_id):null}).filter(Boolean))
   for(const poId of uniquePoIds){
     await sb.from('shipment_purchase_orders').insert({shipment_id:sh.id,purchase_order_id:parseInt(poId)}).catch(()=>{})
   }
-  for(const c of checked){
-    const itemId=parseInt(c.id.replace('sp-item-',''))
+  for(const itemId of _spStagedItems){
     const poItem=purchaseOrderItems.find(i=>i.id===itemId)
     if(!poItem)continue
     await sb.from('shipment_items').insert({
@@ -9302,7 +9356,10 @@ async function _spSubmitShipment(){
       qty:poItem.qty,unit:poItem.unit||'',status:'planned'
     })
   }
-  _spCreatingShipment=false
+  _spStagedItems=[]
+  _spDraftEtd=''
+  _spDraftVessel=''
+  logActivity('供應商建立船運','shipment',shipNo,document.getElementById('sp-supplier-sel')?.value||'')
   await loadShipments()
   _renderSpTabBar()
   _renderSpContent()
@@ -9316,7 +9373,9 @@ function renderSupplierPortal(){
     const cos=[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort()
     cos.forEach(co=>{const opt=document.createElement('option');opt.value=co;opt.textContent=co;sel.appendChild(opt)})
   }
-  _spCreatingShipment=false
+  _spStagedItems=[]
+  _spDraftEtd=''
+  _spDraftVessel=''
   _renderSpTabBar()
   _renderSpContent()
 }
