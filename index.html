@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.8.1</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.8.2</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -4540,6 +4540,7 @@ function renderPurchaseOrders(){
         (()=>{const its=purchaseOrderItems.filter(i=>i.po_id===p.id);return its.length?'<div style="font-size:11px;color:#555;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+its.map(i=>i.product_name).join('、')+'</div>':''})()+
         '<div style="font-size:10px;color:#888">'+d+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div>'+
         (shBadge?'<div style="margin-top:4px">'+shBadge+'</div>':'')+
+        (p.supplier_instructions?'<div style="margin-top:5px;font-size:11px;font-weight:600;color:#854F0B;background:#FFFBF3;border:1px solid #E2B36D;border-radius:4px;padding:4px 7px">⚠ 特殊指示：'+esc(p.supplier_instructions)+'</div>':'')+
       '</div>'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
     '</div>'
@@ -4587,7 +4588,12 @@ function openPurchaseModal(id, prefill={}){
     '<div><label>預計交貨日</label><input type="date" id="pp-expected" value="'+(p?.expected_delivery||'')+'" onchange="_isDirty=true" /></div>'+
     '<div><label>幣別</label><select id="pp-currency" onchange="_isDirty=true">'+currencyOpts+'</select></div>'+
     '</div>'+
-    '<div style="margin-bottom:14px"><label>備註</label><textarea id="pp-notes" oninput="_isDirty=true" onchange="_isDirty=true">'+(p?.notes||'')+'</textarea></div>'
+    '<div style="margin-bottom:10px"><label>備註</label><textarea id="pp-notes" oninput="_isDirty=true" onchange="_isDirty=true">'+(p?.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:14px">'+
+    '<label style="display:flex;align-items:center;gap:6px;color:#854F0B;font-weight:600">⚠ 供應商特殊指示 <span style="font-size:11px;font-weight:400;color:#888">（裝載方式、包裝要求等）— 填寫後將強制顯示警示</span></label>'+
+    '<textarea id="pp-supplier-instr" rows="2" style="border-color:#E2B36D;background:#FFFBF3" oninput="_isDirty=true" onchange="_isDirty=true" placeholder="例：此批貨需橫放，不可疊高超過3層；請以防潮袋包裝每捲...">'+(p?.supplier_instructions||'')+'</textarea>'+
+    (p?.supplier_instructions?'<div style="font-size:11px;color:#854F0B;margin-top:4px">⚠ 此採購單已有特殊指示</div>':'')+
+    '</div>'
   if(p){
     html+='<div class="divider"></div><div style="margin-bottom:12px"><div class="section-title">關聯船運</div>'+
       (linkedShipments.length
@@ -4736,6 +4742,7 @@ async function createPurchaseOrder(){
   assignIfPresent(payload,'expected_delivery',document.getElementById('pp-expected')?.value)
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value||'USD')
   assignIfPresent(payload,'notes',document.getElementById('pp-notes')?.value?.trim())
+  assignIfPresent(payload,'supplier_instructions',document.getElementById('pp-supplier-instr')?.value?.trim())
   const{error}=await sb.from('purchase_orders').insert(payload)
   if(error){showToast('建立失敗：'+error.message,'error');return}
   const po=await sb.from('purchase_orders').select('*').eq('id',id).single()
@@ -4874,6 +4881,7 @@ async function savePurchaseOrder(){
   assignIfPresent(payload,'expected_delivery',document.getElementById('pp-expected')?.value)
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value)
   assignIfPresent(payload,'notes',document.getElementById('pp-notes')?.value?.trim())
+  assignIfPresent(payload,'supplier_instructions',document.getElementById('pp-supplier-instr')?.value?.trim())
   const{error}=await sb.from('purchase_orders').update(payload).eq('id',selectedPurchaseId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
   _isDirty=false
@@ -9175,6 +9183,7 @@ function _renderSpContent(){
         (p.created_at?'<span style="font-size:11px;color:#aaa">'+p.created_at.slice(0,10)+'</span>':'')+
         '</div>'+
         '<div style="font-size:12px;color:#555;margin-bottom:5px">'+itemRow+'</div>'+
+        (p.supplier_instructions?'<div style="font-size:12px;font-weight:600;color:#854F0B;background:#FFFBF3;border:1px solid #E2B36D;border-radius:4px;padding:5px 8px;margin-bottom:6px">⚠ 特殊指示：'+esc(p.supplier_instructions)+'</div>':'')+
         '<div style="font-size:12px;color:#555;line-height:1.8">'+shipRows+'</div>'+
       '</div>'
     }).join('')
