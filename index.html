@@ -235,55 +235,55 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.6.0</span></div>
   </div>
   <nav class="sidebar-nav">
-    <div class="nav-section">業務 Sales · ขาย</div>
+    <div class="nav-section" data-i18n="nav_sales">業務</div>
     <button class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">
-      <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span><span>儀表板<br><span style="font-size:9px;opacity:0.65;font-weight:400">Dashboard · แดชบอร์ด</span></span>
+      <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span><span data-i18n="tab_dashboard">儀表板</span>
     </button>
     <button class="nav-item" id="nav-inquiry" onclick="switchTab('inquiry')">
-      <span class="nav-icon"><i data-lucide="clipboard-list"></i></span><span>詢價管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Inquiries · ใบสอบถามราคา</span></span><span class="nav-badge" id="badge-inquiry" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="clipboard-list"></i></span><span data-i18n="tab_inquiry">詢價管理</span><span class="nav-badge" id="badge-inquiry" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-quotes" onclick="switchTab('quotes')">
-      <span class="nav-icon"><i data-lucide="file-text"></i></span><span>報價管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Quotations · ใบเสนอราคา</span></span>
+      <span class="nav-icon"><i data-lucide="file-text"></i></span><span data-i18n="tab_quotes">報價管理</span>
     </button>
     <button class="nav-item" id="nav-orders" onclick="switchTab('orders')">
-      <span class="nav-icon"><i data-lucide="package"></i></span><span>訂單管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Orders · คำสั่งซื้อ</span></span><span class="nav-badge" id="badge-orders" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="package"></i></span><span data-i18n="tab_orders">訂單管理</span><span class="nav-badge" id="badge-orders" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-purchases" onclick="switchTab('purchases')" style="display:none">
-      <span class="nav-icon"><i data-lucide="shopping-cart"></i></span><span>採購單管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Purchase Orders · ใบสั่งซื้อ</span></span><span class="nav-badge" id="badge-purchases" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="shopping-cart"></i></span><span data-i18n="tab_purchases">採購單管理</span><span class="nav-badge" id="badge-purchases" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-shipments" onclick="switchTab('shipments')">
-      <span class="nav-icon"><i data-lucide="anchor"></i></span><span>船運管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Shipments · การขนส่ง</span></span>
+      <span class="nav-icon"><i data-lucide="anchor"></i></span><span data-i18n="tab_shipments">船運管理</span>
     </button>
     <button class="nav-item" id="nav-samples" onclick="switchTab('samples')">
-      <span class="nav-icon"><i data-lucide="flask-conical"></i></span><span>樣品管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Samples · ตัวอย่าง</span></span><span class="nav-badge" id="badge-samples" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="flask-conical"></i></span><span data-i18n="tab_samples">樣品管理</span><span class="nav-badge" id="badge-samples" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-complaints" onclick="switchTab('complaints')">
-      <span class="nav-icon"><i data-lucide="alert-triangle"></i></span><span>客訴管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Complaints · ข้อร้องเรียน</span></span><span class="nav-badge" id="badge-complaints" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="alert-triangle"></i></span><span data-i18n="tab_complaints">客訴管理</span><span class="nav-badge" id="badge-complaints" style="display:none"></span>
     </button>
-    <div class="nav-section">通訊錄 Contacts · รายชื่อ</div>
+    <div class="nav-section" data-i18n="nav_contacts">通訊錄</div>
     <button class="nav-item" id="nav-customers" onclick="switchTab('customers')">
-      <span class="nav-icon"><i data-lucide="users"></i></span><span>客戶管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Customers · ลูกค้า</span></span><span class="nav-badge" id="badge-customers" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="users"></i></span><span data-i18n="tab_customers">客戶管理</span><span class="nav-badge" id="badge-customers" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-suppliers_mgmt" onclick="switchTab('suppliers_mgmt')">
-      <span class="nav-icon"><i data-lucide="factory"></i></span><span>供應商管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Suppliers · ผู้จัดจำหน่าย</span></span>
+      <span class="nav-icon"><i data-lucide="factory"></i></span><span data-i18n="tab_suppliers_mgmt">供應商管理</span>
     </button>
-    <div class="nav-section">產品 Products · สินค้า</div>
+    <div class="nav-section" data-i18n="nav_products">產品</div>
     <button class="nav-item" id="nav-products" onclick="switchTab('products')">
-      <span class="nav-icon"><i data-lucide="boxes"></i></span><span>產品目錄<br><span style="font-size:9px;opacity:0.65;font-weight:400">Product Catalog · แคตตาล็อก</span></span><span class="nav-badge" id="badge-products" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="boxes"></i></span><span data-i18n="tab_products">產品目錄</span><span class="nav-badge" id="badge-products" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-docs" onclick="switchTab('docs')">
-      <span class="nav-icon"><i data-lucide="folder-open"></i></span><span>技術文件庫<br><span style="font-size:9px;opacity:0.65;font-weight:400">Technical Docs · เอกสารเทคนิค</span></span>
+      <span class="nav-icon"><i data-lucide="folder-open"></i></span><span data-i18n="tab_docs">技術文件庫</span>
     </button>
-    <div class="nav-section">設定 Settings · ตั้งค่า</div>
+    <div class="nav-section" data-i18n="nav_settings">設定</div>
     <button class="nav-item" id="nav-users_mgmt" onclick="switchTab('users_mgmt')" style="display:none">
-      <span class="nav-icon"><i data-lucide="user-cog"></i></span><span>使用者管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Users · จัดการผู้ใช้</span></span>
+      <span class="nav-icon"><i data-lucide="user-cog"></i></span><span data-i18n="tab_users_mgmt">使用者管理</span>
     </button>
     <button class="nav-item" id="nav-settings" onclick="switchTab('settings')" style="display:none">
-      <span class="nav-icon"><i data-lucide="settings"></i></span><span>系統設定<br><span style="font-size:9px;opacity:0.65;font-weight:400">System · ระบบ</span></span>
+      <span class="nav-icon"><i data-lucide="settings"></i></span><span data-i18n="tab_settings">系統設定</span>
     </button>
   </nav>
   <div class="sidebar-footer">
-    <div id="sidebar-user-email">未登入 / Not logged in</div>
+    <div id="sidebar-user-email" data-i18n="not_logged_in">未登入</div>
     <div style="margin-top:8px;font-size:10px;line-height:1.5;color:#888">
       <div>Powered by</div>
       <div>NNPC Consulting Co., Ltd.</div>
@@ -301,6 +301,11 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <button class="btn btn-ghost btn-sm" id="pshop-mobile-cart-btn" onclick="openMobileCart()" style="display:none"><i data-lucide="shopping-cart" style="width:13px;height:13px;margin-right:4px;vertical-align:-2px"></i><span id="pshop-mobile-cart-count">0</span> 項</button>
       <button class="btn btn-ghost btn-sm" id="pshop-back-btn" onclick="pshopLeave()" style="display:none">← 返回採購單</button>
       <div id="overdue-alert" style="display:none"></div>
+      <div style="display:flex;border:1px solid #e5e5e0;border-radius:4px;overflow:hidden">
+        <button class="lang-btn" data-lang="zh" onclick="setLang('zh')" style="padding:3px 9px;border:none;background:transparent;cursor:pointer;font-size:11px;font-weight:700;color:#0F6E56">中</button>
+        <button class="lang-btn" data-lang="en" onclick="setLang('en')" style="padding:3px 9px;border:none;background:transparent;cursor:pointer;font-size:11px;border-left:1px solid #e5e5e0;color:#888">EN</button>
+        <button class="lang-btn" data-lang="th" onclick="setLang('th')" style="padding:3px 9px;border:none;background:transparent;cursor:pointer;font-size:11px;border-left:1px solid #e5e5e0;color:#888">ไทย</button>
+      </div>
       <div id="user-info" style="font-size:11px;color:#888;display:none"></div>
       <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none" onclick="logout()">登出 Logout</button>
     </div>
@@ -312,30 +317,30 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="inq-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('inquiry')">☰ Filter · กรอง</button>
-          <button class="btn btn-primary" onclick="showNewInqForm()">+ New Inquiry · ใบสอบถามใหม่</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('inquiry')" data-i18n="btn_filter">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="showNewInqForm()" data-i18n="btn_new_inquiry">+ 新增詢價</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="inquiry-filter-bar">
         <select id="f-status" onchange="renderInquiries()">
-          <option value="">All Statuses · ทุกสถานะ</option>
-          <option value="pending">待詢供應商 Pending · รอสอบถาม</option>
-          <option value="asked">已發詢價 Sent · ส่งแล้ว</option>
-          <option value="received">供應商已回 Replied · ตอบแล้ว</option>
-          <option value="sent_to_quote">已送報價 Quoted · ส่งใบเสนอแล้ว</option>
-          <option value="closed">已結案 Closed · ปิดแล้ว</option>
+          <option value="" data-i18n="lbl_all_statuses">全部狀態</option>
+          <option value="pending" data-i18n="inq_pending">待詢供應商</option>
+          <option value="asked" data-i18n="inq_asked">已發詢價</option>
+          <option value="received" data-i18n="inq_received">供應商已回</option>
+          <option value="sent_to_quote" data-i18n="inq_sent_quote">已送報價</option>
+          <option value="closed">已結案</option>
         </select>
-        <select id="f-customer" onchange="renderInquiries()"><option value="">All Customers · ทุกลูกค้า</option></select>
-        <input id="f-product" type="text" placeholder="Search products · ค้นหาสินค้า..." oninput="renderInquiries()" style="max-width:150px" />
-        <label class="filter-date-label">From · ตั้งแต่</label><input id="f-date-from" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="From date" />
+        <select id="f-customer" onchange="renderInquiries()"><option value="" data-i18n="lbl_all_customers">全部客戶</option></select>
+        <input id="f-product" type="text" placeholder="搜尋產品..." oninput="renderInquiries()" style="max-width:150px" />
+        <label class="filter-date-label" data-i18n="lbl_from">起始日期</label><input id="f-date-from" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="From date" />
         <span style="font-size:11px;color:#aaa">–</span>
-        <label class="filter-date-label">To · ถึง</label><input id="f-date-to" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="To date" />
-        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Clear · ล้าง</button>
+        <label class="filter-date-label" data-i18n="lbl_to">結束日期</label><input id="f-date-to" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="To date" />
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()" data-i18n="btn_clear">清除</button>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">Legend · สี</span>
-        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">追蹤逾期 Overdue</span>
-        <span class="ls-item" style="background:#FFFBEA;border:1px solid #F5C842;color:#7A5B00">即將逾期 Due Soon</span>
+        <span class="ls-lbl" data-i18n="legend_lbl">顏色說明</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444" data-i18n="legend_overdue">追蹤逾期</span>
+        <span class="ls-item" style="background:#FFFBEA;border:1px solid #F5C842;color:#7A5B00" data-i18n="legend_due_soon">即將逾期</span>
       </div>
       <div id="inquiry-list"></div>
     </div>
@@ -345,36 +350,36 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px">
         <div id="quote-summary" style="font-size:12px;color:#888"></div>
         <div class="quote-actions" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('quotes')">☰ Filter · กรอง</button>
-          <button class="btn btn-ghost btn-sm" onclick="openQuoteDefaultsModal()">⚙ Quote Defaults · ค่าเริ่มต้น</button>
-          <button class="btn btn-primary" onclick="openNewQuoteModal()">+ New Quotation · ใบเสนอราคาใหม่</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('quotes')" data-i18n="btn_filter">☰ 篩選</button>
+          <button class="btn btn-ghost btn-sm" onclick="openQuoteDefaultsModal()" data-i18n="btn_quote_defaults">⚙ 報價預設值</button>
+          <button class="btn btn-primary" onclick="openNewQuoteModal()" data-i18n="btn_new_quote">+ 新增報價單</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="quote-filter-bar">
         <select id="fq-status" onchange="renderQuotes()">
-          <option value="">All Statuses · ทุกสถานะ</option>
-          <option value="draft">草稿 Draft · ร่าง</option>
-          <option value="sent">已送客戶 Sent · ส่งแล้ว</option>
-          <option value="sample_pending">待寄樣 Sample Pending · รอส่งตัวอย่าง</option>
-          <option value="sample_review">樣品確認中 Sample Review · ตรวจสอบตัวอย่าง</option>
-          <option value="accepted">客戶接受 Accepted · ยอมรับแล้ว</option>
-          <option value="rejected">客戶拒絕 Rejected · ปฏิเสธ</option>
-          <option value="superseded">已取代 Superseded · แทนที่แล้ว</option>
+          <option value="" data-i18n="lbl_all_statuses">全部狀態</option>
+          <option value="draft" data-i18n="q_draft">草稿</option>
+          <option value="sent" data-i18n="q_sent">已送客戶</option>
+          <option value="sample_pending" data-i18n="q_sample_pending">待寄樣</option>
+          <option value="sample_review" data-i18n="q_sample_review">樣品確認中</option>
+          <option value="accepted" data-i18n="q_accepted">客戶接受</option>
+          <option value="rejected" data-i18n="q_rejected">客戶拒絕</option>
+          <option value="superseded" data-i18n="q_superseded">已取代（舊版本）</option>
         </select>
-        <input id="fq-customer" type="text" placeholder="Search customer · ค้นหาลูกค้า..." oninput="renderQuotes()" style="max-width:150px" />
-        <input id="fq-product" type="text" placeholder="Search product · ค้นหาสินค้า..." oninput="renderQuotes()" style="max-width:150px" />
-        <label class="filter-date-label">From · ตั้งแต่</label><input id="fq-date-from" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="From date" />
+        <input id="fq-customer" type="text" placeholder="搜尋客戶..." oninput="renderQuotes()" style="max-width:150px" />
+        <input id="fq-product" type="text" placeholder="搜尋產品..." oninput="renderQuotes()" style="max-width:150px" />
+        <label class="filter-date-label" data-i18n="lbl_from">起始日期</label><input id="fq-date-from" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="From date" />
         <span style="font-size:11px;color:#aaa">–</span>
-        <label class="filter-date-label">To · ถึง</label><input id="fq-date-to" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="To date" />
-        <button class="btn btn-ghost btn-sm" onclick="clearQuoteFilters()">Clear · ล้าง</button>
+        <label class="filter-date-label" data-i18n="lbl_to">結束日期</label><input id="fq-date-to" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="To date" />
+        <button class="btn btn-ghost btn-sm" onclick="clearQuoteFilters()" data-i18n="btn_clear">清除</button>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">Status Colors · สี</span>
-        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">Draft · ร่าง</span>
-        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">Sent · ส่งแล้ว</span>
-        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">Accepted · ยอมรับ</span>
-        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">Rejected · ปฏิเสธ</span>
-        <span class="ls-item" style="background:#f5f5f2;color:#aaa">Superseded · แทนที่</span>
+        <span class="ls-lbl" data-i18n="legend_status_lbl">狀態顏色</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B" data-i18n="q_draft">草稿</span>
+        <span class="ls-item" style="background:#EEEDFE;color:#534AB7" data-i18n="q_sent">已送客戶</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11" data-i18n="q_accepted">客戶接受</span>
+        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D" data-i18n="q_rejected">客戶拒絕</span>
+        <span class="ls-item" style="background:#f5f5f2;color:#aaa" data-i18n="q_superseded">已取代（舊版本）</span>
       </div>
       <div id="quote-list"></div>
     </div>
@@ -384,25 +389,25 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="sample-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('samples')">☰ Filter · กรอง</button>
-          <button class="btn btn-primary" onclick="openSampleModal(null)">+ New Sample · ตัวอย่างใหม่</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('samples')" data-i18n="btn_filter">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="openSampleModal(null)" data-i18n="btn_new_sample">+ 新增樣品</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="sample-filter-bar">
         <select id="fs-status" onchange="renderSamples()">
-          <option value="">All Statuses · ทุกสถานะ</option>
-          <option value="in_stock">庫存中 In Stock · มีสต็อก</option>
-          <option value="waiting_arrival">等待到貨 Awaiting Arrival · รอสินค้า</option>
-          <option value="waiting_feedback">等待回饋 Awaiting Feedback · รอผล</option>
-          <option value="no_stock">無庫存 No Stock · ไม่มีสต็อก</option>
-          <option value="closed">已結案 Closed · ปิดแล้ว</option>
+          <option value="" data-i18n="lbl_all_statuses">全部狀態</option>
+          <option value="in_stock" data-i18n="smp_in_stock">庫存中</option>
+          <option value="waiting_arrival" data-i18n="smp_waiting_arrival">等待到貨</option>
+          <option value="waiting_feedback" data-i18n="smp_waiting_feedback">等待回饋</option>
+          <option value="no_stock" data-i18n="smp_no_stock">無庫存</option>
+          <option value="closed">已結案</option>
         </select>
-        <select id="fs-supplier" onchange="renderSamples()"><option value="">All Suppliers · ทุกซัพพลายเออร์</option></select>
-        <select id="fs-customer" onchange="renderSamples()"><option value="">All Customers · ทุกลูกค้า</option></select>
+        <select id="fs-supplier" onchange="renderSamples()"><option value="" data-i18n="lbl_all_suppliers">全部供應商</option></select>
+        <select id="fs-customer" onchange="renderSamples()"><option value="" data-i18n="lbl_all_customers">全部客戶</option></select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">Legend · สี</span>
-        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">樣品逾期 Sample Overdue (&gt;7d in transit / &gt;14d no feedback)</span>
+        <span class="ls-lbl" data-i18n="legend_lbl">顏色說明</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444" data-i18n="legend_sample_overdue">樣品逾期（出貨中 >7天未到 / 已出貨 >14天未回饋）</span>
       </div>
       <div id="sample-list"></div>
     </div>
@@ -411,7 +416,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-dashboard" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="dashboard-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-ghost btn-sm" onclick="renderDashboard()">↻ Refresh · รีเฟรช</button>
+        <button class="btn btn-ghost btn-sm" onclick="renderDashboard()" data-i18n="btn_refresh">↻ 重新整理</button>
       </div>
       <div id="dashboard-panels"></div>
       <div id="dashboard-list"></div>
@@ -421,26 +426,26 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-complaints" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="complaint-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openComplaintModal(null)">+ New Complaint · ร้องเรียนใหม่</button>
+        <button class="btn btn-primary" onclick="openComplaintModal(null)" data-i18n="btn_new_complaint">+ 新增客訴</button>
       </div>
       <div class="filter-bar" id="complaint-filter-bar">
         <select id="fc-source" onchange="renderComplaints()">
-          <option value="">All Sources · ทุกแหล่ง</option>
-          <option value="unloading">下貨櫃發現 Found at Unloading · พบขณะขนถ่าย</option>
-          <option value="customer">客戶回報 Customer Report · ลูกค้าแจ้ง</option>
+          <option value="" data-i18n="lbl_all_sources">全部來源</option>
+          <option value="unloading" data-i18n="cmp_unloading">下貨櫃發現</option>
+          <option value="customer" data-i18n="cmp_customer">客戶回報</option>
         </select>
         <select id="fc-status" onchange="renderComplaints()">
-          <option value="">All Statuses · ทุกสถานะ</option>
-          <option value="open">處理中 In Progress · กำลังดำเนินการ</option>
-          <option value="pending_credit">等待折讓單 Pending Credit Note · รอใบลดหนี้</option>
-          <option value="resolved">已結案 Resolved · แก้ไขแล้ว</option>
+          <option value="" data-i18n="lbl_all_statuses">全部狀態</option>
+          <option value="open" data-i18n="cmp_open">處理中</option>
+          <option value="pending_credit" data-i18n="cmp_pending_credit">等待折讓單</option>
+          <option value="resolved" data-i18n="cmp_resolved">已結案</option>
         </select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">Status Colors · สี</span>
-        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">In Progress · ดำเนินการ</span>
-        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">Pending Credit · รอใบลดหนี้</span>
-        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">Resolved · แก้ไขแล้ว</span>
+        <span class="ls-lbl" data-i18n="legend_status_lbl">狀態顏色</span>
+        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D" data-i18n="cmp_open">處理中</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B" data-i18n="cmp_pending_credit">等待折讓單</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11" data-i18n="cmp_resolved">已結案</span>
       </div>
       <div id="complaint-list"></div>
     </div>
@@ -450,27 +455,27 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="order-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('orders')">☰ Filter · กรอง</button>
-          <button class="btn btn-primary" onclick="openOrderModal(null)">+ New Order · คำสั่งซื้อใหม่</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('orders')" data-i18n="btn_filter">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="openOrderModal(null)" data-i18n="btn_new_order">+ 新增訂單</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="order-filter-bar">
         <select id="fo-status" onchange="renderOrders()">
-          <option value="">All Statuses · ทุกสถานะ</option>
-          <option value="confirmed">已確認 Confirmed · ยืนยันแล้ว</option>
-          <option value="processing">處理中 Processing · กำลังดำเนินการ</option>
-          <option value="ready">備貨完成 Ready · พร้อมส่ง</option>
-          <option value="shipped">已出貨 Shipped · จัดส่งแล้ว</option>
-          <option value="delivered">已到客戶 Delivered · ส่งถึงแล้ว</option>
-          <option value="completed">已完成 Completed · เสร็จสิ้น</option>
-          <option value="cancelled">已取消 Cancelled · ยกเลิก</option>
+          <option value="" data-i18n="lbl_all_statuses">全部狀態</option>
+          <option value="confirmed" data-i18n="ord_confirmed">已確認</option>
+          <option value="processing" data-i18n="ord_processing">處理中</option>
+          <option value="ready" data-i18n="ord_ready">備貨完成</option>
+          <option value="shipped" data-i18n="ord_shipped">已出貨</option>
+          <option value="delivered" data-i18n="ord_delivered">已到客戶</option>
+          <option value="completed" data-i18n="ord_completed">已完成</option>
+          <option value="cancelled" data-i18n="ord_cancelled">已取消</option>
         </select>
-        <select id="fo-customer" onchange="renderOrders()"><option value="">All Customers · ทุกลูกค้า</option></select>
-        <select id="fo-supplier" onchange="renderOrders()"><option value="">All Suppliers · ทุกซัพพลายเออร์</option></select>
+        <select id="fo-customer" onchange="renderOrders()"><option value="" data-i18n="lbl_all_customers">全部客戶</option></select>
+        <select id="fo-supplier" onchange="renderOrders()"><option value="" data-i18n="lbl_all_suppliers">全部供應商</option></select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">Legend · สี</span>
-        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">需要行動 Action Required (overdue / ≤1d to deadline)</span>
+        <span class="ls-lbl" data-i18n="legend_lbl">顏色說明</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444" data-i18n="legend_action_req">需要行動（逾期 / 交期剩 ≤1天）</span>
       </div>
       <div id="order-list"></div>
     </div>
@@ -480,35 +485,35 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="shipment-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('shipments')">☰ Filter · กรอง</button>
-          <button class="btn btn-primary" onclick="openShipmentModal(null)">+ New Shipment · การจัดส่งใหม่</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('shipments')" data-i18n="btn_filter">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="openShipmentModal(null)" data-i18n="btn_new_shipment">+ 新增船運批次</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="shipment-filter-bar">
         <select id="fsh-mode" onchange="renderShipments()">
-          <option value="">All Modes · ทุกวิธี</option>
-          <option value="sea">海運 Sea · ทางทะเล</option>
-          <option value="air">空運 Air · ทางอากาศ</option>
-          <option value="land">陸運 Land · ทางบก</option>
-          <option value="express">快遞 Express · ด่วน</option>
+          <option value="" data-i18n="lbl_all_modes">全部方式</option>
+          <option value="sea" data-i18n="sh_sea">海運</option>
+          <option value="air" data-i18n="sh_air">空運</option>
+          <option value="land" data-i18n="sh_land">陸運</option>
+          <option value="express" data-i18n="sh_express">快遞</option>
         </select>
         <select id="fsh-status" onchange="renderShipments()">
-          <option value="">All Statuses · ทุกสถานะ</option>
-          <option value="planned">已規劃 Planned · วางแผนแล้ว</option>
-          <option value="booked">已訂艙 Booked · จองแล้ว</option>
-          <option value="in_transit">運送中 In Transit · กำลังขนส่ง</option>
-          <option value="customs_clearance">報關中 Customs · ผ่านศุลกากร</option>
-          <option value="completed">已完成 Completed · เสร็จสิ้น</option>
-          <option value="cancelled">已取消 Cancelled · ยกเลิก</option>
+          <option value="" data-i18n="lbl_all_statuses">全部狀態</option>
+          <option value="planned" data-i18n="sh_planned">已規劃</option>
+          <option value="booked" data-i18n="sh_booked">已訂艙</option>
+          <option value="in_transit" data-i18n="sh_in_transit">運送中</option>
+          <option value="customs_clearance" data-i18n="sh_customs">報關中</option>
+          <option value="completed" data-i18n="sh_completed">已完成</option>
+          <option value="cancelled" data-i18n="sh_cancelled">已取消</option>
         </select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">Status Colors · สี</span>
-        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">Planned · วางแผน</span>
-        <span class="ls-item" style="background:#E6F1FB;color:#185FA5">Booked · จอง</span>
-        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">In Transit · ขนส่ง</span>
-        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56">Customs · ศุลกากร</span>
-        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">Completed · เสร็จ</span>
+        <span class="ls-lbl" data-i18n="legend_status_lbl">狀態顏色</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B" data-i18n="sh_planned">已規劃</span>
+        <span class="ls-item" style="background:#E6F1FB;color:#185FA5" data-i18n="sh_booked">已訂艙</span>
+        <span class="ls-item" style="background:#EEEDFE;color:#534AB7" data-i18n="sh_in_transit">運送中</span>
+        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56" data-i18n="sh_customs">報關中</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11" data-i18n="sh_completed">已完成</span>
       </div>
       <div id="shipment-list"></div>
     </div>
@@ -517,29 +522,29 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-customers" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div id="customer-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openCreateCustomerModal()">+ New Customer · ลูกค้าใหม่</button>
+        <button class="btn btn-primary" onclick="openCreateCustomerModal()" data-i18n="btn_new_customer">+ 新增客戶</button>
       </div>
       <div id="customer-review-alert" style="display:none" class="alert-warn"></div>
       <div id="new-customer-form" class="card" style="display:none;border-color:#185FA5;background:#f0f7ff">
-        <div class="section-title" style="color:#0C447C;margin-bottom:12px">New Customer · ลูกค้าใหม่</div>
+        <div class="section-title" style="color:#0C447C;margin-bottom:12px" data-i18n="nc_title">新增客戶</div>
         <div class="grid-2" style="margin-bottom:10px">
-          <div><label>Contact Name · ชื่อ <span class="req">*</span></label><input id="nc-name" placeholder="e.g. David Chen" /></div>
-          <div><label>Company · บริษัท <span class="req">*</span></label><input id="nc-company" placeholder="e.g. ABC Packaging Co." /></div>
+          <div><label data-i18n="lbl_contact_name">聯絡人姓名</label> <span class="req">*</span><input id="nc-name" placeholder="e.g. David Chen" /></div>
+          <div><label data-i18n="lbl_company_name">公司名稱</label> <span class="req">*</span><input id="nc-company" placeholder="e.g. ABC Packaging Co." /></div>
           <div><label>Email</label><input id="nc-email" placeholder="david@abc.com" /></div>
-          <div><label>Phone · โทร</label><input id="nc-phone" placeholder="+66 81 234 5678" /></div>
-          <div><label>Country · ประเทศ</label>
+          <div><label data-i18n="lbl_phone">電話</label><input id="nc-phone" placeholder="+66 81 234 5678" /></div>
+          <div><label data-i18n="lbl_country">國家</label>
             <select id="nc-country">
               <option value="TH">Thailand TH</option><option value="TW">Taiwan TW</option>
               <option value="CN">China CN</option><option value="SG">Singapore SG</option>
-              <option value="MY">Malaysia MY</option><option value="OTHER">Other · อื่นๆ</option>
+              <option value="MY">Malaysia MY</option><option value="OTHER">Other</option>
             </select>
           </div>
-          <div><label>Industry · อุตสาหกรรม</label><input id="nc-industry" placeholder="e.g. Packaging, Labels" /></div>
+          <div><label data-i18n="lbl_industry">行業</label><input id="nc-industry" placeholder="e.g. Packaging, Labels" /></div>
         </div>
-        <div style="margin-bottom:10px"><label>Notes · หมายเหตุ</label><textarea id="nc-notes" placeholder="Special requirements, preferences..."></textarea></div>
+        <div style="margin-bottom:10px"><label data-i18n="lbl_notes">備註</label><textarea id="nc-notes" placeholder="Special requirements, preferences..."></textarea></div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-blue" onclick="createCustomer()">Add · เพิ่ม</button>
-          <button class="btn btn-ghost" onclick="hideNewCustomerForm()">Cancel · ยกเลิก</button>
+          <button class="btn btn-blue" onclick="createCustomer()" data-i18n="btn_add">新增</button>
+          <button class="btn btn-ghost" onclick="hideNewCustomerForm()" data-i18n="btn_cancel">取消</button>
         </div>
       </div>
       <div id="customer-list"></div>
@@ -549,25 +554,25 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-suppliers_mgmt" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div id="supplier-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openCreateSupplierModal()">+ New Supplier · ซัพพลายเออร์ใหม่</button>
+        <button class="btn btn-primary" onclick="openCreateSupplierModal()" data-i18n="btn_new_supplier">+ 新增供應商</button>
       </div>
       <div id="new-supplier-form" class="card" style="display:none;border-color:#0F6E56;background:#f8fffc">
-        <div class="section-title" style="color:#085041;margin-bottom:12px">New Supplier Contact · ผู้ติดต่อซัพพลายเออร์ใหม่</div>
+        <div class="section-title" style="color:#085041;margin-bottom:12px" data-i18n="ns_title">新增供應商聯絡人</div>
         <div class="grid-2" style="margin-bottom:10px">
-          <div><label>Name · ชื่อ <span class="req">*</span></label><input id="ns-name" placeholder="e.g. Wang Manager" /></div>
-          <div><label>Company · บริษัท <span class="req">*</span></label><input id="ns-company" placeholder="e.g. Yufeng Paper" /></div>
-          <div><label>Country · ประเทศ <span class="req">*</span></label><select id="ns-country"><option value="TH">Thailand TH</option><option value="TW">Taiwan TW</option><option value="CN">China CN</option><option value="SG">Singapore SG</option><option value="MY">Malaysia MY</option><option value="OTHER">Other · อื่นๆ</option></select></div>
-          <div><label>Role · ตำแหน่ง</label><input id="ns-role" placeholder="e.g. Sales Manager" /></div>
+          <div><label data-i18n="lbl_name">姓名</label> <span class="req">*</span><input id="ns-name" placeholder="e.g. Wang Manager" /></div>
+          <div><label data-i18n="lbl_company_name">公司名稱</label> <span class="req">*</span><input id="ns-company" placeholder="e.g. Yufeng Paper" /></div>
+          <div><label data-i18n="lbl_country">國家</label> <span class="req">*</span><select id="ns-country"><option value="TH">Thailand TH</option><option value="TW">Taiwan TW</option><option value="CN">China CN</option><option value="SG">Singapore SG</option><option value="MY">Malaysia MY</option><option value="OTHER">Other</option></select></div>
+          <div><label data-i18n="lbl_role">職務</label><input id="ns-role" placeholder="e.g. Sales Manager" /></div>
           <div><label>Email <span class="req">*</span></label><input id="ns-email" placeholder="wang@yufeng.com" /></div>
-          <div><label>Phone · โทร</label><input id="ns-phone" placeholder="+886 2 1234 5678" /></div>
+          <div><label data-i18n="lbl_phone">電話</label><input id="ns-phone" placeholder="+886 2 1234 5678" /></div>
           <div><label>LINE ID</label><input id="ns-line" placeholder="wang_yufeng" /></div>
           <div><label>WhatsApp</label><input id="ns-whatsapp" placeholder="+886912345678" /></div>
-          <div><label>Specialty Products · สินค้าเชี่ยวชาญ</label><input id="ns-specialty" placeholder="e.g. Silicone Release Paper" /></div>
-          <div><label>Email Salutation · คำทักทาย</label><input id="ns-salutation" placeholder="e.g. David, Mr. Wang" /></div>
+          <div><label data-i18n="lbl_specialty">專長產品</label><input id="ns-specialty" placeholder="e.g. Silicone Release Paper" /></div>
+          <div><label data-i18n="lbl_salutation">郵件稱謂</label><input id="ns-salutation" placeholder="e.g. David, Mr. Wang" /></div>
         </div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="createSupplier()">Add · เพิ่ม</button>
-          <button class="btn btn-ghost" onclick="hideNewSupplierForm()">Cancel · ยกเลิก</button>
+          <button class="btn btn-primary" onclick="createSupplier()" data-i18n="btn_add">新增</button>
+          <button class="btn btn-ghost" onclick="hideNewSupplierForm()" data-i18n="btn_cancel">取消</button>
         </div>
       </div>
       <div id="supplier-mgmt-list"></div>
@@ -578,31 +583,31 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="product-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('products')">☰ Filter · กรอง</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('products')" data-i18n="btn_filter">☰ 篩選</button>
           <div style="display:flex;border:1px solid #e5e5e0;border-radius:6px;overflow:hidden">
             <button id="pvmode-grid" onclick="setProductViewMode('grid')" title="Grid view" style="padding:5px 9px;border:none;background:#0F6E56;color:#fff;cursor:pointer;font-size:14px">⊞</button>
             <button id="pvmode-list" onclick="setProductViewMode('list')" title="List view" style="padding:5px 9px;border:none;background:transparent;color:#666;cursor:pointer;font-size:14px">☰</button>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="openInventoryModal()">📦 Inventory · สินค้าคงคลัง</button>
-          <button class="btn btn-primary" onclick="openProductModal()">+ New Product · สินค้าใหม่</button>
+          <button class="btn btn-ghost btn-sm" onclick="openInventoryModal()" data-i18n="btn_inventory">📦 庫存管理</button>
+          <button class="btn btn-primary" onclick="openProductModal()" data-i18n="btn_new_product">+ 新增產品</button>
         </div>
       </div>
       <div id="product-overdue-alert" style="display:none"></div>
       <div class="filter-bar mobile-drawer-source" id="product-filter-bar">
-        <input id="fp-search" type="text" placeholder="Search name, SKU · ค้นหา..." oninput="renderProducts()" style="max-width:200px" />
-        <select id="fp-supplier" onchange="renderProducts()"><option value="">All Suppliers · ทุกซัพพลายเออร์</option></select>
+        <input id="fp-search" type="text" placeholder="搜尋名稱、SKU..." oninput="renderProducts()" style="max-width:200px" />
+        <select id="fp-supplier" onchange="renderProducts()"><option value="" data-i18n="lbl_all_suppliers">全部供應商</option></select>
         <select id="fp-status" onchange="renderProducts()">
-          <option value="">All Statuses · ทุกสถานะ</option>
-          <option value="ok">正常 OK · ปกติ</option>
-          <option value="warn">即將到期 Expiring Soon · ใกล้หมดอายุ</option>
-          <option value="overdue">需更新 Needs Update · ต้องอัพเดต</option>
-          <option value="inactive">Inactive · ไม่ใช้งาน</option>
+          <option value="" data-i18n="lbl_all_statuses">全部狀態</option>
+          <option value="ok" data-i18n="prd_ok">正常</option>
+          <option value="warn" data-i18n="prd_warn">即將到期</option>
+          <option value="overdue" data-i18n="prd_overdue">需更新</option>
+          <option value="inactive">Inactive</option>
         </select>
-        <button class="btn btn-ghost btn-sm" onclick="clearProductFilters()">Clear · ล้าง</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearProductFilters()" data-i18n="btn_clear">清除</button>
       </div>
       <div id="product-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
       <div class="legend-strip">
-        <span class="ls-lbl">Category Colors · สี</span>
+        <span class="ls-lbl" data-i18n="legend_lbl">顏色說明</span>
         <span class="ls-item" style="background:#F5ECD7;color:#7A4F2A">Brown</span>
         <span class="ls-item" style="background:#FFFBDA;color:#8A7000">Yellow</span>
         <span class="ls-item" style="background:#F5F5F0;color:#666;border:1px solid #e5e5e0">White</span>
@@ -615,32 +620,32 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <!-- 使用者管理 -->
     <div id="tab-users_mgmt" style="display:none">
       <div style="display:flex;gap:0;border-bottom:1px solid #e5e5e0;margin-bottom:14px">
-        <button id="users-subtab-users" onclick="switchUsersSubtab('users')" style="padding:8px 16px;border:none;border-bottom:2px solid #0F6E56;background:none;cursor:pointer;font-size:13px;font-weight:600;color:#0F6E56">Users · ผู้ใช้</button>
-        <button id="users-subtab-logs" onclick="switchUsersSubtab('logs')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555">Activity Log · บันทึกการใช้งาน</button>
-        <button id="users-subtab-groups" onclick="switchUsersSubtab('groups')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555">Groups · กลุ่ม</button>
+        <button id="users-subtab-users" onclick="switchUsersSubtab('users')" style="padding:8px 16px;border:none;border-bottom:2px solid #0F6E56;background:none;cursor:pointer;font-size:13px;font-weight:600;color:#0F6E56" data-i18n="users_tab_users">使用者列表</button>
+        <button id="users-subtab-logs" onclick="switchUsersSubtab('logs')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555" data-i18n="users_tab_logs">操作記錄</button>
+        <button id="users-subtab-groups" onclick="switchUsersSubtab('groups')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555" data-i18n="users_tab_groups">群組管理</button>
       </div>
       <div id="users-pane-users">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <div id="user-summary" style="font-size:12px;color:#888"></div>
-          <button class="btn btn-primary" onclick="showNewUserModal()">+ New User · ผู้ใช้ใหม่</button>
+          <button class="btn btn-primary" onclick="showNewUserModal()" data-i18n="btn_new_user">+ 新增使用者</button>
         </div>
         <div id="user-list"></div>
       </div>
       <div id="users-pane-logs" style="display:none">
         <div class="filter-bar" style="margin-bottom:12px">
-          <select id="al-user" onchange="renderActivityLogs()"><option value="">All Users · ทุกผู้ใช้</option></select>
+          <select id="al-user" onchange="renderActivityLogs()"><option value="" data-i18n="lbl_all_users">全部使用者</option></select>
           <select id="al-module" onchange="renderActivityLogs()">
-            <option value="">All Modules · ทุกโมดูล</option>
-            <option value="inquiry">詢價 Inquiry</option>
-            <option value="quote">報價 Quote</option>
-            <option value="order">訂單 Order</option>
-            <option value="purchase">採購 Purchase</option>
-            <option value="product">產品 Product</option>
-            <option value="customer">客戶 Customer</option>
-            <option value="supplier">供應商 Supplier</option>
-            <option value="sample">樣品 Sample</option>
-            <option value="user">使用者 User</option>
-            <option value="auth">登入 Auth</option>
+            <option value="" data-i18n="lbl_all_modules">全部模組</option>
+            <option value="inquiry" data-i18n="mod_inquiry">詢價</option>
+            <option value="quote" data-i18n="mod_quote">報價</option>
+            <option value="order" data-i18n="mod_order">訂單</option>
+            <option value="purchase" data-i18n="mod_purchase">採購</option>
+            <option value="product" data-i18n="mod_product">產品</option>
+            <option value="customer" data-i18n="mod_customer">客戶</option>
+            <option value="supplier" data-i18n="mod_supplier">供應商</option>
+            <option value="sample" data-i18n="mod_sample">樣品</option>
+            <option value="user" data-i18n="mod_user">使用者</option>
+            <option value="auth" data-i18n="mod_auth">登入</option>
           </select>
           <input id="al-date-from" type="date" onchange="renderActivityLogs()" style="max-width:140px" aria-label="From date" />
           <input id="al-date-to" type="date" onchange="renderActivityLogs()" style="max-width:140px" aria-label="To date" />
@@ -650,7 +655,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div id="users-pane-groups" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <div id="group-summary" style="font-size:12px;color:#888"></div>
-          <button class="btn btn-primary" onclick="openGroupModal(null)">+ New Group · กลุ่มใหม่</button>
+          <button class="btn btn-primary" onclick="openGroupModal(null)" data-i18n="btn_new_group">+ 新增群組</button>
         </div>
         <div id="group-list"></div>
       </div>
@@ -659,7 +664,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <!-- 系統設定 -->
     <div id="tab-settings" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div id="settings-summary" style="font-size:12px;color:#888">Admin only · ผู้ดูแลระบบเท่านั้น</div>
+        <div id="settings-summary" style="font-size:12px;color:#888" data-i18n="settings_admin">僅管理者可調整全域規則</div>
       </div>
       <div id="settings-panel"></div>
     </div>
@@ -669,43 +674,43 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="purchase-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('purchases')">☰ Filter · กรอง</button>
-          <button class="btn btn-primary" onclick="startPurchaseShopping()"><i data-lucide="shopping-cart" style="width:14px;height:14px;margin-right:5px;vertical-align:-2px"></i>Start Purchasing · เริ่มสั่งซื้อ</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('purchases')" data-i18n="btn_filter">☰ 篩選</button>
+          <button class="btn btn-primary" onclick="startPurchaseShopping()"><i data-lucide="shopping-cart" style="width:14px;height:14px;margin-right:5px;vertical-align:-2px"></i><span data-i18n="btn_start_purchase">開始採購</span></button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="purchase-filter-bar">
         <select id="pf-status" onchange="renderPurchaseOrders()">
-          <option value="">All Statuses · ทุกสถานะ</option>
-          <option value="draft">草稿 Draft · ร่าง</option>
-          <option value="pending_approval">待審批 Pending Approval · รออนุมัติ</option>
-          <option value="approved">已審批 Approved · อนุมัติแล้ว</option>
-          <option value="sent">已發給供應商 Sent · ส่งแล้ว</option>
-          <option value="in_production">生產中 In Production · กำลังผลิต</option>
-          <option value="shipped">已出貨 Shipped · จัดส่งแล้ว</option>
-          <option value="received">已到貨 Received · ได้รับแล้ว</option>
-          <option value="completed">已完成 Completed · เสร็จสิ้น</option>
-          <option value="rejected">已拒絕 Rejected · ปฏิเสธ</option>
-          <option value="cancelled">已取消 Cancelled · ยกเลิก</option>
+          <option value="" data-i18n="lbl_all_statuses">全部狀態</option>
+          <option value="draft" data-i18n="po_draft">草稿</option>
+          <option value="pending_approval" data-i18n="po_pending_approval">待審批</option>
+          <option value="approved" data-i18n="po_approved">已審批</option>
+          <option value="sent" data-i18n="po_sent">已發給供應商</option>
+          <option value="in_production" data-i18n="po_in_production">生產中</option>
+          <option value="shipped" data-i18n="po_shipped">已出貨</option>
+          <option value="received" data-i18n="po_received">已到貨</option>
+          <option value="completed" data-i18n="po_completed">已完成</option>
+          <option value="rejected" data-i18n="po_rejected">已拒絕</option>
+          <option value="cancelled" data-i18n="po_cancelled">已取消</option>
         </select>
         <select id="pf-supplier" onchange="renderPurchaseOrders()">
-          <option value="">All Suppliers · ทุกซัพพลายเออร์</option>
+          <option value="" data-i18n="lbl_all_suppliers">全部供應商</option>
         </select>
         <select id="pf-sort" onchange="renderPurchaseOrders()">
-          <option value="accounting_desc" selected>Acct No. (Desc) · เลขบัญชี ↓</option>
-          <option value="accounting_asc">Acct No. (Asc) · เลขบัญชี ↑</option>
-          <option value="created_desc">Created (Newest) · สร้างล่าสุด</option>
+          <option value="accounting_desc" selected data-i18n="po_sort_acct_desc">會計編號（降序）</option>
+          <option value="accounting_asc" data-i18n="po_sort_acct_asc">會計編號（升序）</option>
+          <option value="created_desc" data-i18n="po_sort_created_desc">建立日期（新→舊）</option>
         </select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">Legend · สี</span>
-        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">未歸入船運 No Shipment Assigned</span>
-        <span class="ls-lbl" style="margin-left:6px">Status Colors · สถานะ</span>
-        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">Draft / In Production</span>
-        <span class="ls-item" style="background:#E6F1FB;color:#185FA5">Pending / Shipped</span>
-        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">Approved · อนุมัติ</span>
-        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56">Sent to Supplier · ส่งแล้ว</span>
-        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">Received · ได้รับ</span>
-        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">Rejected · ปฏิเสธ</span>
+        <span class="ls-lbl" data-i18n="legend_lbl">顏色說明</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444" data-i18n="legend_no_shipment">未歸入任何船運批次</span>
+        <span class="ls-lbl" style="margin-left:6px" data-i18n="legend_status_lbl">狀態顏色</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B"><span data-i18n="po_draft">草稿</span> / <span data-i18n="po_in_production">生產中</span></span>
+        <span class="ls-item" style="background:#E6F1FB;color:#185FA5"><span data-i18n="po_pending_approval">待審批</span> / <span data-i18n="po_shipped">已出貨</span></span>
+        <span class="ls-item" style="background:#EEEDFE;color:#534AB7" data-i18n="po_approved">已審批</span>
+        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56" data-i18n="po_sent">已發給供應商</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11" data-i18n="po_received">已到貨</span>
+        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D" data-i18n="po_rejected">已拒絕</span>
       </div>
       <div id="purchase-list"></div>
     </div>
@@ -721,8 +726,8 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <!-- order import accordion -->
           <div id="pshop-order-section" style="border:1px solid #e5e5e0;border-radius:4px;margin-bottom:14px;overflow:hidden">
             <div onclick="togglePshopOrderSection()" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;background:#f9f9f7;user-select:none">
-              <span style="font-size:13px;font-weight:500">Import from Order · นำเข้าจากคำสั่งซื้อ</span>
-              <span id="pshop-order-toggle-icon" style="font-size:11px;color:#888">Expand · ขยาย ▾</span>
+              <span style="font-size:13px;font-weight:500" data-i18n="pshop_import_order">從訂單帶入品項</span>
+              <span id="pshop-order-toggle-icon" style="font-size:11px;color:#888" data-i18n="pshop_expand">展開 ▾</span>
             </div>
             <div id="pshop-order-body" style="display:none;padding:12px 14px;border-top:1px solid #e5e5e0">
               <div id="pshop-order-list"></div>
@@ -733,17 +738,17 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         </div>
         <!-- desktop cart -->
         <div id="pshop-desktop-cart" style="width:280px;flex-shrink:0;border-left:1px solid #e5e5e0;min-height:calc(100vh - 120px);padding:16px;background:#fff;position:sticky;top:57px;max-height:calc(100vh - 57px);overflow-y:auto">
-          <div style="font-size:13px;font-weight:600;margin-bottom:10px">Cart · ตะกร้า</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px" data-i18n="pshop_cart">採購車</div>
           <div id="pshop-cart-items"></div>
           <div id="pshop-cart-total" style="border-top:1px solid #e5e5e0;padding-top:10px;margin-top:8px;font-size:13px;font-weight:600;text-align:right"></div>
-          <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="openPshopCheckout()" id="pshop-checkout-btn">Checkout · ชำระเงิน</button>
+          <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="openPshopCheckout()" id="pshop-checkout-btn" data-i18n="pshop_checkout_btn">前往結算</button>
         </div>
       </div>
       <!-- mobile cart overlay -->
       <div id="pshop-mobile-cart-overlay" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.5)" onclick="closeMobileCart()">
         <div onclick="event.stopPropagation()" style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:6px 6px 0 0;max-height:80vh;display:flex;flex-direction:column">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 10px;border-bottom:1px solid #e5e5e0;flex-shrink:0">
-            <div style="font-size:14px;font-weight:600">Cart · ตะกร้า</div>
+            <div style="font-size:14px;font-weight:600" data-i18n="pshop_cart">採購車</div>
             <button class="btn btn-ghost btn-sm" onclick="closeMobileCart()">✕</button>
           </div>
           <div style="flex:1;overflow-y:auto;padding:12px 16px">
@@ -751,7 +756,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
             <div id="pshop-mobile-cart-total" style="border-top:1px solid #e5e5e0;padding-top:10px;margin-top:8px;font-size:13px;font-weight:600;text-align:right"></div>
           </div>
           <div style="padding:12px 16px;border-top:1px solid #e5e5e0;flex-shrink:0">
-            <button class="btn btn-primary" style="width:100%" onclick="closeMobileCart();openPshopCheckout()">Checkout · ชำระเงิน</button>
+            <button class="btn btn-primary" style="width:100%" onclick="closeMobileCart();openPshopCheckout()" data-i18n="pshop_checkout_btn">前往結算</button>
           </div>
         </div>
       </div>
@@ -761,33 +766,33 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div class="modal-overlay" id="modal-pshop-checkout" onclick="closeModalOnBg(event,'modal-pshop-checkout')">
       <div class="modal-box sm">
         <div class="modal-hd">
-          <div style="font-size:14px;font-weight:600">Confirm Purchase Order · ยืนยันใบสั่งซื้อ</div>
+          <div style="font-size:14px;font-weight:600" data-i18n="pshop_confirm_title">確認採購</div>
           <button class="modal-close" onclick="closeModal('modal-pshop-checkout')">✕</button>
         </div>
         <div class="modal-bd">
           <div id="pshop-checkout-summary" style="background:#f9f9f7;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:14px;font-size:12px"></div>
           <div style="display:flex;flex-direction:column;gap:10px">
-            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">Acct No. (optional) · เลขบัญชี</label><input id="pshop-accounting" placeholder="ACC-..." style="width:100%" /></div>
-            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">Est. Delivery · วันส่งมอบ</label><input type="date" id="pshop-delivery" style="width:100%" /></div>
-            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">Currency · สกุลเงิน</label>
+            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px" data-i18n="pshop_acct_no">會計編號（選填）</label><input id="pshop-accounting" placeholder="ACC-..." style="width:100%" /></div>
+            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px" data-i18n="pshop_delivery">預計交貨日</label><input type="date" id="pshop-delivery" style="width:100%" /></div>
+            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px" data-i18n="pshop_currency">幣別</label>
               <select id="pshop-currency" style="width:100%"></select>
             </div>
-            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">Notes · หมายเหตุ</label><textarea id="pshop-notes" rows="3" placeholder="Additional notes..." style="width:100%;resize:vertical"></textarea></div>
+            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px" data-i18n="pshop_notes">備註</label><textarea id="pshop-notes" rows="3" placeholder="Additional notes..." style="width:100%;resize:vertical"></textarea></div>
           </div>
         </div>
         <div class="modal-foot" style="justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-pshop-checkout')">Cancel · ยกเลิก</button>
-          <button class="btn btn-primary btn-sm" onclick="confirmShopOrder()">Confirm PO · สร้างใบสั่งซื้อ</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-pshop-checkout')" data-i18n="pshop_cancel_btn">取消</button>
+          <button class="btn btn-primary btn-sm" onclick="confirmShopOrder()" data-i18n="pshop_confirm_btn">確認建立採購單</button>
         </div>
       </div>
     </div>
 
     <!-- 技術文件庫 -->
     <div id="tab-docs" style="display:none">
-      <div style="margin-bottom:12px"><input id="doc-search" placeholder="Search product, doc type, tag · ค้นหา..." oninput="renderDocs()" /></div>
-      <div class="alert-info">Search and copy links to share with customers · ค้นหาและคัดลอกลิงก์ส่งให้ลูกค้า</div>
+      <div style="margin-bottom:12px"><input id="doc-search" placeholder="搜尋產品、文件類型、標籤..." oninput="renderDocs()" /></div>
+      <div class="alert-info" data-i18n="docs_info">業務助理可直接搜尋並複製連結給客戶</div>
       <div id="doc-list"></div>
-      <button class="btn btn-ghost" style="width:100%;margin-top:8px;border-style:dashed" onclick="showToast('Upload feature coming soon · เร็วๆ นี้')">+ Upload Document · อัพโหลดเอกสาร</button>
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px;border-style:dashed" onclick="showToast('Upload feature coming soon')" data-i18n="docs_upload">+ 上傳新文件</button>
     </div>
 
   </div>
@@ -1075,6 +1080,289 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 </div>
 
 <script>
+// ── i18n ─────────────────────────────────────────────────────────────────────
+const I18N={
+  zh:{
+    nav_sales:'業務',nav_contacts:'通訊錄',nav_products:'產品',nav_settings:'設定',
+    tab_dashboard:'儀表板',tab_inquiry:'詢價管理',tab_quotes:'報價管理',tab_samples:'樣品管理',
+    tab_complaints:'客訴管理',tab_orders:'訂單管理',tab_shipments:'船運管理',
+    tab_customers:'客戶管理',tab_suppliers_mgmt:'供應商管理',tab_products:'產品目錄',
+    tab_docs:'技術文件庫',tab_users_mgmt:'使用者管理',tab_settings:'系統設定',
+    tab_purchases:'採購單管理','tab_purchase-shop':'採購選購',
+    btn_filter:'☰ 篩選',btn_clear:'清除',btn_refresh:'↻ 重新整理',
+    btn_new_inquiry:'+ 新增詢價',btn_new_quote:'+ 新增報價單',btn_new_sample:'+ 新增樣品',
+    btn_new_order:'+ 新增訂單',btn_new_shipment:'+ 新增船運批次',btn_new_customer:'+ 新增客戶',
+    btn_new_supplier:'+ 新增供應商',btn_new_product:'+ 新增產品',btn_new_user:'+ 新增使用者',
+    btn_new_group:'+ 新增群組',btn_new_complaint:'+ 新增客訴',
+    btn_quote_defaults:'⚙ 報價預設值',btn_inventory:'📦 庫存管理',btn_start_purchase:'開始採購',
+    btn_add:'新增',btn_cancel:'取消',
+    lbl_all_statuses:'全部狀態',lbl_all_customers:'全部客戶',lbl_all_suppliers:'全部供應商',
+    lbl_all_modes:'全部方式',lbl_all_sources:'全部來源',lbl_all_modules:'全部模組',
+    lbl_all_users:'全部使用者',lbl_from:'起始日期',lbl_to:'結束日期',
+    legend_lbl:'顏色說明',legend_status_lbl:'狀態顏色',
+    legend_overdue:'追蹤逾期',legend_due_soon:'即將逾期',
+    legend_sample_overdue:'樣品逾期（出貨中 >7天未到 / 已出貨 >14天未回饋）',
+    legend_action_req:'需要行動（逾期 / 交期剩 ≤1天）',legend_no_shipment:'未歸入任何船運批次',
+    inq_pending:'待詢供應商',inq_asked:'已發詢價',inq_received:'供應商已回',inq_sent_quote:'已送報價',
+    q_draft:'草稿',q_sent:'已送客戶',q_sample_pending:'待寄樣',q_sample_review:'樣品確認中',
+    q_accepted:'客戶接受',q_rejected:'客戶拒絕',q_superseded:'已取代（舊版本）',
+    smp_in_stock:'庫存中',smp_waiting_arrival:'等待到貨',smp_waiting_feedback:'等待回饋',smp_no_stock:'無庫存',
+    cmp_unloading:'下貨櫃發現',cmp_customer:'客戶回報',
+    cmp_open:'處理中',cmp_pending_credit:'等待折讓單',cmp_resolved:'已結案',
+    ord_confirmed:'已確認',ord_processing:'處理中',ord_ready:'備貨完成',
+    ord_shipped:'已出貨',ord_delivered:'已到客戶',ord_completed:'已完成',ord_cancelled:'已取消',
+    sh_sea:'海運',sh_air:'空運',sh_land:'陸運',sh_express:'快遞',
+    sh_planned:'已規劃',sh_booked:'已訂艙',sh_in_transit:'運送中',
+    sh_customs:'報關中',sh_completed:'已完成',sh_cancelled:'已取消',
+    po_draft:'草稿',po_pending_approval:'待審批',po_approved:'已審批',
+    po_sent:'已發給供應商',po_in_production:'生產中',po_shipped:'已出貨',
+    po_received:'已到貨',po_completed:'已完成',po_rejected:'已拒絕',po_cancelled:'已取消',
+    po_sort_acct_desc:'會計編號（降序）',po_sort_acct_asc:'會計編號（升序）',
+    po_sort_created_desc:'建立日期（新→舊）',
+    prd_ok:'正常',prd_warn:'即將到期',prd_overdue:'需更新',
+    users_tab_users:'使用者列表',users_tab_logs:'操作記錄',users_tab_groups:'群組管理',
+    mod_inquiry:'詢價',mod_quote:'報價',mod_order:'訂單',mod_purchase:'採購',
+    mod_product:'產品',mod_customer:'客戶',mod_supplier:'供應商',mod_sample:'樣品',
+    mod_user:'使用者',mod_auth:'登入',
+    settings_admin:'僅管理者可調整全域規則',
+    pshop_import_order:'從訂單帶入品項',pshop_expand:'展開 ▾',
+    pshop_cart:'採購車',pshop_checkout_btn:'前往結算',
+    pshop_confirm_title:'確認採購',pshop_acct_no:'會計編號（選填）',
+    pshop_delivery:'預計交貨日',pshop_currency:'幣別',pshop_notes:'備註',
+    pshop_cancel_btn:'取消',pshop_confirm_btn:'確認建立採購單',
+    docs_search:'搜尋產品、文件類型、標籤...',
+    docs_info:'業務助理可直接搜尋並複製連結給客戶',docs_upload:'+ 上傳新文件',
+    not_logged_in:'未登入',
+    nc_title:'新增客戶',lbl_contact_name:'聯絡人姓名',lbl_company_name:'公司名稱',
+    lbl_phone:'電話',lbl_country:'國家',lbl_industry:'行業',lbl_notes:'備註',
+    ns_title:'新增供應商聯絡人',lbl_name:'姓名',lbl_role:'職務',
+    lbl_specialty:'專長產品',lbl_salutation:'郵件稱謂',
+    ord_new_title:'新增訂單',ord_basic_info:'基本資料',ord_ship_section:'船運資訊',
+    ord_items_section:'品項明細',
+    lbl_order_no:'訂單編號',lbl_customer:'客戶',lbl_supplier:'供應商',lbl_currency:'幣別',
+    lbl_order_date:'訂單日期',lbl_est_delivery:'預計交期',lbl_actual_delivery:'實際到貨日',
+    lbl_transport:'運輸方式',lbl_tracking_no:'快遞單號',lbl_customer_po:'客戶訂單號',
+    lbl_requires_coa:'此訂單需要 COA（分析證明書）',
+    ord_no_shipment:'尚未掛入任何船運批次',
+    ord_link_via_po:'請透過相關採購單掛入船運批次。',
+    ord_no_po:'此訂單尚未對應任何採購單，若為安全庫存採購則可不關聯訂單。',
+    ord_no_items:'尚無品項',
+    btn_edit_items:'✎ 編輯品項',btn_done_editing:'✓ 完成',
+    btn_add_item:'+ 新增品項',btn_add_item_submit:'加入品項',btn_from_catalog:'選自產品目錄',
+    lbl_product:'產品名稱',lbl_spec:'規格',lbl_qty:'數量',lbl_unit:'單位',
+    lbl_pricing_unit:'計價單位',lbl_width_mm:'寬幅（mm）',lbl_unit_price:'單價',
+    ord_verbal_warn:'⚠ 口頭承諾訂單需要主管審批後才能建立採購單',
+    ord_verbal_msg:'此為口頭承諾訂單，請審批後才可建立採購單。',
+    btn_approve:'審批通過 ✓',btn_reject_ord:'拒絕 ✗',
+    ord_waiting_approval:'⏳ 等待主管審批',
+    ord_approved_txt:'✓ 已審批通過',ord_approval_rejected_txt:'✗ 審批已拒絕',
+    ord_coa_section:'COA（分析證明書）',btn_upload_coa:'上傳 COA',
+    btn_delete_order:'刪除訂單',btn_save_info:'儲存基本資料',
+    btn_save_items:'儲存品項',btn_create_po:'建立採購單',
+    btn_start_processing:'開始處理 →',btn_ord_ready:'備貨完成 →',
+    btn_mark_shipped:'標記已出貨 →',btn_delivered:'客戶已收到 →',
+    btn_complete:'完成訂單 ✓',btn_cancel_order:'取消訂單',
+    ord_select:'— 選擇 —',
+    lbl_order_type:'訂單來源',ord_type_confirmed:'confirmed — 正式訂單',
+    ord_type_verbal:'verbal — 口頭承諾',
+    lbl_qty_m:'數量（米）',btn_create_order:'建立訂單',
+    lbl_customer_po_placeholder:'客戶系統的訂單編號（選填）',
+    lbl_product_placeholder:'可手動輸入或從目錄帶入',
+    lbl_width_placeholder:'例如 1070（m²計價時必填）',
+  },
+  en:{
+    nav_sales:'Sales',nav_contacts:'Contacts',nav_products:'Products',nav_settings:'Settings',
+    tab_dashboard:'Dashboard',tab_inquiry:'Inquiries',tab_quotes:'Quotations',tab_samples:'Samples',
+    tab_complaints:'Complaints',tab_orders:'Orders',tab_shipments:'Shipments',
+    tab_customers:'Customers',tab_suppliers_mgmt:'Suppliers',tab_products:'Products',
+    tab_docs:'Documents',tab_users_mgmt:'Users',tab_settings:'Settings',
+    tab_purchases:'Purchase Orders','tab_purchase-shop':'Purchase Shop',
+    btn_filter:'☰ Filter',btn_clear:'Clear',btn_refresh:'↻ Refresh',
+    btn_new_inquiry:'+ New Inquiry',btn_new_quote:'+ New Quotation',btn_new_sample:'+ New Sample',
+    btn_new_order:'+ New Order',btn_new_shipment:'+ New Shipment',btn_new_customer:'+ New Customer',
+    btn_new_supplier:'+ New Supplier',btn_new_product:'+ New Product',btn_new_user:'+ New User',
+    btn_new_group:'+ New Group',btn_new_complaint:'+ New Complaint',
+    btn_quote_defaults:'⚙ Quote Defaults',btn_inventory:'📦 Inventory',btn_start_purchase:'Start Purchasing',
+    btn_add:'Add',btn_cancel:'Cancel',
+    lbl_all_statuses:'All Statuses',lbl_all_customers:'All Customers',lbl_all_suppliers:'All Suppliers',
+    lbl_all_modes:'All Modes',lbl_all_sources:'All Sources',lbl_all_modules:'All Modules',
+    lbl_all_users:'All Users',lbl_from:'From',lbl_to:'To',
+    legend_lbl:'Legend',legend_status_lbl:'Status Colors',
+    legend_overdue:'Follow-up Overdue',legend_due_soon:'Due Soon',
+    legend_sample_overdue:'Sample Overdue (>7d in transit / >14d no feedback)',
+    legend_action_req:'Action Required (overdue / ≤1d to deadline)',legend_no_shipment:'No Shipment Assigned',
+    inq_pending:'Pending (Supplier)',inq_asked:'Sent to Supplier',inq_received:'Supplier Replied',inq_sent_quote:'Quoted',
+    q_draft:'Draft',q_sent:'Sent to Customer',q_sample_pending:'Sample Pending',q_sample_review:'Sample Review',
+    q_accepted:'Accepted',q_rejected:'Rejected',q_superseded:'Superseded',
+    smp_in_stock:'In Stock',smp_waiting_arrival:'Awaiting Arrival',smp_waiting_feedback:'Awaiting Feedback',smp_no_stock:'No Stock',
+    cmp_unloading:'Found at Unloading',cmp_customer:'Customer Report',
+    cmp_open:'In Progress',cmp_pending_credit:'Pending Credit Note',cmp_resolved:'Resolved',
+    ord_confirmed:'Confirmed',ord_processing:'Processing',ord_ready:'Ready',
+    ord_shipped:'Shipped',ord_delivered:'Delivered',ord_completed:'Completed',ord_cancelled:'Cancelled',
+    sh_sea:'Sea',sh_air:'Air',sh_land:'Land',sh_express:'Express',
+    sh_planned:'Planned',sh_booked:'Booked',sh_in_transit:'In Transit',
+    sh_customs:'Customs',sh_completed:'Completed',sh_cancelled:'Cancelled',
+    po_draft:'Draft',po_pending_approval:'Pending Approval',po_approved:'Approved',
+    po_sent:'Sent to Supplier',po_in_production:'In Production',po_shipped:'Shipped',
+    po_received:'Received',po_completed:'Completed',po_rejected:'Rejected',po_cancelled:'Cancelled',
+    po_sort_acct_desc:'Acct No. (Desc)',po_sort_acct_asc:'Acct No. (Asc)',
+    po_sort_created_desc:'Created (Newest)',
+    prd_ok:'OK',prd_warn:'Expiring Soon',prd_overdue:'Needs Update',
+    users_tab_users:'Users',users_tab_logs:'Activity Log',users_tab_groups:'Groups',
+    mod_inquiry:'Inquiry',mod_quote:'Quote',mod_order:'Order',mod_purchase:'Purchase',
+    mod_product:'Product',mod_customer:'Customer',mod_supplier:'Supplier',mod_sample:'Sample',
+    mod_user:'User',mod_auth:'Auth',
+    settings_admin:'Admin only — global rules',
+    pshop_import_order:'Import from Order',pshop_expand:'Expand ▾',
+    pshop_cart:'Cart',pshop_checkout_btn:'Checkout',
+    pshop_confirm_title:'Confirm Purchase Order',pshop_acct_no:'Acct No. (optional)',
+    pshop_delivery:'Est. Delivery Date',pshop_currency:'Currency',pshop_notes:'Notes',
+    pshop_cancel_btn:'Cancel',pshop_confirm_btn:'Confirm PO',
+    docs_search:'Search product, doc type, tag...',
+    docs_info:'Search and copy links to share with customers',docs_upload:'+ Upload Document',
+    not_logged_in:'Not logged in',
+    nc_title:'New Customer',lbl_contact_name:'Contact Name',lbl_company_name:'Company',
+    lbl_phone:'Phone',lbl_country:'Country',lbl_industry:'Industry',lbl_notes:'Notes',
+    ns_title:'New Supplier Contact',lbl_name:'Name',lbl_role:'Role',
+    lbl_specialty:'Specialty Products',lbl_salutation:'Email Salutation',
+    ord_new_title:'New Order',ord_basic_info:'Basic Info',ord_ship_section:'Shipments',
+    ord_items_section:'Items',
+    lbl_order_no:'Order No.',lbl_customer:'Customer',lbl_supplier:'Supplier',lbl_currency:'Currency',
+    lbl_order_date:'Order Date',lbl_est_delivery:'Est. Delivery',lbl_actual_delivery:'Actual Delivery',
+    lbl_transport:'Transport',lbl_tracking_no:'Tracking No.',lbl_customer_po:'Customer PO No.',
+    lbl_requires_coa:'Requires COA (Certificate of Analysis)',
+    ord_no_shipment:'No shipment linked yet',
+    ord_link_via_po:'Link shipments via the related Purchase Order.',
+    ord_no_po:'No PO linked. If this is a stock purchase, no link needed.',
+    ord_no_items:'No items yet',
+    btn_edit_items:'✎ Edit Items',btn_done_editing:'✓ Done',
+    btn_add_item:'+ Add Item',btn_add_item_submit:'Add Item',btn_from_catalog:'From Catalog',
+    lbl_product:'Product',lbl_spec:'Spec',lbl_qty:'Qty',lbl_unit:'Unit',
+    lbl_pricing_unit:'Pricing Unit',lbl_width_mm:'Width (mm)',lbl_unit_price:'Unit Price',
+    ord_verbal_warn:'⚠ Verbal commitment orders require manager approval before creating a PO.',
+    ord_verbal_msg:'Verbal commitment order — requires approval before a PO can be created.',
+    btn_approve:'Approve ✓',btn_reject_ord:'Reject ✗',
+    ord_waiting_approval:'⏳ Pending manager approval',
+    ord_approved_txt:'✓ Approved',ord_approval_rejected_txt:'✗ Approval rejected',
+    ord_coa_section:'COA (Certificate of Analysis)',btn_upload_coa:'Upload COA',
+    btn_delete_order:'Delete Order',btn_save_info:'Save Info',
+    btn_save_items:'Save Items',btn_create_po:'Create PO',
+    btn_start_processing:'Start Processing →',btn_ord_ready:'Ready →',
+    btn_mark_shipped:'Mark Shipped →',btn_delivered:'Delivered →',
+    btn_complete:'Complete ✓',btn_cancel_order:'Cancel Order',
+    ord_select:'— Select —',
+    lbl_order_type:'Order Type',ord_type_confirmed:'Confirmed Order',
+    ord_type_verbal:'Verbal Commitment',
+    lbl_qty_m:'Qty (m)',btn_create_order:'Create Order',
+    lbl_customer_po_placeholder:'Customer ref no. (optional)',
+    lbl_product_placeholder:'Type or pick from catalog',
+    lbl_width_placeholder:'e.g. 1070 (required for m²)',
+  },
+  th:{
+    nav_sales:'ขาย',nav_contacts:'รายชื่อ',nav_products:'สินค้า',nav_settings:'ตั้งค่า',
+    tab_dashboard:'แดชบอร์ด',tab_inquiry:'ใบสอบถามราคา',tab_quotes:'ใบเสนอราคา',tab_samples:'ตัวอย่าง',
+    tab_complaints:'ร้องเรียน',tab_orders:'คำสั่งซื้อ',tab_shipments:'การขนส่ง',
+    tab_customers:'ลูกค้า',tab_suppliers_mgmt:'ซัพพลายเออร์',tab_products:'สินค้า',
+    tab_docs:'เอกสาร',tab_users_mgmt:'ผู้ใช้',tab_settings:'การตั้งค่า',
+    tab_purchases:'ใบสั่งซื้อ','tab_purchase-shop':'ร้านค้า',
+    btn_filter:'☰ กรอง',btn_clear:'ล้าง',btn_refresh:'↻ รีเฟรช',
+    btn_new_inquiry:'+ ใบสอบถามใหม่',btn_new_quote:'+ ใบเสนอราคาใหม่',btn_new_sample:'+ ตัวอย่างใหม่',
+    btn_new_order:'+ คำสั่งซื้อใหม่',btn_new_shipment:'+ การจัดส่งใหม่',btn_new_customer:'+ ลูกค้าใหม่',
+    btn_new_supplier:'+ ซัพพลายเออร์ใหม่',btn_new_product:'+ สินค้าใหม่',btn_new_user:'+ ผู้ใช้ใหม่',
+    btn_new_group:'+ กลุ่มใหม่',btn_new_complaint:'+ ร้องเรียนใหม่',
+    btn_quote_defaults:'⚙ ค่าเริ่มต้น',btn_inventory:'📦 สินค้าคงคลัง',btn_start_purchase:'เริ่มสั่งซื้อ',
+    btn_add:'เพิ่ม',btn_cancel:'ยกเลิก',
+    lbl_all_statuses:'ทุกสถานะ',lbl_all_customers:'ทุกลูกค้า',lbl_all_suppliers:'ทุกซัพพลายเออร์',
+    lbl_all_modes:'ทุกวิธี',lbl_all_sources:'ทุกแหล่ง',lbl_all_modules:'ทุกโมดูล',
+    lbl_all_users:'ทุกผู้ใช้',lbl_from:'ตั้งแต่',lbl_to:'ถึง',
+    legend_lbl:'สีแสดงสถานะ',legend_status_lbl:'สีสถานะ',
+    legend_overdue:'ติดตามล่าช้า',legend_due_soon:'ใกล้ครบกำหนด',
+    legend_sample_overdue:'ตัวอย่างล่าช้า (>7วัน / >14วันไม่มีผล)',
+    legend_action_req:'ต้องดำเนินการ (เกินกำหนด / เหลือ ≤1 วัน)',legend_no_shipment:'ยังไม่มีการขนส่ง',
+    inq_pending:'รอสอบถาม',inq_asked:'ส่งแล้ว',inq_received:'ซัพพลายเออร์ตอบ',inq_sent_quote:'ส่งใบเสนอแล้ว',
+    q_draft:'ร่าง',q_sent:'ส่งลูกค้าแล้ว',q_sample_pending:'รอส่งตัวอย่าง',q_sample_review:'ตรวจสอบตัวอย่าง',
+    q_accepted:'ยอมรับ',q_rejected:'ปฏิเสธ',q_superseded:'แทนที่แล้ว',
+    smp_in_stock:'มีสต็อก',smp_waiting_arrival:'รอสินค้า',smp_waiting_feedback:'รอผล',smp_no_stock:'ไม่มีสต็อก',
+    cmp_unloading:'พบขณะขนถ่าย',cmp_customer:'ลูกค้าแจ้ง',
+    cmp_open:'กำลังดำเนินการ',cmp_pending_credit:'รอใบลดหนี้',cmp_resolved:'แก้ไขแล้ว',
+    ord_confirmed:'ยืนยันแล้ว',ord_processing:'กำลังดำเนินการ',ord_ready:'พร้อมส่ง',
+    ord_shipped:'จัดส่งแล้ว',ord_delivered:'ส่งถึงแล้ว',ord_completed:'เสร็จสิ้น',ord_cancelled:'ยกเลิก',
+    sh_sea:'ทางทะเล',sh_air:'ทางอากาศ',sh_land:'ทางบก',sh_express:'ด่วน',
+    sh_planned:'วางแผนแล้ว',sh_booked:'จองแล้ว',sh_in_transit:'กำลังขนส่ง',
+    sh_customs:'ผ่านศุลกากร',sh_completed:'เสร็จสิ้น',sh_cancelled:'ยกเลิก',
+    po_draft:'ร่าง',po_pending_approval:'รออนุมัติ',po_approved:'อนุมัติแล้ว',
+    po_sent:'ส่งซัพพลายเออร์แล้ว',po_in_production:'กำลังผลิต',po_shipped:'จัดส่งแล้ว',
+    po_received:'ได้รับแล้ว',po_completed:'เสร็จสิ้น',po_rejected:'ปฏิเสธ',po_cancelled:'ยกเลิก',
+    po_sort_acct_desc:'เลขบัญชี (มาก→น้อย)',po_sort_acct_asc:'เลขบัญชี (น้อย→มาก)',
+    po_sort_created_desc:'สร้างล่าสุด',
+    prd_ok:'ปกติ',prd_warn:'ใกล้หมดอายุ',prd_overdue:'ต้องอัพเดต',
+    users_tab_users:'ผู้ใช้',users_tab_logs:'บันทึกการใช้งาน',users_tab_groups:'กลุ่ม',
+    mod_inquiry:'ใบสอบถาม',mod_quote:'ใบเสนอราคา',mod_order:'คำสั่งซื้อ',mod_purchase:'ใบสั่งซื้อ',
+    mod_product:'สินค้า',mod_customer:'ลูกค้า',mod_supplier:'ซัพพลายเออร์',mod_sample:'ตัวอย่าง',
+    mod_user:'ผู้ใช้',mod_auth:'เข้าสู่ระบบ',
+    settings_admin:'ผู้ดูแลระบบเท่านั้น',
+    pshop_import_order:'นำเข้าจากคำสั่งซื้อ',pshop_expand:'ขยาย ▾',
+    pshop_cart:'ตะกร้า',pshop_checkout_btn:'ชำระเงิน',
+    pshop_confirm_title:'ยืนยันใบสั่งซื้อ',pshop_acct_no:'เลขบัญชี (ไม่บังคับ)',
+    pshop_delivery:'วันส่งมอบโดยประมาณ',pshop_currency:'สกุลเงิน',pshop_notes:'หมายเหตุ',
+    pshop_cancel_btn:'ยกเลิก',pshop_confirm_btn:'สร้างใบสั่งซื้อ',
+    docs_search:'ค้นหาสินค้า, ประเภทเอกสาร, แท็ก...',
+    docs_info:'ค้นหาและคัดลอกลิงก์ส่งให้ลูกค้า',docs_upload:'+ อัพโหลดเอกสาร',
+    not_logged_in:'ยังไม่ได้เข้าสู่ระบบ',
+    nc_title:'ลูกค้าใหม่',lbl_contact_name:'ชื่อผู้ติดต่อ',lbl_company_name:'บริษัท',
+    lbl_phone:'โทรศัพท์',lbl_country:'ประเทศ',lbl_industry:'อุตสาหกรรม',lbl_notes:'หมายเหตุ',
+    ns_title:'ผู้ติดต่อซัพพลายเออร์ใหม่',lbl_name:'ชื่อ',lbl_role:'ตำแหน่ง',
+    lbl_specialty:'สินค้าเชี่ยวชาญ',lbl_salutation:'คำทักทายในอีเมล',
+    ord_new_title:'คำสั่งซื้อใหม่',ord_basic_info:'ข้อมูลพื้นฐาน',ord_ship_section:'การขนส่ง',
+    ord_items_section:'รายการสินค้า',
+    lbl_order_no:'เลขที่คำสั่งซื้อ',lbl_customer:'ลูกค้า',lbl_supplier:'ซัพพลายเออร์',lbl_currency:'สกุลเงิน',
+    lbl_order_date:'วันที่สั่งซื้อ',lbl_est_delivery:'วันส่งมอบโดยประมาณ',lbl_actual_delivery:'วันส่งมอบจริง',
+    lbl_transport:'วิธีขนส่ง',lbl_tracking_no:'เลขติดตามพัสดุ',lbl_customer_po:'เลขสั่งซื้อลูกค้า',
+    lbl_requires_coa:'ต้องการใบรับรองการวิเคราะห์ (COA)',
+    ord_no_shipment:'ยังไม่เชื่อมกับการขนส่ง',
+    ord_link_via_po:'เชื่อมการขนส่งผ่านใบสั่งซื้อที่เกี่ยวข้อง',
+    ord_no_po:'ยังไม่มีใบสั่งซื้อ ถ้าเป็นการซื้อสต็อกไม่ต้องเชื่อม',
+    ord_no_items:'ยังไม่มีรายการ',
+    btn_edit_items:'✎ แก้ไขรายการ',btn_done_editing:'✓ เสร็จ',
+    btn_add_item:'+ เพิ่มรายการ',btn_add_item_submit:'เพิ่มรายการ',btn_from_catalog:'เลือกจากแคตตาล็อก',
+    lbl_product:'สินค้า',lbl_spec:'สเปค',lbl_qty:'จำนวน',lbl_unit:'หน่วย',
+    lbl_pricing_unit:'หน่วยราคา',lbl_width_mm:'ความกว้าง (มม.)',lbl_unit_price:'ราคาต่อหน่วย',
+    ord_verbal_warn:'⚠ คำสั่งซื้อปากเปล่าต้องได้รับการอนุมัติก่อนสร้างใบสั่งซื้อ',
+    ord_verbal_msg:'คำสั่งซื้อปากเปล่า — ต้องได้รับการอนุมัติก่อน',
+    btn_approve:'อนุมัติ ✓',btn_reject_ord:'ปฏิเสธ ✗',
+    ord_waiting_approval:'⏳ รออนุมัติจากผู้จัดการ',
+    ord_approved_txt:'✓ อนุมัติแล้ว',ord_approval_rejected_txt:'✗ ปฏิเสธแล้ว',
+    ord_coa_section:'COA (ใบรับรองการวิเคราะห์)',btn_upload_coa:'อัพโหลด COA',
+    btn_delete_order:'ลบคำสั่งซื้อ',btn_save_info:'บันทึกข้อมูล',
+    btn_save_items:'บันทึกรายการ',btn_create_po:'สร้างใบสั่งซื้อ',
+    btn_start_processing:'เริ่มดำเนินการ →',btn_ord_ready:'พร้อมแล้ว →',
+    btn_mark_shipped:'จัดส่งแล้ว →',btn_delivered:'ส่งถึงแล้ว →',
+    btn_complete:'เสร็จสิ้น ✓',btn_cancel_order:'ยกเลิกคำสั่งซื้อ',
+    ord_select:'— เลือก —',
+    lbl_order_type:'ประเภทคำสั่งซื้อ',ord_type_confirmed:'คำสั่งซื้อจริง',
+    ord_type_verbal:'คำพูด (ปากเปล่า)',
+    lbl_qty_m:'จำนวน (ม.)',btn_create_order:'สร้างคำสั่งซื้อ',
+    lbl_customer_po_placeholder:'เลขสั่งซื้อลูกค้า (ไม่บังคับ)',
+    lbl_product_placeholder:'พิมพ์หรือเลือกจากแคตตาล็อก',
+    lbl_width_placeholder:'เช่น 1070 (จำเป็นสำหรับ m²)',
+  }
+}
+let _lang=localStorage.getItem('joychin_lang')||'zh'
+function t(key){return I18N[_lang]?.[key]??I18N.zh[key]??key}
+function setLang(lang){_lang=lang;localStorage.setItem('joychin_lang',lang);applyI18n();if(typeof activeTab!=='undefined')switchTab(activeTab,false)}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n)})
+  const titleEl=document.getElementById('topbar-title')
+  if(titleEl&&typeof activeTab!=='undefined')titleEl.textContent=t('tab_'+activeTab)
+  document.querySelectorAll('.lang-btn').forEach(btn=>{
+    const active=btn.dataset.lang===_lang
+    btn.style.fontWeight=active?'700':'400'
+    btn.style.color=active?'#0F6E56':'#888'
+    btn.style.background=active?'#f0faf5':'transparent'
+  })
+}
+// ── end i18n ──────────────────────────────────────────────────────────────────
+
 function showToast(msg,type='success'){
   const c=document.getElementById('toast-container')
   if(type==='error'){
@@ -1483,6 +1771,7 @@ async function init(){
   if(currentUser&&!isManager()&&hasPermission('manage_users')){
     document.getElementById('nav-users_mgmt').style.display='flex'
   }
+  applyI18n()
   const savedTab=sessionStorage.getItem(SESSION_ACTIVE_TAB_KEY)
   if(savedTab&&TAB_LABELS[savedTab]){
     switchTab(savedTab,false)
@@ -3168,45 +3457,45 @@ function openOrderModal(id){
     const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
     const supOpts=supCos.map(c=>'<option>'+c+'</option>').join('')
     document.getElementById('modal-order-hd').innerHTML=
-      '<div style="font-size:14px;font-weight:600">New Order · คำสั่งซื้อใหม่</div>'+
+      '<div style="font-size:14px;font-weight:600">'+t('ord_new_title')+'</div>'+
       '<button class="modal-close" onclick="closeModal(\'modal-order\')">×</button>'
     document.getElementById('modal-order-bd').innerHTML=
       '<div class="grid-2" style="margin-bottom:10px">'+
-      '<div><label>Order No.</label><input id="or-id" value="'+newId+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
-      '<div><label>Customer · ลูกค้า <span class="req">*</span></label><select id="or-customer"><option value="">— Select —</option>'+custOpts+'</select></div>'+
-      '<div><label>Supplier · ซัพพลายเออร์ <span class="req">*</span></label><select id="or-supplier"><option value="">— Select —</option>'+supOpts+'</select></div>'+
-      '<div><label>Currency · สกุลเงิน</label><select id="or-currency">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
-      '<div><label>Order Date · วันที่</label><input id="or-date" type="date" value="'+today+'" /></div>'+
-      '<div><label>Est. Delivery · กำหนดส่ง</label><input id="or-exp-del" type="date" /></div>'+
-      '<div><label>Transport · ขนส่ง</label><select id="or-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS)+'</select></div>'+
-      '<div><label>Tracking No.</label><input id="or-tracking" /></div>'+
-      '<div><label>Order Type · ประเภท</label><select id="or-source" onchange="onOrderSourceChange()"><option value="confirmed">Confirmed Order</option><option value="verbal">Verbal Commitment</option></select></div>'+
-      '<div><label>Customer PO No.</label><input id="noi-customer-ref" type="text" placeholder="Customer ref no. (optional)" /></div>'+
+      '<div><label>'+t('lbl_order_no')+'</label><input id="or-id" value="'+newId+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+      '<div><label>'+t('lbl_customer')+' <span class="req">*</span></label><select id="or-customer"><option value="">'+t('ord_select')+'</option>'+custOpts+'</select></div>'+
+      '<div><label>'+t('lbl_supplier')+' <span class="req">*</span></label><select id="or-supplier"><option value="">'+t('ord_select')+'</option>'+supOpts+'</select></div>'+
+      '<div><label>'+t('lbl_currency')+'</label><select id="or-currency">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
+      '<div><label>'+t('lbl_order_date')+'</label><input id="or-date" type="date" value="'+today+'" /></div>'+
+      '<div><label>'+t('lbl_est_delivery')+'</label><input id="or-exp-del" type="date" /></div>'+
+      '<div><label>'+t('lbl_transport')+'</label><select id="or-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS)+'</select></div>'+
+      '<div><label>'+t('lbl_tracking_no')+'</label><input id="or-tracking" /></div>'+
+      '<div><label>'+t('lbl_order_type')+'</label><select id="or-source" onchange="onOrderSourceChange()"><option value="confirmed">'+t('ord_type_confirmed')+'</option><option value="verbal">'+t('ord_type_verbal')+'</option></select></div>'+
+      '<div><label>'+t('lbl_customer_po')+'</label><input id="noi-customer-ref" type="text" placeholder="'+t('lbl_customer_po_placeholder')+'" /></div>'+
       '</div>'+
-      '<div id="or-verbal-warn" style="display:none;background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:10px">⚠ Verbal commitment orders require manager approval before a PO can be created.</div>'+
-      '<div style="margin-bottom:14px"><label>Notes · หมายเหตุ</label><textarea id="or-notes"></textarea></div>'+
+      '<div id="or-verbal-warn" style="display:none;background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:10px">'+t('ord_verbal_warn')+'</div>'+
+      '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea id="or-notes"></textarea></div>'+
       '<div class="divider"></div>'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-      '<div class="section-title" style="margin-bottom:0">Items · รายการสินค้า</div>'+
+      '<div class="section-title" style="margin-bottom:0">'+t('ord_items_section')+'</div>'+
       '</div>'+
       '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
-      '<div style="margin-bottom:8px"><label>Product <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="noi-name" placeholder="Type or pick from catalog" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'new\')" style="white-space:nowrap;height:32px">From Catalog</button></div><input id="noi-product-id" type="hidden" /></div>'+
+      '<div style="margin-bottom:8px"><label>'+t('lbl_product')+' <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="noi-name" placeholder="'+t('lbl_product_placeholder')+'" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'new\')" style="white-space:nowrap;height:32px">'+t('btn_from_catalog')+'</button></div><input id="noi-product-id" type="hidden" /></div>'+
       '<div class="grid-2" style="margin-bottom:8px">'+
-      '<div><label>Spec</label><input id="noi-spec" /></div>'+
+      '<div><label>'+t('lbl_spec')+'</label><input id="noi-spec" /></div>'+
       '<div></div>'+
-      '<div><label>Qty (m) <span class="req">*</span></label><input id="noi-qty" type="number" min="0" oninput="refreshNoiCalc()" /></div>'+
+      '<div><label>'+t('lbl_qty_m')+' <span class="req">*</span></label><input id="noi-qty" type="number" min="0" oninput="refreshNoiCalc()" /></div>'+
       '<div></div>'+
-      '<div><label>Unit Price <span class="req">*</span></label><input id="noi-price" type="number" min="0" step="0.0001" placeholder="0.0000" oninput="refreshNoiCalc()" /></div>'+
-      '<div><label>Pricing Unit</label><select id="noi-pricing-unit" onchange="noiCpuChange()"><option value="m2">THB/m²</option><option value="m">THB/m</option></select></div>'+
-      '<div id="noi-width-wrap"><label>Width (mm)</label><input id="noi-width-mm" type="number" min="0" step="1" placeholder="e.g. 1070" oninput="refreshNoiCalc()" /></div>'+
-      '<div><label>Currency</label><select id="noi-currency" onchange="refreshNoiCalc()">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
+      '<div><label>'+t('lbl_unit_price')+' <span class="req">*</span></label><input id="noi-price" type="number" min="0" step="0.0001" placeholder="0.0000" oninput="refreshNoiCalc()" /></div>'+
+      '<div><label>'+t('lbl_pricing_unit')+'</label><select id="noi-pricing-unit" onchange="noiCpuChange()"><option value="m2">THB/m²</option><option value="m">THB/m</option></select></div>'+
+      '<div id="noi-width-wrap"><label>'+t('lbl_width_mm')+'</label><input id="noi-width-mm" type="number" min="0" step="1" placeholder="'+t('lbl_width_placeholder')+'" oninput="refreshNoiCalc()" /></div>'+
+      '<div><label>'+t('lbl_currency')+'</label><select id="noi-currency" onchange="refreshNoiCalc()">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
       '</div>'+
       '<div id="noi-new-calc" style="font-size:12px;color:#555;margin-bottom:4px"></div>'+
       '<div style="display:flex;gap:8px">'+
-      '<button class="btn btn-primary btn-sm" onclick="addPendingOrderItem()">Add Item</button>'+
+      '<button class="btn btn-primary btn-sm" onclick="addPendingOrderItem()">'+t('btn_add_item_submit')+'</button>'+
       '</div></div>'+
-      '<div id="new-order-items" style="margin-bottom:12px"><div style="font-size:12px;color:#aaa">No items yet</div></div>'+
-      '<button class="btn btn-primary" onclick="_createOrder()">Create Order</button>'
+      '<div id="new-order-items" style="margin-bottom:12px"><div style="font-size:12px;color:#aaa">'+t('ord_no_items')+'</div></div>'+
+      '<button class="btn btn-primary" onclick="_createOrder()">'+t('btn_create_order')+'</button>'
   } else {
     _renderOrderModal()
     _backfillOrderPurchaseLinks(id)
@@ -3410,26 +3699,26 @@ function _renderOrderModal(){
 
   // Section 1
   let html=
-    '<div class="section-title">Basic Info · ข้อมูลพื้นฐาน</div>'+
+    '<div class="section-title">'+t('ord_basic_info')+'</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>Order No.</label><input readonly value="'+esc(o.id)+'" style="background:#f8f8f5;color:#666" /></div>'+
-    '<div><label>Customer · ลูกค้า</label><select id="ore-customer"><option value="">— Select —</option>'+custOpts+'</select></div>'+
-    '<div><label>Supplier · ซัพพลายเออร์</label><select id="ore-supplier"><option value="">— Select —</option>'+supOpts+'</select></div>'+
-    '<div><label>Currency · สกุลเงิน</label><select id="ore-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
-    '<div><label>Order Date · วันที่</label><input id="ore-date" type="date" value="'+(o.order_date||'')+'" /></div>'+
-    '<div><label>Est. Delivery · กำหนดส่ง</label><input id="ore-exp-del" type="date" value="'+(o.expected_delivery||'')+'" /></div>'+
-    '<div><label>Actual Delivery · ส่งจริง</label><input id="ore-actual-del" type="date" value="'+(o.actual_delivery||'')+'" /></div>'+
-    '<div><label>Transport · ขนส่ง</label><select id="ore-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS,o.transport_method)+'</select></div>'+
-    '<div><label>Tracking No. · เลขพัสดุ</label><input id="ore-tracking" value="'+esc(o.tracking_no||'')+'" /></div>'+
-    '<div><label>Customer PO No. · เลขสั่งซื้อลูกค้า</label><input id="oi-customer-ref" type="text" placeholder="Customer ref no. (optional)" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
+    '<div><label>'+t('lbl_order_no')+'</label><input readonly value="'+esc(o.id)+'" style="background:#f8f8f5;color:#666" /></div>'+
+    '<div><label>'+t('lbl_customer')+'</label><select id="ore-customer"><option value="">'+t('ord_select')+'</option>'+custOpts+'</select></div>'+
+    '<div><label>'+t('lbl_supplier')+'</label><select id="ore-supplier"><option value="">'+t('ord_select')+'</option>'+supOpts+'</select></div>'+
+    '<div><label>'+t('lbl_currency')+'</label><select id="ore-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
+    '<div><label>'+t('lbl_order_date')+'</label><input id="ore-date" type="date" value="'+(o.order_date||'')+'" /></div>'+
+    '<div><label>'+t('lbl_est_delivery')+'</label><input id="ore-exp-del" type="date" value="'+(o.expected_delivery||'')+'" /></div>'+
+    '<div><label>'+t('lbl_actual_delivery')+'</label><input id="ore-actual-del" type="date" value="'+(o.actual_delivery||'')+'" /></div>'+
+    '<div><label>'+t('lbl_transport')+'</label><select id="ore-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS,o.transport_method)+'</select></div>'+
+    '<div><label>'+t('lbl_tracking_no')+'</label><input id="ore-tracking" value="'+esc(o.tracking_no||'')+'" /></div>'+
+    '<div><label>'+t('lbl_customer_po')+'</label><input id="oi-customer-ref" type="text" placeholder="'+t('lbl_customer_po_placeholder')+'" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
     '</div>'+
-    '<div style="margin-bottom:12px"><label>Notes · หมายเหตุ</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
-    '<div style="margin-bottom:4px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" /> Requires COA · ต้องการใบรับรอง</label></div>'+
+    '<div style="margin-bottom:12px"><label>'+t('lbl_notes')+'</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:4px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" /> '+t('lbl_requires_coa')+'</label></div>'+
     '<div class="divider"></div>'
 
   const linkedShipments=orderLinkedShipments(o.id)
   const relatedPurchases=purchaseOrders.filter(p=>purchaseOrderLinksForDisplay(p.id).some(link=>String(link.order_id)===String(o.id)))
-  html+='<div class="section-title">Shipments · การขนส่ง</div>'
+  html+='<div class="section-title">'+t('ord_ship_section')+'</div>'
   if(linkedShipments.length){
     html+=linkedShipments.map(sh=>{
       const st=shipmentStatusObj(sh.status)
@@ -3439,9 +3728,9 @@ function _renderOrderModal(){
         '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span></div>'
     }).join('')
   } else {
-    html+='<div style="font-size:12px;color:#aaa;padding:4px 0 10px">No shipment linked · ยังไม่เชื่อมกับการขนส่ง</div>'
+    html+='<div style="font-size:12px;color:#aaa;padding:4px 0 10px">'+t('ord_no_shipment')+'</div>'
   }
-  html+='<div style="font-size:11px;color:#888;margin-bottom:12px">'+(relatedPurchases.length?'Link shipments via the related Purchase Order.':'No PO linked to this order. If this is a stock purchase, no link needed.')+'</div><div class="divider"></div>'
+  html+='<div style="font-size:11px;color:#888;margin-bottom:12px">'+(relatedPurchases.length?t('ord_link_via_po'):t('ord_no_po'))+'</div><div class="divider"></div>'
 
   // Section 2: Items
   function calcOiAmount(i,pendingQty){
@@ -3471,30 +3760,30 @@ function _renderOrderModal(){
   const editMode=_orderItemsEditMode
   html+=
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-    '<div class="section-title" style="margin-bottom:0">Items · รายการสินค้า</div>'+
+    '<div class="section-title" style="margin-bottom:0">'+t('ord_items_section')+'</div>'+
     '<div style="display:flex;gap:6px">'+
     (editMode
-      ? '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'ord-item-form\')">+ Add Item</button>'+
-        '<button class="btn btn-ghost btn-sm" style="color:#0F6E56;border-color:#0F6E56" onclick="toggleOrderItemsEditMode()">✓ Done</button>'
-      : '<button class="btn btn-ghost btn-sm" onclick="toggleOrderItemsEditMode()">✎ Edit Items</button>'
+      ? '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'ord-item-form\')">'+t('btn_add_item')+'</button>'+
+        '<button class="btn btn-ghost btn-sm" style="color:#0F6E56;border-color:#0F6E56" onclick="toggleOrderItemsEditMode()">'+t('btn_done_editing')+'</button>'
+      : '<button class="btn btn-ghost btn-sm" onclick="toggleOrderItemsEditMode()">'+t('btn_edit_items')+'</button>'
     )+
     '</div></div>'+
     (editMode
       ? '<div id="ord-item-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
         '<div class="grid-2" style="margin-bottom:8px">'+
-        '<div><label>Product <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="oi-name" placeholder="Type or pick from catalog" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'edit\')" style="white-space:nowrap;height:32px">From Catalog</button></div><input id="oi-product-id" type="hidden" /></div>'+
-        '<div><label>Spec</label><input id="oi-spec" /></div>'+
-        '<div><label>Qty <span class="req">*</span></label><input id="oi-qty" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
-        '<div><label>Unit</label><select id="oi-unit"><option value="m">m</option><option value="m²">m²</option><option value="roll">roll</option><option value="kg">kg</option><option value="piece">piece</option></select></div>'+
-        '<div><label>Pricing Unit</label><select id="oi-cpu" onchange="refreshOiNewCalc()"><option value="m2">m²</option><option value="m">m</option></select></div>'+
-        '<div><label>Width (mm)</label><input id="oi-width-mm" type="number" min="0" step="1" placeholder="e.g. 1070 (required for m²)" oninput="refreshOiNewCalc()" /></div>'+
-        '<div><label>Unit Price</label><input id="oi-price" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
-        '<div><label>Currency</label><select id="oi-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
+        '<div><label>'+t('lbl_product')+' <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="oi-name" placeholder="'+t('lbl_product_placeholder')+'" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'edit\')" style="white-space:nowrap;height:32px">'+t('btn_from_catalog')+'</button></div><input id="oi-product-id" type="hidden" /></div>'+
+        '<div><label>'+t('lbl_spec')+'</label><input id="oi-spec" /></div>'+
+        '<div><label>'+t('lbl_qty')+' <span class="req">*</span></label><input id="oi-qty" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
+        '<div><label>'+t('lbl_unit')+'</label><select id="oi-unit"><option value="m">m</option><option value="m²">m²</option><option value="roll">roll</option><option value="kg">kg</option><option value="piece">piece</option></select></div>'+
+        '<div><label>'+t('lbl_pricing_unit')+'</label><select id="oi-cpu" onchange="refreshOiNewCalc()"><option value="m2">m²</option><option value="m">m</option></select></div>'+
+        '<div><label>'+t('lbl_width_mm')+'</label><input id="oi-width-mm" type="number" min="0" step="1" placeholder="'+t('lbl_width_placeholder')+'" oninput="refreshOiNewCalc()" /></div>'+
+        '<div><label>'+t('lbl_unit_price')+'</label><input id="oi-price" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
+        '<div><label>'+t('lbl_currency')+'</label><select id="oi-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
         '</div>'+
         '<div id="oi-new-calc" style="font-size:11px;color:#888;margin-bottom:8px;min-height:16px"></div>'+
         '<div style="display:flex;gap:8px">'+
-        '<button class="btn btn-primary btn-sm" onclick="submitOrderItem()">Add Item</button>'+
-        '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'ord-item-form\')">Cancel</button>'+
+        '<button class="btn btn-primary btn-sm" onclick="submitOrderItem()">'+t('btn_add_item_submit')+'</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'ord-item-form\')">'+t('btn_cancel')+'</button>'+
         '</div></div>'
       : ''
     )
@@ -3531,7 +3820,7 @@ function _renderOrderModal(){
       '<span style="font-size:13px;font-weight:600;color:#0F6E56" id="oi-total-display">Total '+total.toFixed(2)+' '+(o.currency||'')+'</span>'+
       '</div>'
   } else {
-    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">No items yet · ยังไม่มีรายการ</div>'
+    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">'+t('ord_no_items')+'</div>'
   }
 
   html+='<div class="divider"></div>'
@@ -3546,46 +3835,46 @@ function _renderOrderModal(){
     if(approvalSt==='none'){
       if(hasPermission('approve')){
         html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:12px 14px;margin-bottom:12px">'+
-          '<div style="font-size:12px;color:#8A6400;margin-bottom:8px">Verbal commitment order — requires approval before a PO can be created.</div>'+
+          '<div style="font-size:12px;color:#8A6400;margin-bottom:8px">'+t('ord_verbal_msg')+'</div>'+
           '<div style="display:flex;gap:8px">'+
-          '<button class="btn btn-primary btn-sm" onclick="approveOrder(\''+o.id+'\')">Approve ✓</button>'+
-          '<button class="btn btn-ghost btn-sm" style="color:#e55" onclick="rejectOrder(\''+o.id+'\')">Reject ✗</button>'+
+          '<button class="btn btn-primary btn-sm" onclick="approveOrder(\''+o.id+'\')">'+t('btn_approve')+'</button>'+
+          '<button class="btn btn-ghost btn-sm" style="color:#e55" onclick="rejectOrder(\''+o.id+'\')">'+t('btn_reject_ord')+'</button>'+
           '</div></div>'
       } else {
-        html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:10px 14px;font-size:12px;color:#8A6400;margin-bottom:12px">⏳ Pending manager approval</div>'
+        html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:10px 14px;font-size:12px;color:#8A6400;margin-bottom:12px">'+t('ord_waiting_approval')+'</div>'
       }
     } else if(approvalSt==='approved'){
-      html+='<div style="background:#E1F5EE;border:1px solid #0F6E56;border-radius:4px;padding:8px 14px;font-size:12px;color:#085041;margin-bottom:12px">✓ Approved'+(o.approved_by?' — '+o.approved_by:'')+(o.approved_at?' · '+o.approved_at.slice(0,10):'')+'</div>'
+      html+='<div style="background:#E1F5EE;border:1px solid #0F6E56;border-radius:4px;padding:8px 14px;font-size:12px;color:#085041;margin-bottom:12px">'+t('ord_approved_txt')+(o.approved_by?' — '+o.approved_by:'')+(o.approved_at?' · '+o.approved_at.slice(0,10):'')+'</div>'
     } else if(approvalSt==='rejected'){
-      html+='<div style="background:#FCEBEB;border:1px solid #F09595;border-radius:4px;padding:8px 14px;font-size:12px;color:#A32D2D;margin-bottom:12px">✗ Approval rejected</div>'
+      html+='<div style="background:#FCEBEB;border:1px solid #F09595;border-radius:4px;padding:8px 14px;font-size:12px;color:#A32D2D;margin-bottom:12px">'+t('ord_approval_rejected_txt')+'</div>'
     }
   }
 
   // COA section
   if(o.requires_coa){
     html+='<div class="divider"></div>'+
-    '<div class="section-title">COA (Certificate of Analysis)</div>'+
+    '<div class="section-title">'+t('ord_coa_section')+'</div>'+
     '<div id="order-coa-docs" style="margin-bottom:10px"><div style="font-size:12px;color:#aaa">Loading...</div></div>'+
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">'+
     '<input type="file" id="order-coa-file" accept=".pdf,application/pdf" style="width:auto;font-size:12px" />'+
-    '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">Upload COA</button>'+
+    '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">'+t('btn_upload_coa')+'</button>'+
     '</div>'
   }
 
   // Consolidated sticky footer
   html+='<div class="modal-foot" style="justify-content:space-between;align-items:center">'
-  html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteOrder()">Delete Order</button>'
+  html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteOrder()">'+t('btn_delete_order')+'</button>'
   html+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
-  html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderBasic()">Save Info</button>'
-  if(hasItems&&editMode) html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderItems()">Save Items</button>'
+  html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderBasic()">'+t('btn_save_info')+'</button>'
+  if(hasItems&&editMode) html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderItems()">'+t('btn_save_items')+'</button>'
   if(isActive){
-    html+='<button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>Create PO</button>'
-    if(o.status==='confirmed') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'processing\')">Start Processing →</button>'
-    if(o.status==='processing') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'ready\')">Ready →</button>'
-    if(o.status==='ready') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'shipped\')">Mark Shipped →</button>'
-    if(o.status==='shipped') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'delivered\')">Delivered →</button>'
-    if(o.status==='delivered') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'completed\')">Complete ✓</button>'
-    html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="openCancelOrderModal()">Cancel Order</button>'
+    html+='<button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>'+t('btn_create_po')+'</button>'
+    if(o.status==='confirmed') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'processing\')">'+t('btn_start_processing')+'</button>'
+    if(o.status==='processing') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'ready\')">'+t('btn_ord_ready')+'</button>'
+    if(o.status==='ready') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'shipped\')">'+t('btn_mark_shipped')+'</button>'
+    if(o.status==='shipped') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'delivered\')">'+t('btn_delivered')+'</button>'
+    if(o.status==='delivered') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'completed\')">'+t('btn_complete')+'</button>'
+    html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="openCancelOrderModal()">'+t('btn_cancel_order')+'</button>'
   }
   html+='</div></div>'
 
@@ -5210,7 +5499,7 @@ async function confirmShopOrder(){
 }
 // ── end 採購選購 ──────────────────────────────────────────
 
-const TAB_LABELS={dashboard:'儀表板 Dashboard · แดชบอร์ด',inquiry:'詢價管理 Inquiries · ใบสอบถามราคา',quotes:'報價管理 Quotations · ใบเสนอราคา',samples:'樣品管理 Samples · ตัวอย่าง',complaints:'客訴管理 Complaints · ร้องเรียน',orders:'訂單管理 Orders · คำสั่งซื้อ',shipments:'船運管理 Shipments · การขนส่ง',customers:'客戶管理 Customers · ลูกค้า',suppliers_mgmt:'供應商管理 Suppliers · ซัพพลายเออร์',products:'產品目錄 Products · สินค้า',docs:'技術文件庫 Documents · เอกสาร',users_mgmt:'使用者管理 Users · ผู้ใช้',settings:'系統設定 Settings · การตั้งค่า',purchases:'採購單管理 Purchase Orders · ใบสั่งซื้อ','purchase-shop':'採購選購 Purchase Shop · ร้านค้า'}
+const TAB_LABELS={dashboard:1,inquiry:1,quotes:1,samples:1,complaints:1,orders:1,shipments:1,customers:1,suppliers_mgmt:1,products:1,docs:1,users_mgmt:1,settings:1,purchases:1,'purchase-shop':1}
 function switchTab(tab,save=true){
   if(tab==='settings'&&!hasPermission('view_settings')){
     showToast('只有管理者可以查看系統設定','error')
@@ -5218,11 +5507,11 @@ function switchTab(tab,save=true){
   }
   activeTab=tab
   if(save)sessionStorage.setItem(SESSION_ACTIVE_TAB_KEY,tab)
-  Object.keys(TAB_LABELS).forEach(t=>{
-    const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?'block':'none'
-    const nav=document.getElementById('nav-'+t);if(nav)nav.classList.toggle('active',t===tab)
+  Object.keys(TAB_LABELS).forEach(k=>{
+    const el=document.getElementById('tab-'+k);if(el)el.style.display=k===tab?'block':'none'
+    const nav=document.getElementById('nav-'+k);if(nav)nav.classList.toggle('active',k===tab)
   })
-  document.getElementById('topbar-title').textContent=TAB_LABELS[tab]||''
+  document.getElementById('topbar-title').textContent=t('tab_'+tab)||''
   if(tab==='inquiry'){renderInquiries();populateFilterCustomers()}
   if(tab==='customers')renderCustomers()
   if(tab==='suppliers_mgmt')renderSupplierMgmt()
