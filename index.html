@@ -2753,7 +2753,7 @@ function renderOrders(){
       (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">客戶單號：'+esc(o.customer_ref_no)+'</span>':'')+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
       (o.source==='verbal'&&(o.approval_status||'none')==='none'?'<span class="badge" style="background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D">待審批</span>':'')+
-      (()=>{if(!o.requires_coa)return '';const today=new Date().toISOString().slice(0,10);const hasCoa=orderCoaDocs.some(d=>String(d.order_id)===String(o.id));if(hasCoa)return '<span class="badge" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7">COA ✓</span>';const lshs=orderLinkedShipments(o.id);const etdPassed=lshs.some(sh=>sh.etd&&sh.etd<=today);if(etdPassed)return '<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5">⚠ COA 待收</span>';return '<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>';})()+'
+      (()=>{if(!o.requires_coa)return '';const today=new Date().toISOString().slice(0,10);const hasCoa=orderCoaDocs.some(d=>String(d.order_id)===String(o.id));if(hasCoa)return '<span class="badge" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7">COA ✓</span>';const lshs=orderLinkedShipments(o.id);const etdPassed=lshs.some(sh=>sh.etd&&sh.etd<=today);if(etdPassed)return '<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5">⚠ COA 待收</span>';return '<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>';})()+
       '</div>'+
       '<div style="font-size:12px;color:#666">'+
       (cust?cust.company:'—')+' · '+(sup?sup.company:'—')+
