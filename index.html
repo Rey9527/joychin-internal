@@ -1697,7 +1697,7 @@ let _productTypeFilter=''
 const PRODUCT_TYPES=['Brown','Yellow','White','Film','Other']
 const PRODUCT_TYPE_COLORS={Brown:{bg:'#F5ECD7',color:'#7A4F2A'},Yellow:{bg:'#FFFBDA',color:'#8A7000'},White:{bg:'#F5F5F0',color:'#666'},Film:{bg:'#E6F1FB',color:'#185FA5'},Other:{bg:'#F0EBF5',color:'#6B3FA0'}}
 let samples=[],sampleRequestsIn=[],sampleShipmentsOut=[],complaints=[]
-let orders=[],orderItems=[]
+let orders=[],orderItems=[],orderCoaDocs=[]
 let shipments=[],shipmentPurchaseOrders=[],shipmentItems=[]
 let purchaseOrders=[],purchaseOrderItems=[],purchaseOrderOrderLinks=[]
 let quoteChanges=[]
@@ -1715,11 +1715,12 @@ let _purchaseLinkTarget=null
 let _nqItems=[] // 新增報價單暫存品項
 
 async function loadOrders(){
-  const[{data:o},{data:oi}]=await Promise.all([
+  const[{data:o},{data:oi},{data:cd}]=await Promise.all([
     sb.from('orders').select('*').order('created_at',{ascending:false}),
-    sb.from('order_items').select('*')
+    sb.from('order_items').select('*'),
+    sb.from('order_documents').select('order_id').eq('doc_type','coa')
   ])
-  orders=o||[];orderItems=oi||[]
+  orders=o||[];orderItems=oi||[];orderCoaDocs=cd||[]
   updateOrderBadge()
   autoScanTasks()
 }
@@ -2724,7 +2725,7 @@ function renderOrders(){
       (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">客戶單號：'+esc(o.customer_ref_no)+'</span>':'')+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
       (o.source==='verbal'&&(o.approval_status||'none')==='none'?'<span class="badge" style="background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D">待審批</span>':'')+
-      (o.requires_coa?'<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>':'')+
+      (()=>{if(!o.requires_coa)return '';const today=new Date().toISOString().slice(0,10);const hasCoa=orderCoaDocs.some(d=>String(d.order_id)===String(o.id));if(hasCoa)return '<span class="badge" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7">COA ✓</span>';const lshs=orderLinkedShipments(o.id);const etdPassed=lshs.some(sh=>sh.etd&&sh.etd<=today);if(etdPassed)return '<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5">⚠ COA 待收</span>';return '<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>';})()+'
       '</div>'+
       '<div style="font-size:12px;color:#666">'+
       (cust?cust.company:'—')+' · '+(sup?sup.company:'—')+
@@ -3961,8 +3962,10 @@ async function uploadOrderCoa(orderId){
   if(dbErr){showToast('記錄失敗：'+dbErr.message,'error');if(btn){btn.disabled=false;btn.textContent='上傳 COA'};return}
   if(fileInput)fileInput.value=''
   if(btn){btn.disabled=false;btn.textContent='上傳 COA'}
+  if(!orderCoaDocs.find(d=>String(d.order_id)===String(orderId)))orderCoaDocs.push({order_id:orderId})
   showToast('COA 已上傳')
   renderOrderCoaDocs(orderId)
+  renderOrders()
 }
 
 function _orderDocPath(raw){
@@ -3997,8 +4000,11 @@ async function deleteOrderDoc(docId,filePath,orderId){
   const path=_orderDocPath(filePath)
   if(path)await sb.storage.from('order-docs').remove([path])
   await sb.from('order_documents').delete().eq('id',docId)
+  const{data:rem}=await sb.from('order_documents').select('order_id').eq('doc_type','coa').eq('order_id',orderId)
+  if(!rem||rem.length===0)orderCoaDocs=orderCoaDocs.filter(d=>String(d.order_id)!==String(orderId))
   showToast('已刪除')
   renderOrderCoaDocs(orderId)
+  renderOrders()
 }
 
 async function deleteOrder(){
