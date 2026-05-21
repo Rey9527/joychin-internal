@@ -231,59 +231,59 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 <div class="sidebar">
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
-    <p>離型紙業務系統</p>
+    <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
     <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.6.0</span></div>
   </div>
   <nav class="sidebar-nav">
-    <div class="nav-section">業務</div>
+    <div class="nav-section">業務 Sales · ขาย</div>
     <button class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">
-      <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span><span>儀表板</span>
+      <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span><span>儀表板<br><span style="font-size:9px;opacity:0.65;font-weight:400">Dashboard · แดชบอร์ด</span></span>
     </button>
     <button class="nav-item" id="nav-inquiry" onclick="switchTab('inquiry')">
-      <span class="nav-icon"><i data-lucide="clipboard-list"></i></span><span>詢價管理</span><span class="nav-badge" id="badge-inquiry" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="clipboard-list"></i></span><span>詢價管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Inquiries · ใบสอบถามราคา</span></span><span class="nav-badge" id="badge-inquiry" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-quotes" onclick="switchTab('quotes')">
-      <span class="nav-icon"><i data-lucide="file-text"></i></span><span>報價管理</span>
+      <span class="nav-icon"><i data-lucide="file-text"></i></span><span>報價管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Quotations · ใบเสนอราคา</span></span>
     </button>
     <button class="nav-item" id="nav-orders" onclick="switchTab('orders')">
-      <span class="nav-icon"><i data-lucide="package"></i></span><span>訂單管理</span><span class="nav-badge" id="badge-orders" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="package"></i></span><span>訂單管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Orders · คำสั่งซื้อ</span></span><span class="nav-badge" id="badge-orders" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-purchases" onclick="switchTab('purchases')" style="display:none">
-      <span class="nav-icon"><i data-lucide="shopping-cart"></i></span><span>採購單管理</span><span class="nav-badge" id="badge-purchases" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="shopping-cart"></i></span><span>採購單管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Purchase Orders · ใบสั่งซื้อ</span></span><span class="nav-badge" id="badge-purchases" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-shipments" onclick="switchTab('shipments')">
-      <span class="nav-icon"><i data-lucide="anchor"></i></span><span>船運管理</span>
+      <span class="nav-icon"><i data-lucide="anchor"></i></span><span>船運管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Shipments · การขนส่ง</span></span>
     </button>
     <button class="nav-item" id="nav-samples" onclick="switchTab('samples')">
-      <span class="nav-icon"><i data-lucide="flask-conical"></i></span><span>樣品管理</span><span class="nav-badge" id="badge-samples" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="flask-conical"></i></span><span>樣品管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Samples · ตัวอย่าง</span></span><span class="nav-badge" id="badge-samples" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-complaints" onclick="switchTab('complaints')">
-      <span class="nav-icon"><i data-lucide="alert-triangle"></i></span><span>客訴管理</span><span class="nav-badge" id="badge-complaints" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="alert-triangle"></i></span><span>客訴管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Complaints · ข้อร้องเรียน</span></span><span class="nav-badge" id="badge-complaints" style="display:none"></span>
     </button>
-    <div class="nav-section">通訊錄</div>
+    <div class="nav-section">通訊錄 Contacts · รายชื่อ</div>
     <button class="nav-item" id="nav-customers" onclick="switchTab('customers')">
-      <span class="nav-icon"><i data-lucide="users"></i></span><span>客戶管理</span><span class="nav-badge" id="badge-customers" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="users"></i></span><span>客戶管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Customers · ลูกค้า</span></span><span class="nav-badge" id="badge-customers" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-suppliers_mgmt" onclick="switchTab('suppliers_mgmt')">
-      <span class="nav-icon"><i data-lucide="factory"></i></span><span>供應商管理</span>
+      <span class="nav-icon"><i data-lucide="factory"></i></span><span>供應商管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Suppliers · ผู้จัดจำหน่าย</span></span>
     </button>
-    <div class="nav-section">產品</div>
+    <div class="nav-section">產品 Products · สินค้า</div>
     <button class="nav-item" id="nav-products" onclick="switchTab('products')">
-      <span class="nav-icon"><i data-lucide="boxes"></i></span><span>產品目錄</span><span class="nav-badge" id="badge-products" style="display:none"></span>
+      <span class="nav-icon"><i data-lucide="boxes"></i></span><span>產品目錄<br><span style="font-size:9px;opacity:0.65;font-weight:400">Product Catalog · แคตตาล็อก</span></span><span class="nav-badge" id="badge-products" style="display:none"></span>
     </button>
     <button class="nav-item" id="nav-docs" onclick="switchTab('docs')">
-      <span class="nav-icon"><i data-lucide="folder-open"></i></span><span>技術文件庫</span>
+      <span class="nav-icon"><i data-lucide="folder-open"></i></span><span>技術文件庫<br><span style="font-size:9px;opacity:0.65;font-weight:400">Technical Docs · เอกสารเทคนิค</span></span>
     </button>
-    <div class="nav-section">設定</div>
+    <div class="nav-section">設定 Settings · ตั้งค่า</div>
     <button class="nav-item" id="nav-users_mgmt" onclick="switchTab('users_mgmt')" style="display:none">
-      <span class="nav-icon"><i data-lucide="user-cog"></i></span><span>使用者管理</span>
+      <span class="nav-icon"><i data-lucide="user-cog"></i></span><span>使用者管理<br><span style="font-size:9px;opacity:0.65;font-weight:400">Users · จัดการผู้ใช้</span></span>
     </button>
     <button class="nav-item" id="nav-settings" onclick="switchTab('settings')" style="display:none">
-      <span class="nav-icon"><i data-lucide="settings"></i></span><span>系統設定</span>
+      <span class="nav-icon"><i data-lucide="settings"></i></span><span>系統設定<br><span style="font-size:9px;opacity:0.65;font-weight:400">System · ระบบ</span></span>
     </button>
   </nav>
   <div class="sidebar-footer">
-    <div id="sidebar-user-email">未登入</div>
+    <div id="sidebar-user-email">未登入 / Not logged in</div>
     <div style="margin-top:8px;font-size:10px;line-height:1.5;color:#888">
       <div>Powered by</div>
       <div>NNPC Consulting Co., Ltd.</div>
@@ -302,7 +302,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <button class="btn btn-ghost btn-sm" id="pshop-back-btn" onclick="pshopLeave()" style="display:none">← 返回採購單</button>
       <div id="overdue-alert" style="display:none"></div>
       <div id="user-info" style="font-size:11px;color:#888;display:none"></div>
-      <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none" onclick="logout()">登出</button>
+      <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none" onclick="logout()">登出 Logout</button>
     </div>
   </div>
   <div class="content">
@@ -312,30 +312,30 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="inq-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('inquiry')">☰ 篩選</button>
-          <button class="btn btn-primary" onclick="showNewInqForm()">+ 新增詢價</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('inquiry')">☰ Filter · กรอง</button>
+          <button class="btn btn-primary" onclick="showNewInqForm()">+ New Inquiry · ใบสอบถามใหม่</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="inquiry-filter-bar">
         <select id="f-status" onchange="renderInquiries()">
-          <option value="">全部狀態</option>
-          <option value="pending">待詢供應商</option>
-          <option value="asked">已發詢價</option>
-          <option value="received">供應商已回</option>
-          <option value="sent_to_quote">已送報價</option>
-          <option value="closed">已結案</option>
+          <option value="">All Statuses · ทุกสถานะ</option>
+          <option value="pending">待詢供應商 Pending · รอสอบถาม</option>
+          <option value="asked">已發詢價 Sent · ส่งแล้ว</option>
+          <option value="received">供應商已回 Replied · ตอบแล้ว</option>
+          <option value="sent_to_quote">已送報價 Quoted · ส่งใบเสนอแล้ว</option>
+          <option value="closed">已結案 Closed · ปิดแล้ว</option>
         </select>
-        <select id="f-customer" onchange="renderInquiries()"><option value="">全部客戶</option></select>
-        <input id="f-product" type="text" placeholder="搜尋產品..." oninput="renderInquiries()" style="max-width:150px" />
-        <label class="filter-date-label">起始日期</label><input id="f-date-from" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="起始日期" />
-        <span style="font-size:11px;color:#aaa">至</span>
-        <label class="filter-date-label">結束日期</label><input id="f-date-to" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="結束日期" />
-        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">清除</button>
+        <select id="f-customer" onchange="renderInquiries()"><option value="">All Customers · ทุกลูกค้า</option></select>
+        <input id="f-product" type="text" placeholder="Search products · ค้นหาสินค้า..." oninput="renderInquiries()" style="max-width:150px" />
+        <label class="filter-date-label">From · ตั้งแต่</label><input id="f-date-from" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="From date" />
+        <span style="font-size:11px;color:#aaa">–</span>
+        <label class="filter-date-label">To · ถึง</label><input id="f-date-to" type="date" onchange="renderInquiries()" style="max-width:140px" aria-label="To date" />
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Clear · ล้าง</button>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">顏色說明</span>
-        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">追蹤逾期</span>
-        <span class="ls-item" style="background:#FFFBEA;border:1px solid #F5C842;color:#7A5B00">即將逾期</span>
+        <span class="ls-lbl">Legend · สี</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">追蹤逾期 Overdue</span>
+        <span class="ls-item" style="background:#FFFBEA;border:1px solid #F5C842;color:#7A5B00">即將逾期 Due Soon</span>
       </div>
       <div id="inquiry-list"></div>
     </div>
@@ -345,36 +345,36 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px">
         <div id="quote-summary" style="font-size:12px;color:#888"></div>
         <div class="quote-actions" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('quotes')">☰ 篩選</button>
-          <button class="btn btn-ghost btn-sm" onclick="openQuoteDefaultsModal()">⚙ 報價預設值</button>
-          <button class="btn btn-primary" onclick="openNewQuoteModal()">+ 直接新增報價單</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('quotes')">☰ Filter · กรอง</button>
+          <button class="btn btn-ghost btn-sm" onclick="openQuoteDefaultsModal()">⚙ Quote Defaults · ค่าเริ่มต้น</button>
+          <button class="btn btn-primary" onclick="openNewQuoteModal()">+ New Quotation · ใบเสนอราคาใหม่</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="quote-filter-bar">
         <select id="fq-status" onchange="renderQuotes()">
-          <option value="">全部狀態</option>
-          <option value="draft">草稿</option>
-          <option value="sent">已送客戶</option>
-          <option value="sample_pending">待寄樣</option>
-          <option value="sample_review">樣品確認中</option>
-          <option value="accepted">客戶接受</option>
-          <option value="rejected">客戶拒絕</option>
-          <option value="superseded">已取代（舊版本）</option>
+          <option value="">All Statuses · ทุกสถานะ</option>
+          <option value="draft">草稿 Draft · ร่าง</option>
+          <option value="sent">已送客戶 Sent · ส่งแล้ว</option>
+          <option value="sample_pending">待寄樣 Sample Pending · รอส่งตัวอย่าง</option>
+          <option value="sample_review">樣品確認中 Sample Review · ตรวจสอบตัวอย่าง</option>
+          <option value="accepted">客戶接受 Accepted · ยอมรับแล้ว</option>
+          <option value="rejected">客戶拒絕 Rejected · ปฏิเสธ</option>
+          <option value="superseded">已取代 Superseded · แทนที่แล้ว</option>
         </select>
-        <input id="fq-customer" type="text" placeholder="搜尋客戶..." oninput="renderQuotes()" style="max-width:150px" />
-        <input id="fq-product" type="text" placeholder="搜尋產品..." oninput="renderQuotes()" style="max-width:150px" />
-        <label class="filter-date-label">起始日期</label><input id="fq-date-from" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="起始日期" />
-        <span style="font-size:11px;color:#aaa">至</span>
-        <label class="filter-date-label">結束日期</label><input id="fq-date-to" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="結束日期" />
-        <button class="btn btn-ghost btn-sm" onclick="clearQuoteFilters()">清除</button>
+        <input id="fq-customer" type="text" placeholder="Search customer · ค้นหาลูกค้า..." oninput="renderQuotes()" style="max-width:150px" />
+        <input id="fq-product" type="text" placeholder="Search product · ค้นหาสินค้า..." oninput="renderQuotes()" style="max-width:150px" />
+        <label class="filter-date-label">From · ตั้งแต่</label><input id="fq-date-from" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="From date" />
+        <span style="font-size:11px;color:#aaa">–</span>
+        <label class="filter-date-label">To · ถึง</label><input id="fq-date-to" type="date" onchange="renderQuotes()" style="max-width:140px" aria-label="To date" />
+        <button class="btn btn-ghost btn-sm" onclick="clearQuoteFilters()">Clear · ล้าง</button>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">狀態顏色</span>
-        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">草稿</span>
-        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">已送客戶</span>
-        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">客戶接受</span>
-        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">客戶拒絕</span>
-        <span class="ls-item" style="background:#f5f5f2;color:#aaa">已取代</span>
+        <span class="ls-lbl">Status Colors · สี</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">Draft · ร่าง</span>
+        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">Sent · ส่งแล้ว</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">Accepted · ยอมรับ</span>
+        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">Rejected · ปฏิเสธ</span>
+        <span class="ls-item" style="background:#f5f5f2;color:#aaa">Superseded · แทนที่</span>
       </div>
       <div id="quote-list"></div>
     </div>
@@ -384,25 +384,25 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="sample-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('samples')">☰ 篩選</button>
-          <button class="btn btn-primary" onclick="openSampleModal(null)">+ 新增樣品</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('samples')">☰ Filter · กรอง</button>
+          <button class="btn btn-primary" onclick="openSampleModal(null)">+ New Sample · ตัวอย่างใหม่</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="sample-filter-bar">
         <select id="fs-status" onchange="renderSamples()">
-          <option value="">全部狀態</option>
-          <option value="in_stock">庫存中</option>
-          <option value="waiting_arrival">等待到貨</option>
-          <option value="waiting_feedback">等待回饋</option>
-          <option value="no_stock">無庫存</option>
-          <option value="closed">已結案</option>
+          <option value="">All Statuses · ทุกสถานะ</option>
+          <option value="in_stock">庫存中 In Stock · มีสต็อก</option>
+          <option value="waiting_arrival">等待到貨 Awaiting Arrival · รอสินค้า</option>
+          <option value="waiting_feedback">等待回饋 Awaiting Feedback · รอผล</option>
+          <option value="no_stock">無庫存 No Stock · ไม่มีสต็อก</option>
+          <option value="closed">已結案 Closed · ปิดแล้ว</option>
         </select>
-        <select id="fs-supplier" onchange="renderSamples()"><option value="">全部供應商</option></select>
-        <select id="fs-customer" onchange="renderSamples()"><option value="">全部客戶</option></select>
+        <select id="fs-supplier" onchange="renderSamples()"><option value="">All Suppliers · ทุกซัพพลายเออร์</option></select>
+        <select id="fs-customer" onchange="renderSamples()"><option value="">All Customers · ทุกลูกค้า</option></select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">顏色說明</span>
-        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">樣品逾期（出貨中 &gt;7天未到 / 已出貨 &gt;14天未回饋）</span>
+        <span class="ls-lbl">Legend · สี</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">樣品逾期 Sample Overdue (&gt;7d in transit / &gt;14d no feedback)</span>
       </div>
       <div id="sample-list"></div>
     </div>
@@ -411,7 +411,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-dashboard" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="dashboard-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-ghost btn-sm" onclick="renderDashboard()">↻ 重新整理</button>
+        <button class="btn btn-ghost btn-sm" onclick="renderDashboard()">↻ Refresh · รีเฟรช</button>
       </div>
       <div id="dashboard-panels"></div>
       <div id="dashboard-list"></div>
@@ -421,26 +421,26 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-complaints" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="complaint-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openComplaintModal(null)">+ 新增客訴</button>
+        <button class="btn btn-primary" onclick="openComplaintModal(null)">+ New Complaint · ร้องเรียนใหม่</button>
       </div>
       <div class="filter-bar" id="complaint-filter-bar">
         <select id="fc-source" onchange="renderComplaints()">
-          <option value="">全部來源</option>
-          <option value="unloading">下貨櫃發現</option>
-          <option value="customer">客戶回報</option>
+          <option value="">All Sources · ทุกแหล่ง</option>
+          <option value="unloading">下貨櫃發現 Found at Unloading · พบขณะขนถ่าย</option>
+          <option value="customer">客戶回報 Customer Report · ลูกค้าแจ้ง</option>
         </select>
         <select id="fc-status" onchange="renderComplaints()">
-          <option value="">全部狀態</option>
-          <option value="open">處理中</option>
-          <option value="pending_credit">等待折讓單</option>
-          <option value="resolved">已結案</option>
+          <option value="">All Statuses · ทุกสถานะ</option>
+          <option value="open">處理中 In Progress · กำลังดำเนินการ</option>
+          <option value="pending_credit">等待折讓單 Pending Credit Note · รอใบลดหนี้</option>
+          <option value="resolved">已結案 Resolved · แก้ไขแล้ว</option>
         </select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">狀態顏色</span>
-        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">處理中</span>
-        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">等待折讓單</span>
-        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">已結案</span>
+        <span class="ls-lbl">Status Colors · สี</span>
+        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">In Progress · ดำเนินการ</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">Pending Credit · รอใบลดหนี้</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">Resolved · แก้ไขแล้ว</span>
       </div>
       <div id="complaint-list"></div>
     </div>
@@ -450,27 +450,27 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="order-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('orders')">☰ 篩選</button>
-          <button class="btn btn-primary" onclick="openOrderModal(null)">+ 新增訂單</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('orders')">☰ Filter · กรอง</button>
+          <button class="btn btn-primary" onclick="openOrderModal(null)">+ New Order · คำสั่งซื้อใหม่</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="order-filter-bar">
         <select id="fo-status" onchange="renderOrders()">
-          <option value="">全部狀態</option>
-          <option value="confirmed">已確認</option>
-          <option value="processing">處理中</option>
-          <option value="ready">備貨完成</option>
-          <option value="shipped">已出貨</option>
-          <option value="delivered">已到客戶</option>
-          <option value="completed">已完成</option>
-          <option value="cancelled">已取消</option>
+          <option value="">All Statuses · ทุกสถานะ</option>
+          <option value="confirmed">已確認 Confirmed · ยืนยันแล้ว</option>
+          <option value="processing">處理中 Processing · กำลังดำเนินการ</option>
+          <option value="ready">備貨完成 Ready · พร้อมส่ง</option>
+          <option value="shipped">已出貨 Shipped · จัดส่งแล้ว</option>
+          <option value="delivered">已到客戶 Delivered · ส่งถึงแล้ว</option>
+          <option value="completed">已完成 Completed · เสร็จสิ้น</option>
+          <option value="cancelled">已取消 Cancelled · ยกเลิก</option>
         </select>
-        <select id="fo-customer" onchange="renderOrders()"><option value="">全部客戶</option></select>
-        <select id="fo-supplier" onchange="renderOrders()"><option value="">全部供應商</option></select>
+        <select id="fo-customer" onchange="renderOrders()"><option value="">All Customers · ทุกลูกค้า</option></select>
+        <select id="fo-supplier" onchange="renderOrders()"><option value="">All Suppliers · ทุกซัพพลายเออร์</option></select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">顏色說明</span>
-        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">需要行動（逾期 / 交期剩 ≤1天）</span>
+        <span class="ls-lbl">Legend · สี</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">需要行動 Action Required (overdue / ≤1d to deadline)</span>
       </div>
       <div id="order-list"></div>
     </div>
@@ -480,35 +480,35 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="shipment-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('shipments')">☰ 篩選</button>
-          <button class="btn btn-primary" onclick="openShipmentModal(null)">+ 新增船運批次</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('shipments')">☰ Filter · กรอง</button>
+          <button class="btn btn-primary" onclick="openShipmentModal(null)">+ New Shipment · การจัดส่งใหม่</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="shipment-filter-bar">
         <select id="fsh-mode" onchange="renderShipments()">
-          <option value="">全部方式</option>
-          <option value="sea">海運</option>
-          <option value="air">空運</option>
-          <option value="land">陸運</option>
-          <option value="express">快遞</option>
+          <option value="">All Modes · ทุกวิธี</option>
+          <option value="sea">海運 Sea · ทางทะเล</option>
+          <option value="air">空運 Air · ทางอากาศ</option>
+          <option value="land">陸運 Land · ทางบก</option>
+          <option value="express">快遞 Express · ด่วน</option>
         </select>
         <select id="fsh-status" onchange="renderShipments()">
-          <option value="">全部狀態</option>
-          <option value="planned">已規劃</option>
-          <option value="booked">已訂艙</option>
-          <option value="in_transit">運送中</option>
-          <option value="customs_clearance">報關中</option>
-          <option value="completed">已完成</option>
-          <option value="cancelled">已取消</option>
+          <option value="">All Statuses · ทุกสถานะ</option>
+          <option value="planned">已規劃 Planned · วางแผนแล้ว</option>
+          <option value="booked">已訂艙 Booked · จองแล้ว</option>
+          <option value="in_transit">運送中 In Transit · กำลังขนส่ง</option>
+          <option value="customs_clearance">報關中 Customs · ผ่านศุลกากร</option>
+          <option value="completed">已完成 Completed · เสร็จสิ้น</option>
+          <option value="cancelled">已取消 Cancelled · ยกเลิก</option>
         </select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">狀態顏色</span>
-        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">已規劃</span>
-        <span class="ls-item" style="background:#E6F1FB;color:#185FA5">已訂艙</span>
-        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">運送中</span>
-        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56">報關中</span>
-        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">已完成</span>
+        <span class="ls-lbl">Status Colors · สี</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">Planned · วางแผน</span>
+        <span class="ls-item" style="background:#E6F1FB;color:#185FA5">Booked · จอง</span>
+        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">In Transit · ขนส่ง</span>
+        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56">Customs · ศุลกากร</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">Completed · เสร็จ</span>
       </div>
       <div id="shipment-list"></div>
     </div>
@@ -517,29 +517,29 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-customers" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div id="customer-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openCreateCustomerModal()">+ 新增客戶</button>
+        <button class="btn btn-primary" onclick="openCreateCustomerModal()">+ New Customer · ลูกค้าใหม่</button>
       </div>
       <div id="customer-review-alert" style="display:none" class="alert-warn"></div>
       <div id="new-customer-form" class="card" style="display:none;border-color:#185FA5;background:#f0f7ff">
-        <div class="section-title" style="color:#0C447C;margin-bottom:12px">新增客戶</div>
+        <div class="section-title" style="color:#0C447C;margin-bottom:12px">New Customer · ลูกค้าใหม่</div>
         <div class="grid-2" style="margin-bottom:10px">
-          <div><label>聯絡人姓名 <span class="req">*</span></label><input id="nc-name" placeholder="例：David Chen" /></div>
-          <div><label>公司名稱 <span class="req">*</span></label><input id="nc-company" placeholder="例：ABC Packaging Co." /></div>
+          <div><label>Contact Name · ชื่อ <span class="req">*</span></label><input id="nc-name" placeholder="e.g. David Chen" /></div>
+          <div><label>Company · บริษัท <span class="req">*</span></label><input id="nc-company" placeholder="e.g. ABC Packaging Co." /></div>
           <div><label>Email</label><input id="nc-email" placeholder="david@abc.com" /></div>
-          <div><label>電話</label><input id="nc-phone" placeholder="+66 81 234 5678" /></div>
-          <div><label>國家</label>
+          <div><label>Phone · โทร</label><input id="nc-phone" placeholder="+66 81 234 5678" /></div>
+          <div><label>Country · ประเทศ</label>
             <select id="nc-country">
-              <option value="TH">泰國 TH</option><option value="TW">台灣 TW</option>
-              <option value="CN">中國 CN</option><option value="SG">新加坡 SG</option>
-              <option value="MY">馬來西亞 MY</option><option value="OTHER">其他</option>
+              <option value="TH">Thailand TH</option><option value="TW">Taiwan TW</option>
+              <option value="CN">China CN</option><option value="SG">Singapore SG</option>
+              <option value="MY">Malaysia MY</option><option value="OTHER">Other · อื่นๆ</option>
             </select>
           </div>
-          <div><label>行業</label><input id="nc-industry" placeholder="例：包裝、標籤" /></div>
+          <div><label>Industry · อุตสาหกรรม</label><input id="nc-industry" placeholder="e.g. Packaging, Labels" /></div>
         </div>
-        <div style="margin-bottom:10px"><label>備註</label><textarea id="nc-notes" placeholder="特殊需求、偏好..."></textarea></div>
+        <div style="margin-bottom:10px"><label>Notes · หมายเหตุ</label><textarea id="nc-notes" placeholder="Special requirements, preferences..."></textarea></div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-blue" onclick="createCustomer()">新增</button>
-          <button class="btn btn-ghost" onclick="hideNewCustomerForm()">取消</button>
+          <button class="btn btn-blue" onclick="createCustomer()">Add · เพิ่ม</button>
+          <button class="btn btn-ghost" onclick="hideNewCustomerForm()">Cancel · ยกเลิก</button>
         </div>
       </div>
       <div id="customer-list"></div>
@@ -549,25 +549,25 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div id="tab-suppliers_mgmt" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div id="supplier-summary" style="font-size:12px;color:#888"></div>
-        <button class="btn btn-primary" onclick="openCreateSupplierModal()">+ 新增供應商</button>
+        <button class="btn btn-primary" onclick="openCreateSupplierModal()">+ New Supplier · ซัพพลายเออร์ใหม่</button>
       </div>
       <div id="new-supplier-form" class="card" style="display:none;border-color:#0F6E56;background:#f8fffc">
-        <div class="section-title" style="color:#085041;margin-bottom:12px">新增供應商聯絡人</div>
+        <div class="section-title" style="color:#085041;margin-bottom:12px">New Supplier Contact · ผู้ติดต่อซัพพลายเออร์ใหม่</div>
         <div class="grid-2" style="margin-bottom:10px">
-          <div><label>姓名 <span class="req">*</span></label><input id="ns-name" placeholder="例：王經理" /></div>
-          <div><label>公司 <span class="req">*</span></label><input id="ns-company" placeholder="例：裕豐紙業" /></div>
-          <div><label>國家 <span class="req">*</span></label><select id="ns-country"><option value="TH">泰國 TH</option><option value="TW">台灣 TW</option><option value="CN">中國 CN</option><option value="SG">新加坡 SG</option><option value="MY">馬來西亞 MY</option><option value="OTHER">其他</option></select></div>
-          <div><label>職務</label><input id="ns-role" placeholder="例：業務經理" /></div>
+          <div><label>Name · ชื่อ <span class="req">*</span></label><input id="ns-name" placeholder="e.g. Wang Manager" /></div>
+          <div><label>Company · บริษัท <span class="req">*</span></label><input id="ns-company" placeholder="e.g. Yufeng Paper" /></div>
+          <div><label>Country · ประเทศ <span class="req">*</span></label><select id="ns-country"><option value="TH">Thailand TH</option><option value="TW">Taiwan TW</option><option value="CN">China CN</option><option value="SG">Singapore SG</option><option value="MY">Malaysia MY</option><option value="OTHER">Other · อื่นๆ</option></select></div>
+          <div><label>Role · ตำแหน่ง</label><input id="ns-role" placeholder="e.g. Sales Manager" /></div>
           <div><label>Email <span class="req">*</span></label><input id="ns-email" placeholder="wang@yufeng.com" /></div>
-          <div><label>電話</label><input id="ns-phone" placeholder="+886 2 1234 5678" /></div>
+          <div><label>Phone · โทร</label><input id="ns-phone" placeholder="+886 2 1234 5678" /></div>
           <div><label>LINE ID</label><input id="ns-line" placeholder="wang_yufeng" /></div>
           <div><label>WhatsApp</label><input id="ns-whatsapp" placeholder="+886912345678" /></div>
-          <div><label>專長產品</label><input id="ns-specialty" placeholder="矽油離型紙" /></div>
-          <div><label>郵件稱謂</label><input id="ns-salutation" placeholder="例：王哥、李總、David" /></div>
+          <div><label>Specialty Products · สินค้าเชี่ยวชาญ</label><input id="ns-specialty" placeholder="e.g. Silicone Release Paper" /></div>
+          <div><label>Email Salutation · คำทักทาย</label><input id="ns-salutation" placeholder="e.g. David, Mr. Wang" /></div>
         </div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="createSupplier()">新增</button>
-          <button class="btn btn-ghost" onclick="hideNewSupplierForm()">取消</button>
+          <button class="btn btn-primary" onclick="createSupplier()">Add · เพิ่ม</button>
+          <button class="btn btn-ghost" onclick="hideNewSupplierForm()">Cancel · ยกเลิก</button>
         </div>
       </div>
       <div id="supplier-mgmt-list"></div>
@@ -578,31 +578,31 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="product-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('products')">☰ 篩選</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('products')">☰ Filter · กรอง</button>
           <div style="display:flex;border:1px solid #e5e5e0;border-radius:6px;overflow:hidden">
-            <button id="pvmode-grid" onclick="setProductViewMode('grid')" title="格狀" style="padding:5px 9px;border:none;background:#0F6E56;color:#fff;cursor:pointer;font-size:14px">⊞</button>
-            <button id="pvmode-list" onclick="setProductViewMode('list')" title="條列" style="padding:5px 9px;border:none;background:transparent;color:#666;cursor:pointer;font-size:14px">☰</button>
+            <button id="pvmode-grid" onclick="setProductViewMode('grid')" title="Grid view" style="padding:5px 9px;border:none;background:#0F6E56;color:#fff;cursor:pointer;font-size:14px">⊞</button>
+            <button id="pvmode-list" onclick="setProductViewMode('list')" title="List view" style="padding:5px 9px;border:none;background:transparent;color:#666;cursor:pointer;font-size:14px">☰</button>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="openInventoryModal()">📦 庫存管理</button>
-          <button class="btn btn-primary" onclick="openProductModal()">+ 新增產品</button>
+          <button class="btn btn-ghost btn-sm" onclick="openInventoryModal()">📦 Inventory · สินค้าคงคลัง</button>
+          <button class="btn btn-primary" onclick="openProductModal()">+ New Product · สินค้าใหม่</button>
         </div>
       </div>
       <div id="product-overdue-alert" style="display:none"></div>
       <div class="filter-bar mobile-drawer-source" id="product-filter-bar">
-        <input id="fp-search" type="text" placeholder="搜尋產品名稱、料號..." oninput="renderProducts()" style="max-width:200px" />
-        <select id="fp-supplier" onchange="renderProducts()"><option value="">全部供應商</option></select>
+        <input id="fp-search" type="text" placeholder="Search name, SKU · ค้นหา..." oninput="renderProducts()" style="max-width:200px" />
+        <select id="fp-supplier" onchange="renderProducts()"><option value="">All Suppliers · ทุกซัพพลายเออร์</option></select>
         <select id="fp-status" onchange="renderProducts()">
-          <option value="">全部狀態</option>
-          <option value="ok">正常</option>
-          <option value="warn">即將到期</option>
-          <option value="overdue">需更新</option>
-          <option value="inactive">Inactive</option>
+          <option value="">All Statuses · ทุกสถานะ</option>
+          <option value="ok">正常 OK · ปกติ</option>
+          <option value="warn">即將到期 Expiring Soon · ใกล้หมดอายุ</option>
+          <option value="overdue">需更新 Needs Update · ต้องอัพเดต</option>
+          <option value="inactive">Inactive · ไม่ใช้งาน</option>
         </select>
-        <button class="btn btn-ghost btn-sm" onclick="clearProductFilters()">清除</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearProductFilters()">Clear · ล้าง</button>
       </div>
       <div id="product-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
       <div class="legend-strip">
-        <span class="ls-lbl">分類顏色</span>
+        <span class="ls-lbl">Category Colors · สี</span>
         <span class="ls-item" style="background:#F5ECD7;color:#7A4F2A">Brown</span>
         <span class="ls-item" style="background:#FFFBDA;color:#8A7000">Yellow</span>
         <span class="ls-item" style="background:#F5F5F0;color:#666;border:1px solid #e5e5e0">White</span>
@@ -615,42 +615,42 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <!-- 使用者管理 -->
     <div id="tab-users_mgmt" style="display:none">
       <div style="display:flex;gap:0;border-bottom:1px solid #e5e5e0;margin-bottom:14px">
-        <button id="users-subtab-users" onclick="switchUsersSubtab('users')" style="padding:8px 16px;border:none;border-bottom:2px solid #0F6E56;background:none;cursor:pointer;font-size:13px;font-weight:600;color:#0F6E56">使用者列表</button>
-        <button id="users-subtab-logs" onclick="switchUsersSubtab('logs')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555">操作記錄</button>
-        <button id="users-subtab-groups" onclick="switchUsersSubtab('groups')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555">群組管理</button>
+        <button id="users-subtab-users" onclick="switchUsersSubtab('users')" style="padding:8px 16px;border:none;border-bottom:2px solid #0F6E56;background:none;cursor:pointer;font-size:13px;font-weight:600;color:#0F6E56">Users · ผู้ใช้</button>
+        <button id="users-subtab-logs" onclick="switchUsersSubtab('logs')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555">Activity Log · บันทึกการใช้งาน</button>
+        <button id="users-subtab-groups" onclick="switchUsersSubtab('groups')" style="display:none;padding:8px 16px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#555">Groups · กลุ่ม</button>
       </div>
       <div id="users-pane-users">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <div id="user-summary" style="font-size:12px;color:#888"></div>
-          <button class="btn btn-primary" onclick="showNewUserModal()">+ 新增使用者</button>
+          <button class="btn btn-primary" onclick="showNewUserModal()">+ New User · ผู้ใช้ใหม่</button>
         </div>
         <div id="user-list"></div>
       </div>
       <div id="users-pane-logs" style="display:none">
         <div class="filter-bar" style="margin-bottom:12px">
-          <select id="al-user" onchange="renderActivityLogs()"><option value="">全部使用者</option></select>
+          <select id="al-user" onchange="renderActivityLogs()"><option value="">All Users · ทุกผู้ใช้</option></select>
           <select id="al-module" onchange="renderActivityLogs()">
-            <option value="">全部模組</option>
-            <option value="inquiry">詢價</option>
-            <option value="quote">報價</option>
-            <option value="order">訂單</option>
-            <option value="purchase">採購</option>
-            <option value="product">產品</option>
-            <option value="customer">客戶</option>
-            <option value="supplier">供應商</option>
-            <option value="sample">樣品</option>
-            <option value="user">使用者</option>
-            <option value="auth">登入</option>
+            <option value="">All Modules · ทุกโมดูล</option>
+            <option value="inquiry">詢價 Inquiry</option>
+            <option value="quote">報價 Quote</option>
+            <option value="order">訂單 Order</option>
+            <option value="purchase">採購 Purchase</option>
+            <option value="product">產品 Product</option>
+            <option value="customer">客戶 Customer</option>
+            <option value="supplier">供應商 Supplier</option>
+            <option value="sample">樣品 Sample</option>
+            <option value="user">使用者 User</option>
+            <option value="auth">登入 Auth</option>
           </select>
-          <input id="al-date-from" type="date" onchange="renderActivityLogs()" style="max-width:140px" aria-label="起始日期" />
-          <input id="al-date-to" type="date" onchange="renderActivityLogs()" style="max-width:140px" aria-label="結束日期" />
+          <input id="al-date-from" type="date" onchange="renderActivityLogs()" style="max-width:140px" aria-label="From date" />
+          <input id="al-date-to" type="date" onchange="renderActivityLogs()" style="max-width:140px" aria-label="To date" />
         </div>
         <div id="activity-log-list"></div>
       </div>
       <div id="users-pane-groups" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <div id="group-summary" style="font-size:12px;color:#888"></div>
-          <button class="btn btn-primary" onclick="openGroupModal(null)">+ 新增群組</button>
+          <button class="btn btn-primary" onclick="openGroupModal(null)">+ New Group · กลุ่มใหม่</button>
         </div>
         <div id="group-list"></div>
       </div>
@@ -659,7 +659,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <!-- 系統設定 -->
     <div id="tab-settings" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div id="settings-summary" style="font-size:12px;color:#888">僅管理者可調整全域規則</div>
+        <div id="settings-summary" style="font-size:12px;color:#888">Admin only · ผู้ดูแลระบบเท่านั้น</div>
       </div>
       <div id="settings-panel"></div>
     </div>
@@ -669,43 +669,43 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
         <div id="purchase-summary" style="font-size:12px;color:#888"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('purchases')">☰ 篩選</button>
-          <button class="btn btn-primary" onclick="startPurchaseShopping()"><i data-lucide="shopping-cart" style="width:14px;height:14px;margin-right:5px;vertical-align:-2px"></i>開始採購</button>
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" onclick="openFilterDrawer('purchases')">☰ Filter · กรอง</button>
+          <button class="btn btn-primary" onclick="startPurchaseShopping()"><i data-lucide="shopping-cart" style="width:14px;height:14px;margin-right:5px;vertical-align:-2px"></i>Start Purchasing · เริ่มสั่งซื้อ</button>
         </div>
       </div>
       <div class="filter-bar mobile-drawer-source" id="purchase-filter-bar">
         <select id="pf-status" onchange="renderPurchaseOrders()">
-          <option value="">全部狀態</option>
-          <option value="draft">草稿</option>
-          <option value="pending_approval">待審批</option>
-          <option value="approved">已審批</option>
-          <option value="sent">已發給供應商</option>
-          <option value="in_production">生產中</option>
-          <option value="shipped">已出貨</option>
-          <option value="received">已到貨</option>
-          <option value="completed">已完成</option>
-          <option value="rejected">已拒絕</option>
-          <option value="cancelled">已取消</option>
+          <option value="">All Statuses · ทุกสถานะ</option>
+          <option value="draft">草稿 Draft · ร่าง</option>
+          <option value="pending_approval">待審批 Pending Approval · รออนุมัติ</option>
+          <option value="approved">已審批 Approved · อนุมัติแล้ว</option>
+          <option value="sent">已發給供應商 Sent · ส่งแล้ว</option>
+          <option value="in_production">生產中 In Production · กำลังผลิต</option>
+          <option value="shipped">已出貨 Shipped · จัดส่งแล้ว</option>
+          <option value="received">已到貨 Received · ได้รับแล้ว</option>
+          <option value="completed">已完成 Completed · เสร็จสิ้น</option>
+          <option value="rejected">已拒絕 Rejected · ปฏิเสธ</option>
+          <option value="cancelled">已取消 Cancelled · ยกเลิก</option>
         </select>
         <select id="pf-supplier" onchange="renderPurchaseOrders()">
-          <option value="">全部供應商</option>
+          <option value="">All Suppliers · ทุกซัพพลายเออร์</option>
         </select>
         <select id="pf-sort" onchange="renderPurchaseOrders()">
-          <option value="accounting_desc" selected>會計編號（降序）</option>
-          <option value="accounting_asc">會計編號（升序）</option>
-          <option value="created_desc">建立日期（新→舊）</option>
+          <option value="accounting_desc" selected>Acct No. (Desc) · เลขบัญชี ↓</option>
+          <option value="accounting_asc">Acct No. (Asc) · เลขบัญชี ↑</option>
+          <option value="created_desc">Created (Newest) · สร้างล่าสุด</option>
         </select>
       </div>
       <div class="legend-strip">
-        <span class="ls-lbl">顏色說明</span>
-        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">未歸入任何船運批次</span>
-        <span class="ls-lbl" style="margin-left:6px">狀態顏色</span>
-        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">草稿／生產中</span>
-        <span class="ls-item" style="background:#E6F1FB;color:#185FA5">待審批／已出貨</span>
-        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">已審批</span>
-        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56">已發給供應商</span>
-        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">已到貨</span>
-        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">已拒絕</span>
+        <span class="ls-lbl">Legend · สี</span>
+        <span class="ls-item" style="background:#FEF2F2;border-left:3px solid #EF4444">未歸入船運 No Shipment Assigned</span>
+        <span class="ls-lbl" style="margin-left:6px">Status Colors · สถานะ</span>
+        <span class="ls-item" style="background:#FAEEDA;color:#854F0B">Draft / In Production</span>
+        <span class="ls-item" style="background:#E6F1FB;color:#185FA5">Pending / Shipped</span>
+        <span class="ls-item" style="background:#EEEDFE;color:#534AB7">Approved · อนุมัติ</span>
+        <span class="ls-item" style="background:#E1F5EE;color:#0F6E56">Sent to Supplier · ส่งแล้ว</span>
+        <span class="ls-item" style="background:#EAF3DE;color:#3B6D11">Received · ได้รับ</span>
+        <span class="ls-item" style="background:#FCEBEB;color:#A32D2D">Rejected · ปฏิเสธ</span>
       </div>
       <div id="purchase-list"></div>
     </div>
@@ -721,8 +721,8 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
           <!-- order import accordion -->
           <div id="pshop-order-section" style="border:1px solid #e5e5e0;border-radius:4px;margin-bottom:14px;overflow:hidden">
             <div onclick="togglePshopOrderSection()" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;background:#f9f9f7;user-select:none">
-              <span style="font-size:13px;font-weight:500">從訂單帶入品項</span>
-              <span id="pshop-order-toggle-icon" style="font-size:11px;color:#888">展開 ▾</span>
+              <span style="font-size:13px;font-weight:500">Import from Order · นำเข้าจากคำสั่งซื้อ</span>
+              <span id="pshop-order-toggle-icon" style="font-size:11px;color:#888">Expand · ขยาย ▾</span>
             </div>
             <div id="pshop-order-body" style="display:none;padding:12px 14px;border-top:1px solid #e5e5e0">
               <div id="pshop-order-list"></div>
@@ -733,17 +733,17 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
         </div>
         <!-- desktop cart -->
         <div id="pshop-desktop-cart" style="width:280px;flex-shrink:0;border-left:1px solid #e5e5e0;min-height:calc(100vh - 120px);padding:16px;background:#fff;position:sticky;top:57px;max-height:calc(100vh - 57px);overflow-y:auto">
-          <div style="font-size:13px;font-weight:600;margin-bottom:10px">採購車</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px">Cart · ตะกร้า</div>
           <div id="pshop-cart-items"></div>
           <div id="pshop-cart-total" style="border-top:1px solid #e5e5e0;padding-top:10px;margin-top:8px;font-size:13px;font-weight:600;text-align:right"></div>
-          <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="openPshopCheckout()" id="pshop-checkout-btn">前往結算</button>
+          <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="openPshopCheckout()" id="pshop-checkout-btn">Checkout · ชำระเงิน</button>
         </div>
       </div>
       <!-- mobile cart overlay -->
       <div id="pshop-mobile-cart-overlay" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.5)" onclick="closeMobileCart()">
         <div onclick="event.stopPropagation()" style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:6px 6px 0 0;max-height:80vh;display:flex;flex-direction:column">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 10px;border-bottom:1px solid #e5e5e0;flex-shrink:0">
-            <div style="font-size:14px;font-weight:600">採購車</div>
+            <div style="font-size:14px;font-weight:600">Cart · ตะกร้า</div>
             <button class="btn btn-ghost btn-sm" onclick="closeMobileCart()">✕</button>
           </div>
           <div style="flex:1;overflow-y:auto;padding:12px 16px">
@@ -751,7 +751,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
             <div id="pshop-mobile-cart-total" style="border-top:1px solid #e5e5e0;padding-top:10px;margin-top:8px;font-size:13px;font-weight:600;text-align:right"></div>
           </div>
           <div style="padding:12px 16px;border-top:1px solid #e5e5e0;flex-shrink:0">
-            <button class="btn btn-primary" style="width:100%" onclick="closeMobileCart();openPshopCheckout()">前往結算</button>
+            <button class="btn btn-primary" style="width:100%" onclick="closeMobileCart();openPshopCheckout()">Checkout · ชำระเงิน</button>
           </div>
         </div>
       </div>
@@ -761,33 +761,33 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <div class="modal-overlay" id="modal-pshop-checkout" onclick="closeModalOnBg(event,'modal-pshop-checkout')">
       <div class="modal-box sm">
         <div class="modal-hd">
-          <div style="font-size:14px;font-weight:600">確認採購</div>
+          <div style="font-size:14px;font-weight:600">Confirm Purchase Order · ยืนยันใบสั่งซื้อ</div>
           <button class="modal-close" onclick="closeModal('modal-pshop-checkout')">✕</button>
         </div>
         <div class="modal-bd">
           <div id="pshop-checkout-summary" style="background:#f9f9f7;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:14px;font-size:12px"></div>
           <div style="display:flex;flex-direction:column;gap:10px">
-            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">會計編號（選填）</label><input id="pshop-accounting" placeholder="ACC-..." style="width:100%" /></div>
-            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">預計交貨日</label><input type="date" id="pshop-delivery" style="width:100%" /></div>
-            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">幣別</label>
+            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">Acct No. (optional) · เลขบัญชี</label><input id="pshop-accounting" placeholder="ACC-..." style="width:100%" /></div>
+            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">Est. Delivery · วันส่งมอบ</label><input type="date" id="pshop-delivery" style="width:100%" /></div>
+            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">Currency · สกุลเงิน</label>
               <select id="pshop-currency" style="width:100%"></select>
             </div>
-            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">備註</label><textarea id="pshop-notes" rows="3" placeholder="備註說明..." style="width:100%;resize:vertical"></textarea></div>
+            <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">Notes · หมายเหตุ</label><textarea id="pshop-notes" rows="3" placeholder="Additional notes..." style="width:100%;resize:vertical"></textarea></div>
           </div>
         </div>
         <div class="modal-foot" style="justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-pshop-checkout')">取消</button>
-          <button class="btn btn-primary btn-sm" onclick="confirmShopOrder()">確認建立採購單</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-pshop-checkout')">Cancel · ยกเลิก</button>
+          <button class="btn btn-primary btn-sm" onclick="confirmShopOrder()">Confirm PO · สร้างใบสั่งซื้อ</button>
         </div>
       </div>
     </div>
 
     <!-- 技術文件庫 -->
     <div id="tab-docs" style="display:none">
-      <div style="margin-bottom:12px"><input id="doc-search" placeholder="搜尋產品、文件類型、標籤..." oninput="renderDocs()" /></div>
-      <div class="alert-info">業務助理可直接搜尋並複製連結給客戶</div>
+      <div style="margin-bottom:12px"><input id="doc-search" placeholder="Search product, doc type, tag · ค้นหา..." oninput="renderDocs()" /></div>
+      <div class="alert-info">Search and copy links to share with customers · ค้นหาและคัดลอกลิงก์ส่งให้ลูกค้า</div>
       <div id="doc-list"></div>
-      <button class="btn btn-ghost" style="width:100%;margin-top:8px;border-style:dashed" onclick="showToast('上傳功能即將開放')">+ 上傳新文件</button>
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px;border-style:dashed" onclick="showToast('Upload feature coming soon · เร็วๆ นี้')">+ Upload Document · อัพโหลดเอกสาร</button>
     </div>
 
   </div>
@@ -3156,6 +3156,7 @@ async function detachPurchaseFromShipment(shipmentId,purchaseOrderId){
 function openOrderModal(id){
   selectedOrderId=id
   _oiPending={}
+  _orderItemsEditMode=false
   document.getElementById('modal-order').classList.add('open')
   const today=new Date().toISOString().slice(0,10)
   if(id===null){
@@ -3167,45 +3168,45 @@ function openOrderModal(id){
     const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
     const supOpts=supCos.map(c=>'<option>'+c+'</option>').join('')
     document.getElementById('modal-order-hd').innerHTML=
-      '<div style="font-size:14px;font-weight:600">新增訂單</div>'+
+      '<div style="font-size:14px;font-weight:600">New Order · คำสั่งซื้อใหม่</div>'+
       '<button class="modal-close" onclick="closeModal(\'modal-order\')">×</button>'
     document.getElementById('modal-order-bd').innerHTML=
       '<div class="grid-2" style="margin-bottom:10px">'+
-      '<div><label>訂單編號</label><input id="or-id" value="'+newId+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
-      '<div><label>客戶 <span class="req">*</span></label><select id="or-customer"><option value="">— 選擇 —</option>'+custOpts+'</select></div>'+
-      '<div><label>供應商 <span class="req">*</span></label><select id="or-supplier"><option value="">— 選擇 —</option>'+supOpts+'</select></div>'+
-      '<div><label>幣別</label><select id="or-currency">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
-      '<div><label>訂單日期</label><input id="or-date" type="date" value="'+today+'" /></div>'+
-      '<div><label>預計交期</label><input id="or-exp-del" type="date" /></div>'+
-      '<div><label>運輸方式</label><select id="or-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS)+'</select></div>'+
-      '<div><label>快遞單號</label><input id="or-tracking" /></div>'+
-      '<div><label>訂單來源</label><select id="or-source" onchange="onOrderSourceChange()"><option value="confirmed">confirmed — 正式訂單</option><option value="verbal">verbal — 口頭承諾</option></select></div>'+
-      '<div><label>客戶訂單號</label><input id="noi-customer-ref" type="text" placeholder="客戶系統的訂單編號（選填）" /></div>'+
+      '<div><label>Order No.</label><input id="or-id" value="'+newId+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+      '<div><label>Customer · ลูกค้า <span class="req">*</span></label><select id="or-customer"><option value="">— Select —</option>'+custOpts+'</select></div>'+
+      '<div><label>Supplier · ซัพพลายเออร์ <span class="req">*</span></label><select id="or-supplier"><option value="">— Select —</option>'+supOpts+'</select></div>'+
+      '<div><label>Currency · สกุลเงิน</label><select id="or-currency">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
+      '<div><label>Order Date · วันที่</label><input id="or-date" type="date" value="'+today+'" /></div>'+
+      '<div><label>Est. Delivery · กำหนดส่ง</label><input id="or-exp-del" type="date" /></div>'+
+      '<div><label>Transport · ขนส่ง</label><select id="or-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS)+'</select></div>'+
+      '<div><label>Tracking No.</label><input id="or-tracking" /></div>'+
+      '<div><label>Order Type · ประเภท</label><select id="or-source" onchange="onOrderSourceChange()"><option value="confirmed">Confirmed Order</option><option value="verbal">Verbal Commitment</option></select></div>'+
+      '<div><label>Customer PO No.</label><input id="noi-customer-ref" type="text" placeholder="Customer ref no. (optional)" /></div>'+
       '</div>'+
-      '<div id="or-verbal-warn" style="display:none;background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:10px">⚠ 口頭承諾訂單需要主管審批後才能建立採購單</div>'+
-      '<div style="margin-bottom:14px"><label>備註</label><textarea id="or-notes"></textarea></div>'+
+      '<div id="or-verbal-warn" style="display:none;background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:10px">⚠ Verbal commitment orders require manager approval before a PO can be created.</div>'+
+      '<div style="margin-bottom:14px"><label>Notes · หมายเหตุ</label><textarea id="or-notes"></textarea></div>'+
       '<div class="divider"></div>'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-      '<div class="section-title" style="margin-bottom:0">品項明細</div>'+
+      '<div class="section-title" style="margin-bottom:0">Items · รายการสินค้า</div>'+
       '</div>'+
       '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
-      '<div style="margin-bottom:8px"><label>產品名稱 <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="noi-name" placeholder="可手動輸入或從目錄帶入" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'new\')" style="white-space:nowrap;height:32px">選自產品目錄</button></div><input id="noi-product-id" type="hidden" /></div>'+
+      '<div style="margin-bottom:8px"><label>Product <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="noi-name" placeholder="Type or pick from catalog" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'new\')" style="white-space:nowrap;height:32px">From Catalog</button></div><input id="noi-product-id" type="hidden" /></div>'+
       '<div class="grid-2" style="margin-bottom:8px">'+
-      '<div><label>規格</label><input id="noi-spec" /></div>'+
+      '<div><label>Spec</label><input id="noi-spec" /></div>'+
       '<div></div>'+
-      '<div><label>數量（米）<span class="req">*</span></label><input id="noi-qty" type="number" min="0" oninput="refreshNoiCalc()" /></div>'+
+      '<div><label>Qty (m) <span class="req">*</span></label><input id="noi-qty" type="number" min="0" oninput="refreshNoiCalc()" /></div>'+
       '<div></div>'+
-      '<div><label>單價 <span class="req">*</span></label><input id="noi-price" type="number" min="0" step="0.0001" placeholder="0.0000" oninput="refreshNoiCalc()" /></div>'+
-      '<div><label>計價單位</label><select id="noi-pricing-unit" onchange="noiCpuChange()"><option value="m2">THB/m²</option><option value="m">THB/m</option></select></div>'+
-      '<div id="noi-width-wrap"><label>寬幅（mm）</label><input id="noi-width-mm" type="number" min="0" step="1" placeholder="例如 1070" oninput="refreshNoiCalc()" /></div>'+
-      '<div><label>幣別</label><select id="noi-currency" onchange="refreshNoiCalc()">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
+      '<div><label>Unit Price <span class="req">*</span></label><input id="noi-price" type="number" min="0" step="0.0001" placeholder="0.0000" oninput="refreshNoiCalc()" /></div>'+
+      '<div><label>Pricing Unit</label><select id="noi-pricing-unit" onchange="noiCpuChange()"><option value="m2">THB/m²</option><option value="m">THB/m</option></select></div>'+
+      '<div id="noi-width-wrap"><label>Width (mm)</label><input id="noi-width-mm" type="number" min="0" step="1" placeholder="e.g. 1070" oninput="refreshNoiCalc()" /></div>'+
+      '<div><label>Currency</label><select id="noi-currency" onchange="refreshNoiCalc()">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
       '</div>'+
       '<div id="noi-new-calc" style="font-size:12px;color:#555;margin-bottom:4px"></div>'+
       '<div style="display:flex;gap:8px">'+
-      '<button class="btn btn-primary btn-sm" onclick="addPendingOrderItem()">加入品項</button>'+
+      '<button class="btn btn-primary btn-sm" onclick="addPendingOrderItem()">Add Item</button>'+
       '</div></div>'+
-      '<div id="new-order-items" style="margin-bottom:12px"><div style="font-size:12px;color:#aaa">尚未新增品項</div></div>'+
-      '<button class="btn btn-primary" onclick="_createOrder()">建立訂單</button>'
+      '<div id="new-order-items" style="margin-bottom:12px"><div style="font-size:12px;color:#aaa">No items yet</div></div>'+
+      '<button class="btn btn-primary" onclick="_createOrder()">Create Order</button>'
   } else {
     _renderOrderModal()
     _backfillOrderPurchaseLinks(id)
@@ -3409,38 +3410,38 @@ function _renderOrderModal(){
 
   // Section 1
   let html=
-    '<div class="section-title">基本資料</div>'+
+    '<div class="section-title">Basic Info · ข้อมูลพื้นฐาน</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>訂單編號</label><input readonly value="'+esc(o.id)+'" style="background:#f8f8f5;color:#666" /></div>'+
-    '<div><label>客戶</label><select id="ore-customer"><option value="">— 選擇 —</option>'+custOpts+'</select></div>'+
-    '<div><label>供應商</label><select id="ore-supplier"><option value="">— 選擇 —</option>'+supOpts+'</select></div>'+
-    '<div><label>幣別</label><select id="ore-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
-    '<div><label>訂單日期</label><input id="ore-date" type="date" value="'+(o.order_date||'')+'" /></div>'+
-    '<div><label>預計交期</label><input id="ore-exp-del" type="date" value="'+(o.expected_delivery||'')+'" /></div>'+
-    '<div><label>實際到貨日</label><input id="ore-actual-del" type="date" value="'+(o.actual_delivery||'')+'" /></div>'+
-    '<div><label>運輸方式</label><select id="ore-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS,o.transport_method)+'</select></div>'+
-    '<div><label>快遞單號</label><input id="ore-tracking" value="'+esc(o.tracking_no||'')+'" /></div>'+
-    '<div><label>客戶訂單號</label><input id="oi-customer-ref" type="text" placeholder="客戶系統的訂單編號（選填）" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
+    '<div><label>Order No.</label><input readonly value="'+esc(o.id)+'" style="background:#f8f8f5;color:#666" /></div>'+
+    '<div><label>Customer · ลูกค้า</label><select id="ore-customer"><option value="">— Select —</option>'+custOpts+'</select></div>'+
+    '<div><label>Supplier · ซัพพลายเออร์</label><select id="ore-supplier"><option value="">— Select —</option>'+supOpts+'</select></div>'+
+    '<div><label>Currency · สกุลเงิน</label><select id="ore-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
+    '<div><label>Order Date · วันที่</label><input id="ore-date" type="date" value="'+(o.order_date||'')+'" /></div>'+
+    '<div><label>Est. Delivery · กำหนดส่ง</label><input id="ore-exp-del" type="date" value="'+(o.expected_delivery||'')+'" /></div>'+
+    '<div><label>Actual Delivery · ส่งจริง</label><input id="ore-actual-del" type="date" value="'+(o.actual_delivery||'')+'" /></div>'+
+    '<div><label>Transport · ขนส่ง</label><select id="ore-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS,o.transport_method)+'</select></div>'+
+    '<div><label>Tracking No. · เลขพัสดุ</label><input id="ore-tracking" value="'+esc(o.tracking_no||'')+'" /></div>'+
+    '<div><label>Customer PO No. · เลขสั่งซื้อลูกค้า</label><input id="oi-customer-ref" type="text" placeholder="Customer ref no. (optional)" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
     '</div>'+
-    '<div style="margin-bottom:12px"><label>備註</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
-    '<div style="margin-bottom:4px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" /> 此訂單需要 COA（分析證明書）</label></div>'+
+    '<div style="margin-bottom:12px"><label>Notes · หมายเหตุ</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:4px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" /> Requires COA · ต้องการใบรับรอง</label></div>'+
     '<div class="divider"></div>'
 
   const linkedShipments=orderLinkedShipments(o.id)
   const relatedPurchases=purchaseOrders.filter(p=>purchaseOrderLinksForDisplay(p.id).some(link=>String(link.order_id)===String(o.id)))
-  html+='<div class="section-title">船運資訊</div>'
+  html+='<div class="section-title">Shipments · การขนส่ง</div>'
   if(linkedShipments.length){
     html+=linkedShipments.map(sh=>{
       const st=shipmentStatusObj(sh.status)
       return '<div class="row" style="margin-bottom:8px" onclick="openShipmentModal('+sh.id+')">'+
         '<div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(sh.shipment_no)+'</div>'+
-        '<div style="font-size:11px;color:#888">'+[shipmentModeLabel(sh.transport_mode),sh.etd?('ETD '+sh.etd):null,sh.eta?('ETA '+sh.eta):null,sh.container_no?('櫃號 '+sh.container_no):null].filter(Boolean).join(' · ')+'</div></div>'+
+        '<div style="font-size:11px;color:#888">'+[shipmentModeLabel(sh.transport_mode),sh.etd?('ETD '+sh.etd):null,sh.eta?('ETA '+sh.eta):null,sh.container_no?('Container '+sh.container_no):null].filter(Boolean).join(' · ')+'</div></div>'+
         '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span></div>'
     }).join('')
   } else {
-    html+='<div style="font-size:12px;color:#aaa;padding:4px 0 10px">尚未掛入任何船運批次</div>'
+    html+='<div style="font-size:12px;color:#aaa;padding:4px 0 10px">No shipment linked · ยังไม่เชื่อมกับการขนส่ง</div>'
   }
-  html+='<div style="font-size:11px;color:#888;margin-bottom:12px">'+(relatedPurchases.length?'請透過相關採購單掛入船運批次。':'此訂單尚未對應任何採購單，若為安全庫存採購則可不關聯訂單。')+'</div><div class="divider"></div>'
+  html+='<div style="font-size:11px;color:#888;margin-bottom:12px">'+(relatedPurchases.length?'Link shipments via the related Purchase Order.':'No PO linked to this order. If this is a stock purchase, no link needed.')+'</div><div class="divider"></div>'
 
   // Section 2: Items
   function calcOiAmount(i,pendingQty){
@@ -3467,26 +3468,36 @@ function _renderOrderModal(){
     return parseFloat(up).toFixed(2)+' '+cur+' × '+q+(unit?' '+unit:'')+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
   }
   const total=itms.reduce((s,i)=>s+calcOiAmount(i),0)
+  const editMode=_orderItemsEditMode
   html+=
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-    '<div class="section-title" style="margin-bottom:0">品項明細</div>'+
-    '<button class="btn btn-primary btn-sm" onclick="toggleSmForm(\'ord-item-form\')">+ 新增品項</button></div>'+
-    '<div id="ord-item-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
-    '<div class="grid-2" style="margin-bottom:8px">'+
-    '<div><label>產品名稱 <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="oi-name" placeholder="可手動輸入或從目錄帶入" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'edit\')" style="white-space:nowrap;height:32px">選自產品目錄</button></div><input id="oi-product-id" type="hidden" /></div>'+
-    '<div><label>規格</label><input id="oi-spec" /></div>'+
-    '<div><label>數量 <span class="req">*</span></label><input id="oi-qty" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
-    '<div><label>單位</label><select id="oi-unit"><option value="m">m（米）</option><option value="m²">m²（平方米）</option><option value="roll">roll（卷）</option><option value="kg">kg</option><option value="piece">piece</option></select></div>'+
-    '<div><label>計價單位</label><select id="oi-cpu" onchange="refreshOiNewCalc()"><option value="m2">平方米 m²</option><option value="m">米 m</option></select></div>'+
-    '<div><label>寬幅（mm）</label><input id="oi-width-mm" type="number" min="0" step="1" placeholder="例如 1070（m²計價時必填）" oninput="refreshOiNewCalc()" /></div>'+
-    '<div><label>單價</label><input id="oi-price" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
-    '<div><label>幣別</label><select id="oi-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
-    '</div>'+
-    '<div id="oi-new-calc" style="font-size:11px;color:#888;margin-bottom:8px;min-height:16px"></div>'+
-    '<div style="display:flex;gap:8px">'+
-    '<button class="btn btn-primary btn-sm" onclick="submitOrderItem()">加入品項</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'ord-item-form\')">取消</button>'+
-    '</div></div>'
+    '<div class="section-title" style="margin-bottom:0">Items · รายการสินค้า</div>'+
+    '<div style="display:flex;gap:6px">'+
+    (editMode
+      ? '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'ord-item-form\')">+ Add Item</button>'+
+        '<button class="btn btn-ghost btn-sm" style="color:#0F6E56;border-color:#0F6E56" onclick="toggleOrderItemsEditMode()">✓ Done</button>'
+      : '<button class="btn btn-ghost btn-sm" onclick="toggleOrderItemsEditMode()">✎ Edit Items</button>'
+    )+
+    '</div></div>'+
+    (editMode
+      ? '<div id="ord-item-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
+        '<div class="grid-2" style="margin-bottom:8px">'+
+        '<div><label>Product <span class="req">*</span></label><div style="display:flex;gap:6px"><input id="oi-name" placeholder="Type or pick from catalog" style="flex:1" /><button class="btn btn-ghost btn-sm" type="button" onclick="openOrderProductPicker(\'edit\')" style="white-space:nowrap;height:32px">From Catalog</button></div><input id="oi-product-id" type="hidden" /></div>'+
+        '<div><label>Spec</label><input id="oi-spec" /></div>'+
+        '<div><label>Qty <span class="req">*</span></label><input id="oi-qty" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
+        '<div><label>Unit</label><select id="oi-unit"><option value="m">m</option><option value="m²">m²</option><option value="roll">roll</option><option value="kg">kg</option><option value="piece">piece</option></select></div>'+
+        '<div><label>Pricing Unit</label><select id="oi-cpu" onchange="refreshOiNewCalc()"><option value="m2">m²</option><option value="m">m</option></select></div>'+
+        '<div><label>Width (mm)</label><input id="oi-width-mm" type="number" min="0" step="1" placeholder="e.g. 1070 (required for m²)" oninput="refreshOiNewCalc()" /></div>'+
+        '<div><label>Unit Price</label><input id="oi-price" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
+        '<div><label>Currency</label><select id="oi-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
+        '</div>'+
+        '<div id="oi-new-calc" style="font-size:11px;color:#888;margin-bottom:8px;min-height:16px"></div>'+
+        '<div style="display:flex;gap:8px">'+
+        '<button class="btn btn-primary btn-sm" onclick="submitOrderItem()">Add Item</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'ord-item-form\')">Cancel</button>'+
+        '</div></div>'
+      : ''
+    )
 
   if(itms.length){
     itms.forEach(it=>{
@@ -3496,28 +3507,31 @@ function _renderOrderModal(){
       const wm=parseFloat(it.width_m||catalogProd?.width_m||0)
       const missingWidth=cpu==='m2'&&wm===0
       html+='<div style="padding:10px 0;border-bottom:1px solid #f0f0eb;font-size:12px">'+
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">'+
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">'+
         '<div style="font-weight:500;color:#333">'+esc(it.product_name||'—')+(it.spec?' <span style="font-weight:400;color:#aaa">'+esc(it.spec)+'</span>':'')+'</div>'+
-        '<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0;flex-shrink:0" onclick="deleteOrderItem('+it.id+')">×</button>'+
+        (editMode?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0;flex-shrink:0" onclick="deleteOrderItem('+it.id+')">×</button>':'')+
         '</div>'+
-        '<div style="font-size:11px;color:#888;margin-bottom:6px" id="oi-calc-'+it.id+'">'+fmtOiCalc(it)+'</div>'+
-        (missingWidth?'<div style="font-size:11px;color:#e55;margin-bottom:6px">⚠ 缺少寬幅，請在下方補填</div>':'')+
-        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
-        '<label style="color:#888;white-space:nowrap">數量</label>'+
-        '<input type="number" min="0" step="0.01" value="'+parseFloat(it.qty||0)+'" style="width:80px;font-size:12px;padding:2px 6px;border:1px solid #ddd;border-radius:4px" oninput="oiQtyChange('+it.id+',this.value)" />'+
-        '<label style="color:#888;white-space:nowrap">單位</label>'+
-        '<select style="font-size:12px;padding:2px 4px;border:1px solid #ddd;border-radius:4px;width:64px" onchange="oiUnitChange('+it.id+',this.value)">'+
-        ['m','m²','roll','kg','piece'].map(u=>'<option value="'+u+'"'+(( _oiPending[it.id]?.unit??it.unit)===u?' selected':'')+'>'+u+'</option>').join('')+
-        '</select>'+
-        (cpu==='m2'?'<label style="color:#888;white-space:nowrap">寬幅(mm)</label>'+
-        '<input type="number" min="0" step="1" value="'+(wm>0?Math.round(wm*1000):'')+'" placeholder="例 1070" style="width:70px;font-size:12px;padding:2px 6px;border:1px solid '+(missingWidth?'#e55':'#ddd')+';border-radius:4px" oninput="oiWidthChange('+it.id+',this.value)" />':'')+
-        '</div></div>'
+        '<div style="font-size:11px;color:#888;margin-bottom:4px" id="oi-calc-'+it.id+'">'+fmtOiCalc(it)+'</div>'+
+        (missingWidth&&editMode?'<div style="font-size:11px;color:#e55;margin-bottom:4px">⚠ Width missing — fill in below</div>':'')+
+        (editMode
+          ? '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
+            '<label style="color:#888;white-space:nowrap">Qty</label>'+
+            '<input type="number" min="0" step="0.01" value="'+parseFloat(it.qty||0)+'" style="width:80px;font-size:12px;padding:2px 6px;border:1px solid #ddd;border-radius:4px" oninput="oiQtyChange('+it.id+',this.value)" />'+
+            '<label style="color:#888;white-space:nowrap">Unit</label>'+
+            '<select style="font-size:12px;padding:2px 4px;border:1px solid #ddd;border-radius:4px;width:64px" onchange="oiUnitChange('+it.id+',this.value)">'+
+            ['m','m²','roll','kg','piece'].map(u=>'<option value="'+u+'"'+((_oiPending[it.id]?.unit??it.unit)===u?' selected':'')+'>'+u+'</option>').join('')+
+            '</select>'+
+            (cpu==='m2'?'<label style="color:#888;white-space:nowrap">Width(mm)</label>'+
+            '<input type="number" min="0" step="1" value="'+(wm>0?Math.round(wm*1000):'')+'" placeholder="e.g. 1070" style="width:70px;font-size:12px;padding:2px 6px;border:1px solid '+(missingWidth?'#e55':'#ddd')+';border-radius:4px" oninput="oiWidthChange('+it.id+',this.value)" />':'')+
+            '</div>'
+          : ''
+        )+'</div>'
     })
     html+='<div style="display:flex;justify-content:flex-end;align-items:center;padding:8px 0">'+
       '<span style="font-size:13px;font-weight:600;color:#0F6E56" id="oi-total-display">Total '+total.toFixed(2)+' '+(o.currency||'')+'</span>'+
       '</div>'
   } else {
-    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">尚無品項</div>'
+    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">No items yet · ยังไม่มีรายการ</div>'
   }
 
   html+='<div class="divider"></div>'
@@ -3532,46 +3546,46 @@ function _renderOrderModal(){
     if(approvalSt==='none'){
       if(hasPermission('approve')){
         html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:12px 14px;margin-bottom:12px">'+
-          '<div style="font-size:12px;color:#8A6400;margin-bottom:8px">此為口頭承諾訂單，請審批後才可建立採購單。</div>'+
+          '<div style="font-size:12px;color:#8A6400;margin-bottom:8px">Verbal commitment order — requires approval before a PO can be created.</div>'+
           '<div style="display:flex;gap:8px">'+
-          '<button class="btn btn-primary btn-sm" onclick="approveOrder(\''+o.id+'\')">審批通過 ✓</button>'+
-          '<button class="btn btn-ghost btn-sm" style="color:#e55" onclick="rejectOrder(\''+o.id+'\')">拒絕 ✗</button>'+
+          '<button class="btn btn-primary btn-sm" onclick="approveOrder(\''+o.id+'\')">Approve ✓</button>'+
+          '<button class="btn btn-ghost btn-sm" style="color:#e55" onclick="rejectOrder(\''+o.id+'\')">Reject ✗</button>'+
           '</div></div>'
       } else {
-        html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:10px 14px;font-size:12px;color:#8A6400;margin-bottom:12px">⏳ 等待主管審批</div>'
+        html+='<div style="background:#FFF6D8;border:1px solid #E2B36D;border-radius:4px;padding:10px 14px;font-size:12px;color:#8A6400;margin-bottom:12px">⏳ Pending manager approval</div>'
       }
     } else if(approvalSt==='approved'){
-      html+='<div style="background:#E1F5EE;border:1px solid #0F6E56;border-radius:4px;padding:8px 14px;font-size:12px;color:#085041;margin-bottom:12px">✓ 已審批通過'+(o.approved_by?' — '+o.approved_by:'')+(o.approved_at?' · '+o.approved_at.slice(0,10):'')+'</div>'
+      html+='<div style="background:#E1F5EE;border:1px solid #0F6E56;border-radius:4px;padding:8px 14px;font-size:12px;color:#085041;margin-bottom:12px">✓ Approved'+(o.approved_by?' — '+o.approved_by:'')+(o.approved_at?' · '+o.approved_at.slice(0,10):'')+'</div>'
     } else if(approvalSt==='rejected'){
-      html+='<div style="background:#FCEBEB;border:1px solid #F09595;border-radius:4px;padding:8px 14px;font-size:12px;color:#A32D2D;margin-bottom:12px">✗ 審批已拒絕</div>'
+      html+='<div style="background:#FCEBEB;border:1px solid #F09595;border-radius:4px;padding:8px 14px;font-size:12px;color:#A32D2D;margin-bottom:12px">✗ Approval rejected</div>'
     }
   }
 
   // COA section
   if(o.requires_coa){
     html+='<div class="divider"></div>'+
-    '<div class="section-title">COA（分析證明書）</div>'+
-    '<div id="order-coa-docs" style="margin-bottom:10px"><div style="font-size:12px;color:#aaa">載入中...</div></div>'+
+    '<div class="section-title">COA (Certificate of Analysis)</div>'+
+    '<div id="order-coa-docs" style="margin-bottom:10px"><div style="font-size:12px;color:#aaa">Loading...</div></div>'+
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">'+
     '<input type="file" id="order-coa-file" accept=".pdf,application/pdf" style="width:auto;font-size:12px" />'+
-    '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">上傳 COA</button>'+
+    '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">Upload COA</button>'+
     '</div>'
   }
 
   // Consolidated sticky footer
   html+='<div class="modal-foot" style="justify-content:space-between;align-items:center">'
-  html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteOrder()">刪除訂單</button>'
+  html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteOrder()">Delete Order</button>'
   html+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
-  html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderBasic()">儲存基本資料</button>'
-  if(hasItems) html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderItems()">儲存品項</button>'
+  html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderBasic()">Save Info</button>'
+  if(hasItems&&editMode) html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderItems()">Save Items</button>'
   if(isActive){
-    html+='<button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>建立採購單</button>'
-    if(o.status==='confirmed') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'processing\')">開始處理 →</button>'
-    if(o.status==='processing') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'ready\')">備貨完成 →</button>'
-    if(o.status==='ready') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'shipped\')">標記已出貨 →</button>'
-    if(o.status==='shipped') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'delivered\')">客戶已收到 →</button>'
-    if(o.status==='delivered') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'completed\')">完成訂單 ✓</button>'
-    html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="openCancelOrderModal()">取消訂單</button>'
+    html+='<button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>Create PO</button>'
+    if(o.status==='confirmed') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'processing\')">Start Processing →</button>'
+    if(o.status==='processing') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'ready\')">Ready →</button>'
+    if(o.status==='ready') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'shipped\')">Mark Shipped →</button>'
+    if(o.status==='shipped') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'delivered\')">Delivered →</button>'
+    if(o.status==='delivered') html+='<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(\'completed\')">Complete ✓</button>'
+    html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="openCancelOrderModal()">Cancel Order</button>'
   }
   html+='</div></div>'
 
@@ -3797,6 +3811,8 @@ async function deleteOrderItem(itemId){
 }
 
 let _oiPending={}
+let _orderItemsEditMode=false
+function toggleOrderItemsEditMode(){_orderItemsEditMode=!_orderItemsEditMode;_renderOrderModal()}
 function _calcOiItemAmt(i,pendingQty){
   const cpu=i.customer_pricing_unit
   const pendingWmM=_oiPending[i.id]?.width_m
@@ -5194,7 +5210,7 @@ async function confirmShopOrder(){
 }
 // ── end 採購選購 ──────────────────────────────────────────
 
-const TAB_LABELS={dashboard:'儀表板',inquiry:'詢價管理',quotes:'報價管理',samples:'樣品管理',complaints:'客訴管理',orders:'訂單管理',shipments:'船運管理',customers:'客戶管理',suppliers_mgmt:'供應商管理',products:'產品目錄',docs:'技術文件庫',users_mgmt:'使用者管理',settings:'系統設定',purchases:'採購單管理','purchase-shop':'採購選購'}
+const TAB_LABELS={dashboard:'儀表板 Dashboard · แดชบอร์ด',inquiry:'詢價管理 Inquiries · ใบสอบถามราคา',quotes:'報價管理 Quotations · ใบเสนอราคา',samples:'樣品管理 Samples · ตัวอย่าง',complaints:'客訴管理 Complaints · ร้องเรียน',orders:'訂單管理 Orders · คำสั่งซื้อ',shipments:'船運管理 Shipments · การขนส่ง',customers:'客戶管理 Customers · ลูกค้า',suppliers_mgmt:'供應商管理 Suppliers · ซัพพลายเออร์',products:'產品目錄 Products · สินค้า',docs:'技術文件庫 Documents · เอกสาร',users_mgmt:'使用者管理 Users · ผู้ใช้',settings:'系統設定 Settings · การตั้งค่า',purchases:'採購單管理 Purchase Orders · ใบสั่งซื้อ','purchase-shop':'採購選購 Purchase Shop · ร้านค้า'}
 function switchTab(tab,save=true){
   if(tab==='settings'&&!hasPermission('view_settings')){
     showToast('只有管理者可以查看系統設定','error')
