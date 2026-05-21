@@ -260,6 +260,9 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     <button class="nav-item" id="nav-complaints" onclick="switchTab('complaints')">
       <span class="nav-icon"><i data-lucide="alert-triangle"></i></span><span data-i18n="tab_complaints">客訴管理</span><span class="nav-badge" id="badge-complaints" style="display:none"></span>
     </button>
+    <button class="nav-item" id="nav-customer-portal" onclick="switchTab('customer-portal')">
+      <span class="nav-icon"><i data-lucide="eye"></i></span><span data-i18n="tab_customer_portal">客戶視角</span>
+    </button>
     <div class="nav-section" data-i18n="nav_contacts">通訊錄</div>
     <button class="nav-item" id="nav-customers" onclick="switchTab('customers')">
       <span class="nav-icon"><i data-lucide="users"></i></span><span data-i18n="tab_customers">客戶管理</span><span class="nav-badge" id="badge-customers" style="display:none"></span>
@@ -795,6 +798,16 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       <button class="btn btn-ghost" style="width:100%;margin-top:8px;border-style:dashed" onclick="showToast('Upload feature coming soon')" data-i18n="docs_upload">+ 上傳新文件</button>
     </div>
 
+    <div id="tab-customer-portal" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <select id="cp-customer-sel" style="min-width:220px" onchange="renderCustomerPortal()">
+          <option value="">— 選擇客戶 —</option>
+        </select>
+        <div id="cp-order-count" style="font-size:12px;color:#888"></div>
+      </div>
+      <div id="customer-portal-list"><div class="loading" style="color:#aaa">請選擇客戶以查看訂單進度</div></div>
+    </div>
+
   </div>
 </div>
 
@@ -1088,7 +1101,7 @@ const I18N={
     tab_complaints:'客訴管理',tab_orders:'訂單管理',tab_shipments:'船運管理',
     tab_customers:'客戶管理',tab_suppliers_mgmt:'供應商管理',tab_products:'產品目錄',
     tab_docs:'技術文件庫',tab_users_mgmt:'使用者管理',tab_settings:'系統設定',
-    tab_purchases:'採購單管理','tab_purchase-shop':'採購選購',
+    tab_purchases:'採購單管理','tab_purchase-shop':'採購選購',tab_customer_portal:'客戶視角',
     btn_filter:'☰ 篩選',btn_clear:'清除',btn_refresh:'↻ 重新整理',
     btn_new_inquiry:'+ 新增詢價',btn_new_quote:'+ 新增報價單',btn_new_sample:'+ 新增樣品',
     btn_new_order:'+ 新增訂單',btn_new_shipment:'+ 新增船運批次',btn_new_customer:'+ 新增客戶',
@@ -1176,7 +1189,7 @@ const I18N={
     tab_complaints:'Complaints',tab_orders:'Orders',tab_shipments:'Shipments',
     tab_customers:'Customers',tab_suppliers_mgmt:'Suppliers',tab_products:'Products',
     tab_docs:'Documents',tab_users_mgmt:'Users',tab_settings:'Settings',
-    tab_purchases:'Purchase Orders','tab_purchase-shop':'Purchase Shop',
+    tab_purchases:'Purchase Orders','tab_purchase-shop':'Purchase Shop',tab_customer_portal:'Customer View',
     btn_filter:'☰ Filter',btn_clear:'Clear',btn_refresh:'↻ Refresh',
     btn_new_inquiry:'+ New Inquiry',btn_new_quote:'+ New Quotation',btn_new_sample:'+ New Sample',
     btn_new_order:'+ New Order',btn_new_shipment:'+ New Shipment',btn_new_customer:'+ New Customer',
@@ -1264,7 +1277,7 @@ const I18N={
     tab_complaints:'ร้องเรียน',tab_orders:'คำสั่งซื้อ',tab_shipments:'การขนส่ง',
     tab_customers:'ลูกค้า',tab_suppliers_mgmt:'ซัพพลายเออร์',tab_products:'สินค้า',
     tab_docs:'เอกสาร',tab_users_mgmt:'ผู้ใช้',tab_settings:'การตั้งค่า',
-    tab_purchases:'ใบสั่งซื้อ','tab_purchase-shop':'ร้านค้า',
+    tab_purchases:'ใบสั่งซื้อ','tab_purchase-shop':'ร้านค้า',tab_customer_portal:'มุมมองลูกค้า',
     btn_filter:'☰ กรอง',btn_clear:'ล้าง',btn_refresh:'↻ รีเฟรช',
     btn_new_inquiry:'+ ใบสอบถามใหม่',btn_new_quote:'+ ใบเสนอราคาใหม่',btn_new_sample:'+ ตัวอย่างใหม่',
     btn_new_order:'+ คำสั่งซื้อใหม่',btn_new_shipment:'+ การจัดส่งใหม่',btn_new_customer:'+ ลูกค้าใหม่',
@@ -5540,7 +5553,7 @@ async function confirmShopOrder(){
 }
 // ── end 採購選購 ──────────────────────────────────────────
 
-const TAB_LABELS={dashboard:1,inquiry:1,quotes:1,samples:1,complaints:1,orders:1,shipments:1,customers:1,suppliers_mgmt:1,products:1,docs:1,users_mgmt:1,settings:1,purchases:1,'purchase-shop':1}
+const TAB_LABELS={dashboard:1,inquiry:1,quotes:1,samples:1,complaints:1,orders:1,shipments:1,customers:1,suppliers_mgmt:1,products:1,docs:1,users_mgmt:1,settings:1,purchases:1,'purchase-shop':1,'customer-portal':1}
 function switchTab(tab,save=true){
   if(tab==='settings'&&!hasPermission('view_settings')){
     showToast('只有管理者可以查看系統設定','error')
@@ -5568,6 +5581,7 @@ function switchTab(tab,save=true){
   if(tab==='purchases'){populatePurchaseSupplierFilter();renderPurchaseOrders();updatePurchaseBadge()}
   if(tab==='purchase-shop')pshopInitPage()
   else pshopShowTopbarControls(false)
+  if(tab==='customer-portal')renderCustomerPortal()
   closeSidebar()
 }
 
@@ -9073,6 +9087,84 @@ function copyDocLink(url,name){
   navigator.clipboard.writeText(url)
     .then(()=>showToast('已複製：'+name+' 的連結'))
     .catch(()=>showToast('請手動複製','error'))
+}
+
+function renderCustomerPortal(){
+  const el=document.getElementById('customer-portal-list')
+  const countEl=document.getElementById('cp-order-count')
+  if(!el)return
+  const sel=document.getElementById('cp-customer-sel')
+  if(sel&&sel.options.length<=1){
+    customers.slice().sort((a,b)=>(a.company||'').localeCompare(b.company||'')).forEach(c=>{
+      const opt=document.createElement('option')
+      opt.value=c.id;opt.textContent=c.company;sel.appendChild(opt)
+    })
+  }
+  const custId=sel?.value
+  if(!custId){
+    if(countEl)countEl.textContent=''
+    el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇客戶以查看訂單進度</div>'
+    return
+  }
+  const custOrders=orders.filter(o=>String(o.customer_id)===String(custId)).sort((a,b)=>(b.order_date||'').localeCompare(a.order_date||''))
+  if(countEl)countEl.textContent=custOrders.length?custOrders.length+' 筆訂單':''
+  if(!custOrders.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">此客戶尚無訂單</div>';return}
+  const today=new Date().toISOString().slice(0,10)
+  el.innerHTML=custOrders.map(o=>{
+    const st=sObj(o.status,ORDER_STATUS)
+    const itms=orderItems.filter(i=>i.order_id===o.id)
+    const lshs=orderLinkedShipments(o.id)
+    const hasCoa=orderCoaDocs.some(d=>String(d.order_id)===String(o.id))
+    const etdPassed=lshs.some(sh=>sh.etd&&sh.etd<=today)
+    const coaBadge=o.requires_coa
+      ?(hasCoa?'<span class="badge" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7">COA ✓</span>'
+        :etdPassed?'<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5">⚠ COA 待確認</span>'
+        :'<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>')
+      :''
+    const itemsHtml=itms.length
+      ?'<div style="border:1px solid #f0f0ec;border-radius:4px;overflow:hidden">'+
+        itms.map((it,idx)=>{
+          const prod=products.find(p=>String(p.id)===String(it.product_id))
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:12px;'+(idx?'border-top:1px solid #f0f0ec':'')+'">'+
+            '<span style="color:#333">'+esc(prod?.product_name||'—')+'</span>'+
+            '<span style="color:#666;flex-shrink:0;margin-left:12px">'+esc(String(it.quantity||''))+(it.unit?' '+it.unit:'')+'</span>'+
+          '</div>'
+        }).join('')+
+        '</div>'
+      :'<div style="font-size:12px;color:#aaa">尚無品項</div>'
+    const shipHtml=lshs.length
+      ?lshs.map(sh=>{
+          const sst=shipmentStatusObj(sh.status)
+          return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0">'+
+            '<span class="badge" style="background:'+sst.bg+';color:'+sst.color+';border:1px solid '+sst.color+'">'+sst.label+'</span>'+
+            '<span style="color:#555">'+esc(sh.shipment_no||'—')+'</span>'+
+            (sh.etd?'<span style="color:#888">ETD '+sh.etd+'</span>':'')+
+          '</div>'
+        }).join('')
+      :'<div style="font-size:12px;color:#aaa">尚無船運</div>'
+    return '<div class="card" style="margin-bottom:12px;padding:14px 16px">'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
+      '<span style="font-size:14px;font-weight:600">'+esc(o.id)+'</span>'+
+      '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
+      (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">'+esc(o.customer_ref_no)+'</span>':'')+
+      coaBadge+
+      '</div>'+
+      '<div style="font-size:11px;color:#888;margin-bottom:12px">'+
+      (o.order_date?'訂單日期 '+o.order_date:'')+
+      (o.expected_delivery?' · 預計交貨 '+o.expected_delivery:'')+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'+
+      '<div>'+
+      '<div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.4px;margin-bottom:6px">品項</div>'+
+      itemsHtml+
+      '</div>'+
+      '<div>'+
+      '<div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.4px;margin-bottom:6px">船運</div>'+
+      shipHtml+
+      '</div>'+
+      '</div>'+
+    '</div>'
+  }).join('')
 }
 
 checkAuth()
