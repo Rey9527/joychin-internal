@@ -1142,7 +1142,7 @@ const I18N={
     lbl_order_no:'訂單編號',lbl_customer:'客戶',lbl_supplier:'供應商',lbl_currency:'幣別',
     lbl_order_date:'訂單日期',lbl_est_delivery:'預計交期',lbl_actual_delivery:'實際到貨日',
     lbl_transport:'運輸方式',lbl_tracking_no:'快遞單號',lbl_customer_po:'客戶訂單號',
-    lbl_requires_coa:'此訂單需要 COA（分析證明書）',
+    lbl_requires_coa:'出貨時需向供應商索取 COA',
     ord_no_shipment:'尚未掛入任何船運批次',
     ord_link_via_po:'請透過相關採購單掛入船運批次。',
     ord_no_po:'此訂單尚未對應任何採購單，若為安全庫存採購則可不關聯訂單。',
@@ -1230,7 +1230,7 @@ const I18N={
     lbl_order_no:'Order No.',lbl_customer:'Customer',lbl_supplier:'Supplier',lbl_currency:'Currency',
     lbl_order_date:'Order Date',lbl_est_delivery:'Est. Delivery',lbl_actual_delivery:'Actual Delivery',
     lbl_transport:'Transport',lbl_tracking_no:'Tracking No.',lbl_customer_po:'Customer PO No.',
-    lbl_requires_coa:'Requires COA (Certificate of Analysis)',
+    lbl_requires_coa:'Request COA from supplier at shipment',
     ord_no_shipment:'No shipment linked yet',
     ord_link_via_po:'Link shipments via the related Purchase Order.',
     ord_no_po:'No PO linked. If this is a stock purchase, no link needed.',
@@ -1318,7 +1318,7 @@ const I18N={
     lbl_order_no:'เลขที่คำสั่งซื้อ',lbl_customer:'ลูกค้า',lbl_supplier:'ซัพพลายเออร์',lbl_currency:'สกุลเงิน',
     lbl_order_date:'วันที่สั่งซื้อ',lbl_est_delivery:'วันส่งมอบโดยประมาณ',lbl_actual_delivery:'วันส่งมอบจริง',
     lbl_transport:'วิธีขนส่ง',lbl_tracking_no:'เลขติดตามพัสดุ',lbl_customer_po:'เลขสั่งซื้อลูกค้า',
-    lbl_requires_coa:'ต้องการใบรับรองการวิเคราะห์ (COA)',
+    lbl_requires_coa:'ขอ COA จากซัพพลายเออร์เมื่อจัดส่ง',
     ord_no_shipment:'ยังไม่เชื่อมกับการขนส่ง',
     ord_link_via_po:'เชื่อมการขนส่งผ่านใบสั่งซื้อที่เกี่ยวข้อง',
     ord_no_po:'ยังไม่มีใบสั่งซื้อ ถ้าเป็นการซื้อสต็อกไม่ต้องเชื่อม',
@@ -3751,10 +3751,11 @@ function _renderOrderModal(){
     '<div style="font-size:12px;font-weight:600;color:#6B3FA0;margin-bottom:8px">'+t('ord_coa_section')+'</div>'+
     '<div id="order-coa-docs" style="margin-bottom:10px"><div style="font-size:12px;color:#aaa">Loading...</div></div>'+
     (!linkedShipments.length
-      ? '<div style="font-size:12px;color:#888;padding:8px;background:#f3f0fa;border-radius:4px">📦 尚無關聯船運，待船運建立後追蹤 COA</div>'
+      ? '<div style="font-size:12px;color:#888;padding:8px;background:#f3f0fa;border-radius:4px">📋 提醒已設定 — 待船運建立後，出貨時向供應商索取 COA</div>'
       : !_coaEtdPassed&&!_coaHasDocs
-        ? '<div style="font-size:12px;color:#7A5800;padding:8px;background:#FFF8E1;border-radius:4px">⏳ 等待出貨中'+((_coaNextEtd)?' · ETD '+_coaNextEtd:'')+' — ETD 後請上傳供應商 COA</div>'
-        : '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+        ? '<div style="font-size:12px;color:#7A5800;padding:8px;background:#FFF8E1;border-radius:4px">⏳ 等待出貨'+((_coaNextEtd)?' · ETD '+_coaNextEtd:'')+' — 屆時記得向供應商索取 COA</div>'
+        : '<div style="font-size:12px;color:#991B1B;padding:6px 8px;background:#FEE2E2;border-radius:4px;margin-bottom:8px">⚠ ETD 已過 — 請確認是否已向供應商取得 COA，取得後上傳存檔</div>'+
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
           '<input type="file" id="order-coa-file" accept=".pdf,application/pdf" style="width:auto;font-size:12px" />'+
           '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">'+t('btn_upload_coa')+'</button>'+
           '</div>'
