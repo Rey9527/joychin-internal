@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.7.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.7.1</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -799,13 +799,17 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     </div>
 
     <div id="tab-customer-portal" style="display:none">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
         <select id="cp-customer-sel" style="min-width:220px" onchange="renderCustomerPortal()">
           <option value="">— 選擇客戶 —</option>
         </select>
-        <div id="cp-order-count" style="font-size:12px;color:#888"></div>
+        <div id="cp-item-count" style="font-size:12px;color:#888"></div>
       </div>
-      <div id="customer-portal-list"><div class="loading" style="color:#aaa">請選擇客戶以查看訂單進度</div></div>
+      <div style="display:flex;gap:0;border-bottom:2px solid #e5e5e0;margin-bottom:14px">
+        <button id="cp-tab-orders" onclick="switchCpTab('orders')" style="padding:7px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:#0F6E56;border-bottom:2px solid #0F6E56;margin-bottom:-2px">訂單</button>
+        <button id="cp-tab-samples" onclick="switchCpTab('samples')" style="padding:7px 18px;font-size:13px;border:none;background:none;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px">樣品</button>
+      </div>
+      <div id="customer-portal-list"><div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇客戶以查看資料</div></div>
     </div>
 
   </div>
@@ -9089,25 +9093,40 @@ function copyDocLink(url,name){
     .catch(()=>showToast('請手動複製','error'))
 }
 
+let _cpTab='orders'
+function switchCpTab(tab){
+  _cpTab=tab
+  const tabs=['orders','samples']
+  tabs.forEach(k=>{
+    const btn=document.getElementById('cp-tab-'+k)
+    if(!btn)return
+    const active=k===tab
+    btn.style.color=active?'#0F6E56':'#888'
+    btn.style.fontWeight=active?'600':'400'
+    btn.style.borderBottom=active?'2px solid #0F6E56':'2px solid transparent'
+  })
+  renderCustomerPortal()
+}
 function renderCustomerPortal(){
   const el=document.getElementById('customer-portal-list')
-  const countEl=document.getElementById('cp-order-count')
+  const countEl=document.getElementById('cp-item-count')
   if(!el)return
   const sel=document.getElementById('cp-customer-sel')
   if(sel&&sel.options.length<=1){
-    customers.slice().sort((a,b)=>(a.company||'').localeCompare(b.company||'')).forEach(c=>{
-      const opt=document.createElement('option')
-      opt.value=c.id;opt.textContent=c.company;sel.appendChild(opt)
-    })
+    const cos=[...new Set(customers.map(c=>c.company).filter(Boolean))].sort()
+    cos.forEach(co=>{const opt=document.createElement('option');opt.value=co;opt.textContent=co;sel.appendChild(opt)})
   }
-  const custId=sel?.value
-  if(!custId){
+  const co=sel?.value
+  if(!co){
     if(countEl)countEl.textContent=''
-    el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇客戶以查看訂單進度</div>'
+    el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇客戶以查看資料</div>'
     return
   }
-  const custOrders=orders.filter(o=>String(o.customer_id)===String(custId)).sort((a,b)=>(b.order_date||'').localeCompare(a.order_date||''))
-  if(countEl)countEl.textContent=custOrders.length?custOrders.length+' 筆訂單':''
+  const custIds=new Set(customers.filter(c=>c.company===co).map(c=>String(c.id)))
+  if(_cpTab==='samples'){_renderCpSamples(custIds,el,countEl);return}
+  // ── Orders ──
+  const custOrders=orders.filter(o=>custIds.has(String(o.customer_id))).sort((a,b)=>(b.order_date||'').localeCompare(a.order_date||''))
+  if(countEl)countEl.textContent=custOrders.length+' 筆訂單'
   if(!custOrders.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">此客戶尚無訂單</div>';return}
   const today=new Date().toISOString().slice(0,10)
   el.innerHTML=custOrders.map(o=>{
@@ -9129,8 +9148,7 @@ function renderCustomerPortal(){
             '<span style="color:#333">'+esc(prod?.product_name||'—')+'</span>'+
             '<span style="color:#666;flex-shrink:0;margin-left:12px">'+esc(String(it.quantity||''))+(it.unit?' '+it.unit:'')+'</span>'+
           '</div>'
-        }).join('')+
-        '</div>'
+        }).join('')+'</div>'
       :'<div style="font-size:12px;color:#aaa">尚無品項</div>'
     const shipHtml=lshs.length
       ?lshs.map(sh=>{
@@ -9147,22 +9165,38 @@ function renderCustomerPortal(){
       '<span style="font-size:14px;font-weight:600">'+esc(o.id)+'</span>'+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
       (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">'+esc(o.customer_ref_no)+'</span>':'')+
-      coaBadge+
-      '</div>'+
+      coaBadge+'</div>'+
       '<div style="font-size:11px;color:#888;margin-bottom:12px">'+
-      (o.order_date?'訂單日期 '+o.order_date:'')+
-      (o.expected_delivery?' · 預計交貨 '+o.expected_delivery:'')+
+      (o.order_date?'訂單日期 '+o.order_date:'')+(o.expected_delivery?' · 預計交貨 '+o.expected_delivery:'')+
       '</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'+
-      '<div>'+
-      '<div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.4px;margin-bottom:6px">品項</div>'+
-      itemsHtml+
+      '<div><div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.4px;margin-bottom:6px">品項</div>'+itemsHtml+'</div>'+
+      '<div><div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.4px;margin-bottom:6px">船運</div>'+shipHtml+'</div>'+
+      '</div></div>'
+  }).join('')
+}
+function _renderCpSamples(custIds,el,countEl){
+  const custShipments=sampleShipmentsOut.filter(r=>custIds.has(String(r.customer_id)))
+    .sort((a,b)=>(b.shipped_date||'').localeCompare(a.shipped_date||''))
+  if(countEl)countEl.textContent=custShipments.length+' 筆樣品出貨'
+  if(!custShipments.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">此客戶尚無樣品記錄</div>';return}
+  const fbMap={approved:'客戶接受',rejected:'客戶拒絕',need_revision:'需修改',shipped:'已寄出'}
+  const fbStyle={approved:'background:#EAF3DE;color:#3B6D11;border:1px solid #3B6D11',rejected:'background:#FCEBEB;color:#A32D2D;border:1px solid #A32D2D',need_revision:'background:#FAEEDA;color:#854F0B;border:1px solid #854F0B',shipped:'background:#E6F1FB;color:#185FA5;border:1px solid #185FA5'}
+  el.innerHTML=custShipments.map(r=>{
+    const smp=samples.find(s=>s.id===r.sample_id)
+    const stStyle=fbStyle[r.status]||'background:#f0f0f0;color:#888'
+    const stLabel=fbMap[r.status]||r.status
+    return '<div class="card" style="margin-bottom:10px;padding:14px 16px">'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
+      '<span style="font-size:14px;font-weight:600">'+esc(smp?.product_name||'—')+'</span>'+
+      '<span class="badge" style="'+stStyle+'">'+stLabel+'</span>'+
       '</div>'+
-      '<div>'+
-      '<div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.4px;margin-bottom:6px">船運</div>'+
-      shipHtml+
+      '<div style="font-size:12px;color:#666">'+
+      (r.shipped_date?'寄出日期 '+r.shipped_date:'')+
+      (r.qty?' · 數量 '+r.qty+(smp?.unit?' '+smp.unit:''):'')+
+      (r.tracking_no?' · 運單 '+esc(r.tracking_no):'')+
       '</div>'+
-      '</div>'+
+      (r.feedback?'<div style="font-size:12px;color:#555;margin-top:6px;padding:6px 8px;background:#f8f8f5;border-radius:4px">回饋：'+esc(r.feedback)+'</div>':'')+
     '</div>'
   }).join('')
 }
