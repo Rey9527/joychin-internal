@@ -3716,6 +3716,10 @@ function _renderOrderModal(){
   const itms=orderItems.filter(i=>i.order_id===id)
   const hasItems=itms.length>0
   const today=new Date().toISOString().slice(0,10)
+  const linkedShipments=orderLinkedShipments(o.id)
+  const _coaHasDocs=orderCoaDocs.some(d=>String(d.order_id)===String(o.id))
+  const _coaEtdPassed=linkedShipments.some(sh=>sh.etd&&sh.etd<=today)
+  const _coaNextEtd=linkedShipments.map(sh=>sh.etd).filter(Boolean).sort()[0]
 
   document.getElementById('modal-order-hd').innerHTML=
     '<div style="flex:1"><div style="font-size:15px;font-weight:600">'+o.id+'</div>'+
@@ -3746,13 +3750,18 @@ function _renderOrderModal(){
     '<div id="ord-coa-section" style="'+(o.requires_coa?'':'display:none')+';background:#f8f5ff;border:1px solid #D4BFEA;border-radius:6px;padding:12px;margin-top:8px;margin-bottom:4px">'+
     '<div style="font-size:12px;font-weight:600;color:#6B3FA0;margin-bottom:8px">'+t('ord_coa_section')+'</div>'+
     '<div id="order-coa-docs" style="margin-bottom:10px"><div style="font-size:12px;color:#aaa">Loading...</div></div>'+
-    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
-    '<input type="file" id="order-coa-file" accept=".pdf,application/pdf" style="width:auto;font-size:12px" />'+
-    '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">'+t('btn_upload_coa')+'</button>'+
-    '</div></div>'+
+    (!linkedShipments.length
+      ? '<div style="font-size:12px;color:#888;padding:8px;background:#f3f0fa;border-radius:4px">📦 尚無關聯船運，待船運建立後追蹤 COA</div>'
+      : !_coaEtdPassed&&!_coaHasDocs
+        ? '<div style="font-size:12px;color:#7A5800;padding:8px;background:#FFF8E1;border-radius:4px">⏳ 等待出貨中'+((_coaNextEtd)?' · ETD '+_coaNextEtd:'')+' — ETD 後請上傳供應商 COA</div>'
+        : '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+          '<input type="file" id="order-coa-file" accept=".pdf,application/pdf" style="width:auto;font-size:12px" />'+
+          '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">'+t('btn_upload_coa')+'</button>'+
+          '</div>'
+    )+
+    '</div>'+
     '<div class="divider"></div>'
 
-  const linkedShipments=orderLinkedShipments(o.id)
   const relatedPurchases=purchaseOrders.filter(p=>purchaseOrderLinksForDisplay(p.id).some(link=>String(link.order_id)===String(o.id)))
   html+='<div class="section-title">'+t('ord_ship_section')+'</div>'
   if(linkedShipments.length){
