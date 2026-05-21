@@ -1157,7 +1157,7 @@ const I18N={
     ord_waiting_approval:'⏳ 等待主管審批',
     ord_approved_txt:'✓ 已審批通過',ord_approval_rejected_txt:'✗ 審批已拒絕',
     ord_coa_section:'COA（分析證明書）',btn_upload_coa:'上傳 COA',
-    btn_delete_order:'刪除訂單',btn_save_info:'儲存基本資料',
+    btn_delete_order:'刪除訂單',btn_save_info:'儲存',
     btn_save_items:'儲存品項',btn_create_po:'建立採購單',
     btn_start_processing:'開始處理 →',btn_ord_ready:'備貨完成 →',
     btn_mark_shipped:'標記已出貨 →',btn_delivered:'客戶已收到 →',
@@ -1245,7 +1245,7 @@ const I18N={
     ord_waiting_approval:'⏳ Pending manager approval',
     ord_approved_txt:'✓ Approved',ord_approval_rejected_txt:'✗ Approval rejected',
     ord_coa_section:'COA (Certificate of Analysis)',btn_upload_coa:'Upload COA',
-    btn_delete_order:'Delete Order',btn_save_info:'Save Info',
+    btn_delete_order:'Delete Order',btn_save_info:'Save',
     btn_save_items:'Save Items',btn_create_po:'Create PO',
     btn_start_processing:'Start Processing →',btn_ord_ready:'Ready →',
     btn_mark_shipped:'Mark Shipped →',btn_delivered:'Delivered →',
@@ -1333,7 +1333,7 @@ const I18N={
     ord_waiting_approval:'⏳ รออนุมัติจากผู้จัดการ',
     ord_approved_txt:'✓ อนุมัติแล้ว',ord_approval_rejected_txt:'✗ ปฏิเสธแล้ว',
     ord_coa_section:'COA (ใบรับรองการวิเคราะห์)',btn_upload_coa:'อัพโหลด COA',
-    btn_delete_order:'ลบคำสั่งซื้อ',btn_save_info:'บันทึกข้อมูล',
+    btn_delete_order:'ลบคำสั่งซื้อ',btn_save_info:'บันทึก',
     btn_save_items:'บันทึกรายการ',btn_create_po:'สร้างใบสั่งซื้อ',
     btn_start_processing:'เริ่มดำเนินการ →',btn_ord_ready:'พร้อมแล้ว →',
     btn_mark_shipped:'จัดส่งแล้ว →',btn_delivered:'ส่งถึงแล้ว →',
@@ -3891,7 +3891,7 @@ function _renderOrderModal(){
   html+='<div class="modal-foot" style="justify-content:space-between;align-items:center">'
   html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteOrder()">'+t('btn_delete_order')+'</button>'
   html+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
-  html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderBasic()">'+t('btn_save_info')+'</button>'
+  html+='<button class="btn '+(isActive?'btn-ghost':'btn-primary')+' btn-sm" onclick="saveOrderBasic()">'+t('btn_save_info')+'</button>'
   if(hasItems&&editMode) html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderItems()">'+t('btn_save_items')+'</button>'
   if(isActive){
     html+='<button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>'+t('btn_create_po')+'</button>'
