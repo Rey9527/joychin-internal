@@ -799,15 +799,11 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
     </div>
 
     <div id="tab-customer-portal" style="display:none">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
         <select id="cp-customer-sel" style="min-width:220px" onchange="renderCustomerPortal()">
           <option value="">— 選擇客戶 —</option>
         </select>
         <div id="cp-item-count" style="font-size:12px;color:#888"></div>
-      </div>
-      <div style="display:flex;gap:0;border-bottom:2px solid #e5e5e0;margin-bottom:14px">
-        <button id="cp-tab-orders" onclick="switchCpTab('orders')" style="padding:7px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:#0F6E56;border-bottom:2px solid #0F6E56;margin-bottom:-2px">訂單</button>
-        <button id="cp-tab-samples" onclick="switchCpTab('samples')" style="padding:7px 18px;font-size:13px;border:none;background:none;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px">樣品</button>
       </div>
       <div id="customer-portal-list"><div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">請選擇客戶以查看資料</div></div>
     </div>
@@ -9093,20 +9089,6 @@ function copyDocLink(url,name){
     .catch(()=>showToast('請手動複製','error'))
 }
 
-let _cpTab='orders'
-function switchCpTab(tab){
-  _cpTab=tab
-  const tabs=['orders','samples']
-  tabs.forEach(k=>{
-    const btn=document.getElementById('cp-tab-'+k)
-    if(!btn)return
-    const active=k===tab
-    btn.style.color=active?'#0F6E56':'#888'
-    btn.style.fontWeight=active?'600':'400'
-    btn.style.borderBottom=active?'2px solid #0F6E56':'2px solid transparent'
-  })
-  renderCustomerPortal()
-}
 function renderCustomerPortal(){
   const el=document.getElementById('customer-portal-list')
   const countEl=document.getElementById('cp-item-count')
@@ -9123,82 +9105,77 @@ function renderCustomerPortal(){
     return
   }
   const custIds=new Set(customers.filter(c=>c.company===co).map(c=>String(c.id)))
-  if(_cpTab==='samples'){_renderCpSamples(custIds,el,countEl);return}
-  // ── Orders ──
-  const custOrders=orders.filter(o=>custIds.has(String(o.customer_id))).sort((a,b)=>(b.order_date||'').localeCompare(a.order_date||''))
-  if(countEl)countEl.textContent=custOrders.length+' 筆訂單'
-  if(!custOrders.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">此客戶尚無訂單</div>';return}
   const today=new Date().toISOString().slice(0,10)
-  el.innerHTML=custOrders.map(o=>{
-    const st=sObj(o.status,ORDER_STATUS)
-    const itms=orderItems.filter(i=>i.order_id===o.id)
-    const lshs=orderLinkedShipments(o.id)
-    const hasCoa=orderCoaDocs.some(d=>String(d.order_id)===String(o.id))
-    const etdPassed=lshs.some(sh=>sh.etd&&sh.etd<=today)
-    const coaBadge=o.requires_coa
-      ?(hasCoa?'<span class="badge" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7">COA ✓</span>'
-        :etdPassed?'<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5">⚠ COA 待確認</span>'
-        :'<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>')
-      :''
-    const itemsHtml=itms.length
-      ?'<div style="border:1px solid #f0f0ec;border-radius:4px;overflow:hidden">'+
-        itms.map((it,idx)=>{
-          const prod=products.find(p=>String(p.id)===String(it.product_id))
-          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:12px;'+(idx?'border-top:1px solid #f0f0ec':'')+'">'+
-            '<span style="color:#333">'+esc(prod?.product_name||'—')+'</span>'+
-            '<span style="color:#666;flex-shrink:0;margin-left:12px">'+esc(String(it.quantity||''))+(it.unit?' '+it.unit:'')+'</span>'+
-          '</div>'
-        }).join('')+'</div>'
-      :'<div style="font-size:12px;color:#aaa">尚無品項</div>'
-    const shipHtml=lshs.length
-      ?lshs.map(sh=>{
-          const sst=shipmentStatusObj(sh.status)
-          return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0">'+
-            '<span class="badge" style="background:'+sst.bg+';color:'+sst.color+';border:1px solid '+sst.color+'">'+sst.label+'</span>'+
-            '<span style="color:#555">'+esc(sh.shipment_no||'—')+'</span>'+
-            (sh.etd?'<span style="color:#888">ETD '+sh.etd+'</span>':'')+
-          '</div>'
-        }).join('')
-      :'<div style="font-size:12px;color:#aaa">尚無船運</div>'
-    return '<div class="card" style="margin-bottom:12px;padding:14px 16px">'+
-      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
-      '<span style="font-size:14px;font-weight:600">'+esc(o.id)+'</span>'+
-      '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
-      (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">'+esc(o.customer_ref_no)+'</span>':'')+
-      coaBadge+'</div>'+
-      '<div style="font-size:11px;color:#888;margin-bottom:12px">'+
-      (o.order_date?'訂單日期 '+o.order_date:'')+(o.expected_delivery?' · 預計交貨 '+o.expected_delivery:'')+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'+
-      '<div><div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.4px;margin-bottom:6px">品項</div>'+itemsHtml+'</div>'+
-      '<div><div style="font-size:11px;font-weight:600;color:#888;letter-spacing:.4px;margin-bottom:6px">船運</div>'+shipHtml+'</div>'+
-      '</div></div>'
-  }).join('')
-}
-function _renderCpSamples(custIds,el,countEl){
-  const custShipments=sampleShipmentsOut.filter(r=>custIds.has(String(r.customer_id)))
-    .sort((a,b)=>(b.shipped_date||'').localeCompare(a.shipped_date||''))
-  if(countEl)countEl.textContent=custShipments.length+' 筆樣品出貨'
-  if(!custShipments.length){el.innerHTML='<div style="color:#aaa;font-size:13px;padding:24px 0;text-align:center">此客戶尚無樣品記錄</div>';return}
-  const fbMap={approved:'客戶接受',rejected:'客戶拒絕',need_revision:'需修改',shipped:'已寄出'}
-  const fbStyle={approved:'background:#EAF3DE;color:#3B6D11;border:1px solid #3B6D11',rejected:'background:#FCEBEB;color:#A32D2D;border:1px solid #A32D2D',need_revision:'background:#FAEEDA;color:#854F0B;border:1px solid #854F0B',shipped:'background:#E6F1FB;color:#185FA5;border:1px solid #185FA5'}
-  el.innerHTML=custShipments.map(r=>{
-    const smp=samples.find(s=>s.id===r.sample_id)
-    const stStyle=fbStyle[r.status]||'background:#f0f0f0;color:#888'
-    const stLabel=fbMap[r.status]||r.status
-    return '<div class="card" style="margin-bottom:10px;padding:14px 16px">'+
-      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
-      '<span style="font-size:14px;font-weight:600">'+esc(smp?.product_name||'—')+'</span>'+
-      '<span class="badge" style="'+stStyle+'">'+stLabel+'</span>'+
-      '</div>'+
-      '<div style="font-size:12px;color:#666">'+
-      (r.shipped_date?'寄出日期 '+r.shipped_date:'')+
-      (r.qty?' · 數量 '+r.qty+(smp?.unit?' '+smp.unit:''):'')+
-      (r.tracking_no?' · 運單 '+esc(r.tracking_no):'')+
-      '</div>'+
-      (r.feedback?'<div style="font-size:12px;color:#555;margin-top:6px;padding:6px 8px;background:#f8f8f5;border-radius:4px">回饋：'+esc(r.feedback)+'</div>':'')+
-    '</div>'
-  }).join('')
+
+  // ── 詢價 section ──
+  const custInqs=inquiries.filter(i=>i.customer===co).sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''))
+  const smpFbStyle={approved:'background:#EAF3DE;color:#3B6D11;border:1px solid #3B6D11',rejected:'background:#FCEBEB;color:#A32D2D;border:1px solid #A32D2D',need_revision:'background:#FAEEDA;color:#854F0B;border:1px solid #854F0B',shipped:'background:#E6F1FB;color:#185FA5;border:1px solid #185FA5'}
+  const smpFbLabel={approved:'客戶接受',rejected:'客戶拒絕',need_revision:'需修改',shipped:'已寄出'}
+  let inqHtml=''
+  if(custInqs.length){
+    inqHtml=custInqs.map(inq=>{
+      const st=sObj(inq.status,INQ_STATUS)
+      const linkedSmps=samples.filter(s=>String(s.from_inquiry_id)===String(inq.id))
+      const smpsHtml=linkedSmps.map(smp=>{
+        const shipments=sampleShipmentsOut.filter(r=>r.sample_id===smp.id).sort((a,b)=>(b.shipped_date||'').localeCompare(a.shipped_date||''))
+        const shipLine=shipments.length
+          ?shipments.map(r=>'└─ 樣品已寄出 · '+esc(smp.product_name||'—')+(r.shipped_date?' · '+r.shipped_date:'')+(r.qty?' · '+r.qty+(smp.unit?' '+smp.unit:''):'')+' · <span class="badge" style="'+(smpFbStyle[r.status]||'background:#f0f0f0;color:#888')+'">'+( smpFbLabel[r.status]||r.status)+'</span>'+(r.feedback?' — '+esc(r.feedback):'')).join('<br>')
+          :'└─ 樣品 '+esc(smp.product_name||'—')+' · 尚未寄出'
+        return '<div style="font-size:12px;color:#555;margin-top:5px;line-height:1.8">'+shipLine+'</div>'
+      }).join('')
+      return '<div style="padding:10px 12px;background:#fff;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:8px">'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:'+(smpsHtml?'6':'0')+'px">'+
+        '<span style="font-weight:600;font-size:13px">'+esc(inq.id)+'</span>'+
+        '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
+        (inq.product?'<span style="font-size:12px;color:#555">'+esc(inq.product)+'</span>':'')+
+        (inq.created_at?'<span style="font-size:11px;color:#aaa">'+inq.created_at.slice(0,10)+'</span>':'')+
+        '</div>'+smpsHtml+'</div>'
+    }).join('')
+  }else{
+    inqHtml='<div style="font-size:12px;color:#aaa;padding:6px 0">此客戶尚無詢價記錄</div>'
+  }
+
+  // ── 訂單 section ──
+  const custOrders=orders.filter(o=>custIds.has(String(o.customer_id))).sort((a,b)=>(b.order_date||'').localeCompare(a.order_date||''))
+  let ordHtml=''
+  if(custOrders.length){
+    ordHtml=custOrders.map(o=>{
+      const st=sObj(o.status,ORDER_STATUS)
+      const itms=orderItems.filter(i=>i.order_id===o.id)
+      const lshs=orderLinkedShipments(o.id)
+      const hasCoa=orderCoaDocs.some(d=>String(d.order_id)===String(o.id))
+      const etdPassed=lshs.some(sh=>sh.etd&&sh.etd<=today)
+      const coaBadge=o.requires_coa
+        ?(hasCoa?'<span class="badge" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7">COA ✓</span>'
+          :etdPassed?'<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5">⚠ COA 待確認</span>'
+          :'<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>')
+        :''
+      const itemsRow=itms.map(it=>{
+        const prod=products.find(p=>String(p.id)===String(it.product_id))
+        return esc(prod?.product_name||'—')+(it.quantity?' '+it.quantity+(it.unit?' '+it.unit:''):'')
+      }).join(' / ')||'—'
+      const shipRows=lshs.map(sh=>{
+        const sst=shipmentStatusObj(sh.status)
+        return '└─ '+esc(sh.shipment_no||'—')+' · <span class="badge" style="background:'+sst.bg+';color:'+sst.color+';border:1px solid '+sst.color+'">'+sst.label+'</span>'+(sh.etd?' · ETD '+sh.etd:'')
+      }).join('<br>')||'└─ <span style="color:#aaa">尚無船運</span>'
+      return '<div style="padding:10px 12px;background:#fff;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:8px">'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
+        '<span style="font-weight:600;font-size:13px">'+esc(o.id)+'</span>'+
+        '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
+        (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">'+esc(o.customer_ref_no)+'</span>':'')+
+        coaBadge+(o.order_date?'<span style="font-size:11px;color:#aaa">'+o.order_date+'</span>':'')+
+        '</div>'+
+        '<div style="font-size:12px;color:#555;margin-bottom:5px">'+esc(itemsRow)+'</div>'+
+        '<div style="font-size:12px;color:#555;line-height:1.8">'+shipRows+'</div>'+
+      '</div>'
+    }).join('')
+  }else{
+    ordHtml='<div style="font-size:12px;color:#aaa;padding:6px 0">此客戶尚無訂單</div>'
+  }
+
+  if(countEl)countEl.textContent=custInqs.length+' 筆詢價 · '+custOrders.length+' 筆訂單'
+  const section=(icon,title,body)=>'<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;color:#888;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px">'+icon+' '+title+'</div>'+body+'</div>'
+  el.innerHTML=section('📋','詢價',inqHtml)+section('📦','訂單',ordHtml)
 }
 
 checkAuth()
