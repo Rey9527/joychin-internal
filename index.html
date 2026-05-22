@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.1</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.2</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -9381,6 +9381,8 @@ function _renderSpContent(){
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+
       '<div><label style="font-size:11px;color:#555">ETD <span style="color:#e55">*</span></label>'+
       '<input type="date" id="sp-etd" value="'+(_spDraftEtd||'')+'" style="margin-top:2px" onchange="_spDraftEtd=this.value" /></div>'+
+      '<div><label style="font-size:11px;color:#555">ETA（選填）</label>'+
+      '<input type="date" id="sp-eta" value="'+(_spDraftEta||'')+'" style="margin-top:2px" onchange="_spDraftEta=this.value" /></div>'+
       '<div><label style="font-size:11px;color:#555">船名（選填）</label>'+
       '<input id="sp-vessel" value="'+esc(_spDraftVessel||'')+'" placeholder="vessel name" style="margin-top:2px" oninput="_spDraftVessel=this.value" /></div>'+
       '</div>'+
@@ -9421,11 +9423,14 @@ function _renderSpContent(){
 let _spStagedItems=[]
 let _spStagedQtys={}
 let _spDraftEtd=''
+let _spDraftEta=''
 let _spDraftVessel=''
 function _spSyncDraft(){
   const etd=document.getElementById('sp-etd')?.value
+  const eta=document.getElementById('sp-eta')?.value
   const vessel=document.getElementById('sp-vessel')?.value
   if(etd!==undefined)_spDraftEtd=etd
+  if(eta!==undefined)_spDraftEta=eta
   if(vessel!==undefined)_spDraftVessel=vessel
 }
 function _spAddItem(itemId,defaultQty){
@@ -9448,7 +9453,7 @@ async function _spSubmitShipment(){
   if(!_spDraftEtd){showToast('請填寫 ETD','error');return}
   if(!_spStagedItems.length){showToast('請選擇至少一項產品','error');return}
   const shipNo=generateShipmentNo()
-  const{data:sh,error:shErr}=await sb.from('shipments').insert({shipment_no:shipNo,status:'planned',etd:_spDraftEtd,vessel_name:_spDraftVessel||null}).select().single()
+  const{data:sh,error:shErr}=await sb.from('shipments').insert({shipment_no:shipNo,status:'planned',etd:_spDraftEtd,eta:_spDraftEta||null,vessel_name:_spDraftVessel||null}).select().single()
   if(shErr){showToast('建立失敗：'+shErr.message,'error');return}
   const uniquePoIds=new Set(_spStagedItems.map(id=>{const i=purchaseOrderItems.find(x=>x.id===id);return i?String(i.po_id):null}).filter(Boolean))
   for(const poId of uniquePoIds){
@@ -9467,6 +9472,7 @@ async function _spSubmitShipment(){
   _spStagedItems=[]
   _spStagedQtys={}
   _spDraftEtd=''
+  _spDraftEta=''
   _spDraftVessel=''
   logActivity('供應商建立船運','shipment',shipNo,document.getElementById('sp-supplier-sel')?.value||'')
   await loadShipments()
@@ -9499,6 +9505,7 @@ function renderSupplierPortal(){
   _spStagedItems=[]
   _spStagedQtys={}
   _spDraftEtd=''
+  _spDraftEta=''
   _spDraftVessel=''
   _renderSpTabBar()
   _renderSpContent()
