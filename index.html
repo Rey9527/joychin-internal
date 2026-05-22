@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.9.1</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.0</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1004,15 +1004,21 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       </div>
       <div style="margin-bottom:12px">
         <label>角色 <span class="req">*</span></label>
-        <select id="nu-role">
+        <select id="nu-role" onchange="_nuRoleChange()">
           <option value="user">一般使用者</option>
           <option value="manager">經理</option>
           <option value="admin">系統管理員</option>
+          <option value="supplier">供應商</option>
+          <option value="customer">客戶</option>
         </select>
       </div>
       <div style="margin-bottom:12px">
         <label>群組</label>
         <select id="nu-group"><option value="">不指定群組</option></select>
+      </div>
+      <div id="nu-linked-wrap" style="margin-bottom:12px;display:none">
+        <label id="nu-linked-label">綁定公司 <span class="req">*</span></label>
+        <select id="nu-linked-company"><option value="">— 請選擇 —</option></select>
       </div>
       <div style="margin-bottom:14px">
         <label>初始密碼 <span class="req">*</span></label>
@@ -1461,15 +1467,18 @@ function sanitizeUserSession(user){
 }
 function normalizeUserRole(role){
   if(role==='assistant')return 'user'
-  if(['admin','manager','user'].includes(role))return role
+  if(['admin','manager','user','supplier','customer'].includes(role))return role
   return 'user'
 }
 function userRoleLabel(role){
-  return ({admin:'系統管理員',manager:'經理',user:'一般使用者'})[normalizeUserRole(role)]||'一般使用者'
+  return ({admin:'系統管理員',manager:'經理',user:'一般使用者',supplier:'供應商',customer:'客戶'})[normalizeUserRole(role)]||'一般使用者'
 }
 function userRoleColor(role){
-  return ({admin:'#A32D2D',manager:'#185FA5',user:'#666'})[normalizeUserRole(role)]||'#666'
+  return ({admin:'#A32D2D',manager:'#185FA5',user:'#666',supplier:'#854F0B',customer:'#0F6E56'})[normalizeUserRole(role)]||'#666'
 }
+function isSupplierAccount(){return currentUser?.role==='supplier'}
+function isCustomerAccount(){return currentUser?.role==='customer'}
+function isExternalAccount(){return isSupplierAccount()||isCustomerAccount()}
 
 function persistCurrentUser(user){
   currentUser=user?{...user,role:normalizeUserRole(user.role)}:null
@@ -1799,12 +1808,27 @@ async function init(){
   if(currentUser&&!isManager()&&hasPermission('manage_users')){
     document.getElementById('nav-users_mgmt').style.display='flex'
   }
+  if(isExternalAccount()){
+    // hide all nav except the relevant portal
+    document.querySelectorAll('.nav-item,.nav-section').forEach(el=>el.style.display='none')
+    if(isSupplierAccount()){
+      document.getElementById('nav-supplier-portal').style.display='flex'
+    } else {
+      document.getElementById('nav-customer-portal').style.display='flex'
+    }
+  }
   applyI18n()
-  const savedTab=sessionStorage.getItem(SESSION_ACTIVE_TAB_KEY)
-  if(savedTab&&TAB_LABELS[savedTab]){
-    switchTab(savedTab,false)
+  if(isSupplierAccount()){
+    switchTab('supplier-portal',false)
+  } else if(isCustomerAccount()){
+    switchTab('customer-portal',false)
   } else {
-    switchTab('dashboard',false)
+    const savedTab=sessionStorage.getItem(SESSION_ACTIVE_TAB_KEY)
+    if(savedTab&&TAB_LABELS[savedTab]){
+      switchTab(savedTab,false)
+    } else {
+      switchTab('dashboard',false)
+    }
   }
   enhanceNumericInputs()
   document.addEventListener('wheel',e=>{
@@ -8581,20 +8605,38 @@ function showNewUserModal(){
   document.getElementById('modal-new-user').classList.add('open')
 }
 
+function _nuRoleChange(){
+  const role=document.getElementById('nu-role')?.value
+  const wrap=document.getElementById('nu-linked-wrap')
+  const lbl=document.getElementById('nu-linked-label')
+  const sel=document.getElementById('nu-linked-company')
+  if(!wrap||!sel)return
+  if(role==='supplier'||role==='customer'){
+    wrap.style.display='block'
+    lbl.innerHTML=(role==='supplier'?'綁定供應商公司':'綁定客戶公司')+' <span class="req">*</span>'
+    const list=role==='supplier'
+      ?[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort()
+      :[...new Set(customers.map(c=>c.company).filter(Boolean))].sort()
+    sel.innerHTML='<option value="">— 請選擇 —</option>'+list.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')
+  } else {
+    wrap.style.display='none'
+    sel.innerHTML='<option value="">— 請選擇 —</option>'
+  }
+}
 async function createUser(){
   const email=document.getElementById('nu-email')?.value.trim()
   const name=document.getElementById('nu-name')?.value.trim()
   const role=document.getElementById('nu-role')?.value
   const password=document.getElementById('nu-password')?.value
-  
   if(!email||!name||!password){showToast('請填寫必要欄位','error');return}
-
+  const linkedCo=(role==='supplier'||role==='customer')?document.getElementById('nu-linked-company')?.value:''
+  if((role==='supplier'||role==='customer')&&!linkedCo){showToast('請選擇綁定公司','error');return}
   const groupId=document.getElementById('nu-group')?.value
   const insertPayload={email,name,role:normalizeUserRole(role),password_hash:password,is_active:true}
   if(groupId)insertPayload.group_id=parseInt(groupId)
+  if(linkedCo)insertPayload.linked_company=linkedCo
   const{error}=await sb.from('users').insert(insertPayload)
   if(error){showToast('新增失敗：'+error.message,'error');return}
-  
   await loadUsers()
   closeModal('modal-new-user')
   renderUsersMgmt()
@@ -8614,11 +8656,27 @@ function openUserDetail(userId){
     '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">'+
     '<div><label>姓名</label><input id="ud-name" value="'+esc(u.name||'')+'" '+(canEdit?'':'readonly style="background:#f8f8f5;color:#666"')+' /></div>'+
     '<div><label>Email</label><input id="ud-email" value="'+esc(u.email||'')+'" '+(canEdit?'':'readonly style="background:#f8f8f5;color:#666"')+' /></div>'+
-    '<div><label>角色</label><select id="ud-role" '+(isManager&&!isSelf?'':'disabled style="background:#f8f8f5;color:#666"')+'>'+
+    '<div><label>角色</label><select id="ud-role" '+(isManager&&!isSelf?'onchange="_udRoleChange()"':'disabled style="background:#f8f8f5;color:#666"')+'>'+
       '<option value="user"'+(u.role==='user'?' selected':'')+'>一般使用者</option>'+
       '<option value="manager"'+(u.role==='manager'?' selected':'')+'>經理</option>'+
       '<option value="admin"'+(u.role==='admin'?' selected':'')+'>系統管理員</option>'+
+      '<option value="supplier"'+(u.role==='supplier'?' selected':'')+'>供應商</option>'+
+      '<option value="customer"'+(u.role==='customer'?' selected':'')+'>客戶</option>'+
     '</select></div>'+
+    (()=>{
+      const r=u.role
+      const isExternal=r==='supplier'||r==='customer'
+      if(!isExternal&&!(isManager&&!isSelf))return ''
+      const list=r==='supplier'
+        ?[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort()
+        :[...new Set(customers.map(c=>c.company).filter(Boolean))].sort()
+      const display=isExternal?'block':'none'
+      return '<div id="ud-linked-wrap" style="margin-bottom:0;display:'+display+'"><label id="ud-linked-label">'+(r==='customer'?'綁定客戶公司':'綁定供應商公司')+'</label>'+
+        (isManager&&!isSelf
+          ?'<select id="ud-linked-company"><option value="">— 請選擇 —</option>'+list.map(c=>'<option value="'+esc(c)+'"'+(u.linked_company===c?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select>'
+          :'<div style="padding:8px 0;font-size:13px;color:#444">'+esc(u.linked_company||'—')+'</div>')+
+      '</div>'
+    })()+
     '<div><label>群組</label><select id="ud-group" '+(isManager&&!isSelf?'':'disabled style="background:#f8f8f5;color:#666"')+'>'+
       '<option value="">無群組</option>'+
       userGroups.map(g=>'<option value="'+g.id+'"'+(String(u.group_id)===String(g.id)?' selected':'')+'>'+esc(g.name)+'</option>').join('')+
@@ -8644,6 +8702,22 @@ function openUserDetail(userId){
   document.getElementById('modal-user-detail').classList.add('open')
 }
 
+function _udRoleChange(){
+  const role=document.getElementById('ud-role')?.value
+  const wrap=document.getElementById('ud-linked-wrap')
+  const lbl=document.getElementById('ud-linked-label')
+  const sel=document.getElementById('ud-linked-company')
+  if(!wrap)return
+  const isExternal=role==='supplier'||role==='customer'
+  wrap.style.display=isExternal?'block':'none'
+  if(lbl)lbl.textContent=role==='customer'?'綁定客戶公司':'綁定供應商公司'
+  if(sel){
+    const list=role==='supplier'
+      ?[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort()
+      :[...new Set(customers.map(c=>c.company).filter(Boolean))].sort()
+    sel.innerHTML='<option value="">— 請選擇 —</option>'+list.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')
+  }
+}
 async function saveUserDetail(userId){
   const u=users.find(x=>x.id===userId)
   if(!u)return
@@ -8658,6 +8732,8 @@ async function saveUserDetail(userId){
     patch.is_active=!!document.getElementById('ud-active')?.checked
     const grpVal=document.getElementById('ud-group')?.value
     patch.group_id=grpVal?parseInt(grpVal):null
+    const linkedCo=document.getElementById('ud-linked-company')?.value||null
+    patch.linked_company=linkedCo
   }
   const{error}=await sb.from('users').update(patch).eq('id',userId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
@@ -8933,6 +9009,7 @@ function renderUsersMgmt(){
         '<div style="font-size:13px;font-weight:500">'+u.name+(isSelf?' <span style="font-size:10px;color:#888">（我）</span>':'')+'</div>'+
         '<div style="font-size:11px;color:#888">'+u.email+'</div>'+
         (grp?'<div style="margin-top:3px"><span style="font-size:10px;padding:1px 7px;border-radius:4px;background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">'+esc(grp.name)+'</span></div>':'')+
+        (u.linked_company?'<div style="margin-top:3px"><span style="font-size:10px;padding:1px 7px;border-radius:4px;background:'+userRoleColor(u.role)+'15;color:'+userRoleColor(u.role)+';border:1px solid '+userRoleColor(u.role)+'40">🔗 '+esc(u.linked_company)+'</span></div>':'')+
       '</div>'+
       roleBadge+statusBadge+
       '<span style="color:#ccc;font-size:14px">›</span>'+
@@ -9362,9 +9439,23 @@ function renderSupplierPortal(){
   const el=document.getElementById('supplier-portal-list')
   if(!el)return
   const sel=document.getElementById('sp-supplier-sel')
-  if(sel&&sel.options.length<=1){
-    const cos=[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort()
-    cos.forEach(co=>{const opt=document.createElement('option');opt.value=co;opt.textContent=co;sel.appendChild(opt)})
+  if(isSupplierAccount()){
+    // external supplier account: lock to their company, hide selector
+    const co=currentUser.linked_company||''
+    if(sel){sel.innerHTML='<option value="'+esc(co)+'">'+esc(co)+'</option>';sel.value=co;sel.disabled=true;sel.style.display='none'}
+    const wrap=sel?.parentElement
+    if(wrap&&!document.getElementById('sp-company-label')){
+      const lbl=document.createElement('div')
+      lbl.id='sp-company-label'
+      lbl.style.cssText='font-size:14px;font-weight:600;color:#1a1a1a'
+      lbl.textContent=co
+      wrap.insertBefore(lbl,wrap.firstChild)
+    }
+  } else {
+    if(sel&&sel.options.length<=1){
+      const cos=[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort()
+      cos.forEach(co=>{const opt=document.createElement('option');opt.value=co;opt.textContent=co;sel.appendChild(opt)})
+    }
   }
   _spStagedItems=[]
   _spDraftEtd=''
@@ -9378,9 +9469,22 @@ function renderCustomerPortal(){
   const countEl=document.getElementById('cp-item-count')
   if(!el)return
   const sel=document.getElementById('cp-customer-sel')
-  if(sel&&sel.options.length<=1){
-    const cos=[...new Set(customers.map(c=>c.company).filter(Boolean))].sort()
-    cos.forEach(co=>{const opt=document.createElement('option');opt.value=co;opt.textContent=co;sel.appendChild(opt)})
+  if(isCustomerAccount()){
+    const co=currentUser.linked_company||''
+    if(sel){sel.innerHTML='<option value="'+esc(co)+'">'+esc(co)+'</option>';sel.value=co;sel.disabled=true;sel.style.display='none'}
+    const wrap=sel?.parentElement
+    if(wrap&&!document.getElementById('cp-company-label')){
+      const lbl=document.createElement('div')
+      lbl.id='cp-company-label'
+      lbl.style.cssText='font-size:14px;font-weight:600;color:#1a1a1a'
+      lbl.textContent=co
+      wrap.insertBefore(lbl,wrap.firstChild)
+    }
+  } else {
+    if(sel&&sel.options.length<=1){
+      const cos=[...new Set(customers.map(c=>c.company).filter(Boolean))].sort()
+      cos.forEach(co=>{const opt=document.createElement('option');opt.value=co;opt.textContent=co;sel.appendChild(opt)})
+    }
   }
   const co=sel?.value
   if(!co){
