@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.1</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -9277,9 +9277,26 @@ function _renderSpContent(){
           poItms.map((i,idx)=>{
             const si=shipmentItems.find(x=>x.po_item_id===i.id)
             const sh=si?shipments.find(s=>s.id===si.shipment_id):null
+            const ordQty=parseFloat(i.qty)||0
+            const shpQty=si?parseFloat(si.qty)||0:0
+            let deliveryBadge=''
+            if(sh){
+              const diff=shpQty-ordQty
+              const unit=esc(i.unit||'')
+              if(ordQty===0||diff===0){
+                deliveryBadge='<span class="badge" style="background:#E1F5EE;color:#0F6E56;border:1px solid #A7F3D0;flex-shrink:0;margin-left:8px;white-space:nowrap">✓ '+shpQty+' '+unit+'</span>'
+              } else if(diff<0){
+                deliveryBadge='<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;flex-shrink:0;margin-left:8px;white-space:nowrap">少交 '+Math.abs(diff).toFixed(2).replace(/\.?0+$/,'')+' '+unit+'</span>'
+              } else {
+                deliveryBadge='<span class="badge" style="background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;flex-shrink:0;margin-left:8px;white-space:nowrap">多交 '+diff.toFixed(2).replace(/\.?0+$/,'')+' '+unit+'</span>'
+              }
+              deliveryBadge+='<span class="badge" style="background:#E1F5EE;color:#0F6E56;border:1px solid #A7F3D0;flex-shrink:0;margin-left:4px;font-size:10px">📦 '+esc(sh.shipment_no||'—')+'</span>'
+            } else {
+              deliveryBadge='<span style="font-size:11px;color:#ccc;flex-shrink:0;margin-left:8px">未規劃</span>'
+            }
             return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;font-size:12px;'+(idx?'border-top:1px solid #f0f0ec':'')+'">' +
-              '<span style="color:#333">'+esc(i.product_name||'—')+(i.qty?' · '+i.qty+(i.unit?' '+i.unit:''):'')+'</span>'+
-              (sh?'<span class="badge" style="background:#E1F5EE;color:#0F6E56;border:1px solid #A7F3D0;flex-shrink:0;margin-left:8px">📦 '+esc(sh.shipment_no||'—')+'</span>':'<span style="font-size:11px;color:#ccc;flex-shrink:0;margin-left:8px">未規劃</span>')+
+              '<span style="color:#333">'+esc(i.product_name||'—')+(ordQty?' <span style="color:#aaa">訂 '+ordQty+(i.unit?' '+esc(i.unit):'')+'</span>':'')+'</span>'+
+              '<div style="display:flex;align-items:center;flex-shrink:0">'+deliveryBadge+'</div>'+
             '</div>'
           }).join('')+'</div>'
         :'<div style="font-size:12px;color:#aaa;margin-bottom:6px">—</div>'
@@ -9323,11 +9340,11 @@ function _renderSpContent(){
           '</div>'
         } else {
           leftRows+='<div draggable="true" ondragstart="event.dataTransfer.setData(\'text\',\''+i.id+'\')" '+
-            'onclick="_spSyncDraft();_spStagedItems.push('+i.id+');_renderSpContent()" '+
+            'onclick="_spAddItem('+i.id+','+(i.qty??'null')+')" '+
             'style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:#fff;border:1px solid #e5e5e0;margin-bottom:4px;cursor:grab" '+
             'onmouseenter="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.08)\'" onmouseleave="this.style.boxShadow=\'\'">'+
             '<span style="font-size:13px;color:#ccc">⠿</span>'+
-            '<span style="font-size:12px;flex:1">'+esc(i.product_name||'—')+(i.qty?' · '+i.qty+(i.unit?' '+i.unit:''):'')+'</span>'+
+            '<span style="font-size:12px;flex:1">'+esc(i.product_name||'—')+(i.qty?' <span style="color:#aaa">訂 '+i.qty+(i.unit?' '+esc(i.unit):'')+'</span>':'')+'</span>'+
             '<span style="font-size:10px;color:#aaa">拖曳</span>'+
           '</div>'
         }
@@ -9338,9 +9355,21 @@ function _renderSpContent(){
     const stagedItemHtml=_spStagedItems.map(id=>{
       const item=purchaseOrderItems.find(i=>i.id===id)
       if(!item)return ''
-      return '<div style="display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:6px;background:#F0FDF4;border:1px solid #A7F3D0;margin-bottom:4px">'+
-        '<span style="font-size:12px;flex:1">'+esc(item.product_name||'—')+(item.qty?' · '+item.qty+(item.unit?' '+item.unit:''):'')+'</span>'+
-        '<button onclick="_spStagedItems=_spStagedItems.filter(x=>x!=='+id+');_renderSpContent()" style="border:none;background:transparent;color:#aaa;cursor:pointer;font-size:16px;line-height:1;padding:0">×</button>'+
+      const currentQty=_spStagedQtys[id]??item.qty??''
+      const orderedQty=item.qty
+      return '<div style="background:#F0FDF4;border:1px solid #A7F3D0;border-radius:6px;padding:7px 10px;margin-bottom:4px">'+
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'+
+          '<span style="font-size:12px;flex:1;font-weight:500">'+esc(item.product_name||'—')+'</span>'+
+          '<button onclick="_spStagedItems=_spStagedItems.filter(x=>x!=='+id+');delete _spStagedQtys['+id+'];_renderSpContent()" style="border:none;background:transparent;color:#aaa;cursor:pointer;font-size:16px;line-height:1;padding:0">×</button>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:6px">'+
+          '<span style="font-size:11px;color:#888">訂購 '+(orderedQty??'—')+(item.unit?' '+esc(item.unit):'')+'</span>'+
+          '<span style="font-size:11px;color:#aaa">→ 實際交付</span>'+
+          '<input type="number" value="'+currentQty+'" min="0" step="any" '+
+            'oninput="_spStagedQtys['+id+']=parseFloat(this.value)||0" '+
+            'style="width:72px;padding:3px 6px;font-size:12px;border:1px solid #A7F3D0;border-radius:4px;background:#fff" />'+
+          '<span style="font-size:11px;color:#555">'+esc(item.unit||'')+'</span>'+
+        '</div>'+
       '</div>'
     }).join('')
     const dropZone=_spStagedItems.length
@@ -9390,6 +9419,7 @@ function _renderSpContent(){
   }
 }
 let _spStagedItems=[]
+let _spStagedQtys={}
 let _spDraftEtd=''
 let _spDraftVessel=''
 function _spSyncDraft(){
@@ -9398,13 +9428,20 @@ function _spSyncDraft(){
   if(etd!==undefined)_spDraftEtd=etd
   if(vessel!==undefined)_spDraftVessel=vessel
 }
+function _spAddItem(itemId,defaultQty){
+  _spSyncDraft()
+  if(!_spStagedItems.includes(itemId)){
+    _spStagedItems.push(itemId)
+    _spStagedQtys[itemId]=defaultQty??null
+  }
+  _renderSpContent()
+}
 function _spOnDrop(e){
   e.preventDefault()
   const itemId=parseInt(e.dataTransfer.getData('text'))
   if(!itemId)return
-  _spSyncDraft()
-  if(!_spStagedItems.includes(itemId))_spStagedItems.push(itemId)
-  _renderSpContent()
+  const poItem=purchaseOrderItems.find(i=>i.id===itemId)
+  _spAddItem(itemId,poItem?.qty??null)
 }
 async function _spSubmitShipment(){
   _spSyncDraft()
@@ -9420,13 +9457,15 @@ async function _spSubmitShipment(){
   for(const itemId of _spStagedItems){
     const poItem=purchaseOrderItems.find(i=>i.id===itemId)
     if(!poItem)continue
+    const shippedQty=_spStagedQtys[itemId]??poItem.qty
     await sb.from('shipment_items').insert({
       shipment_id:sh.id,po_id:String(poItem.po_id),po_item_id:poItem.id,
       product_id:poItem.product_id||null,product_name:poItem.product_name,
-      qty:poItem.qty,unit:poItem.unit||'',status:'planned'
+      qty:shippedQty,unit:poItem.unit||'',status:'planned'
     })
   }
   _spStagedItems=[]
+  _spStagedQtys={}
   _spDraftEtd=''
   _spDraftVessel=''
   logActivity('供應商建立船運','shipment',shipNo,document.getElementById('sp-supplier-sel')?.value||'')
@@ -9458,6 +9497,7 @@ function renderSupplierPortal(){
     }
   }
   _spStagedItems=[]
+  _spStagedQtys={}
   _spDraftEtd=''
   _spDraftVessel=''
   _renderSpTabBar()
