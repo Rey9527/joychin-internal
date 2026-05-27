@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.5</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.6</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -3963,9 +3963,6 @@ function _renderOrderModal(){
       '>'+s.label+'</button>'
   }).join('')
   html+='</div>'
-  if(!['cancelled','completed'].includes(o.status)){
-    html+='<div style="margin-top:6px"><button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595;font-size:11px" onclick="openCancelOrderModal()">'+t('btn_cancel_order')+'</button></div>'
-  }
   html+='</div>'
 
   // Consolidated sticky footer
@@ -3975,6 +3972,7 @@ function _renderOrderModal(){
   html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderBasic()">'+t('btn_save_info')+'</button>'
   if(hasItems&&editMode) html+='<button class="btn btn-ghost btn-sm" onclick="saveOrderItems()">'+t('btn_save_items')+'</button>'
   if(isActive) html+='<button class="btn btn-ghost btn-sm" onclick="createPurchaseFromOrder(\''+o.id+'\')" '+(purchaseDisabled?'disabled':'')+'>'+t('btn_create_po')+'</button>'
+  if(!['cancelled','completed'].includes(o.status)) html+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="openCancelOrderModal()">'+t('btn_cancel_order')+'</button>'
   html+='</div></div>'
 
   document.getElementById('modal-order-bd').innerHTML=html
