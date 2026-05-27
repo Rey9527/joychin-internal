@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.10</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.11</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -595,7 +595,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
       </div>
       <div id="product-overdue-alert" style="display:none"></div>
       <div class="filter-bar mobile-drawer-source" id="product-filter-bar">
-        <input id="fp-search" type="text" placeholder="搜尋名稱、SKU..." oninput="renderProducts()" style="max-width:200px" />
+        <input id="fp-search" type="text" placeholder="搜尋名稱、SKU..." data-i18n-ph="fp_search_ph" oninput="renderProducts()" style="max-width:200px" />
         <select id="fp-supplier" onchange="renderProducts()"><option value="" data-i18n="lbl_all_suppliers">全部供應商</option></select>
         <select id="fp-status" onchange="renderProducts()">
           <option value="" data-i18n="lbl_all_statuses">全部狀態</option>
@@ -959,7 +959,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 <div class="modal-overlay" id="modal-inv-log" onclick="closeModalOnBg(event,'modal-inv-log')">
   <div class="modal-box lg">
     <div class="modal-hd">
-      <div style="font-size:14px;font-weight:600">📋 庫存異動記錄</div>
+      <div style="font-size:14px;font-weight:600" data-i18n="inv_log_title">📋 庫存異動記錄</div>
       <button class="modal-close" onclick="closeModal('modal-inv-log')">×</button>
     </div>
     <div class="modal-bd" id="modal-inv-log-bd"></div>
@@ -1122,7 +1122,14 @@ const I18N={
     btn_new_supplier:'+ 新增供應商',btn_new_product:'+ 新增產品',btn_new_user:'+ 新增使用者',
     btn_new_group:'+ 新增群組',btn_new_complaint:'+ 新增客訴',
     btn_quote_defaults:'⚙ 報價預設值',btn_inventory:'📦 庫存管理',btn_start_purchase:'開始採購',
-    btn_add:'新增',btn_cancel:'取消',btn_logout:'登出',
+    btn_inv_log:'📋 異動記錄',btn_update_stock:'更新庫存',btn_save_stock:'確認儲存',
+    inv_log_title:'📋 庫存異動記錄',inv_no_log:'尚無庫存異動記錄',
+    inv_edit_hint:'編輯模式：直接填入實際盤點數量，Enter 跳下一筆，完成後按「確認儲存」',
+    inv_col_product:'產品',inv_col_safe:'安全水位',inv_col_stock:'現有庫存',inv_col_note:'備註',
+    lbl_base_paper_weight:'基紙重量（g/m²）',lbl_total_weight:'總重（kg）',
+    lbl_last_reviewed:'上次確認',lbl_reviewed_short:'確認',
+    fp_search_ph:'搜尋名稱、SKU...',
+    btn_add:'新增',btn_cancel:'取消',btn_close:'關閉',btn_logout:'登出',
     lbl_all_statuses:'全部狀態',lbl_all_customers:'全部客戶',lbl_all_suppliers:'全部供應商',
     lbl_all_modes:'全部方式',lbl_all_sources:'全部來源',lbl_all_modules:'全部模組',
     lbl_all_users:'全部使用者',lbl_from:'起始日期',lbl_to:'結束日期',
@@ -1221,7 +1228,14 @@ const I18N={
     btn_new_supplier:'+ New Supplier',btn_new_product:'+ New Product',btn_new_user:'+ New User',
     btn_new_group:'+ New Group',btn_new_complaint:'+ New Complaint',
     btn_quote_defaults:'⚙ Quote Defaults',btn_inventory:'📦 Inventory',btn_start_purchase:'Start Purchasing',
-    btn_add:'Add',btn_cancel:'Cancel',btn_logout:'Logout',
+    btn_inv_log:'📋 Change Log',btn_update_stock:'Update Stock',btn_save_stock:'Confirm & Save',
+    inv_log_title:'📋 Stock Change Log',inv_no_log:'No stock changes recorded',
+    inv_edit_hint:'Edit mode: enter actual counts directly. Press Enter for next item, then click "Confirm & Save".',
+    inv_col_product:'Product',inv_col_safe:'Safe Level',inv_col_stock:'Stock',inv_col_note:'Note',
+    lbl_base_paper_weight:'Base Paper Weight (g/m²)',lbl_total_weight:'Total Weight (kg)',
+    lbl_last_reviewed:'Last Confirmed',lbl_reviewed_short:'Confirmed',
+    fp_search_ph:'Search name, SKU...',
+    btn_add:'Add',btn_cancel:'Cancel',btn_close:'Close',btn_logout:'Logout',
     lbl_all_statuses:'All Statuses',lbl_all_customers:'All Customers',lbl_all_suppliers:'All Suppliers',
     lbl_all_modes:'All Modes',lbl_all_sources:'All Sources',lbl_all_modules:'All Modules',
     lbl_all_users:'All Users',lbl_from:'From',lbl_to:'To',
@@ -1320,7 +1334,14 @@ const I18N={
     btn_new_supplier:'+ ซัพพลายเออร์ใหม่',btn_new_product:'+ สินค้าใหม่',btn_new_user:'+ ผู้ใช้ใหม่',
     btn_new_group:'+ กลุ่มใหม่',btn_new_complaint:'+ ร้องเรียนใหม่',
     btn_quote_defaults:'⚙ ค่าเริ่มต้น',btn_inventory:'📦 สินค้าคงคลัง',btn_start_purchase:'เริ่มสั่งซื้อ',
-    btn_add:'เพิ่ม',btn_cancel:'ยกเลิก',btn_logout:'ออกจากระบบ',
+    btn_inv_log:'📋 บันทึกการเปลี่ยนแปลง',btn_update_stock:'อัปเดตสต็อก',btn_save_stock:'ยืนยันและบันทึก',
+    inv_log_title:'📋 บันทึกความเคลื่อนไหวสต็อก',inv_no_log:'ยังไม่มีรายการเปลี่ยนแปลงสต็อก',
+    inv_edit_hint:'โหมดแก้ไข: กรอกจำนวนจริง กด Enter ไปรายการถัดไป แล้วกด "ยืนยันและบันทึก"',
+    inv_col_product:'สินค้า',inv_col_safe:'ระดับความปลอดภัย',inv_col_stock:'สต็อกปัจจุบัน',inv_col_note:'หมายเหตุ',
+    lbl_base_paper_weight:'น้ำหนักกระดาษฐาน (g/m²)',lbl_total_weight:'น้ำหนักรวม (kg)',
+    lbl_last_reviewed:'ยืนยันล่าสุด',lbl_reviewed_short:'ยืนยัน',
+    fp_search_ph:'ค้นหาชื่อ, SKU...',
+    btn_add:'เพิ่ม',btn_cancel:'ยกเลิก',btn_close:'ปิด',btn_logout:'ออกจากระบบ',
     lbl_all_statuses:'ทุกสถานะ',lbl_all_customers:'ทุกลูกค้า',lbl_all_suppliers:'ทุกซัพพลายเออร์',
     lbl_all_modes:'ทุกวิธี',lbl_all_sources:'ทุกแหล่ง',lbl_all_modules:'ทุกโมดูล',
     lbl_all_users:'ทุกผู้ใช้',lbl_from:'ตั้งแต่',lbl_to:'ถึง',
@@ -1412,6 +1433,7 @@ function t(key){return I18N[_lang]?.[key]??I18N.zh[key]??key}
 function setLang(lang){_lang=lang;localStorage.setItem('joychin_lang',lang);applyI18n();if(typeof activeTab!=='undefined')switchTab(activeTab,false)}
 function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n)})
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{el.placeholder=t(el.dataset.i18nPh)})
   const titleEl=document.getElementById('topbar-title')
   if(titleEl&&typeof activeTab!=='undefined')titleEl.textContent=t('tab_'+activeTab)
 }
@@ -7895,10 +7917,10 @@ function openInventoryModal(editMode){
   const COL=editMode?'1fr 90px 90px 110px':'1fr 90px 130px'
   let html=''
   if(editMode){
-    html+='<div style="font-size:12px;color:#888;background:#FFF6D8;border:1px solid #E2B36D;border-radius:6px;padding:8px 12px;margin-bottom:10px">編輯模式：直接填入實際盤點數量，Enter 跳下一筆，完成後按「確認儲存」</div>'
+    html+='<div style="font-size:12px;color:#888;background:#FFF6D8;border:1px solid #E2B36D;border-radius:6px;padding:8px 12px;margin-bottom:10px">'+t('inv_edit_hint')+'</div>'
   }
   html+='<div style="display:grid;grid-template-columns:'+COL+';gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
-    '<div>產品</div><div style="text-align:right">安全水位</div><div style="text-align:right">現有庫存</div>'+(editMode?'<div>備註</div>':'')+'</div>'
+    '<div>'+t('inv_col_product')+'</div><div style="text-align:right">'+t('inv_col_safe')+'</div><div style="text-align:right">'+t('inv_col_stock')+'</div>'+(editMode?'<div>'+t('inv_col_note')+'</div>':'')+'</div>'
   allProds.forEach((p,i)=>{
     const qty=parseFloat(p.stock_qty)||0
     const safe=p.min_stock_qty!=null?parseFloat(p.min_stock_qty):null
@@ -7921,12 +7943,12 @@ function openInventoryModal(editMode){
       '</div>'
   })
   html+='<div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e5e0;padding:12px 4px 4px;display:flex;gap:8px;align-items:center;margin-top:8px">'+
-    '<button class="btn btn-ghost" onclick="openInventoryLogModal()" style="margin-right:auto">📋 異動記錄</button>'+
+    '<button class="btn btn-ghost" onclick="openInventoryLogModal()" style="margin-right:auto">'+t('btn_inv_log')+'</button>'+
     (editMode
-      ?'<button class="btn btn-ghost" onclick="openInventoryModal()">取消</button>'+
-       '<button class="btn btn-primary" onclick="saveInventoryAdjustments()">確認儲存</button>'
-      :'<button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">關閉</button>'+
-       '<button class="btn btn-primary" onclick="openInventoryModal(true)">更新庫存</button>'
+      ?'<button class="btn btn-ghost" onclick="openInventoryModal()">'+t('btn_cancel')+'</button>'+
+       '<button class="btn btn-primary" onclick="saveInventoryAdjustments()">'+t('btn_save_stock')+'</button>'
+      :'<button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">'+t('btn_close')+'</button>'+
+       '<button class="btn btn-primary" onclick="openInventoryModal(true)">'+t('btn_update_stock')+'</button>'
     )+
     '</div>'
   bd.innerHTML=html
@@ -7977,10 +7999,10 @@ async function _renderInventoryLog(){
   if(!el)return
   const{data,error}=await sb.from('inventory_logs').select('*').order('created_at',{ascending:false}).limit(200)
   if(error){el.innerHTML='<div style="color:#A32D2D;font-size:12px;padding:16px">載入失敗：'+error.message+'</div>';return}
-  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">尚無庫存異動記錄</div>';return}
+  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">'+t('inv_no_log')+'</div>';return}
   const COL='1fr 70px 70px 70px 120px 130px'
   el.innerHTML='<div style="display:grid;grid-template-columns:'+COL+';gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
-    '<div>產品</div><div style="text-align:right">調整量</div><div style="text-align:right">調整前</div><div style="text-align:right">調整後</div><div>備註</div><div style="text-align:right">時間</div></div>'+
+    '<div>'+t('inv_col_product')+'</div><div style="text-align:right">調整量</div><div style="text-align:right">調整前</div><div style="text-align:right">調整後</div><div>'+t('inv_col_note')+'</div><div style="text-align:right">時間</div></div>'+
     data.map(r=>{
       const p=products.find(x=>String(x.id)===String(r.product_id))
       const change=parseFloat(r.change_qty)||0
@@ -8078,7 +8100,7 @@ function renderProducts(){
           '<div style="font-size:12px;color:#666;margin-bottom:4px">'+(sup?esc(sup.company):'—')+'</div>'+
           (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
           (()=>{const sq=parseFloat(p.stock_qty)||0;const mq=parseFloat(p.min_stock_qty)||0;if(p.stock_qty==null)return '';const low=mq>0&&sq<=mq;const warn=mq>0&&sq>mq&&sq<mq*1.5;const col=low?'#A32D2D':warn?'#7A5B00':'#555';return '<div style="font-size:11px;color:'+col+';margin-bottom:4px">'+(low?'⚠ ':warn?'● ':'')+'庫存 '+sq+' '+(getInventoryUnit())+(mq>0?' / 安全 '+mq:'')+' </div>'})()+
-          '<div style="font-size:11px;color:#aaa;margin-bottom:10px">確認：'+(p.last_reviewed_at||'—')+'</div>'+
+          '<div style="font-size:11px;color:#aaa;margin-bottom:10px">'+t('lbl_reviewed_short')+'：'+(p.last_reviewed_at||'—')+'</div>'+
         '</div>'
       }).join('')+
     '</div>'
@@ -8102,7 +8124,7 @@ function renderProducts(){
         '</div>'+
         '<div style="font-size:12px;color:#666">'+(sup?esc(sup.company):'—')+(hasPermission('view_cost')&&p.cost_price?' · 成本 '+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):'')+
         (()=>{const sq=parseFloat(p.stock_qty)||0;const mq=parseFloat(p.min_stock_qty)||0;if(p.stock_qty==null)return '';const low=mq>0&&sq<=mq;const warn=mq>0&&sq>mq&&sq<mq*1.5;const col=low?'#A32D2D':warn?'#7A5B00':'#aaa';return ' · <span style="color:'+col+'">'+(low?'⚠ ':warn?'● ':'')+'庫存 '+sq+' '+(getInventoryUnit())+(mq>0?' / 安全 '+mq:'')+' </span>'})()+'</div>'+
-        '<div style="font-size:11px;color:#aaa">上次確認：'+(p.last_reviewed_at||'—')+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+' （'+getProductReviewDays()+'天週期）</div>'+
+        '<div style="font-size:11px;color:#aaa">'+t('lbl_last_reviewed')+'：'+(p.last_reviewed_at||'—')+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+'</div>'+
         '</div>'+
         '</div>'
     }).join('')
@@ -8139,8 +8161,8 @@ function openProductModal(id){
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>寬幅（mm）</label><input type="number" id="pd-width-mm" value="'+(p?.width_m!=null?Math.round(p.width_m*1000):'')+'" placeholder="例如 1070" step="1" /></div>'+
     '<div><label>每卷米數</label><input type="number" id="pd-meters-per-roll" value="'+(p?.meters_per_roll||'')+'" placeholder="固定規格填入，客製化留空" step="0.01" /></div>'+
-    '<div><label>基紙重量（g/m²）</label><input type="number" id="pd-base-paper-weight" value="'+(p?.base_paper_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
-    '<div><label>總重（kg）</label><input type="number" id="pd-total-weight" value="'+(p?.total_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
+    '<div><label>'+t('lbl_base_paper_weight')+'</label><input type="number" id="pd-base-paper-weight" value="'+(p?.base_paper_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
+    '<div><label>'+t('lbl_total_weight')+'</label><input type="number" id="pd-total-weight" value="'+(p?.total_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
     '</div>'+
     '<div class="grid-3" style="margin-bottom:10px">'+
     '<div><label>成本價</label><input type="number" id="pd-cost" value="'+(p?.cost_price||'')+'" placeholder="0.0000" step="0.0001" /></div>'+
