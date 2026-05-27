@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.6</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.7</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1188,6 +1188,13 @@ const I18N={
     ord_waiting_approval:'⏳ 等待主管審批',
     ord_approved_txt:'✓ 已審批通過',ord_approval_rejected_txt:'✗ 審批已拒絕',
     ord_coa_section:'COA（分析證明書）',btn_upload_coa:'上傳 COA',
+    coa_not_uploaded:'尚未上傳 COA',
+    coa_no_shipment:'📋 提醒已設定 — 待船運建立後，出貨時向供應商索取 COA',
+    coa_waiting_etd:'⏳ 等待出貨',coa_waiting_remind:' — 屆時記得向供應商索取 COA',
+    coa_etd_overdue:'⚠ ETD 已過 — 請確認是否已向供應商取得 COA，取得後上傳存檔',
+    ord_status_section:'訂單狀態',
+    status_confirmed:'已確認',status_processing:'處理中',status_ready:'備貨完成',
+    status_shipped:'已出貨',status_delivered:'已到客戶',status_completed:'已完成',status_cancelled:'已取消',
     btn_delete_order:'刪除訂單',btn_save_info:'儲存',
     btn_save_items:'儲存品項',btn_create_po:'建立採購單',
     btn_start_processing:'開始處理 →',btn_ord_ready:'備貨完成 →',
@@ -1280,6 +1287,13 @@ const I18N={
     ord_waiting_approval:'⏳ Pending manager approval',
     ord_approved_txt:'✓ Approved',ord_approval_rejected_txt:'✗ Approval rejected',
     ord_coa_section:'COA (Certificate of Analysis)',btn_upload_coa:'Upload COA',
+    coa_not_uploaded:'No COA uploaded yet',
+    coa_no_shipment:'📋 Reminder set — Request COA from supplier when shipment is created',
+    coa_waiting_etd:'⏳ Awaiting shipment',coa_waiting_remind:' — Remember to request COA from supplier',
+    coa_etd_overdue:'⚠ ETD passed — Confirm whether COA has been obtained from supplier, then upload for filing',
+    ord_status_section:'Order Status',
+    status_confirmed:'Confirmed',status_processing:'Processing',status_ready:'Ready',
+    status_shipped:'Shipped',status_delivered:'Delivered',status_completed:'Completed',status_cancelled:'Cancelled',
     btn_delete_order:'Delete Order',btn_save_info:'Save',
     btn_save_items:'Save Items',btn_create_po:'Create PO',
     btn_start_processing:'Start Processing →',btn_ord_ready:'Ready →',
@@ -1372,6 +1386,13 @@ const I18N={
     ord_waiting_approval:'⏳ รออนุมัติจากผู้จัดการ',
     ord_approved_txt:'✓ อนุมัติแล้ว',ord_approval_rejected_txt:'✗ ปฏิเสธแล้ว',
     ord_coa_section:'COA (ใบรับรองการวิเคราะห์)',btn_upload_coa:'อัพโหลด COA',
+    coa_not_uploaded:'ยังไม่ได้อัพโหลด COA',
+    coa_no_shipment:'📋 ตั้งการแจ้งเตือนแล้ว — ขอ COA จากซัพพลายเออร์เมื่อสร้างการขนส่ง',
+    coa_waiting_etd:'⏳ รอการขนส่ง',coa_waiting_remind:' — อย่าลืมขอ COA จากซัพพลายเออร์',
+    coa_etd_overdue:'⚠ ETD ผ่านแล้ว — กรุณายืนยันว่าได้รับ COA จากซัพพลายเออร์หรือยัง แล้วอัพโหลดเก็บไว้',
+    ord_status_section:'สถานะคำสั่งซื้อ',
+    status_confirmed:'ยืนยันแล้ว',status_processing:'กำลังดำเนินการ',status_ready:'พร้อมแล้ว',
+    status_shipped:'จัดส่งแล้ว',status_delivered:'ส่งถึงลูกค้าแล้ว',status_completed:'เสร็จสิ้น',status_cancelled:'ยกเลิกแล้ว',
     btn_delete_order:'ลบคำสั่งซื้อ',btn_save_info:'บันทึก',
     btn_save_items:'บันทึกรายการ',btn_create_po:'สร้างใบสั่งซื้อ',
     btn_start_processing:'เริ่มดำเนินการ →',btn_ord_ready:'พร้อมแล้ว →',
@@ -2757,6 +2778,7 @@ const ORDER_STATUS=[
   {id:'completed',label:'已完成',color:'#0F6E56',bg:'#D4EFE8'},
   {id:'cancelled',label:'已取消',color:'#5F5E5A',bg:'#F1EFE8'},
 ]
+function orderStatusLabel(id){return t('status_'+id)||ORDER_STATUS.find(s=>s.id===id)?.label||id}
 
 function generateOrderId(){
   const today=new Date().toISOString().slice(0,10).replace(/-/g,'')
@@ -2804,7 +2826,7 @@ function renderOrders(){
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
       '<span style="font-size:13px;font-weight:500">'+o.id+'</span>'+
       (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">客戶單號：'+esc(o.customer_ref_no)+'</span>':'')+
-      '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span>'+
+      '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+orderStatusLabel(st.id)+'</span>'+
       (o.source==='verbal'&&(o.approval_status||'none')==='none'?'<span class="badge" style="background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D">待審批</span>':'')+
       (()=>{if(!o.requires_coa)return '';const today=new Date().toISOString().slice(0,10);const hasCoa=orderCoaDocs.some(d=>String(d.order_id)===String(o.id));if(hasCoa)return '<span class="badge" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7">COA ✓</span>';const lshs=orderLinkedShipments(o.id);const etdPassed=lshs.some(sh=>sh.etd&&sh.etd<=today);if(etdPassed)return '<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5">⚠ COA 待收</span>';return '<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>';})()+
       '</div>'+
@@ -3778,7 +3800,7 @@ function _renderOrderModal(){
 
   document.getElementById('modal-order-hd').innerHTML=
     '<div style="flex:1"><div style="font-size:15px;font-weight:600">'+o.id+'</div>'+
-    '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+';margin-top:4px">'+st.label+'</span></div>'+
+    '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+';margin-top:4px">'+orderStatusLabel(st.id)+'</span></div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-order\')">×</button>'
 
   const custOpts=customers.map(c=>'<option value="'+c.id+'"'+(c.id===o.customer_id?' selected':'')+'>'+c.company+'</option>').join('')
@@ -3806,10 +3828,10 @@ function _renderOrderModal(){
     '<div style="font-size:12px;font-weight:600;color:#6B3FA0;margin-bottom:8px">'+t('ord_coa_section')+'</div>'+
     '<div id="order-coa-docs" style="margin-bottom:10px"><div style="font-size:12px;color:#aaa">Loading...</div></div>'+
     (!linkedShipments.length
-      ? '<div style="font-size:12px;color:#888;padding:8px;background:#f3f0fa;border-radius:4px">📋 提醒已設定 — 待船運建立後，出貨時向供應商索取 COA</div>'
+      ? '<div style="font-size:12px;color:#888;padding:8px;background:#f3f0fa;border-radius:4px">'+t('coa_no_shipment')+'</div>'
       : !_coaEtdPassed&&!_coaHasDocs
-        ? '<div style="font-size:12px;color:#7A5800;padding:8px;background:#FFF8E1;border-radius:4px">⏳ 等待出貨'+((_coaNextEtd)?' · ETD '+_coaNextEtd:'')+' — 屆時記得向供應商索取 COA</div>'
-        : '<div style="font-size:12px;color:#991B1B;padding:6px 8px;background:#FEE2E2;border-radius:4px;margin-bottom:8px">⚠ ETD 已過 — 請確認是否已向供應商取得 COA，取得後上傳存檔</div>'+
+        ? '<div style="font-size:12px;color:#7A5800;padding:8px;background:#FFF8E1;border-radius:4px">'+t('coa_waiting_etd')+((_coaNextEtd)?' · ETD '+_coaNextEtd:'')+t('coa_waiting_remind')+'</div>'
+        : '<div style="font-size:12px;color:#991B1B;padding:6px 8px;background:#FEE2E2;border-radius:4px;margin-bottom:8px">'+t('coa_etd_overdue')+'</div>'+
           '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
           '<input type="file" id="order-coa-file" accept=".pdf,application/pdf" style="width:auto;font-size:12px" />'+
           '<button class="btn btn-ghost btn-sm" id="order-coa-upload-btn" onclick="uploadOrderCoa(\''+id+'\')">'+t('btn_upload_coa')+'</button>'+
@@ -3954,13 +3976,13 @@ function _renderOrderModal(){
   // Status selector pills
   const selectableStatuses=ORDER_STATUS.filter(s=>s.id!=='cancelled')
   html+='<div style="margin-bottom:14px">'
-  html+='<div class="section-title" style="margin-bottom:8px">訂單狀態</div>'
+  html+='<div class="section-title" style="margin-bottom:8px">'+t('ord_status_section')+'</div>'
   html+='<div class="status-btns">'
   html+=selectableStatuses.map(s=>{
     const isCurrent=o.status===s.id
     return '<button class="status-btn" style="background:'+(isCurrent?s.bg:'transparent')+';color:'+(isCurrent?s.color:'#aaa')+';border-color:'+(isCurrent?s.color:'#e5e5e0')+';'+(isCurrent?'font-weight:600':'')+(isCurrent?'':';cursor:pointer')+'" '+
-      (isCurrent?'disabled':'onclick="confirmModal(\'確定要將狀態改為「'+s.label+'」嗎？\',()=>updateOrderStatus(\''+s.id+'\'))"')+
-      '>'+s.label+'</button>'
+      (isCurrent?'disabled':'onclick="confirmModal(\'確定要將狀態改為「'+orderStatusLabel(s.id)+'」嗎？\',()=>updateOrderStatus(\''+s.id+'\'))"')+
+      '>'+orderStatusLabel(s.id)+'</button>'
   }).join('')
   html+='</div>'
   html+='</div>'
@@ -4030,7 +4052,7 @@ async function renderOrderCoaDocs(orderId){
   if(!el)return
   const{data,error}=await sb.from('order_documents').select('*').eq('order_id',orderId).eq('doc_type','coa').order('created_at',{ascending:false})
   if(error){el.innerHTML='<div style="font-size:12px;color:#A32D2D">載入失敗</div>';return}
-  if(!data||!data.length){el.innerHTML='<div style="font-size:12px;color:#aaa">尚未上傳 COA</div>';return}
+  if(!data||!data.length){el.innerHTML='<div style="font-size:12px;color:#aaa">'+t('coa_not_uploaded')+'</div>';return}
   el.innerHTML=data.map(d=>{
     const date=(d.created_at||'').slice(0,10)
     const size=d.file_size?(d.file_size>1048576?(d.file_size/1048576).toFixed(1)+' MB':(d.file_size/1024).toFixed(0)+' KB'):''
@@ -7922,7 +7944,7 @@ async function saveInventoryAdjustments(){
   confirmModal('確認更新 '+updates.length+' 筆庫存？\n'+summary,async()=>{
     const now=new Date().toISOString()
     for(const u of updates){
-      const{error}=await sb.from('products').update({stock_qty:u.newQty,stock_updated_at:now}).eq('id',u.p.id)
+      const{error}=await sb.from('products').update({stock_qty:u.newQty}).eq('id',u.p.id)
       if(error){showToast('更新失敗：'+error.message,'error');return}
       await sb.from('inventory_logs').insert({product_id:u.p.id,change_qty:u.change,qty_before:u.qtyBefore,qty_after:u.newQty,note:u.note,source:'manual',created_by:currentUser?.auth_id||null})
     }
