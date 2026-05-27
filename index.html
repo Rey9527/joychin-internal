@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.2</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.3</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8103,6 +8103,8 @@ function openProductModal(id){
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>寬幅（mm）</label><input type="number" id="pd-width-mm" value="'+(p?.width_m!=null?Math.round(p.width_m*1000):'')+'" placeholder="例如 1070" step="1" /></div>'+
     '<div><label>每卷米數</label><input type="number" id="pd-meters-per-roll" value="'+(p?.meters_per_roll||'')+'" placeholder="固定規格填入，客製化留空" step="0.01" /></div>'+
+    '<div><label>基紙重量（g/m²）</label><input type="number" id="pd-base-paper-weight" value="'+(p?.base_paper_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
+    '<div><label>總重（kg）</label><input type="number" id="pd-total-weight" value="'+(p?.total_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
     '</div>'+
     '<div class="grid-3" style="margin-bottom:10px">'+
     '<div><label>成本價</label><input type="number" id="pd-cost" value="'+(p?.cost_price||'')+'" placeholder="0.0000" step="0.0001" /></div>'+
@@ -8177,7 +8179,9 @@ async function saveProduct(id){
     meters_per_roll:parseFloat(document.getElementById('pd-meters-per-roll')?.value)||null,
     width_m:(parseFloat(document.getElementById('pd-width-mm')?.value)||null)!=null?(parseFloat(document.getElementById('pd-width-mm').value)/1000)||null:null,
     pricing_unit:document.getElementById('pd-pricing-unit')?.value||null,
-    product_type:document.querySelector('[name=pd-type]:checked')?.value||null
+    product_type:document.querySelector('[name=pd-type]:checked')?.value||null,
+    base_paper_weight:parseFloat(document.getElementById('pd-base-paper-weight')?.value)||null,
+    total_weight:parseFloat(document.getElementById('pd-total-weight')?.value)||null
   }
   let error
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
