@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.8</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.9</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1528,7 +1528,8 @@ const DEFAULT_APP_SETTINGS={
   default_product_review_days:'90',
   inquiry_warn_days:'2',
   inquiry_overdue_days:'3',
-  order_unit_options:'米,m²,公斤'
+  order_unit_options:'米,m²,公斤',
+  inventory_unit:'roll'
 }
 
 function getSettingValue(key,fallback){
@@ -1540,6 +1541,8 @@ function getSettingNumber(key,fallback){
   const value=parseFloat(getSettingValue(key,fallback))
   return Number.isFinite(value)?value:fallback
 }
+
+function getInventoryUnit(){return getSettingValue('inventory_unit','roll')}
 
 function getCustomerReviewDays(){
   return getSettingNumber('default_customer_review_days',180)
@@ -2373,7 +2376,7 @@ function scanDashboardItems(){
   products.filter(p=>p.min_stock_qty!=null&&p.min_stock_qty>0&&(parseFloat(p.stock_qty)||0)<parseFloat(p.min_stock_qty)).forEach(p=>{
     const qty=parseFloat(p.stock_qty)||0
     const safe=parseFloat(p.min_stock_qty)
-    items.push({group:'inventory',label:'庫存低於安全水位',desc:p.product_name+' · 目前 '+qty+' '+(p.unit||'roll')+' / 安全水位 '+safe+' '+(p.unit||'roll'),days:null,urgency:'high',id:p.id,gotoModule:'products'})
+    items.push({group:'inventory',label:'庫存低於安全水位',desc:p.product_name+' · 目前 '+qty+' '+(getInventoryUnit())+' / 安全水位 '+safe+' '+(getInventoryUnit()),days:null,urgency:'high',id:p.id,gotoModule:'products'})
   })
   return items
 }
@@ -2427,7 +2430,7 @@ function renderDashboard(){
         ph+='<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:'+bg+';border-left:3px solid '+col+';border-radius:4px;margin-bottom:4px">'
         ph+='<div style="flex:1;min-width:0">'
         ph+='<div style="font-size:13px;font-weight:500;color:'+col+'">'+esc(p.product_name)+'</div>'
-        ph+='<div style="font-size:11px;color:#666;margin-top:2px">現有 '+(parseFloat(p.stock_qty)||0)+' 卷 · 安全水位 '+parseFloat(p.min_stock_qty)+' 卷'+(sup?' · '+esc(sup.company):'')+'</div>'
+        ph+='<div style="font-size:11px;color:#666;margin-top:2px">現有 '+(parseFloat(p.stock_qty)||0)+' '+getInventoryUnit()+' · 安全水位 '+parseFloat(p.min_stock_qty)+' '+getInventoryUnit()+(sup?' · '+esc(sup.company):'')+'</div>'
         ph+='</div>'
         ph+='<button class="btn btn-ghost btn-sm" onclick="switchTab(\'purchase-shop\')" style="white-space:nowrap;flex-shrink:0">建立採購</button>'
         ph+='</div>'
@@ -7548,8 +7551,11 @@ function renderSettingsContent(targetId='settings-panel'){
     '<div class="section-title">產品管理規則</div>'+
     '<div class="grid-2" style="margin-bottom:8px">'+
     '<div><label>統一產品更新週期（天）</label><input type="number" id="set-product-review-days" value="'+productDays+'" min="7" step="1" /></div>'+
+    '<div><label>庫存計算單位</label><select id="set-inventory-unit">'+
+    ['roll','piece','kg','m','m²'].map(u=>'<option value="'+u+'"'+(getInventoryUnit()===u?' selected':'')+'>'+u+'</option>').join('')+
+    '</select></div>'+
     '</div>'+
-    '<div style="font-size:11px;color:#888">儲存後，所有產品都會使用同一個更新週期。</div>'+
+    '<div style="font-size:11px;color:#888">儲存後，所有產品的庫存數字都以此單位顯示。</div>'+
     '</div>'+
     '<div class="card" style="margin-bottom:12px">'+
     '<div class="section-title">詢價追蹤通知</div>'+
@@ -7625,6 +7631,7 @@ async function saveSettings(){
     {key:'default_product_review_days',value:String(productReviewDays),label:'統一產品更新週期'},
     {key:'inquiry_warn_days',value:String(inquiryWarnDays),label:'詢價提醒天數'},
     {key:'inquiry_overdue_days',value:String(inquiryOverdueDays),label:'詢價超時天數'},
+    {key:'inventory_unit',value:document.getElementById('set-inventory-unit')?.value||'roll',label:'庫存計算單位'},
   ]
   await Promise.all(rows.map(r=>sb.from('settings').upsert({...r,updated_at:new Date().toISOString()})))
   await Promise.all([
@@ -7905,11 +7912,11 @@ function openInventoryModal(editMode){
     html+='<div style="display:grid;grid-template-columns:'+COL+';gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid #f5f4f0">'+
       '<div><div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
       '<div style="font-size:10px;color:#aaa">'+(sup?esc(sup.company||''):'')+(updAt?' · 更新 '+updAt:'')+'</div></div>'+
-      '<div style="text-align:right;font-size:12px;color:#888">'+(safe!=null?safe+' '+(p.unit||'roll'):'—')+'</div>'+
+      '<div style="text-align:right;font-size:12px;color:#888">'+(safe!=null?safe+' '+(getInventoryUnit()):'—')+'</div>'+
       (editMode
         ?'<div><input type="number" id="inv-qty-'+p.id+'" value="'+Math.round(qty)+'" step="0.01" min="0" style="text-align:right;width:100%;'+(isLow?'color:#A32D2D;font-weight:600':'')+'" onkeydown="'+enterNav+'" /></div>'+
          '<div><input type="text" id="inv-note-'+p.id+'" placeholder="備註..." style="font-size:12px" /></div>'
-        :'<div style="text-align:right;font-size:13px;font-weight:600;color:'+col+'">'+(isLow?'⚠ ':isWarn?'● ':'')+qty+' '+(p.unit||'roll')+'</div>'
+        :'<div style="text-align:right;font-size:13px;font-weight:600;color:'+col+'">'+(isLow?'⚠ ':isWarn?'● ':'')+qty+' '+(getInventoryUnit())+'</div>'
       )+
       '</div>'
   })
@@ -8069,7 +8076,7 @@ function renderProducts(){
           (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:4px;background:'+c.bg+';color:'+c.color+';display:inline-block;margin-bottom:4px">'+esc(p.product_type)+'</span>'})():'')+
           '<div style="font-size:12px;color:#666;margin-bottom:4px">'+(sup?esc(sup.company):'—')+'</div>'+
           (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
-          (()=>{const sq=parseFloat(p.stock_qty)||0;const mq=parseFloat(p.min_stock_qty)||0;if(p.stock_qty==null)return '';const low=mq>0&&sq<=mq;const warn=mq>0&&sq>mq&&sq<mq*1.5;const col=low?'#A32D2D':warn?'#7A5B00':'#555';return '<div style="font-size:11px;color:'+col+';margin-bottom:4px">'+(low?'⚠ ':warn?'● ':'')+'庫存 '+sq+' '+(p.unit||'roll')+(mq>0?' / 安全 '+mq:'')+' </div>'})()+
+          (()=>{const sq=parseFloat(p.stock_qty)||0;const mq=parseFloat(p.min_stock_qty)||0;if(p.stock_qty==null)return '';const low=mq>0&&sq<=mq;const warn=mq>0&&sq>mq&&sq<mq*1.5;const col=low?'#A32D2D':warn?'#7A5B00':'#555';return '<div style="font-size:11px;color:'+col+';margin-bottom:4px">'+(low?'⚠ ':warn?'● ':'')+'庫存 '+sq+' '+(getInventoryUnit())+(mq>0?' / 安全 '+mq:'')+' </div>'})()+
           '<div style="font-size:11px;color:#aaa;margin-bottom:10px">確認：'+(p.last_reviewed_at||'—')+'</div>'+
         '</div>'
       }).join('')+
@@ -8093,7 +8100,7 @@ function renderProducts(){
         '<span style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</span>'+
         '</div>'+
         '<div style="font-size:12px;color:#666">'+(sup?esc(sup.company):'—')+(hasPermission('view_cost')&&p.cost_price?' · 成本 '+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):'')+
-        (()=>{const sq=parseFloat(p.stock_qty)||0;const mq=parseFloat(p.min_stock_qty)||0;if(p.stock_qty==null)return '';const low=mq>0&&sq<=mq;const warn=mq>0&&sq>mq&&sq<mq*1.5;const col=low?'#A32D2D':warn?'#7A5B00':'#aaa';return ' · <span style="color:'+col+'">'+(low?'⚠ ':warn?'● ':'')+'庫存 '+sq+' '+(p.unit||'roll')+(mq>0?' / 安全 '+mq:'')+' </span>'})()+'</div>'+
+        (()=>{const sq=parseFloat(p.stock_qty)||0;const mq=parseFloat(p.min_stock_qty)||0;if(p.stock_qty==null)return '';const low=mq>0&&sq<=mq;const warn=mq>0&&sq>mq&&sq<mq*1.5;const col=low?'#A32D2D':warn?'#7A5B00':'#aaa';return ' · <span style="color:'+col+'">'+(low?'⚠ ':warn?'● ':'')+'庫存 '+sq+' '+(getInventoryUnit())+(mq>0?' / 安全 '+mq:'')+' </span>'})()+'</div>'+
         '<div style="font-size:11px;color:#aaa">上次確認：'+(p.last_reviewed_at||'—')+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+' （'+getProductReviewDays()+'天週期）</div>'+
         '</div>'+
         '</div>'
@@ -8131,9 +8138,6 @@ function openProductModal(id){
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>寬幅（mm）</label><input type="number" id="pd-width-mm" value="'+(p?.width_m!=null?Math.round(p.width_m*1000):'')+'" placeholder="例如 1070" step="1" /></div>'+
     '<div><label>每卷米數</label><input type="number" id="pd-meters-per-roll" value="'+(p?.meters_per_roll||'')+'" placeholder="固定規格填入，客製化留空" step="0.01" /></div>'+
-    '<div><label>庫存單位</label><select id="pd-unit">'+
-    ['roll','piece','kg','m','m²'].map(u=>'<option value="'+u+'"'+((p?.unit||'roll')===u?' selected':'')+'>'+u+'</option>').join('')+
-    '</select></div>'+
     '<div><label>基紙重量（g/m²）</label><input type="number" id="pd-base-paper-weight" value="'+(p?.base_paper_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
     '<div><label>總重（kg）</label><input type="number" id="pd-total-weight" value="'+(p?.total_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
     '</div>'+
@@ -8211,7 +8215,6 @@ async function saveProduct(id){
     width_m:(parseFloat(document.getElementById('pd-width-mm')?.value)||null)!=null?(parseFloat(document.getElementById('pd-width-mm').value)/1000)||null:null,
     pricing_unit:document.getElementById('pd-pricing-unit')?.value||null,
     product_type:document.querySelector('[name=pd-type]:checked')?.value||null,
-    unit:document.getElementById('pd-unit')?.value||'roll',
     base_paper_weight:parseFloat(document.getElementById('pd-base-paper-weight')?.value)||null,
     total_weight:parseFloat(document.getElementById('pd-total-weight')?.value)||null
   }
