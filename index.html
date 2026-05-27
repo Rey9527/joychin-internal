@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.9</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.10</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -7953,7 +7953,8 @@ async function saveInventoryAdjustments(){
     for(const u of updates){
       const{error}=await sb.from('products').update({stock_qty:u.newQty}).eq('id',u.p.id)
       if(error){showToast('更新失敗：'+error.message,'error');return}
-      await sb.from('inventory_logs').insert({product_id:u.p.id,change_qty:u.change,qty_before:u.qtyBefore,qty_after:u.newQty,note:u.note,source:'manual',created_by:currentUser?.auth_id||null})
+      const{error:logErr}=await sb.from('inventory_logs').insert({product_id:u.p.id,change_qty:u.change,qty_before:u.qtyBefore,qty_after:u.newQty,note:u.note,source:'manual',created_by:currentUser?.auth_id||null})
+      if(logErr){showToast('異動記錄寫入失敗：'+logErr.message,'error');return}
     }
     await logActivity('更新庫存','inventory','batch',updates.length+' 筆 — '+summary)
     await loadProducts()
