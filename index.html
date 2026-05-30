@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.15</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.16</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6628,8 +6628,10 @@ async function editQuote(){
 async function generateQuotePDF(headerId){
   const h=quoteHeaders.find(x=>x.id===headerId);if(!h)return
   const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-  // Open window NOW (sync, inside user gesture) so Safari popup blocker doesn't fire
-  const pdfWin=isMobile?window.open('','_blank'):null
+  const dummyFile=new File([''],'x.pdf',{type:'application/pdf'})
+  const canShare=isMobile&&typeof navigator.share==='function'&&navigator.canShare?.({files:[dummyFile]})
+  // Only open a window if share API is unavailable — avoids double-file problem on Dropbox
+  const pdfWin=(!canShare&&isMobile)?window.open('','_blank'):null
   if(pdfWin)pdfWin.document.write('<html><body style="margin:0;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#888;font-size:14px">產生中，請稍候…</body></html>')
   const items=quoteItems.filter(it=>it.header_id===headerId)
   const cust=customers.find(c=>c.company===h.customer)
@@ -6743,15 +6745,12 @@ async function generateQuotePDF(headerId){
   y+=4;sf('normal',8,G);doc.text('(Rey Huang)',sigX+sigW/2,y,{align:'center'})
   doc.setDrawColor(...LG);doc.setLineWidth(0.4);doc.line(ML,PH-12,PW-MR,PH-12)
   const fileName='JC-QT-'+headerId+'.pdf'
-  if(pdfWin){
+  if(canShare){
     const blob=doc.output('blob')
     const file=new File([blob],fileName,{type:'application/pdf'})
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      pdfWin.close()
-      try{await navigator.share({files:[file],title:fileName})}catch(e){}
-    }else{
-      pdfWin.location.href=URL.createObjectURL(blob)
-    }
+    try{await navigator.share({files:[file],title:fileName})}catch(e){}
+  }else if(pdfWin){
+    pdfWin.location.href=URL.createObjectURL(doc.output('blob'))
   }else{
     doc.save(fileName)
   }
