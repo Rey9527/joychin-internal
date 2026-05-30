@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.16</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.17</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6748,7 +6748,7 @@ async function generateQuotePDF(headerId){
   if(canShare){
     const blob=doc.output('blob')
     const file=new File([blob],fileName,{type:'application/pdf'})
-    try{await navigator.share({files:[file],title:fileName})}catch(e){}
+    try{await navigator.share({files:[file]})}catch(e){}
   }else if(pdfWin){
     pdfWin.location.href=URL.createObjectURL(doc.output('blob'))
   }else{
