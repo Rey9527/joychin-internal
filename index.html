@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.29</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.30</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6239,7 +6239,7 @@ async function _execSendToQuote(inqId){
     customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
     apply_customs:supplierNeedsCustoms(inquirySupplier?.id||null),
     margin_pct:parseFloat(settings.default_margin_pct||20),
-    final_price:rawCost?(Math.round(calcQuote(rawCost,settings.default_customs_fee_pct||7.5,settings.default_margin_pct||20,supplierNeedsCustoms(inquirySupplier?.id||null)).final*100)/100):null,
+    final_price:rawCost?(parseFloat(calcQuote(rawCost,settings.default_customs_fee_pct||7.5,settings.default_margin_pct||20,supplierNeedsCustoms(inquirySupplier?.id||null)).final.toFixed(4))):null,
     moq:i.moq||null,lead_time:i.lead_time||null,
     width_m:linkedProduct?.width_m??null,
     pricing_unit:linkedProduct?.pricing_unit||null,
@@ -6372,7 +6372,7 @@ function renderQuoteModalBd(){
     const applyCustoms=shouldApplyCustoms(it)
     const{afterCustoms,final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyCustoms)
     const cur=it.cost_currency||'USD'
-    const fp=it.final_price!=null?it.final_price:Math.round(final*100)/100
+    const fp=it.final_price!=null?it.final_price:parseFloat(final.toFixed(4))
     const mgn=afterCustoms>0?Math.round((fp/afterCustoms-1)*10000)/100:0
     const mgnColor=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'
     const cpu=it.customer_pricing_unit||it.pricing_unit||null
@@ -6768,7 +6768,7 @@ function qItemChange(id,field,value){
       _qPendingItems[id].margin_pct=mgn
     } else if(cp>0){
       const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,shouldApplyCustoms(it))
-      it.final_price=Math.round(final*100)/100
+      it.final_price=parseFloat(final.toFixed(4))
       _qPendingItems[id].final_price=it.final_price
     }
   }
@@ -6782,7 +6782,7 @@ function qItemChangeFinalPrice(id,fp){
   const applyC=shouldApplyCustoms(it)
   const afterCustoms=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
   const mgn=afterCustoms>0?Math.round((fp/afterCustoms-1)*10000)/100:0
-  it.final_price=Math.round(fp*100)/100
+  it.final_price=parseFloat(fp.toFixed(4))
   it.margin_pct=mgn
   _qPendingItems[id].final_price=it.final_price
   _qPendingItems[id].margin_pct=mgn
@@ -6823,7 +6823,7 @@ function openQuoteItemModal(itemId){
   const applyCustoms=shouldApplyCustoms(it)
   const canApplyCustoms=editable&&supplierNeedsCustoms(it.supplier_id)
   const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyCustoms)
-  const fp=it.final_price!=null?it.final_price:Math.round(final*100)/100
+  const fp=it.final_price!=null?it.final_price:parseFloat(final.toFixed(4))
   const normCostInit=_qiNormCost(it)
   const mgn=normCostInit>0?Math.round((fp/normCostInit-1)*10000)/100:0
   const mgnColor=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'
@@ -6923,7 +6923,7 @@ function qiModalFpChange(fp){
   if(!_qPendingItems[_selectedQiId])_qPendingItems[_selectedQiId]={}
   const normCost=_qiNormCost(it)
   const mgn=normCost>0?Math.round((fp/normCost-1)*10000)/100:0
-  it.final_price=Math.round(fp*100)/100
+  it.final_price=parseFloat(fp.toFixed(4))
   it.margin_pct=mgn
   _qPendingItems[_selectedQiId].final_price=it.final_price
   _qPendingItems[_selectedQiId].margin_pct=mgn
@@ -7316,7 +7316,7 @@ function confirmNewPendingItem(){
   const ac=document.getElementById('npi-ac')?.checked||false
   const cpct=parseFloat(document.getElementById('npi-cpct')?.value||_draftNewItem.customs_fee_pct||7.5)
   const fpVal=document.getElementById('npi-fp')?.value
-  const fp=fpVal?Math.round(parseFloat(fpVal)*100)/100:null
+  const fp=fpVal?parseFloat(parseFloat(fpVal).toFixed(4)):null
   const costNorm=_npiNormCost()
   const mgn=costNorm>0&&fp!=null?Math.round((fp/costNorm-1)*10000)/100:null
   _pendingQuoteItems.push({
@@ -7426,7 +7426,7 @@ function savePendingItemEdit(key){
   const ac=document.getElementById('pmi-ac')?.checked||false
   const cpct=parseFloat(document.getElementById('pmi-cpct')?.value||pit.customs_fee_pct||7.5)
   const fpVal=document.getElementById('pmi-fp')?.value
-  const fp=fpVal?Math.round(parseFloat(fpVal)*100)/100:null
+  const fp=fpVal?parseFloat(parseFloat(fpVal).toFixed(4)):null
   const normCost=_pmiNormCost(key)
   const mgn=normCost>0&&fp!=null?Math.round((fp/normCost-1)*10000)/100:null
   const wmVal=parseFloat(document.getElementById('pmi-wm')?.value||0)
@@ -7855,7 +7855,7 @@ function openNqItemEdit(idx){
   const cp=parseFloat(it.cost_price||0)
   const applyC=it.apply_customs&&supplierNeedsCustoms(it.supplier_id)
   const afterCustoms=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
-  const calcFinal=cp>0?Math.round(calcQuote(cp,it.customs_fee_pct,20,applyC).final*100)/100:0
+  const calcFinal=cp>0?parseFloat(calcQuote(cp,it.customs_fee_pct,20,applyC).final.toFixed(4)):0
   const fp=it.final_price!=null?it.final_price:(cp>0?calcFinal:'')
   const mgn=afterCustoms>0&&fp?Math.round((fp/afterCustoms-1)*10000)/100:0
   const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'
@@ -7916,7 +7916,7 @@ function saveNqItemEdit(idx){
   const cpct=parseFloat(document.getElementById('nqe-cpct')?.value||it.customs_fee_pct||7.5)
   const afterCustoms=ac?cp*(1+cpct/100):cp
   const fpVal=document.getElementById('nqe-fp')?.value
-  const fp=fpVal?Math.round(parseFloat(fpVal)*100)/100:null
+  const fp=fpVal?parseFloat(parseFloat(fpVal).toFixed(4)):null
   const mgn=afterCustoms>0&&fp?Math.round((fp/afterCustoms-1)*10000)/100:null
   it.customs_fee_pct=cpct
   it.apply_customs=ac
