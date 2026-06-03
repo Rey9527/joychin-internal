@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.26</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.27</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6792,7 +6792,7 @@ function _qiUpdateEffCost(it){
   const cp=parseFloat(it.cost_price||0)
   const applyC=shouldApplyCustoms(it)
   const eff=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
-  el.textContent=(applyC&&cp>0)?'到岸成本：'+eff.toFixed(2)+' '+(it.cost_currency||''):''
+  el.textContent=cp>0?(applyC?'到岸成本：'+eff.toFixed(2):cp.toFixed(2))+' '+(it.cost_currency||''):''
 }
 function _qiNormCost(it){
   const cp=parseFloat(it.cost_price||0)
@@ -6842,7 +6842,7 @@ function openQuoteItemModal(itemId){
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
     '<input type="checkbox" id="qi-modal-customs-chk" '+(applyCustoms?'checked':'')+' '+(canApplyCustoms?'':'disabled')+' '+(editable&&canApplyCustoms?'onchange="qiModalCustomsChange(this.checked)"':'')+' style="width:auto"> 套用</label></label>'+
     '<input type="number" id="qi-modal-customs-pct" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" '+(editable&&canApplyCustoms?'onchange="qiModalChange(\'customs_fee_pct\',parseFloat(this.value))"':'')+(!editable||!canApplyCustoms?' disabled style="background:#f5f5f2;color:#666"':'')+' />'+
-    (applyCustoms&&cp>0?'<div id="qi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">到岸成本：'+(cp*(1+parseFloat(it.customs_fee_pct??7.5)/100)).toFixed(2)+' '+(it.cost_currency||'')+'</div>':'<div id="qi-eff-cost"></div>')+
+    '<div id="qi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyCustoms?'到岸成本：'+(cp*(1+parseFloat(it.customs_fee_pct??7.5)/100)).toFixed(2):parseFloat(cp).toFixed(2))+' '+(it.cost_currency||''):'')+'</div>'+
     '</div>'+
     '<div><label>報價（含清關含利潤）</label>'+
     '<input type="number" id="qi-modal-fp" value="'+parseFloat(fp).toFixed(2)+'" step="0.01" '+(editable?'onchange="qiModalFpChange(parseFloat(this.value))"':dis)+' />'+
@@ -7266,7 +7266,7 @@ function openNewPendingItemEdit(data){
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
     '<input type="checkbox" id="npi-ac" '+(applyC?'checked':'')+' onchange="npiCalcMgn()" style="width:auto"> 套用</label></label>'+
     '<input type="number" id="npi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="npiCalcMgn()" />'+
-    '<div id="npi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(applyC&&cp>0?'到岸成本：'+(cp*(1+cpct/100)).toFixed(2)+' '+(data.cost_currency||''):'')+'</div></div>'+
+    '<div id="npi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?'到岸成本：'+(cp*(1+cpct/100)).toFixed(2):parseFloat(cp).toFixed(2))+' '+(data.cost_currency||''):'')+'</div></div>'+
     '<div><label>報價（含清關含利潤）</label>'+
     '<input type="number" id="npi-fp" value="'+(calcFp!=null?parseFloat(calcFp).toFixed(2):'')+'" step="0.01" placeholder="輸入報給客戶的價格" onchange="npiCalcMgn()" />'+
     '<div id="npi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
@@ -7302,7 +7302,7 @@ function npiCalcMgn(){
   const cpct=parseFloat(document.getElementById('npi-cpct')?.value||0)
   const eff=ac?cp*(1+cpct/100):cp
   const effEl=document.getElementById('npi-eff-cost')
-  if(effEl)effEl.textContent=(ac&&cp>0)?'到岸成本：'+eff.toFixed(2)+' '+(_draftNewItem?.cost_currency||''):''
+  if(effEl)effEl.textContent=cp>0?(ac?'到岸成本：'+eff.toFixed(2):cp.toFixed(2))+' '+(_draftNewItem?.cost_currency||''):''
   const costNorm=_npiNormCost()
   const fp=parseFloat(document.getElementById('npi-fp')?.value||0)
   const mgn=costNorm>0&&fp?Math.round((fp/costNorm-1)*10000)/100:null
@@ -7386,7 +7386,7 @@ function openPendingItemModal(key){
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
     '<input type="checkbox" id="pmi-ac" '+(applyC?'checked':'')+' onchange="pmiCalcMgn('+key+')" style="width:auto"> 套用</label></label>'+
     '<input type="number" id="pmi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="pmiCalcMgn('+key+')" />'+
-    '<div id="pmi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(applyC&&cp>0?'到岸成本：'+(cp*(1+cpct/100)).toFixed(2)+' '+(pit.cost_currency||''):'')+'</div></div>'+
+    '<div id="pmi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?'到岸成本：'+(cp*(1+cpct/100)).toFixed(2):parseFloat(cp).toFixed(2))+' '+(pit.cost_currency||''):'')+'</div></div>'+
     '<div><label>報價（含清關含利潤）</label>'+
     '<input type="number" id="pmi-fp" value="'+(fp!=null?parseFloat(fp).toFixed(2):'')+'" step="0.01" placeholder="輸入報給客戶的價格" onchange="pmiCalcMgn('+key+')" />'+
     '<div id="pmi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
@@ -7411,7 +7411,7 @@ function pmiCalcMgn(key){
   const cpct=parseFloat(document.getElementById('pmi-cpct')?.value||0)
   const eff=ac?cp*(1+cpct/100):cp
   const effEl=document.getElementById('pmi-eff-cost')
-  if(effEl)effEl.textContent=(ac&&cp>0)?'到岸成本：'+eff.toFixed(2)+' '+(pit.cost_currency||''):''
+  if(effEl)effEl.textContent=cp>0?(ac?'到岸成本：'+eff.toFixed(2):cp.toFixed(2))+' '+(pit.cost_currency||''):''
   const costNorm=_pmiNormCost(key)
   const fp=parseFloat(document.getElementById('pmi-fp')?.value||0)
   const mgn=costNorm>0&&fp?Math.round((fp/costNorm-1)*10000)/100:null
