@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.23</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.24</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -3175,14 +3175,11 @@ function openShipmentModal(id){
       (s.atd?'<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ATD</div><div style="font-size:14px;font-weight:500">'+s.atd+'</div></div>':'')+
       (s.ata?'<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ATA</div><div style="font-size:14px;font-weight:500">'+s.ata+'</div></div>':'')+
     '</div>'+
-    (nextSt&&s.status!=='completed'&&s.status!=='cancelled'&&s.status!=='customs_clearance'?
-      '<div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
-      '<span style="font-size:12px;color:#666">推進狀態：</span>'+
-      '<button class="btn btn-ghost btn-sm" style="color:#185FA5" onclick="quickUpdateShipmentStatus(\''+id+'\',\''+nextSt+'\')">'+nextStatusLabel[s.status]+'</button>'+
-      (s.status==='in_transit'&&s.eta&&s.eta<=today?'<span style="font-size:11px;color:#A32D2D">⚠ ETA 已到</span>':'')+
-      (s.status==='booked'&&s.etd&&s.etd<=today?'<span style="font-size:11px;color:#A32D2D">⚠ ETD 已到</span>':'')+
-      '</div>'
-    :'')+
+    '<div style="margin-bottom:12px"><div class="section-title" style="margin-bottom:6px">狀態</div>'+
+    '<div class="status-btns">'+['planned','booked','in_transit','customs_clearance','completed','cancelled'].map(sid=>{const stO=shipmentStatusObj(sid);const isCurrent=s.status===sid;return '<button class="status-btn" style="background:'+(isCurrent?stO.bg:'transparent')+';color:'+(isCurrent?stO.color:'#aaa')+';border-color:'+(isCurrent?stO.color:'#e5e5e0')+';'+(isCurrent?'font-weight:600':'')+'" '+(isCurrent?'disabled':'onclick="quickUpdateShipmentStatus(\''+id+'\',\''+sid+'\')"')+'>'+stO.label+'</button>'}).join('')+'</div>'+
+    (s.status==='in_transit'&&s.eta&&s.eta<=today?'<span style="font-size:11px;color:#A32D2D;margin-top:4px;display:block">⚠ ETA 已到</span>':'')+
+    (s.status==='booked'&&s.etd&&s.etd<=today?'<span style="font-size:11px;color:#A32D2D;margin-top:4px;display:block">⚠ ETD 已到</span>':'')+
+    '</div>'+
     '<div class="divider"></div>'+
     '<div class="section-title" style="margin-bottom:8px">貨物明細</div>'
   const linkedPurchaseIdsForItems=shipmentPurchaseOrders.filter(x=>String(x.shipment_id)===String(id)).map(link=>String(link.purchase_order_id))
@@ -3345,12 +3342,15 @@ async function deleteShipmentDoc(docId,filePath,shipmentId){
 }
 
 async function quickUpdateShipmentStatus(shipmentId,newStatus){
+  const oldStatus=shipments.find(s=>String(s.id)===String(shipmentId))?.status||''
+  if(oldStatus===newStatus)return
   const{error}=await sb.from('shipments').update({status:newStatus}).eq('id',shipmentId)
   if(error){showToast('更新失敗：'+error.message,'error');return}
+  logActivity('更新船運狀態','shipment',String(shipmentId),oldStatus+' → '+newStatus)
   await loadShipments()
   openShipmentModal(shipmentId)
   renderShipments()
-  if(newStatus==='customs_clearance')renderDashboard()
+  if(newStatus==='customs_clearance'||oldStatus==='customs_clearance')renderDashboard()
 }
 
 async function setShipmentItemStatus(shipmentId,poItemId,status){
@@ -4731,6 +4731,10 @@ function openPurchaseModal(id, prefill={}){
     (items.length?'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">總金額 '+items.reduce((s,i)=>{const q=parseFloat(i.qty||i.quantity||0)||0;const pr=(i.product_id?products.find(x=>String(x.id)===String(i.product_id)):null)||products.find(x=>x.product_name===i.product_name&&(x.spec||null)===(i.spec||null))||null;const up=pr?.cost_price!=null?parseFloat(pr.cost_price):(parseFloat(i.unit_price||i.price||0)||0);const wm=parseFloat(i.width_m||pr?.width_m||0);const pu=i.pricing_unit||pr?.pricing_unit||null;return s+(pu==='m2'&&wm>0?q*up*wm:q*up)},0).toFixed(2)+' '+(p?.currency||items[0]?.currency||'')+'</div>':'')
     )+'</div></div>'
   }
+  if(!isNew){
+    html+='<div style="margin:12px 0 4px"><div class="section-title" style="margin-bottom:6px">狀態</div>'+
+    '<div class="status-btns">'+PURCHASE_STATUS.map(s=>{const isCurrent=p.status===s.id;return '<button class="status-btn" style="background:'+(isCurrent?s.bg:'transparent')+';color:'+(isCurrent?s.color:'#aaa')+';border-color:'+(isCurrent?s.color:'#e5e5e0')+';'+(isCurrent?'font-weight:600':'')+'" '+(isCurrent?'disabled':'onclick="updatePurchaseStatusDirect(\''+s.id+'\')"')+'>'+s.label+'</button>'}).join('')+'</div></div>'
+  }
   let buttons='<div class="modal-foot" style="justify-content:space-between">'
   if(isNew){
     buttons+='<button class="btn btn-primary" onclick="createPurchaseOrder()">建立採購單</button>'
@@ -5042,13 +5046,20 @@ async function rejectPurchaseOrder(){
 
 async function updatePurchaseStatus(status){
   if(!selectedPurchaseId)return
+  const old=purchaseOrders.find(p=>String(p.id)===String(selectedPurchaseId))?.status||''
   const{error}=await sb.from('purchase_orders').update({status}).eq('id',selectedPurchaseId)
   if(error){showToast('更新失敗：'+error.message,'error');return}
+  logActivity('更新採購單狀態','purchase',String(selectedPurchaseId),old+' → '+status)
   _isDirty=false
   await loadPurchaseOrders()
   renderPurchaseOrders()
   openPurchaseModal(selectedPurchaseId)
   showToast('狀態已更新')
+}
+async function updatePurchaseStatusDirect(status){
+  const p=purchaseOrders.find(x=>String(x.id)===String(selectedPurchaseId))
+  if(!p||p.status===status)return
+  confirmModal('確定要將狀態改為「'+(PURCHASE_STATUS.find(s=>s.id===status)?.label||status)+'」嗎？',()=>updatePurchaseStatus(status))
 }
 
 async function cancelPurchaseOrder(){
@@ -6466,41 +6477,12 @@ function renderQuoteModalBd(){
     :''
 
   const footHtml=
-    h.status==='draft'?
-      '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存草稿</button>'+
-      '<div style="display:flex;gap:8px">'+
-      '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 Export PDF</button>'+
-      '<button class="btn btn-ghost btn-sm" onclick="showToast(\'郵件範本功能即將開放\')">複製郵件範本</button>'+
-      '<button class="btn btn-ghost btn-sm" style="color:#534AB7;border-color:#534AB7" onclick="qSaveAndStatus(\'sent\')">標記為已送客戶</button>'+
-      '</div>'
-    :h.status==='sent'?
-      '<button class="btn btn-ghost btn-sm" onclick="editQuote()">修改報價</button>'+
-      '<div style="display:flex;gap:8px">'+
-      '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 Export PDF</button>'+
-      '<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="qAcceptQuote()">客戶接受 ✓</button>'+
-      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="qSaveAndStatus(\'rejected\')">客戶拒絕 ✗</button>'+
-      '</div>'
-    :h.status==='sample_pending'?
-      '<div></div>'+
-      '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'
-    :h.status==='sample_review'?
-      '<div></div>'+
-      '<div style="display:flex;gap:8px">'+
-      '<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="qSaveAndStatus(\'accepted\')">樣品通過 ✓</button>'+
-      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="qSaveAndStatus(\'rejected\')">樣品不通過 ✗</button>'+
-      '</div>'
-    :h.status==='accepted'?
-      '<button class="btn btn-ghost btn-sm" onclick="editQuote()">修改報價</button>'+
-      '<div style="display:flex;gap:8px">'+
-      '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 Export PDF</button>'+
-      '<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">送去訂單 →</button>'+
-      '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'+
-      '</div>'
-    :h.status==='rejected'?
-      '<div></div>'+
-      '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'
-    :
-      '<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存</button>'
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 Export PDF</button>'+
+    (editable?'<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存草稿</button>':'')+
+    (h.status==='accepted'?'<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">送去訂單 →</button>':'')+
+    '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'+
+    '</div>'
 
   const notesField=editable
     ?'<textarea onchange="qHeaderChange(\'notes\',this.value)">'+(h.notes||'')+'</textarea>'
@@ -6546,7 +6528,8 @@ function renderQuoteModalBd(){
   }).join('')
 
   document.getElementById('modal-quote-bd').innerHTML=
-    '<div style="margin-bottom:10px">'+badge(h.status,QUO_STATUS)+'</div>'+
+    '<div style="margin-bottom:12px"><div class="section-title" style="margin-bottom:6px">狀態</div>'+
+    '<div class="status-btns">'+QUO_STATUS.filter(s=>s.id!=='superseded').map(s=>{const isCurrent=h.status===s.id;return '<button class="status-btn" style="background:'+(isCurrent?s.bg:'transparent')+';color:'+(isCurrent?s.color:'#aaa')+';border-color:'+(isCurrent?s.color:'#e5e5e0')+';'+(isCurrent?'font-weight:600':'')+'" '+(isCurrent?'disabled':'onclick="updateQuoteStatusDirect(\''+s.id+'\')"')+'>'+s.label+'</button>'}).join('')+'</div></div>'+
     statusBanner+
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
     '<span class="section-title" style="margin-bottom:0">品項明細</span>'+
@@ -6954,6 +6937,23 @@ function qStatusChange(status){
   _qPendingHeader.status=status
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(h)h.status=status
   renderQuoteModalBd()
+}
+async function updateQuoteStatusDirect(status){
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h||h.status===status)return
+  const oldStatus=h.status
+  if(status==='draft'&&oldStatus!=='draft'){
+    const items=quoteItems.filter(it=>it.header_id===h.id)
+    const snapshot=items.map(it=>{const cp=parseFloat(it.cost_price||0);const applyC=shouldApplyCustoms(it);const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyC);return{product:it.product,cost_price:it.cost_price,cost_currency:it.cost_currency,margin_pct:it.margin_pct,quoted_price:parseFloat(final.toFixed(2))}})
+    await sb.from('quote_changes').insert({header_id:h.id,changed_by:currentUser?.name||currentUser?.email||'unknown',change_type:'edit',note:'手動退回草稿前快照',snapshot,changed_at:new Date().toISOString()})
+  }
+  const{error}=await sb.from('quote_headers').update({status}).eq('id',selectedQuoteId)
+  if(error){showToast('更新失敗：'+error.message,'error');return}
+  h.status=status
+  if(_qPendingHeader)_qPendingHeader.status=status
+  logActivity('更新報價狀態','quote',String(selectedQuoteId),oldStatus+' → '+status)
+  await loadQuotes()
+  renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
+  showToast('狀態已更新為「'+(QUO_STATUS.find(s=>s.id===status)?.label||status)+'」')
 }
 
 function openQuoteCatalogPicker(){
