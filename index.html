@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.25</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.26</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6510,7 +6510,11 @@ function renderQuoteModalBd(){
     const fp=pit.final_price
     const applyC=pit.apply_customs&&cp>0
     const afterCustoms=applyC?cp*(1+parseFloat(pit.customs_fee_pct||0)/100):cp
-    const mgn=afterCustoms>0&&fp!=null?Math.round((fp/afterCustoms-1)*10000)/100:null
+    const pu2=pit.pricing_unit||'';const cpu2=pit.customer_pricing_unit||'';const wm2=parseFloat(pit.width_m||0)
+    let normCost2=afterCustoms
+    if(pu2==='m2'&&cpu2==='m'&&wm2>0)normCost2=afterCustoms*wm2
+    else if(pu2==='m'&&cpu2==='m2'&&wm2>0)normCost2=afterCustoms/wm2
+    const mgn=normCost2>0&&fp!=null?Math.round((fp/normCost2-1)*10000)/100:null
     const mgnColor=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
     const cpu=pit.customer_pricing_unit||pit.pricing_unit||null
     return '<div onclick="openPendingItemModal('+pit._key+')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px dashed #B5D68A;border-radius:4px;margin-bottom:6px;background:#f4fbec;cursor:pointer;transition:background .15s" onmouseenter="this.style.background=\'#eaf5dc\'" onmouseleave="this.style.background=\'#f4fbec\'">'+
@@ -7334,6 +7338,19 @@ function qRemovePendingItem(key){
   if(!_pendingQuoteItems.length&&!Object.keys(_qPendingItems).length&&!Object.keys(_qPendingHeader).length)_isDirty=false
   renderQuoteModalBd()
 }
+function _pmiNormCost(key){
+  const pit=_pendingQuoteItems.find(x=>x._key===key);if(!pit)return 0
+  const cp=parseFloat(pit.cost_price||0)
+  const ac=document.getElementById('pmi-ac')?.checked
+  const cpct=parseFloat(document.getElementById('pmi-cpct')?.value||0)
+  let cost=ac?cp*(1+cpct/100):cp
+  const pu=document.getElementById('pmi-pu')?.value||''
+  const cpu=document.getElementById('pmi-cpu')?.value||''
+  const wm=parseFloat(document.getElementById('pmi-wm')?.value||0)/1000
+  if(pu==='m2'&&cpu==='m'&&wm>0)cost=cost*wm
+  else if(pu==='m'&&cpu==='m2'&&wm>0)cost=cost/wm
+  return cost
+}
 function openPendingItemModal(key){
   const pit=_pendingQuoteItems.find(x=>x._key===key)
   if(!pit)return
@@ -7343,9 +7360,13 @@ function openPendingItemModal(key){
   const applyC=pit.apply_customs&&canApplyCustoms
   const cpct=parseFloat(pit.customs_fee_pct||7.5)
   const afterCustoms=applyC?cp*(1+cpct/100):cp
+  const pu=pit.pricing_unit||'';const cpu=pit.customer_pricing_unit||'';const wm=parseFloat(pit.width_m||0)
+  let normCost=afterCustoms
+  if(pu==='m2'&&cpu==='m'&&wm>0)normCost=afterCustoms*wm
+  else if(pu==='m'&&cpu==='m2'&&wm>0)normCost=afterCustoms/wm
   const calcFp=cp>0?Math.round(calcQuote(cp,cpct,parseFloat(settings.default_margin_pct||20),applyC).final*100)/100:null
   const fp=pit.final_price!=null?pit.final_price:calcFp
-  const mgn=afterCustoms>0&&fp!=null?Math.round((fp/afterCustoms-1)*10000)/100:null
+  const mgn=normCost>0&&fp!=null?Math.round((fp/normCost-1)*10000)/100:null
   const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
   const overlay=document.createElement('div')
   overlay.id='pmi-overlay'
@@ -7364,12 +7385,15 @@ function openPendingItemModal(key){
     '<div><label style="display:flex;justify-content:space-between"><span>清關費 %</span>'+
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
     '<input type="checkbox" id="pmi-ac" '+(applyC?'checked':'')+' onchange="pmiCalcMgn('+key+')" style="width:auto"> 套用</label></label>'+
-    '<input type="number" id="pmi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="pmiCalcMgn('+key+')" /></div>'+
+    '<input type="number" id="pmi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="pmiCalcMgn('+key+')" />'+
+    '<div id="pmi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(applyC&&cp>0?'到岸成本：'+(cp*(1+cpct/100)).toFixed(2)+' '+(pit.cost_currency||''):'')+'</div></div>'+
     '<div><label>報價（含清關含利潤）</label>'+
     '<input type="number" id="pmi-fp" value="'+(fp!=null?parseFloat(fp).toFixed(2):'')+'" step="0.01" placeholder="輸入報給客戶的價格" onchange="pmiCalcMgn('+key+')" />'+
     '<div id="pmi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
-    '<div><label>計價單位（成本）</label><select id="pmi-pu"><option value="">—</option><option value="m2"'+(pit.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
-    '<div><label>報給客戶的單位</label><select id="pmi-cpu"><option value="">—</option><option value="m2"'+(pit.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>計價單位（成本）</label><select id="pmi-pu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>報給客戶的單位</label><select id="pmi-cpu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div style="grid-column:span 2"><label>寬幅（mm）— 單位 m² ↔ m 換算用</label>'+
+    '<input type="number" id="pmi-wm" value="'+(pit.width_m!=null?Math.round(pit.width_m*1000):'')+'" min="0" step="1" placeholder="填入才能換算 m² ↔ m" oninput="pmiCalcMgn('+key+')" /></div>'+
     '<div><label>MOQ</label><input id="pmi-moq" value="'+(pit.moq||'')+'" placeholder="例：1000m²" /></div>'+
     '<div><label>交期</label><input id="pmi-lead" value="'+(pit.lead_time||'')+'" placeholder="例：30天" /></div>'+
     '</div>'+
@@ -7381,32 +7405,35 @@ function openPendingItemModal(key){
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
 }
 function pmiCalcMgn(key){
-  const pit=_pendingQuoteItems.find(x=>x._key===key)
-  if(!pit)return
+  const pit=_pendingQuoteItems.find(x=>x._key===key);if(!pit)return
   const cp=parseFloat(pit.cost_price||0)
   const ac=document.getElementById('pmi-ac')?.checked
   const cpct=parseFloat(document.getElementById('pmi-cpct')?.value||0)
-  const afterCustoms=ac?cp*(1+cpct/100):cp
+  const eff=ac?cp*(1+cpct/100):cp
+  const effEl=document.getElementById('pmi-eff-cost')
+  if(effEl)effEl.textContent=(ac&&cp>0)?'到岸成本：'+eff.toFixed(2)+' '+(pit.cost_currency||''):''
+  const costNorm=_pmiNormCost(key)
   const fp=parseFloat(document.getElementById('pmi-fp')?.value||0)
-  const mgn=afterCustoms>0&&fp?Math.round((fp/afterCustoms-1)*10000)/100:null
+  const mgn=costNorm>0&&fp?Math.round((fp/costNorm-1)*10000)/100:null
   const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
   const el=document.getElementById('pmi-mgn')
-  if(el){el.style.color=mc;el.textContent=fp?'利潤率 '+mgn.toFixed(2)+'%':''}
+  if(el){el.style.color=mc;el.textContent=fp&&mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':''}
 }
 function savePendingItemEdit(key){
   const pit=_pendingQuoteItems.find(x=>x._key===key)
   if(!pit)return
-  const cp=parseFloat(pit.cost_price||0)
   const ac=document.getElementById('pmi-ac')?.checked||false
   const cpct=parseFloat(document.getElementById('pmi-cpct')?.value||pit.customs_fee_pct||7.5)
-  const afterCustoms=ac?cp*(1+cpct/100):cp
   const fpVal=document.getElementById('pmi-fp')?.value
   const fp=fpVal?Math.round(parseFloat(fpVal)*100)/100:null
-  const mgn=afterCustoms>0&&fp!=null?Math.round((fp/afterCustoms-1)*10000)/100:null
+  const normCost=_pmiNormCost(key)
+  const mgn=normCost>0&&fp!=null?Math.round((fp/normCost-1)*10000)/100:null
+  const wmVal=parseFloat(document.getElementById('pmi-wm')?.value||0)
   pit.customs_fee_pct=cpct
   pit.apply_customs=ac
   pit.final_price=fp
   pit.margin_pct=mgn
+  pit.width_m=wmVal>0?wmVal/1000:null
   pit.pricing_unit=document.getElementById('pmi-pu')?.value||null
   pit.customer_pricing_unit=document.getElementById('pmi-cpu')?.value||null
   pit.moq=document.getElementById('pmi-moq')?.value||null
