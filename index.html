@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.28</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.29</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -7600,7 +7600,7 @@ async function sendQuoteToOrder(){
       const _up=it.final_price!=null?it.final_price:(()=>{
         const cp=parseFloat(it.cost_price||0)
         const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,shouldApplyCustoms(it))
-        return Math.round(final*100)/100
+        return parseFloat(final.toFixed(4))
       })()
       const cpu=it.customer_pricing_unit||'m2'
       const resolvedWm=it.width_m||(it.product_id?products.find(p=>p.id===it.product_id)?.width_m:null)||null
