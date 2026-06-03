@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.22</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.23</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6881,22 +6881,8 @@ function qiModalChange(field,value){
   const it=quoteItems.find(x=>String(x.id)===_selectedQiId)
   if(!it)return
   if(!_qPendingItems[_selectedQiId])_qPendingItems[_selectedQiId]={}
-  const oldVal=it[field]
   it[field]=value
   _qPendingItems[_selectedQiId][field]=value
-  // auto-convert fp when customer_pricing_unit changes
-  if(field==='customer_pricing_unit'&&it.final_price!=null&&it.width_m){
-    const wm=parseFloat(it.width_m)
-    let newFp=it.final_price
-    if(oldVal==='m2'&&value==='m')newFp=Math.round(it.final_price*wm*100)/100
-    else if(oldVal==='m'&&value==='m2')newFp=Math.round(it.final_price/wm*100)/100
-    if(newFp!==it.final_price){
-      it.final_price=newFp
-      _qPendingItems[_selectedQiId].final_price=newFp
-      const fpEl=document.getElementById('qi-modal-fp')
-      if(fpEl)fpEl.value=newFp.toFixed(2)
-    }
-  }
   if((field==='pricing_unit'||field==='customer_pricing_unit'||field==='customs_fee_pct'||field==='apply_customs')&&it.final_price!=null){
     const normCost=_qiNormCost(it)
     const mgn=normCost>0?Math.round((it.final_price/normCost-1)*10000)/100:0
