@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.20</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.21</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -7251,7 +7251,8 @@ function openNewPendingItemEdit(data){
     '<div id="npi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
     '<div><label>計價單位（成本）</label><select id="npi-pu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
     '<div><label>報給客戶的單位</label><select id="npi-cpu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
-    (data.width_m?'<div style="grid-column:span 2"><div style="font-size:10px;color:#888;background:#f5f5f2;border-radius:4px;padding:6px 10px">寬幅 '+Math.round(data.width_m*1000)+' mm — 計價單位不同時（m² ↔ m）自動換算</div></div>':'')+
+    '<div style="grid-column:span 2"><label>寬幅（mm）— 單位 m² ↔ m 換算用</label>'+
+    '<input type="number" id="npi-wm" value="'+(data.width_m!=null?Math.round(data.width_m*1000):'')+'" min="0" step="1" placeholder="填入才能換算 m² ↔ m" oninput="npiCalcMgn()" /></div>'+
     '<div><label>MOQ</label><input id="npi-moq" value="" placeholder="例：1000m²" /></div>'+
     '<div><label>交期</label><input id="npi-lead" value="" placeholder="例：30天" /></div>'+
     '</div>'+
@@ -7269,7 +7270,7 @@ function _npiNormCost(){
   let cost=ac?cp*(1+cpct/100):cp
   const pu=document.getElementById('npi-pu')?.value||''
   const cpu=document.getElementById('npi-cpu')?.value||''
-  const wm=parseFloat(_draftNewItem?.width_m||0)
+  const wm=parseFloat(document.getElementById('npi-wm')?.value||0)/1000
   if(pu==='m2'&&cpu==='m'&&wm>0)cost=cost*wm
   else if(pu==='m'&&cpu==='m2'&&wm>0)cost=cost/wm
   return cost
