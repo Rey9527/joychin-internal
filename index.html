@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.18</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.19</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -7224,7 +7224,8 @@ function openNewPendingItemEdit(data){
   const applyC=data.apply_customs&&cp>0
   const cpct=parseFloat(data.customs_fee_pct||7.5)
   const afterCustoms=applyC?cp*(1+cpct/100):cp
-  const calcFp=cp>0?Math.round(calcQuote(cp,cpct,parseFloat(settings.default_margin_pct||20),applyC).final*100)/100:null
+  const sameUnit=(data.pricing_unit||'')===(data.customer_pricing_unit||'')
+  const calcFp=(cp>0&&sameUnit)?Math.round(calcQuote(cp,cpct,parseFloat(settings.default_margin_pct||20),applyC).final*100)/100:null
   const mgn=afterCustoms>0&&calcFp!=null?Math.round((calcFp/afterCustoms-1)*10000)/100:null
   const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
   const overlay=document.createElement('div')
@@ -7248,8 +7249,14 @@ function openNewPendingItemEdit(data){
     '<div><label>報價（含清關含利潤）</label>'+
     '<input type="number" id="npi-fp" value="'+(calcFp!=null?parseFloat(calcFp).toFixed(2):'')+'" step="0.01" placeholder="輸入報給客戶的價格" onchange="npiCalcMgn()" />'+
     '<div id="npi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
-    '<div><label>計價單位（成本）</label><select id="npi-pu"><option value="">—</option><option value="m2"'+(data.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
-    '<div><label>報給客戶的單位</label><select id="npi-cpu"><option value="">—</option><option value="m2"'+(data.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>計價單位（成本）</label><select id="npi-pu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>報給客戶的單位</label><select id="npi-cpu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div style="grid-column:span 2"><label>匯率（1 '+data.cost_currency+' = ? 報價幣別）</label>'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+    '<input type="number" id="npi-fx" value="1" min="0.0001" step="0.0001" style="flex:1" onchange="npiCalcMgn()" />'+
+    (data.width_m?'<span style="font-size:11px;color:#888;white-space:nowrap">寬 '+Math.round(data.width_m*1000)+' mm</span>':'')+
+    '</div>'+
+    '<div style="font-size:10px;color:#aaa;margin-top:2px">成本與報價幣別相同填 1；單位不同時會自動換算寬幅</div></div>'+
     '<div><label>MOQ</label><input id="npi-moq" value="" placeholder="例：1000m²" /></div>'+
     '<div><label>交期</label><input id="npi-lead" value="" placeholder="例：30天" /></div>'+
     '</div>'+
@@ -7260,26 +7267,35 @@ function openNewPendingItemEdit(data){
   document.body.appendChild(overlay)
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
 }
-function npiCalcMgn(){
+function _npiNormCost(){
   const cp=parseFloat(_draftNewItem?.cost_price||0)
   const ac=document.getElementById('npi-ac')?.checked
   const cpct=parseFloat(document.getElementById('npi-cpct')?.value||0)
-  const afterCustoms=ac?cp*(1+cpct/100):cp
+  let cost=ac?cp*(1+cpct/100):cp
+  const pu=document.getElementById('npi-pu')?.value||''
+  const cpu=document.getElementById('npi-cpu')?.value||''
+  const wm=parseFloat(_draftNewItem?.width_m||0)
+  if(pu==='m2'&&cpu==='m'&&wm>0)cost=cost*wm
+  else if(pu==='m'&&cpu==='m2'&&wm>0)cost=cost/wm
+  const fx=parseFloat(document.getElementById('npi-fx')?.value||1)||1
+  return cost*fx
+}
+function npiCalcMgn(){
+  const costNorm=_npiNormCost()
   const fp=parseFloat(document.getElementById('npi-fp')?.value||0)
-  const mgn=afterCustoms>0&&fp?Math.round((fp/afterCustoms-1)*10000)/100:null
+  const mgn=costNorm>0&&fp?Math.round((fp/costNorm-1)*10000)/100:null
   const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
   const el=document.getElementById('npi-mgn')
   if(el){el.style.color=mc;el.textContent=fp?'利潤率 '+mgn.toFixed(2)+'%':''}
 }
 function confirmNewPendingItem(){
   if(!_draftNewItem)return
-  const cp=parseFloat(_draftNewItem.cost_price||0)
   const ac=document.getElementById('npi-ac')?.checked||false
   const cpct=parseFloat(document.getElementById('npi-cpct')?.value||_draftNewItem.customs_fee_pct||7.5)
-  const afterCustoms=ac?cp*(1+cpct/100):cp
   const fpVal=document.getElementById('npi-fp')?.value
   const fp=fpVal?Math.round(parseFloat(fpVal)*100)/100:null
-  const mgn=afterCustoms>0&&fp!=null?Math.round((fp/afterCustoms-1)*10000)/100:null
+  const costNorm=_npiNormCost()
+  const mgn=costNorm>0&&fp!=null?Math.round((fp/costNorm-1)*10000)/100:null
   _pendingQuoteItems.push({
     ..._draftNewItem,
     _key:++_qPendingItemSeq,
