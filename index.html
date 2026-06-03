@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.32</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.33</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1479,6 +1479,7 @@ const SESSION_USER_KEY='currentUser'
 const SESSION_ACTIVE_TAB_KEY='activeTab'
 const CURRENCY_OPTIONS=['USD','THB','TWD','CNY','EUR','JPY']
 const TRANSPORT_OPTIONS=['海運','空運','陸運','快遞']
+const PAYMENT_TERM_OPTIONS=['現金','預付','Net 7','Net 15','Net 30','Net 45','Net 60','Net 90','月結30天','月結60天']
 const COUNTRY_OPTION_PAIRS=[
   ['TH','泰國 TH'],
   ['TW','台灣 TW'],
@@ -3594,7 +3595,7 @@ function openOrderModal(id){
     document.getElementById('modal-order-bd').innerHTML=
       '<div class="grid-2" style="margin-bottom:10px">'+
       '<div><label>'+t('lbl_order_no')+'</label><input id="or-id" value="'+newId+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
-      '<div><label>'+t('lbl_customer')+' <span class="req">*</span></label><select id="or-customer"><option value="">'+t('ord_select')+'</option>'+custOpts+'</select></div>'+
+      '<div><label>'+t('lbl_customer')+' <span class="req">*</span></label><select id="or-customer" onchange="onOrderCustomerChange()"><option value="">'+t('ord_select')+'</option>'+custOpts+'</select></div>'+
       '<div><label>'+t('lbl_supplier')+' <span class="req">*</span></label><select id="or-supplier"><option value="">'+t('ord_select')+'</option>'+supOpts+'</select></div>'+
       '<div><label>'+t('lbl_currency')+'</label><select id="or-currency">'+buildOptions(CURRENCY_OPTIONS,defaultOrderCurrency)+'</select></div>'+
       '<div><label>'+t('lbl_order_date')+'</label><input id="or-date" type="date" value="'+today+'" /></div>'+
@@ -3603,6 +3604,7 @@ function openOrderModal(id){
       '<div><label>'+t('lbl_tracking_no')+'</label><input id="or-tracking" /></div>'+
       '<div><label>'+t('lbl_order_type')+'</label><select id="or-source" onchange="onOrderSourceChange()"><option value="confirmed">'+t('ord_type_confirmed')+'</option><option value="verbal">'+t('ord_type_verbal')+'</option></select></div>'+
       '<div><label>'+t('lbl_customer_po')+'</label><input id="noi-customer-ref" type="text" placeholder="'+t('lbl_customer_po_placeholder')+'" /></div>'+
+      '<div><label>付款條件</label><select id="or-payment-term"><option value="">— 選擇 —</option>'+PAYMENT_TERM_OPTIONS.map(t=>'<option value="'+t+'">'+t+'</option>').join('')+'</select></div>'+
       '</div>'+
       '<div id="or-verbal-warn" style="display:none;background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:10px">'+t('ord_verbal_warn')+'</div>'+
       '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea id="or-notes"></textarea></div>'+
@@ -3653,6 +3655,12 @@ function onOrderSourceChange(){
   const warn=document.getElementById('or-verbal-warn')
   if(warn)warn.style.display=(v==='verbal'?'block':'none')
 }
+function onOrderCustomerChange(){
+  const custId=document.getElementById('or-customer')?.value
+  const cust=custId?customers.find(x=>x.id===parseInt(custId)):null
+  const ptEl=document.getElementById('or-payment-term')
+  if(ptEl&&cust?.payment_term)ptEl.value=cust.payment_term
+}
 
 async function _createOrder(){
   const id=document.getElementById('or-id')?.value.trim()
@@ -3675,7 +3683,8 @@ async function _createOrder(){
     status:'confirmed',total_amount:total,
     source:document.getElementById('or-source')?.value||'confirmed',
     approval_status:'none',
-    customer_ref_no:document.getElementById('noi-customer-ref')?.value.trim()||null
+    customer_ref_no:document.getElementById('noi-customer-ref')?.value.trim()||null,
+    payment_term:document.getElementById('or-payment-term')?.value||null
   })
   if(error){showToast('建立失敗：'+error.message,'error');return}
   const {error:itemError}=await sb.from('order_items').insert(_pendingOrderItems.map(it=>{
@@ -3847,6 +3856,7 @@ function _renderOrderModal(){
     '<div><label>'+t('lbl_transport')+'</label><select id="ore-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS,o.transport_method)+'</select></div>'+
     '<div><label>'+t('lbl_tracking_no')+'</label><input id="ore-tracking" value="'+esc(o.tracking_no||'')+'" /></div>'+
     '<div><label>'+t('lbl_customer_po')+'</label><input id="oi-customer-ref" type="text" placeholder="'+t('lbl_customer_po_placeholder')+'" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
+    '<div><label>付款條件</label><select id="ore-payment-term"><option value="">— 選擇 —</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'"'+(o.payment_term===pt?' selected':'')+'>'+pt+'</option>').join('')+'</select></div>'+
     '</div>'+
     '<div style="margin-bottom:12px"><label>'+t('lbl_notes')+'</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
     '<div style="margin-bottom:4px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" onchange="document.getElementById(\'ord-coa-section\').style.display=this.checked?\'block\':\'none\'" /> '+t('lbl_requires_coa')+'</label></div>'+
@@ -4064,6 +4074,7 @@ async function saveOrderBasic(){
     tracking_no:document.getElementById('ore-tracking')?.value.trim()||null,
     notes:document.getElementById('ore-notes')?.value.trim()||null,
     customer_ref_no:document.getElementById('oi-customer-ref')?.value.trim()||null,
+    payment_term:document.getElementById('ore-payment-term')?.value||null,
     requires_coa:!!(document.getElementById('ore-requires-coa')?.checked)
   }).eq('id',selectedOrderId)
   if(error){showToast('儲存失敗：'+error.message,'error');return}
@@ -5985,6 +5996,7 @@ function buildCustomerCreateForm(prefix,prefill={}){
     '<div><label>國家</label><select id="'+prefix+'-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,prefill.country||'TH')+'</select></div>'+
     '<div><label>行業</label><input id="'+prefix+'-industry" value="'+escapeHtml(prefill.industry||'')+'" /></div>'+
     '<div style="grid-column:1/-1"><label>地址</label><textarea id="'+prefix+'-address" rows="2" style="resize:vertical">'+escapeHtml(prefill.address||'')+'</textarea></div>'+
+    '<div><label>付款條件</label><select id="'+prefix+'-payment-term"><option value="">— 選擇 —</option>'+PAYMENT_TERM_OPTIONS.map(t=>'<option value="'+t+'"'+(prefill.payment_term===t?' selected':'')+'>'+t+'</option>').join('')+'</select></div>'+
     '</div>'+
     '<div style="margin-bottom:14px"><label>備註</label><textarea id="'+prefix+'-notes">'+escapeHtml(prefill.notes||'')+'</textarea></div>'
 }
@@ -8578,6 +8590,7 @@ async function submitCreateCustomerFromModal(prefix='cc',closeTarget='modal-cust
     industry:document.getElementById(prefix+'-industry')?.value.trim()||null,
     address:document.getElementById(prefix+'-address')?.value.trim()||null,
     notes:document.getElementById(prefix+'-notes')?.value.trim()||null,
+    payment_term:document.getElementById(prefix+'-payment-term')?.value||null,
     review_days:getCustomerReviewDays()
   }).select().single()
   if(error){showToast('新增失敗：'+error.message,'error');return}
@@ -8611,6 +8624,7 @@ function openEditCustomer(id){
     '<div><label>國家</label><select id="ec-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,c.country)+'</select></div>'+
     '<div><label>行業</label><input id="ec-industry" value="'+(c.industry||'')+'" /></div>'+
     '<div style="grid-column:1/-1"><label>地址</label><textarea id="ec-address" rows="2" style="resize:vertical">'+(c.address||'')+'</textarea></div>'+
+    '<div><label>付款條件</label><select id="ec-payment-term"><option value="">— 選擇 —</option>'+PAYMENT_TERM_OPTIONS.map(t=>'<option value="'+t+'"'+(c.payment_term===t?' selected':'')+'>'+t+'</option>').join('')+'</select></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>統一回顧週期（天）</label><input value="'+getCustomerReviewDays()+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
@@ -8639,6 +8653,7 @@ async function saveCustomer(id){
     industry:document.getElementById('ec-industry').value.trim()||null,
     address:document.getElementById('ec-address')?.value.trim()||null,
     notes:document.getElementById('ec-notes').value.trim()||null,
+    payment_term:document.getElementById('ec-payment-term')?.value||null,
     review_days:getCustomerReviewDays(),
     last_reviewed_at:document.getElementById('ec-reviewed')?.value||null}).eq('id',id)
   if(updateError){showToast('儲存客戶失敗：'+updateError.message,'error');return}
