@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.27</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.28</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1439,6 +1439,7 @@ function applyI18n(){
 }
 // ── end i18n ──────────────────────────────────────────────────────────────────
 
+function fmtP(n){return parseFloat(parseFloat(n||0).toFixed(4))}
 function showToast(msg,type='success'){
   const c=document.getElementById('toast-container')
   if(type==='error'){
@@ -3722,8 +3723,8 @@ function renderPendingOrderItems(){
     const up=parseFloat(it.unit_price||0)
     const cur=it.currency||'USD'
     let priceStr
-    if(cpu==='m2'&&wm>0) priceStr=up.toFixed(2)+'/m² × '+(wm*1000)+'mm'
-    else priceStr=up.toFixed(2)+(cpu==='m2'?'/m²':'/m')
+    if(cpu==='m2'&&wm>0) priceStr=fmtP(up)+'/m² × '+(wm*1000)+'mm'
+    else priceStr=fmtP(up)+(cpu==='m2'?'/m²':'/m')
     return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0eb;font-size:12px">'+
     '<span style="flex:1">'+esc(it.product_name||'—')+(it.spec?' <span style="color:#aaa">'+esc(it.spec)+'</span>':'')+
     ' · '+(it.qty||'—')+' '+(it.unit||'')+' × '+priceStr+' '+cur+' = <strong>'+_pendingAmt(it).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong></span>'+
@@ -3753,7 +3754,7 @@ function openOrderProductPicker(mode){
     const sup=suppliers.find(s=>s.id===p.supplier_id)
     return '<div class="row" style="cursor:pointer" onclick="selectOrderProduct('+p.id+',\''+mode+'\')">'+
       '<div style="flex:1"><div style="font-size:13px;font-weight:500">'+escapeHtml(p.product_name)+'</div>'+
-      '<div style="font-size:11px;color:#888">'+[sup?.company,p.cost_price?parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):null].filter(Boolean).join(' · ')+'</div></div></div>'
+      '<div style="font-size:11px;color:#888">'+[sup?.company,p.cost_price?fmtP(p.cost_price)+' '+(p.currency||''):null].filter(Boolean).join(' · ')+'</div></div></div>'
   }).join('')||'<div class="loading">目前沒有可選產品</div>'
   openSubformModal('選擇產品目錄',
     '<div style="margin-bottom:10px"><input id="order-product-search" placeholder="搜尋產品名稱" oninput="filterOrderProductPicker(this.value,\''+mode+'\')" /></div>'+
@@ -3766,7 +3767,7 @@ function filterOrderProductPicker(keyword,mode){
     const sup=suppliers.find(s=>s.id===p.supplier_id)
     return '<div class="row" style="cursor:pointer" onclick="selectOrderProduct('+p.id+',\''+mode+'\')">'+
       '<div style="flex:1"><div style="font-size:13px;font-weight:500">'+escapeHtml(p.product_name)+'</div>'+
-      '<div style="font-size:11px;color:#888">'+[sup?.company,p.cost_price?parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):null].filter(Boolean).join(' · ')+'</div></div></div>'
+      '<div style="font-size:11px;color:#888">'+[sup?.company,p.cost_price?fmtP(p.cost_price)+' '+(p.currency||''):null].filter(Boolean).join(' · ')+'</div></div></div>'
   }).join('')||'<div class="loading">沒有符合條件的產品</div>'
   document.getElementById('order-product-picker').innerHTML=rows
 }
@@ -3897,12 +3898,12 @@ function _renderOrderModal(){
     const unit=i.unit||''
     const amt=calcOiAmount(i,pendingQty)
     if(cpu==='m2'&&wm>0){
-      return parseFloat(up).toFixed(2)+' '+cur+'/m² × '+wm.toFixed(4).replace(/\.?0+$/,'')+'m × '+q+unit+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+      return fmtP(up)+' '+cur+'/m² × '+wm.toFixed(4).replace(/\.?0+$/,'')+'m × '+q+unit+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
     }
     if(cpu==='m'){
-      return parseFloat(up).toFixed(2)+' '+cur+'/m × '+q+unit+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+      return fmtP(up)+' '+cur+'/m × '+q+unit+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
     }
-    return parseFloat(up).toFixed(2)+' '+cur+' × '+q+(unit?' '+unit:'')+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+    return fmtP(up)+' '+cur+' × '+q+(unit?' '+unit:'')+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
   }
   const total=itms.reduce((s,i)=>s+calcOiAmount(i),0)
   const editMode=_orderItemsEditMode
@@ -3925,7 +3926,7 @@ function _renderOrderModal(){
         '<div><label>'+t('lbl_unit')+'</label><select id="oi-unit"><option value="m">m</option><option value="m²">m²</option><option value="roll">roll</option><option value="kg">kg</option><option value="piece">piece</option></select></div>'+
         '<div><label>'+t('lbl_pricing_unit')+'</label><select id="oi-cpu" onchange="refreshOiNewCalc()"><option value="m2">m²</option><option value="m">m</option></select></div>'+
         '<div><label>'+t('lbl_width_mm')+'</label><input id="oi-width-mm" type="number" min="0" step="1" placeholder="'+t('lbl_width_placeholder')+'" oninput="refreshOiNewCalc()" /></div>'+
-        '<div><label>'+t('lbl_unit_price')+'</label><input id="oi-price" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
+        '<div><label>'+t('lbl_unit_price')+'</label><input id="oi-price" type="number" min="0" step="0.0001" oninput="refreshOiNewCalc()" /></div>'+
         '<div><label>'+t('lbl_currency')+'</label><select id="oi-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
         '</div>'+
         '<div id="oi-new-calc" style="font-size:11px;color:#888;margin-bottom:8px;min-height:16px"></div>'+
@@ -4207,12 +4208,12 @@ function refreshOiNewCalc(){
   let amt,str
   if(cpu==='m2'&&wm>0){
     amt=up*wm*qty
-    str=up.toFixed(2)+' '+cur+'/m² × '+wmMm+'mm × '+qty+'m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+    str=fmtP(up)+' '+cur+'/m² × '+wmMm+'mm × '+qty+'m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
   } else if(cpu==='m2'&&wm===0){
     str='<span style="color:#e55">⚠ 請填寫寬幅才能計算 m² 金額</span>'
   } else {
     amt=up*qty
-    str=up.toFixed(2)+' '+cur+'/m × '+qty+'m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+    str=fmtP(up)+' '+cur+'/m × '+qty+'m = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
   }
   el.innerHTML=str
 }
@@ -4273,9 +4274,9 @@ function _fmtOiCalcStr(i,pendingQty){
   const cur=i.currency||(o?.currency||'')
   const unit=(_oiPending[i.id]?.unit!=null?_oiPending[i.id].unit:i.unit)||''
   const amt=_calcOiItemAmt(i,pendingQty)
-  if(cpu==='m2'&&wm>0) return parseFloat(up).toFixed(2)+' '+cur+'/m² × '+wm.toFixed(4).replace(/\.?0+$/,'')+'m × '+q+unit+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
-  if(cpu==='m') return parseFloat(up).toFixed(2)+' '+cur+'/m × '+q+unit+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
-  return parseFloat(up).toFixed(2)+' '+cur+' × '+q+(unit?' '+unit:'')+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+  if(cpu==='m2'&&wm>0) return fmtP(up)+' '+cur+'/m² × '+wm.toFixed(4).replace(/\.?0+$/,'')+'m × '+q+unit+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+  if(cpu==='m') return fmtP(up)+' '+cur+'/m × '+q+unit+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
+  return fmtP(up)+' '+cur+' × '+q+(unit?' '+unit:'')+' = <strong>'+amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+cur+'</strong>'
 }
 function oiQtyChange(itemId,val){
   if(!_oiPending[itemId])_oiPending[itemId]={}
@@ -4720,7 +4721,7 @@ function openPurchaseModal(id, prefill={}){
       const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto) auto;gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:4px;background:#fff">'+
         '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+rcvColor+'">'+rcvLabel+' — '+receivedQty+' / '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">數量</div><div style="font-size:12px;font-weight:500">'+(i.qty||i.quantity||0)+' '+(i.unit||'')+'</div></div>'+
-        '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+_dispUp.toFixed(2)+' '+(_costPrice!==null?_costCurrency:(i.currency||'USD'))+(_punit==='m2'?' /m²':'')+(_hasDiffCost?'<span style="font-size:10px;color:#aaa;margin-left:4px;text-decoration:line-through">'+_up.toFixed(2)+'</span>':'')+'</div>'+(!isNew&&_hasDiffCost?'<button onclick="applyCostPrice('+i.id+','+_costPrice.toFixed(4)+',\''+_costCurrency+'\')" style="background:none;border:1px solid #0F6E56;color:#0F6E56;border-radius:3px;cursor:pointer;font-size:10px;padding:2px 5px;margin-top:3px;white-space:nowrap">存入成本價</button>':'')+'</div>'+
+        '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+fmtP(_dispUp)+' '+(_costPrice!==null?_costCurrency:(i.currency||'USD'))+(_punit==='m2'?' /m²':'')+(_hasDiffCost?'<span style="font-size:10px;color:#aaa;margin-left:4px;text-decoration:line-through">'+fmtP(_up)+'</span>':'')+'</div>'+(!isNew&&_hasDiffCost?'<button onclick="applyCostPrice('+i.id+','+_costPrice.toFixed(4)+',\''+_costCurrency+'\')" style="background:none;border:1px solid #0F6E56;color:#0F6E56;border-radius:3px;cursor:pointer;font-size:10px;padding:2px 5px;margin-top:3px;white-space:nowrap">存入成本價</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">小計</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+lineTotal.toFixed(2)+'</div>'+(_punit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+'</div>'+
         delBtn+
       '</div>'
@@ -4794,7 +4795,7 @@ function openPurchaseProductPicker(){
     const widthInfo=p.width_m?'· 寬 '+Math.round(p.width_m*1000)+'mm':null
     return '<div class="row" style="cursor:pointer" onclick="selectPurchaseProduct('+p.id+')">'+
       '<div style="flex:1"><div style="font-size:13px;font-weight:500">'+escapeHtml(p.product_name)+'</div>'+
-      '<div style="font-size:11px;color:#888">'+[sup?.company,p.cost_price?parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):null,widthInfo].filter(Boolean).join(' · ')+'</div></div></div>'
+      '<div style="font-size:11px;color:#888">'+[sup?.company,p.cost_price?fmtP(p.cost_price)+' '+(p.currency||''):null,widthInfo].filter(Boolean).join(' · ')+'</div></div></div>'
   }).join('')||'<div class="loading">目前沒有可選產品</div>'
   openSubformModal('選擇產品目錄',
     '<div style="margin-bottom:10px"><input id="purchase-product-search" placeholder="搜尋產品名稱" oninput="filterPurchaseProductPicker(this.value)" /></div>'+
@@ -4808,7 +4809,7 @@ function filterPurchaseProductPicker(keyword){
     const widthInfo=p.width_m?'· 寬 '+Math.round(p.width_m*1000)+'mm':null
     return '<div class="row" style="cursor:pointer" onclick="selectPurchaseProduct('+p.id+')">'+
       '<div style="flex:1"><div style="font-size:13px;font-weight:500">'+escapeHtml(p.product_name)+'</div>'+
-      '<div style="font-size:11px;color:#888">'+[sup?.company,p.cost_price?parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):null,widthInfo].filter(Boolean).join(' · ')+'</div></div></div>'
+      '<div style="font-size:11px;color:#888">'+[sup?.company,p.cost_price?fmtP(p.cost_price)+' '+(p.currency||''):null,widthInfo].filter(Boolean).join(' · ')+'</div></div></div>'
   }).join('')||'<div class="loading">沒有符合條件的產品</div>'
   document.getElementById('purchase-product-picker').innerHTML=rows
 }
@@ -5118,7 +5119,7 @@ function onPurchaseOrderChange(){
       '<input type="checkbox" class="poi-order-item-chk" value="'+it.id+'" style="width:14px;height:14px;flex-shrink:0;margin:0" />'+
       '<div style="flex:1;min-width:0;overflow:hidden">'+
         '<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.product_name||'—')+(it.spec?' <span style="color:#aaa">'+esc(it.spec)+'</span>':'')+'</div>'+
-        (()=>{const prod=it.product_id?products.find(p=>String(p.id)===String(it.product_id)):null;const cost=prod?.cost_price??it.unit_price;return '<div style="color:#888;font-size:11px">'+it.qty+' '+(it.unit||'')+' × '+parseFloat(cost||0).toFixed(2)+' '+(prod?.currency||'')+(prod?.cost_price?' (成本)':'')+' <span style="color:#ccc;margin-left:4px">客價 '+parseFloat(it.unit_price||0).toFixed(2)+'</span></div>'})()+
+        (()=>{const prod=it.product_id?products.find(p=>String(p.id)===String(it.product_id)):null;const cost=prod?.cost_price??it.unit_price;return '<div style="color:#888;font-size:11px">'+it.qty+' '+(it.unit||'')+' × '+fmtP(cost||0)+' '+(prod?.currency||'')+(prod?.cost_price?' (成本)':'')+' <span style="color:#ccc;margin-left:4px">客價 '+fmtP(it.unit_price||0)+'</span></div>'})()+
       '</div>'+
       '</label>'
     ).join('')+
@@ -5202,7 +5203,7 @@ async function applyCostPrice(itemId,costPrice,currency){
   if(error){showToast('更新失敗：'+error.message,'error');return}
   await loadPurchaseOrders()
   openPurchaseModal(selectedPurchaseId)
-  showToast('已套用成本價 '+parseFloat(costPrice).toFixed(2))
+  showToast('已套用成本價 '+fmtP(costPrice))
 }
 async function deletePurchaseItem(itemId){
   confirmModal('確定要刪除此品項嗎？',async()=>{
@@ -5373,7 +5374,7 @@ function renderPshopProductArea(){
         '<div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
         (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
         (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
-        (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:11px;color:#0F6E56">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+        (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:11px;color:#0F6E56">'+fmtP(p.cost_price)+' '+(p.currency||'')+'</div>':'')+
         '</div>'+
         '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'+
         '<div style="display:flex;align-items:center;gap:4px">'+
@@ -5401,7 +5402,7 @@ function renderPshopProductArea(){
           '<div style="font-size:13px;font-weight:600">'+esc(p.product_name)+'</div>'+
           (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
           (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
-          (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:11px;color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+          (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:11px;color:#0F6E56;font-weight:500">'+fmtP(p.cost_price)+' '+(p.currency||'')+'</div>':'')+
           '</div>'+
           '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'+
           '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量" style="width:72px" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
@@ -5420,7 +5421,7 @@ function renderPshopProductArea(){
           '<div style="font-size:13px;font-weight:600">'+esc(p.product_name)+'</div>'+
           (p.product_code?'<div style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</div>':'')+
           (p.spec?'<div style="font-size:11px;color:#666">'+esc(p.spec)+'</div>':'')+
-          (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+'</div>':'')+
+          (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;color:#0F6E56;font-weight:500">'+fmtP(p.cost_price)+' '+(p.currency||'')+'</div>':'')+
           '<div style="margin-top:auto">'+
           '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'+
           '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量（米）" style="flex:1;min-width:0" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
@@ -5557,7 +5558,7 @@ function renderPshopCartRowsInto(el){
     '<div style="font-size:12px;font-weight:500;word-break:break-all">'+esc(c.product_name)+'</div>'+
     (c.ref_order_id?'<div style="font-size:10px;color:#aaa">來自 '+esc(c.ref_order_id)+'</div>':'')+
     '<div style="font-size:11px;color:#555">'+c.qty+' m'+(c.rolls_qty?' <span style="color:#888">（約 '+parseFloat(c.rolls_qty).toFixed(1)+' 卷）</span>':'')+
-    ' · 單價 '+parseFloat(c.unit_price||0).toFixed(2)+' '+(c.currency||'')+'</div>'+
+    ' · 單價 '+fmtP(c.unit_price||0)+' '+(c.currency||'')+'</div>'+
     '</div>'+
     '<div style="font-size:11px;color:#0F6E56;font-weight:600;white-space:nowrap;padding-top:2px">'+pshopItemAmt(c).toFixed(2)+(c.pricing_unit==='m2'&&c.width_m?'<div style="font-size:10px;color:#aaa;font-weight:400">×'+(c.width_m*1000).toFixed(0)+'mm</div>':'')+'</div>'+
     '<button onclick="pshopRemoveFromCart('+i+')" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:0 2px;line-height:1">✕</button>'+
@@ -5803,7 +5804,7 @@ function _buildInqPickerRows(list){
     const sup=suppliers.find(s=>s.id===p.supplier_id)
     return '<div onclick="pickInqProduct('+p.id+')" style="padding:10px 14px;border-bottom:1px solid #f0f0eb;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background=\'#f8fffc\'" onmouseout="this.style.background=\'\'">'+
       '<div style="font-size:12px;font-weight:500;color:#1a1a1a">'+p.product_name+(p.product_code?' <span style="font-size:10px;color:#aaa;font-weight:400">'+p.product_code+'</span>':'')+'</div>'+
-      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+(p.cost_price?' · '+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||''):'')+'</div>'+
+      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+(p.cost_price?' · '+fmtP(p.cost_price)+' '+(p.currency||''):'')+'</div>'+
       '</div>'
   }).join('')
 }
@@ -6195,8 +6196,8 @@ async function sendToQuote(inqId){
         _pendingStqInqId=inqId;_pendingStqRawCost=rawCost;_pendingStqRawCur=rawCur
         document.getElementById('modal-cost-diff-bd').innerHTML=
           '<div style="margin-bottom:16px;font-size:13px;line-height:1.8">'+
-          '<div style="margin-bottom:8px">目前目錄成本：<strong>'+parseFloat(p.cost_price||0).toFixed(2)+' '+p.currency+'</strong>　上次更新：'+(p.last_reviewed_at||'—')+'</div>'+
-          '<div>本次供應商報價：<strong>'+parseFloat(rawCost||0).toFixed(2)+' '+rawCur+'</strong></div>'+
+          '<div style="margin-bottom:8px">目前目錄成本：<strong>'+fmtP(p.cost_price||0)+' '+p.currency+'</strong>　上次更新：'+(p.last_reviewed_at||'—')+'</div>'+
+          '<div>本次供應商報價：<strong>'+fmtP(rawCost||0)+' '+rawCur+'</strong></div>'+
           '</div>'+
           '<div class="modal-foot">'+
           '<button class="btn btn-primary" onclick="_doSendToQuote(true)">同步更新目錄並送報價</button>'+
@@ -6262,7 +6263,7 @@ async function _execSendToQuote(inqId){
     const snapshot=latestItems.map(it=>{
       const cp=parseFloat(it.cost_price||0)
       const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,shouldApplyCustoms(it))
-      return{product:it.product,cost_price:it.cost_price,cost_currency:it.cost_currency,margin_pct:it.margin_pct,quoted_price:it.final_price!=null?it.final_price:parseFloat(final.toFixed(2))}
+      return{product:it.product,cost_price:it.cost_price,cost_currency:it.cost_currency,margin_pct:it.margin_pct,quoted_price:it.final_price!=null?it.final_price:parseFloat(final.toFixed(4))}
     })
     await sb.from('quote_changes').insert({
       header_id:newId,
@@ -6383,7 +6384,7 @@ function renderQuoteModalBd(){
       '</div>'+
       '<div style="font-size:11px;color:#888;white-space:nowrap">'+wmmStr+'</div>'+
       '<div style="text-align:right;white-space:nowrap">'+
-      (cp>0?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+fp.toFixed(2)+' '+cur+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">未填成本</div>')+
+      (cp>0?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+fmtP(fp)+' '+cur+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">未填成本</div>')+
       '</div>'+
       '<div style="font-size:10px;font-weight:500;color:'+mgnColor+';background:'+mgnColor+'18;padding:2px 6px;border-radius:4px;white-space:nowrap">'+(cp>0?mgn.toFixed(1)+'%':'—')+'</div>'+
       (editable?'<button onclick="event.stopPropagation();removeQuoteItem(\''+it.id+'\')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;flex-shrink:0">×</button>':'')+
@@ -6523,7 +6524,7 @@ function renderQuoteModalBd(){
       (pit.spec?'<div style="font-size:10px;color:#aaa;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(pit.spec)+'</div>':'')+
       '</div>'+
       '<div style="text-align:right;white-space:nowrap">'+
-      (fp!=null?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+parseFloat(fp).toFixed(2)+' '+cur+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">'+(cp>0?'成本 '+cp.toFixed(2)+' '+cur:'未填成本')+'</div>')+
+      (fp!=null?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+fmtP(fp)+' '+cur+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">'+(cp>0?'成本 '+fmtP(cp)+' '+cur:'未填成本')+'</div>')+
       '</div>'+
       (mgn!=null?'<div style="font-size:10px;font-weight:500;color:'+mgnColor+';background:'+mgnColor+'18;padding:2px 6px;border-radius:4px;white-space:nowrap">'+mgn.toFixed(1)+'%</div>':'')+
       '<span style="font-size:10px;color:#3B6D11;background:#EAF3DE;border:1px solid #B5D68A;border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">待儲存</span>'+
@@ -6563,10 +6564,10 @@ function renderQuoteHistory(headerId){
       '<tr style="color:#aaa;border-bottom:1px solid #eee"><th style="text-align:left;padding:2px 4px">產品</th><th style="padding:2px 4px">成本</th><th style="padding:2px 4px">幣別</th><th style="padding:2px 4px">利潤%</th><th style="padding:2px 4px">報價</th></tr>'+
       snap.map(s=>'<tr style="border-bottom:1px solid #f5f5f2">'+
         '<td style="padding:3px 4px">'+esc(s.product||'—')+'</td>'+
-        '<td style="padding:3px 4px;text-align:right">'+parseFloat(s.cost_price||0).toFixed(2)+'</td>'+
+        '<td style="padding:3px 4px;text-align:right">'+fmtP(s.cost_price||0)+'</td>'+
         '<td style="padding:3px 4px;text-align:center">'+esc(s.cost_currency||'—')+'</td>'+
         '<td style="padding:3px 4px;text-align:right">'+(s.margin_pct??'—')+'</td>'+
-        '<td style="padding:3px 4px;text-align:right">'+parseFloat(s.quoted_price||0).toFixed(2)+'</td>'+
+        '<td style="padding:3px 4px;text-align:right">'+fmtP(s.quoted_price||0)+'</td>'+
       '</tr>').join('')+
       '</table>'
       :'<div style="font-size:11px;color:#aaa;margin-top:4px">無品項快照</div>'
@@ -6594,7 +6595,7 @@ async function editQuote(){
     const cp=parseFloat(it.cost_price||0)
     const applyC=shouldApplyCustoms(it)
     const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyC)
-    return{product:it.product,cost_price:it.cost_price,cost_currency:it.cost_currency,margin_pct:it.margin_pct,quoted_price:parseFloat(final.toFixed(2))}
+    return{product:it.product,cost_price:it.cost_price,cost_currency:it.cost_currency,margin_pct:it.margin_pct,quoted_price:parseFloat(final.toFixed(4))}
   })
   const{error}=await sb.from('quote_changes').insert({
     header_id:h.id,
@@ -6705,7 +6706,7 @@ async function generateQuotePDF(headerId){
     sf('bold',8,D);doc.text(it.product||'—',cx+1,y+5)
     if(it.spec){sf('normal',7,G);doc.text(it.spec,cx+1,y+9)}
     cx+=C_ITEM
-    sf('normal',7.5,D);doc.text(fp.toFixed(2)+' '+cur+unitSuffix,cx+C_UNIT-1,y+5,{align:'right'});cx+=C_UNIT
+    sf('normal',7.5,D);doc.text(fmtP(fp)+' '+cur+unitSuffix,cx+C_UNIT-1,y+5,{align:'right'});cx+=C_UNIT
     doc.text(qty>0?String(qty):'—',cx+C_QTY/2,y+5,{align:'center'});cx+=C_QTY
     doc.text(amount>0?amount.toFixed(2):'—',cx+C_AMT-1,y+5,{align:'right'})
     y+=rowH
@@ -6792,7 +6793,7 @@ function _qiUpdateEffCost(it){
   const cp=parseFloat(it.cost_price||0)
   const applyC=shouldApplyCustoms(it)
   const eff=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
-  el.textContent=cp>0?(applyC?'到岸成本：'+eff.toFixed(2):cp.toFixed(2))+' '+(it.cost_currency||''):''
+  el.textContent=cp>0?(applyC?'到岸成本：'+fmtP(eff):fmtP(cp))+' '+(it.cost_currency||''):''
 }
 function _qiNormCost(it){
   const cp=parseFloat(it.cost_price||0)
@@ -6836,16 +6837,16 @@ function openQuoteItemModal(itemId){
     '<div class="grid-2" style="margin-bottom:12px">'+
     '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>Supplier Cost</span>'+
     (it.product_id?'<a href="#" style="font-size:10px;color:#0F6E56;text-decoration:none" onclick="event.preventDefault();closeModal(\'modal-quote-item\');goUpdateProductCost('+it.product_id+')">📦 更新目錄成本</a>':'<span style="font-size:10px;color:#bbb">非目錄</span>')+
-    '</label><input type="number" value="'+(it.cost_price||'')+'" placeholder="0.00" step="0.01"'+ro+' /></div>'+
+    '</label><input type="number" value="'+(it.cost_price||'')+'" placeholder="0.0000" step="0.0001"'+ro+' /></div>'+
     '<div><label>幣別</label><select'+dis+'>'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(it.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
     '<div><label style="display:flex;justify-content:space-between"><span>清關手續費 %</span>'+
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
     '<input type="checkbox" id="qi-modal-customs-chk" '+(applyCustoms?'checked':'')+' '+(canApplyCustoms?'':'disabled')+' '+(editable&&canApplyCustoms?'onchange="qiModalCustomsChange(this.checked)"':'')+' style="width:auto"> 套用</label></label>'+
     '<input type="number" id="qi-modal-customs-pct" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" '+(editable&&canApplyCustoms?'onchange="qiModalChange(\'customs_fee_pct\',parseFloat(this.value))"':'')+(!editable||!canApplyCustoms?' disabled style="background:#f5f5f2;color:#666"':'')+' />'+
-    '<div id="qi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyCustoms?'到岸成本：'+(cp*(1+parseFloat(it.customs_fee_pct??7.5)/100)).toFixed(2):parseFloat(cp).toFixed(2))+' '+(it.cost_currency||''):'')+'</div>'+
+    '<div id="qi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyCustoms?'到岸成本：'+fmtP(cp*(1+parseFloat(it.customs_fee_pct??7.5)/100)):fmtP(cp))+' '+(it.cost_currency||''):'')+'</div>'+
     '</div>'+
     '<div><label>報價（含清關含利潤）</label>'+
-    '<input type="number" id="qi-modal-fp" value="'+parseFloat(fp).toFixed(2)+'" step="0.01" '+(editable?'onchange="qiModalFpChange(parseFloat(this.value))"':dis)+' />'+
+    '<input type="number" id="qi-modal-fp" value="'+fmtP(fp)+'" step="0.0001" '+(editable?'onchange="qiModalFpChange(parseFloat(this.value))"':dis)+' />'+
     '<div id="qi-modal-mgn" style="font-size:10px;margin-top:3px;color:'+mgnColor+'">利潤率 '+mgn.toFixed(2)+'%</div>'+
     '</div>'+
     '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>寬幅</span>'+
@@ -7004,7 +7005,7 @@ function _buildQuoteCatalogRows(list){
       '<span style="font-size:12px">'+stIcon+'</span>'+
       '<div style="flex:1">'+
       '<div style="font-size:12px;font-weight:500;color:#1a1a1a">'+p.product_name+(p.product_code?' <span style="font-size:10px;color:#aaa;font-weight:400">'+p.product_code+'</span>':'')+'</div>'+
-      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+' · '+(p.cost_price?parseFloat(p.cost_price).toFixed(2)+' '+p.currency:'成本未填')+'</div>'+
+      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+' · '+(p.cost_price?fmtP(p.cost_price)+' '+p.currency:'成本未填')+'</div>'+
       '</div></div></div>'
   }).join('')
 }
@@ -7266,9 +7267,9 @@ function openNewPendingItemEdit(data){
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
     '<input type="checkbox" id="npi-ac" '+(applyC?'checked':'')+' onchange="npiCalcMgn()" style="width:auto"> 套用</label></label>'+
     '<input type="number" id="npi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="npiCalcMgn()" />'+
-    '<div id="npi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?'到岸成本：'+(cp*(1+cpct/100)).toFixed(2):parseFloat(cp).toFixed(2))+' '+(data.cost_currency||''):'')+'</div></div>'+
+    '<div id="npi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?'到岸成本：'+fmtP(cp*(1+cpct/100)):fmtP(cp))+' '+(data.cost_currency||''):'')+'</div></div>'+
     '<div><label>報價（含清關含利潤）</label>'+
-    '<input type="number" id="npi-fp" value="'+(calcFp!=null?parseFloat(calcFp).toFixed(2):'')+'" step="0.01" placeholder="輸入報給客戶的價格" onchange="npiCalcMgn()" />'+
+    '<input type="number" id="npi-fp" value="'+(calcFp!=null?fmtP(calcFp):'')+'" step="0.0001" placeholder="輸入報給客戶的價格" onchange="npiCalcMgn()" />'+
     '<div id="npi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
     '<div><label>計價單位（成本）</label><select id="npi-pu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
     '<div><label>報給客戶的單位</label><select id="npi-cpu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
@@ -7302,7 +7303,7 @@ function npiCalcMgn(){
   const cpct=parseFloat(document.getElementById('npi-cpct')?.value||0)
   const eff=ac?cp*(1+cpct/100):cp
   const effEl=document.getElementById('npi-eff-cost')
-  if(effEl)effEl.textContent=cp>0?(ac?'到岸成本：'+eff.toFixed(2):cp.toFixed(2))+' '+(_draftNewItem?.cost_currency||''):''
+  if(effEl)effEl.textContent=cp>0?(ac?'到岸成本：'+fmtP(eff):fmtP(cp))+' '+(_draftNewItem?.cost_currency||''):''
   const costNorm=_npiNormCost()
   const fp=parseFloat(document.getElementById('npi-fp')?.value||0)
   const mgn=costNorm>0&&fp?Math.round((fp/costNorm-1)*10000)/100:null
@@ -7386,9 +7387,9 @@ function openPendingItemModal(key){
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
     '<input type="checkbox" id="pmi-ac" '+(applyC?'checked':'')+' onchange="pmiCalcMgn('+key+')" style="width:auto"> 套用</label></label>'+
     '<input type="number" id="pmi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="pmiCalcMgn('+key+')" />'+
-    '<div id="pmi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?'到岸成本：'+(cp*(1+cpct/100)).toFixed(2):parseFloat(cp).toFixed(2))+' '+(pit.cost_currency||''):'')+'</div></div>'+
+    '<div id="pmi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?'到岸成本：'+fmtP(cp*(1+cpct/100)):fmtP(cp))+' '+(pit.cost_currency||''):'')+'</div></div>'+
     '<div><label>報價（含清關含利潤）</label>'+
-    '<input type="number" id="pmi-fp" value="'+(fp!=null?parseFloat(fp).toFixed(2):'')+'" step="0.01" placeholder="輸入報給客戶的價格" onchange="pmiCalcMgn('+key+')" />'+
+    '<input type="number" id="pmi-fp" value="'+(fp!=null?fmtP(fp):'')+'" step="0.0001" placeholder="輸入報給客戶的價格" onchange="pmiCalcMgn('+key+')" />'+
     '<div id="pmi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
     '<div><label>計價單位（成本）</label><select id="pmi-pu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
     '<div><label>報給客戶的單位</label><select id="pmi-cpu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
@@ -7411,7 +7412,7 @@ function pmiCalcMgn(key){
   const cpct=parseFloat(document.getElementById('pmi-cpct')?.value||0)
   const eff=ac?cp*(1+cpct/100):cp
   const effEl=document.getElementById('pmi-eff-cost')
-  if(effEl)effEl.textContent=cp>0?(ac?'到岸成本：'+eff.toFixed(2):cp.toFixed(2))+' '+(pit.cost_currency||''):''
+  if(effEl)effEl.textContent=cp>0?(ac?'到岸成本：'+fmtP(eff):fmtP(cp))+' '+(pit.cost_currency||''):''
   const costNorm=_pmiNormCost(key)
   const fp=parseFloat(document.getElementById('pmi-fp')?.value||0)
   const mgn=costNorm>0&&fp?Math.round((fp/costNorm-1)*10000)/100:null
@@ -7785,8 +7786,8 @@ function renderNqItems(){
       '<div style="font-size:12px;font-weight:500;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.product)+'</div>'+
       (it.spec?'<div style="font-size:10px;color:#aaa;margin-top:1px">'+esc(it.spec)+'</div>':'')+
       '</div>'+
-      '<div style="font-size:11px;color:'+(cp>0?'#555':'#bbb')+';white-space:nowrap">'+(cp>0?cp.toFixed(2)+' '+cur+' 成本':'未填成本')+'</div>'+
-      (hasFp?'<div style="font-size:12px;font-weight:600;color:#0F6E56;white-space:nowrap">→ '+parseFloat(fp).toFixed(2)+' '+cur+'</div>':'<div style="font-size:10px;color:#bbb">未填報價</div>')+
+      '<div style="font-size:11px;color:'+(cp>0?'#555':'#bbb')+';white-space:nowrap">'+(cp>0?fmtP(cp)+' '+cur+' 成本':'未填成本')+'</div>'+
+      (hasFp?'<div style="font-size:12px;font-weight:600;color:#0F6E56;white-space:nowrap">→ '+fmtP(fp)+' '+cur+'</div>':'<div style="font-size:10px;color:#bbb">未填報價</div>')+
       '<button onclick="event.stopPropagation();removeNqItem('+idx+')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;flex-shrink:0">×</button>'+
       '</div>'
   }).join('')
@@ -7876,7 +7877,7 @@ function openNqItemEdit(idx){
     '<input type="checkbox" id="nqe-ac" '+(applyC?'checked':'')+' '+(canApplyCustoms?'':'disabled')+' onchange="nqeCustomsChange('+idx+',this.checked)" style="width:auto"> 套用</label></label>'+
     '<input type="number" id="nqe-cpct" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" '+(canApplyCustoms?'':'disabled style="background:#f5f5f2;color:#666"')+' onchange="nqeCalcMgn('+idx+')" /></div>'+
     '<div><label>報價（含清關含利潤）</label>'+
-    '<input type="number" id="nqe-fp" value="'+(fp?parseFloat(fp).toFixed(2):'')+'" step="0.01" placeholder="輸入報給客戶的價格" onchange="nqeCalcMgn('+idx+')" />'+
+    '<input type="number" id="nqe-fp" value="'+(fp?fmtP(fp):'')+'" step="0.0001" placeholder="輸入報給客戶的價格" onchange="nqeCalcMgn('+idx+')" />'+
     '<div id="nqe-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(fp?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
     '<div><label>客戶計價單位</label><select id="nqe-cpu"><option value="">—</option><option value="m2"'+(it.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(it.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
     '<div><label>MOQ</label><input id="nqe-moq" value="'+(it.moq||'')+'" placeholder="例：1000m²" /></div>'+
@@ -8174,7 +8175,7 @@ function renderProducts(){
           (p.product_code?'<div style="font-size:10px;color:#aaa;font-family:monospace;margin-bottom:6px">'+esc(p.product_code)+'</div>':'')+
           (p.product_type?(()=>{const c=PRODUCT_TYPE_COLORS[p.product_type]||{bg:'#f0f0eb',color:'#555'};return '<span style="font-size:10px;padding:1px 7px;border-radius:4px;background:'+c.bg+';color:'+c.color+';display:inline-block;margin-bottom:4px">'+esc(p.product_type)+'</span>'})():'')+
           '<div style="font-size:12px;color:#666;margin-bottom:4px">'+(sup?esc(sup.company):'—')+'</div>'+
-          (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+(p.last_reviewed_at?'<span style="font-size:10px;font-weight:400;color:#aaa;margin-left:3px">('+p.last_reviewed_at+')</span>':'')+' </div>':'')+
+          (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">'+fmtP(p.cost_price)+' '+(p.currency||'')+(p.last_reviewed_at?'<span style="font-size:10px;font-weight:400;color:#aaa;margin-left:3px">('+p.last_reviewed_at+')</span>':'')+' </div>':'')+
           (()=>{const sq=parseFloat(p.stock_qty)||0;const mq=parseFloat(p.min_stock_qty)||0;if(p.stock_qty==null)return '';const low=mq>0&&sq<=mq;const warn=mq>0&&sq>mq&&sq<mq*1.5;const col=low?'#A32D2D':warn?'#7A5B00':'#555';return '<div style="font-size:11px;color:'+col+';margin-bottom:4px">'+(low?'⚠ ':warn?'● ':'')+'庫存 '+sq+' '+(getInventoryUnit())+(mq>0?' / 安全 '+mq:'')+' </div>'})()+
         '</div>'
       }).join('')+
@@ -8202,7 +8203,7 @@ function renderProducts(){
         '</div>'+
         '<div style="flex-shrink:0;text-align:right;font-size:11px;color:#888;padding-left:12px;min-width:0;max-width:45%">'+
           '<div style="color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(sup?esc(sup.company):'—')+'</div>'+
-          (hasPermission('view_cost')&&p.cost_price?'<div style="color:#0F6E56;font-weight:500">'+parseFloat(p.cost_price).toFixed(2)+' '+(p.currency||'')+(p.last_reviewed_at?'<span style="font-size:10px;font-weight:400;color:#aaa;margin-left:2px">('+p.last_reviewed_at+')</span>':'')+'</div>':'')+
+          (hasPermission('view_cost')&&p.cost_price?'<div style="color:#0F6E56;font-weight:500">'+fmtP(p.cost_price)+' '+(p.currency||'')+(p.last_reviewed_at?'<span style="font-size:10px;font-weight:400;color:#aaa;margin-left:2px">('+p.last_reviewed_at+')</span>':'')+'</div>':'')+
           stockHtml+
           (daysLeft!==null?'<div>'+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天')+'</div>':'')+
         '</div>'+
@@ -9757,6 +9758,14 @@ function renderCustomerPortal(){
 
 checkAuth()
 if(typeof lucide!=='undefined')lucide.createIcons()
+document.addEventListener('wheel',function(e){
+  if(e.target.tagName!=='INPUT'||e.target.type!=='number')return
+  e.preventDefault()
+  const v=parseFloat(e.target.value)||0
+  e.target.value=+(v+(e.deltaY<0?1:-1)).toFixed(10)
+  e.target.dispatchEvent(new Event('input',{bubbles:true}))
+  e.target.dispatchEvent(new Event('change',{bubbles:true}))
+},{passive:false})
 </script>
 <script src="lang-en.js"></script>
 </body>
