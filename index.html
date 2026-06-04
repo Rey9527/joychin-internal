@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.43</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.44</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6424,7 +6424,9 @@ function renderQuoteModalBd(){
     const mgn=afterCustoms>0?Math.round((fp/afterCustoms-1)*10000)/100:0
     const mgnColor=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'
     const cpu=it.customer_pricing_unit||it.pricing_unit||null
-    const wmmStr=it.width_m!=null?Math.round(it.width_m*1000)+'mm':'—'
+    const _catWm=it.product_id?products.find(p=>String(p.id)===String(it.product_id))?.width_m:null
+    const _dispWm=it.width_m??_catWm??null
+    const wmmStr=_dispWm!=null?Math.round(_dispWm*1000)+'mm':'—'
     return '<div onclick="openQuoteItemModal(\''+it.id+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e5e0;border-radius:4px;margin-bottom:6px;background:#fafaf8;cursor:pointer;transition:background .15s" onmouseenter="this.style.background=\'#f0f5f3\'" onmouseleave="this.style.background=\'#fafaf8\'">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="font-size:12px;font-weight:500;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+it.product+'</div>'+
