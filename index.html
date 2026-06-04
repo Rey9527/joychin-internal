@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.35</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.36</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -2848,7 +2848,8 @@ function renderOrders(){
     const st=sObj(o.status,ORDER_STATUS)
     const itms=orderItems.filter(i=>i.order_id===o.id)
     const isAlert=_alertIds.has(o.id)
-    return '<div class="row" onclick="openOrderModal(\''+esc(o.id)+'\')" style="'+(isAlert?'border-left:3px solid #EF4444;background:#FEF2F2;':'')+'">'+
+    const isDone=['completed','cancelled'].includes(o.status)
+    return '<div class="row" onclick="openOrderModal(\''+esc(o.id)+'\')" style="'+(isAlert?'border-left:3px solid #EF4444;background:#FEF2F2;':isDone?'opacity:0.45;':'')+'">'+
       '<div style="flex:1;min-width:0">'+
       '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">'+
       '<span style="font-size:13px;font-weight:500">'+o.id+'</span>'+
@@ -2864,7 +2865,7 @@ function renderOrders(){
       (o.tracking_no?' · 📦 '+o.tracking_no:'')+
       '</div></div>'+
       '<div style="text-align:right;flex-shrink:0">'+
-      (o.total_amount?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+Number(o.total_amount).toLocaleString()+' '+(o.currency||'')+'</div>':'')+
+      (o.total_amount?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+Number(o.total_amount).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:4})+' '+(o.currency||'')+'</div>':'')+
       '<div style="font-size:11px;color:#aaa">'+itms.length+' 品項</div>'+
       '</div></div>'
   }).join('')
