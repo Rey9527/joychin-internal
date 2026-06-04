@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.37</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.38</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6098,8 +6098,7 @@ function openAddInqToProduct(inqId){
     '<div><label>產品名稱 <span class="req">*</span></label><input id="atp-name" value="'+escHtmlInq(i.product||'')+'" /></div>'+
     '<div><label>料號</label><input id="atp-code" placeholder="例：PSA-45G-01" /></div>'+
     '<div><label>供應商</label><select id="atp-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
-    '<div><label>單位</label><select id="atp-unit"><option value="">— 選擇 —</option><option value="m">m</option><option value="m2">m²</option><option value="roll">roll</option><option value="kg">kg</option><option value="piece">piece</option></select></div>'+
-    '<div><label>計費單位</label><select id="atp-pricing-unit"><option value="m2">THB/m²</option><option value="m">THB/m</option></select></div>'+
+    '<div><label>計費方式</label><select id="atp-billing"><option value="m2">m²（面積計費）</option><option value="m">m（長度計費）</option><option value="roll">roll（整捲計費）</option><option value="kg">kg（重量計費）</option><option value="piece">piece（件數計費）</option></select></div>'+
     '<div><label>寬幅（mm）</label><input type="number" id="atp-width-mm" placeholder="例：1060" step="1" min="0" /></div>'+
     '<div><label>成本價 <span class="req">*</span></label><input type="number" id="atp-cost" value="'+rawCost+'" step="0.0001" /></div>'+
     '<div><label>幣別</label><select id="atp-currency">'+buildOptions(CURRENCY_OPTIONS,rawCur)+'</select></div>'+
@@ -6135,8 +6134,8 @@ async function saveInqToProduct(inqId){
     product_name:name,
     product_code:document.getElementById('atp-code')?.value.trim()||null,
     supplier_id:parseInt(document.getElementById('atp-supplier')?.value)||null,
-    unit:document.getElementById('atp-unit')?.value||null,
-    pricing_unit:document.getElementById('atp-pricing-unit')?.value||'m2',
+    unit:(()=>{const b=document.getElementById('atp-billing')?.value||'m2';return b==='m2'?'m':b})(),
+    pricing_unit:(()=>{const b=document.getElementById('atp-billing')?.value||'m2';return b==='m2'?'m2':'m'})(),
     width_m:(()=>{const mm=parseFloat(document.getElementById('atp-width-mm')?.value||0);return mm>0?mm/1000:null})(),
     cost_price:parseFloat(costVal),
     currency:document.getElementById('atp-currency')?.value||'USD',
