@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.38</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.39</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6100,6 +6100,7 @@ function openAddInqToProduct(inqId){
     '<div><label>供應商</label><select id="atp-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
     '<div><label>計費方式</label><select id="atp-billing"><option value="m2">m²（面積計費）</option><option value="m">m（長度計費）</option><option value="roll">roll（整捲計費）</option><option value="kg">kg（重量計費）</option><option value="piece">piece（件數計費）</option></select></div>'+
     '<div><label>寬幅（mm）</label><input type="number" id="atp-width-mm" placeholder="例：1060" step="1" min="0" /></div>'+
+    '<div><label>厚度（μm）</label><input type="number" id="atp-thickness-um" placeholder="選填" step="0.1" min="0" /></div>'+
     '<div><label>成本價 <span class="req">*</span></label><input type="number" id="atp-cost" value="'+rawCost+'" step="0.0001" /></div>'+
     '<div><label>幣別</label><select id="atp-currency">'+buildOptions(CURRENCY_OPTIONS,rawCur)+'</select></div>'+
     '<div><label>統一更新週期（天）</label><input value="'+getProductReviewDays()+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
@@ -6137,6 +6138,7 @@ async function saveInqToProduct(inqId){
     unit:(()=>{const b=document.getElementById('atp-billing')?.value||'m2';return b==='m2'?'m':b})(),
     pricing_unit:(()=>{const b=document.getElementById('atp-billing')?.value||'m2';return b==='m2'?'m2':'m'})(),
     width_m:(()=>{const mm=parseFloat(document.getElementById('atp-width-mm')?.value||0);return mm>0?mm/1000:null})(),
+    thickness_um:parseFloat(document.getElementById('atp-thickness-um')?.value)||null,
     cost_price:parseFloat(costVal),
     currency:document.getElementById('atp-currency')?.value||'USD',
     review_days:getProductReviewDays(),
@@ -8283,6 +8285,7 @@ function openProductModal(id){
     '<div><label>每卷米數</label><input type="number" id="pd-meters-per-roll" value="'+(p?.meters_per_roll||'')+'" placeholder="固定規格填入，客製化留空" step="0.01" /></div>'+
     '<div><label>'+t('lbl_base_paper_weight')+'</label><input type="number" id="pd-base-paper-weight" value="'+(p?.base_paper_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
     '<div><label>'+t('lbl_total_weight')+'</label><input type="number" id="pd-total-weight" value="'+(p?.total_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
+    '<div><label>厚度（μm）</label><input type="number" id="pd-thickness-um" value="'+(p?.thickness_um||'')+'" placeholder="選填" step="0.1" min="0" /></div>'+
     '</div>'+
     '<div class="grid-3" style="margin-bottom:10px">'+
     '<div><label>成本價</label><input type="number" id="pd-cost" value="'+(p?.cost_price||'')+'" placeholder="0.0000" step="0.0001" /></div>'+
@@ -8359,7 +8362,8 @@ async function saveProduct(id){
     pricing_unit:document.getElementById('pd-pricing-unit')?.value||null,
     product_type:document.querySelector('[name=pd-type]:checked')?.value||null,
     base_paper_weight:parseFloat(document.getElementById('pd-base-paper-weight')?.value)||null,
-    total_weight:parseFloat(document.getElementById('pd-total-weight')?.value)||null
+    total_weight:parseFloat(document.getElementById('pd-total-weight')?.value)||null,
+    thickness_um:parseFloat(document.getElementById('pd-thickness-um')?.value)||null
   }
   let error
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
