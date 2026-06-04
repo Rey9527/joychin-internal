@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.39</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.40</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8333,7 +8333,7 @@ function openProductModal(id){
 
 async function _finishSaveProduct(msg){
   _isDirty=false
-  await loadProducts()
+  await Promise.all([loadProducts(),loadQuotes()])
   closeModal('modal-product')
   closeModal('modal-cost-impact')
   populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
@@ -8371,9 +8371,11 @@ async function saveProduct(id){
   if(error){showToast('儲存失敗：'+error.message,'error');return}
 
   if(id&&existing&&existing.product_name!==name){
+    const oldName=existing.product_name
     await Promise.all([
       sb.from('inquiries').update({product:name}).eq('from_product_id',parseInt(id)),
       sb.from('quote_items').update({product:name}).eq('product_id',parseInt(id)),
+      sb.from('quote_items').update({product:name,product_id:parseInt(id)}).eq('product',oldName).is('product_id',null),
       sb.from('order_items').update({product_name:name}).eq('product_id',parseInt(id)),
       sb.from('purchase_order_items').update({product_name:name}).eq('product_id',parseInt(id)),
       sb.from('samples').update({product_name:name}).eq('from_product_id',parseInt(id)),
