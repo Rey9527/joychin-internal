@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.42</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.43</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6867,6 +6867,8 @@ function openQuoteItemModal(itemId){
   }
   const ro=' readonly style="background:#f5f5f2;color:#666;cursor:default"'
   const dis=' disabled style="background:#f5f5f2;color:#666"'
+  const catProd=it.product_id?products.find(p=>String(p.id)===String(it.product_id)):null
+  const dispWidthM=it.width_m??catProd?.width_m??null
   const cp=parseFloat(it.cost_price||0)
   const applyCustoms=shouldApplyCustoms(it)
   const canApplyCustoms=editable&&supplierNeedsCustoms(it.supplier_id)
@@ -6900,7 +6902,7 @@ function openQuoteItemModal(itemId){
     '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>寬幅</span>'+
     (it.product_id?'<span style="font-size:10px;color:#aaa">來自目錄</span>':(editable?'<span style="font-size:10px;color:#aaa">mm</span>':''))+'</label>'+
     (it.product_id||!editable
-      ?'<input type="text" value="'+(it.width_m!=null?Math.round(it.width_m*1000)+'mm':'—')+'"'+ro+' />'
+      ?'<input type="text" value="'+(dispWidthM!=null?Math.round(dispWidthM*1000)+'mm':'—')+'"'+ro+' />'
       :'<input type="number" id="qi-modal-width" value="'+(it.width_m!=null?Math.round(it.width_m*1000):'')+'" placeholder="例：3200" step="1" min="0" onchange="qiModalWidthChange(parseFloat(this.value)||0)" />'
     )+'</div>'+
     '<div><label>計價單位（成本）<span class="req">*</span></label><select '+(editable?'onchange="qiModalChange(\'pricing_unit\',this.value)"':dis)+'>'+
@@ -7159,7 +7161,8 @@ function renderQiProfitSection(){
   const normCost=_qiNormCost(it)
   const profitPerUnit=fp-normCost
   const cpu=it.customer_pricing_unit||it.pricing_unit||'m2'
-  const wm=parseFloat(it.width_m||0)
+  const catWmQi=it.product_id?products.find(p=>String(p.id)===String(it.product_id))?.width_m:null
+  const wm=parseFloat(it.width_m??catWmQi??0)
   const cur=it.cost_currency||'USD'
   const needWidth=cpu==='m2'&&!wm
   const qtys=_qiProfitQtys
@@ -7219,7 +7222,8 @@ function buildQSimSection(items){
     const costAfterC=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
     const profitPer=fp-costAfterC
     const pu=it.pricing_unit||'m2'
-    const wm=parseFloat(it.width_m||0)
+    const catWmSim=it.product_id?products.find(p=>String(p.id)===String(it.product_id))?.width_m:null
+    const wm=parseFloat(it.width_m??catWmSim??0)
     const cur=it.cost_currency||'USD'
     let profitStr=''
     if(qty&&parseFloat(qty)>0){
@@ -7253,7 +7257,8 @@ function buildQSimResults(eligible){
     const costAfterC=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
     const profitPer=fp-costAfterC
     const pu=it.pricing_unit||'m2'
-    const wm=parseFloat(it.width_m||0)
+    const catWmRes=it.product_id?products.find(p=>String(p.id)===String(it.product_id))?.width_m:null
+    const wm=parseFloat(it.width_m??catWmRes??0)
     const cur=it.cost_currency||'USD'
     const profit=pu==='m2'&&wm>0?profitPer*wm*qty:profitPer*qty
     if(!byCur[cur])byCur[cur]={total:0,items:[]}
