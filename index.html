@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.33</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.35</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -3894,14 +3894,16 @@ function _renderOrderModal(){
   // Section 2: Items
   function calcOiAmount(i,pendingQty){
     const cpu=i.customer_pricing_unit
-    const wm=parseFloat(i.width_m||0)
+    const catWm=i.product_id?products.find(p=>String(p.id)===String(i.product_id))?.width_m:null
+    const wm=parseFloat(i.width_m||catWm||0)
     const up=parseFloat(i.unit_price||0)
     const q=pendingQty!=null?pendingQty:parseFloat(i.qty||0)
     return cpu==='m2'&&wm>0?up*wm*q:up*q
   }
   function fmtOiCalc(i,pendingQty){
     const cpu=i.customer_pricing_unit
-    const wm=parseFloat(i.width_m||0)
+    const catWm=i.product_id?products.find(p=>String(p.id)===String(i.product_id))?.width_m:null
+    const wm=parseFloat(i.width_m||catWm||0)
     const up=parseFloat(i.unit_price||0)
     const q=pendingQty!=null?pendingQty:parseFloat(i.qty||0)
     const cur=i.currency||o.currency||''
@@ -3923,7 +3925,7 @@ function _renderOrderModal(){
     '<div style="display:flex;gap:6px">'+
     (editMode
       ? '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'ord-item-form\')">'+t('btn_add_item')+'</button>'+
-        '<button class="btn btn-ghost btn-sm" style="color:#0F6E56;border-color:#0F6E56" onclick="toggleOrderItemsEditMode()">'+t('btn_done_editing')+'</button>'
+        '<button class="btn btn-ghost btn-sm" style="color:#0F6E56;border-color:#0F6E56" onclick="doneEditingOrderItems()">'+t('btn_done_editing')+'</button>'
       : '<button class="btn btn-ghost btn-sm" onclick="toggleOrderItemsEditMode()">'+t('btn_edit_items')+'</button>'
     )+
     '</div></div>'+
@@ -3960,7 +3962,7 @@ function _renderOrderModal(){
         (editMode?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0;flex-shrink:0" onclick="deleteOrderItem('+it.id+')">×</button>':'')+
         '</div>'+
         '<div style="font-size:11px;color:#888;margin-bottom:4px" id="oi-calc-'+it.id+'">'+fmtOiCalc(it)+'</div>'+
-        (missingWidth&&editMode?'<div style="font-size:11px;color:#e55;margin-bottom:4px">⚠ Width missing — fill in below</div>':'')+
+        (missingWidth?'<div style="font-size:11px;color:#e55;margin-bottom:4px">⚠ Width missing — m² 計費需填寬幅</div>':'')+
         (editMode
           ? '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
             '<label style="color:#888;white-space:nowrap">Qty</label>'+
@@ -4232,14 +4234,18 @@ async function submitOrderItem(){
   const name=document.getElementById('oi-name')?.value.trim()
   if(!name){showToast('請填寫產品名稱','error');return}
   const qty=parseFloat(document.getElementById('oi-qty')?.value||0)
+  if(!qty){showToast('請填寫數量','error');return}
   const unitPrice=parseFloat(document.getElementById('oi-price')?.value||0)
+  if(!unitPrice){showToast('請填寫單價','error');return}
   const cpu=document.getElementById('oi-cpu')?.value||'m2'
   const wmMm=parseFloat(document.getElementById('oi-width-mm')?.value||0)
+  if(cpu==='m2'&&wmMm<=0){showToast('m² 計費須填寫寬幅（Width mm）','error');return}
   const widthM=wmMm>0?wmMm/1000:null
   const wm=widthM||0
   const amt=cpu==='m2'&&wm>0?unitPrice*wm*qty:unitPrice*qty
   const{error}=await sb.from('order_items').insert({
     order_id:selectedOrderId,
+    product_id:parseInt(document.getElementById('oi-product-id')?.value||0)||null,
     product_name:name,
     spec:document.getElementById('oi-spec')?.value.trim()||null,
     qty,unit:document.getElementById('oi-unit')?.value||'m',
@@ -4267,10 +4273,16 @@ async function deleteOrderItem(itemId){
 let _oiPending={}
 let _orderItemsEditMode=false
 function toggleOrderItemsEditMode(){_orderItemsEditMode=!_orderItemsEditMode;_renderOrderModal()}
+async function doneEditingOrderItems(){
+  _orderItemsEditMode=false
+  if(Object.keys(_oiPending).length){await saveOrderItems()}
+  else{_renderOrderModal()}
+}
 function _calcOiItemAmt(i,pendingQty){
   const cpu=i.customer_pricing_unit
   const pendingWmM=_oiPending[i.id]?.width_m
-  const wm=pendingWmM!=null?pendingWmM:parseFloat(i.width_m||0)
+  const catWm=i.product_id?products.find(p=>String(p.id)===String(i.product_id))?.width_m:null
+  const wm=pendingWmM!=null?pendingWmM:parseFloat(i.width_m||catWm||0)
   const up=parseFloat(i.unit_price||0)
   const q=pendingQty!=null?pendingQty:parseFloat(i.qty||0)
   return cpu==='m2'&&wm>0?up*wm*q:up*q
@@ -4279,7 +4291,8 @@ function _fmtOiCalcStr(i,pendingQty){
   const o=orders.find(x=>x.id===selectedOrderId)
   const cpu=i.customer_pricing_unit
   const pendingWmM=_oiPending[i.id]?.width_m
-  const wm=pendingWmM!=null?pendingWmM:parseFloat(i.width_m||0)
+  const catWm=i.product_id?products.find(p=>String(p.id)===String(i.product_id))?.width_m:null
+  const wm=pendingWmM!=null?pendingWmM:parseFloat(i.width_m||catWm||0)
   const up=parseFloat(i.unit_price||0)
   const q=pendingQty!=null?pendingQty:parseFloat(i.qty||0)
   const cur=i.currency||(o?.currency||'')
