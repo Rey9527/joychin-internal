@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.40</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.41</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -5794,12 +5794,14 @@ function inqRowHtml(i){
     '</div>'+badge(i.status)+'</div>'
 }
 
-function genInqId(){const d=new Date();return 'INQ-'+d.getFullYear()+'-'+String(inquiries.length+32).padStart(3,'0')}
+let _nfRowCount=0
+function genInqId(offset=0){const d=new Date();return 'INQ-'+d.getFullYear()+'-'+String(inquiries.length+32+offset).padStart(3,'0')}
 
 async function showNewInqForm(){
   if(!suppliers.length)await loadSuppliers()
   if(!customers.length)await loadCustomers()
   if(!products.length)await loadProducts()
+  _nfRowCount=0
   const custOpts=[...new Set(customers.map(c=>c.company).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-TW')).map(co=>'<option value="'+esc(co)+'">'+esc(co)+'</option>').join('')
   const supCos=[...new Set(suppliers.map(s=>s.company))].sort()
   const supOpts=supCos.map(c=>'<option value="'+c+'">'+c+'</option>').join('')
@@ -5809,21 +5811,40 @@ async function showNewInqForm(){
     '<select id="nf-customer" style="flex:1"><option value="">— 選擇客戶 —</option>'+custOpts+'</select>'+
     '<button class="btn btn-ghost btn-sm" onclick="openQuickAddCustomer()" style="white-space:nowrap">+ 新客戶</button>'+
     '</div></div>'+
-    '<div style="margin-bottom:10px"><label>產品需求 <span class="req">*</span></label>'+
-    '<div style="display:flex;gap:6px">'+
-    '<input id="nf-product" placeholder="可手動輸入或從目錄帶入" style="flex:1" oninput="nfProductManualEdit()" />'+
-    '<input id="nf-product-id" type="hidden" />'+
-    '<button class="btn btn-ghost btn-sm" onclick="openInqProductPicker()" style="white-space:nowrap">選自目錄</button>'+
-    '</div></div>'+
     '<div style="margin-bottom:10px"><label>供應商 <span class="req">*</span></label><select id="nf-supplier"><option value="">— 選擇供應商公司 —</option>'+supOpts+'</select></div>'+
-    '<div style="margin-bottom:10px"><label>規格詳細說明</label><textarea id="nf-spec" placeholder="幅寬、克重、矽化量、表面張力..."></textarea></div>'+
+    '<div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:center"><label style="margin:0">產品需求 <span class="req">*</span></label></div>'+
+    '<div id="nf-products-list"></div>'+
+    '<button class="btn btn-ghost btn-sm" style="margin-bottom:12px;width:100%" onclick="nfAddProductRow()">+ 新增產品</button>'+
     '<div class="modal-foot">'+
     '<button class="btn btn-primary" onclick="createInquiry()">建立詢價單</button>'+
     '<button class="btn btn-ghost" onclick="closeModal(\'modal-new-inq\')">取消</button>'+
     '</div>'
   document.getElementById('modal-new-inq').classList.add('open')
+  nfAddProductRow()
 }
 function hideNewInqForm(){closeModal('modal-new-inq')}
+function nfAddProductRow(){
+  const idx=_nfRowCount++
+  const container=document.getElementById('nf-products-list')
+  if(!container)return
+  const div=document.createElement('div')
+  div.id='nf-row-'+idx
+  div.style.cssText='background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:10px;margin-bottom:8px'
+  div.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+    '<span style="font-size:12px;font-weight:500;color:#555">產品 #'+(idx+1)+'</span>'+
+    '<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0;line-height:1" onclick="nfRemoveProductRow('+idx+')">×</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:6px;margin-bottom:6px">'+
+    '<input id="nf-product-'+idx+'" placeholder="可手動輸入或從目錄帶入" style="flex:1;font-size:12px" />'+
+    '<input id="nf-product-id-'+idx+'" type="hidden" />'+
+    '<button class="btn btn-ghost btn-sm" onclick="openInqProductPicker('+idx+')" style="white-space:nowrap">選自目錄</button>'+
+    '</div>'+
+    '<textarea id="nf-spec-'+idx+'" placeholder="規格說明（選填）" style="font-size:12px;min-height:56px;width:100%;box-sizing:border-box"></textarea>'
+  container.appendChild(div)
+  document.getElementById('nf-product-'+idx)?.focus()
+}
+function nfRemoveProductRow(idx){document.getElementById('nf-row-'+idx)?.remove()}
 function _buildInqPickerRows(list){
   return list.map(p=>{
     const sup=suppliers.find(s=>s.id===p.supplier_id)
@@ -5840,7 +5861,8 @@ function filterInqProductPicker(q){
   const filtered=(window._inqPickerProds||[]).filter(p=>!kw||p.product_name.toLowerCase().includes(kw)||(p.product_code||'').toLowerCase().includes(kw))
   list.innerHTML=filtered.length?_buildInqPickerRows(filtered):'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">找不到符合產品</div>'
 }
-function openInqProductPicker(){
+function openInqProductPicker(rowIdx=0){
+  window._nfActiveRow=rowIdx
   const existing=document.getElementById('catalog-picker-overlay')
   if(existing)existing.remove()
   const overlay=document.createElement('div')
@@ -5863,52 +5885,47 @@ function openInqProductPicker(){
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
   document.getElementById('catalog-picker-search')?.focus()
 }
-function nfProductManualEdit(){
-  document.getElementById('nf-product-id').value=''
-  const s=document.getElementById('nf-supplier')
-  if(s){s.disabled=false;s.style.background='';s.style.color=''}
-}
 function pickInqProduct(productId){
   const p=products.find(x=>x.id===productId)
   if(!p)return
   document.getElementById('catalog-picker-overlay')?.remove()
-  const prodEl=document.getElementById('nf-product')
-  const idEl=document.getElementById('nf-product-id')
-  const specEl=document.getElementById('nf-spec')
-  const supSel=document.getElementById('nf-supplier')
+  const idx=window._nfActiveRow??0
+  const prodEl=document.getElementById('nf-product-'+idx)
+  const idEl=document.getElementById('nf-product-id-'+idx)
+  const specEl=document.getElementById('nf-spec-'+idx)
   if(prodEl)prodEl.value=p.product_name
   if(idEl)idEl.value=p.id
   if(specEl&&!specEl.value&&p.notes)specEl.value=p.notes
-  if(supSel&&p.supplier_id){
+  const supSel=document.getElementById('nf-supplier')
+  if(supSel&&!supSel.value&&p.supplier_id){
     const sup=suppliers.find(s=>s.id===p.supplier_id)
-    if(sup){
-      const opt=[...supSel.options].find(o=>o.value===sup.company)
-      if(opt)supSel.value=sup.company
-      supSel.disabled=true
-      supSel.style.background='#f8f8f5'
-      supSel.style.color='#666'
-    }
+    if(sup){const opt=[...supSel.options].find(o=>o.value===sup.company);if(opt)supSel.value=sup.company}
   }
 }
 
 async function createInquiry(){
   const customer=document.getElementById('nf-customer').value
-  const product=document.getElementById('nf-product').value.trim()
   const supplier=document.getElementById('nf-supplier').value
   if(!customer){showToast('請選擇客戶','error');return}
-  if(!product){showToast('請填寫產品需求','error');return}
   if(!supplier){showToast('請選擇供應商','error');return}
-  const fromProductId=parseInt(document.getElementById('nf-product-id')?.value)||null
-  const newInq={id:genInqId(),customer,product,supplier,
-    spec:document.getElementById('nf-spec').value.trim(),
-    supplier_deadline:null,
-    status:'pending',can_make:'待確認',margin:'20',
-    from_product_id:fromProductId}
-  const{error}=await sb.from('inquiries').insert(newInq)
+  const rows=[...document.querySelectorAll('[id^="nf-row-"]')]
+  const toCreate=rows.map(row=>{
+    const idx=row.id.replace('nf-row-','')
+    return{product:(document.getElementById('nf-product-'+idx)?.value||'').trim(),
+      product_id:parseInt(document.getElementById('nf-product-id-'+idx)?.value)||null,
+      spec:(document.getElementById('nf-spec-'+idx)?.value||'').trim()}
+  }).filter(r=>r.product)
+  if(!toCreate.length){showToast('請至少填寫一個產品','error');return}
+  const newInqs=toCreate.map((r,i)=>({
+    id:genInqId(i),customer,supplier,product:r.product,spec:r.spec,
+    supplier_deadline:null,status:'pending',can_make:'待確認',margin:'20',
+    from_product_id:r.product_id
+  }))
+  const{error}=await sb.from('inquiries').insert(newInqs)
   if(error){showToast('建立失敗：'+error.message,'error');return}
-  logActivity('新增詢價','inquiry',newInq.id,'')
+  newInqs.forEach(inq=>logActivity('新增詢價','inquiry',inq.id,''))
   await loadInquiries();hideNewInqForm();populateFilterCustomers();renderInquiries()
-  selectedInqId=newInq.id;openInqModal(newInq.id)
+  selectedInqId=newInqs[0].id;openInqModal(newInqs[0].id)
 }
 
 async function openInqModal(id){selectedInqId=id;showTpl=false;_pendingInq={};await loadSuppliers();renderInqModalHd();renderInqModalBd();document.getElementById('modal-inq').classList.add('open')}
