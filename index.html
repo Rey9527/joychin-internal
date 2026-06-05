@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.5</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.6</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8558,15 +8558,13 @@ async function deleteProduct(id,name){
   const refCount=qi.length+oi.length+inq.length
   const doDelete=async()=>{
     document.getElementById('del-prod-overlay')?.remove()
-    if(refCount>0){
-      await Promise.all([
-        sb.from('quote_items').update({product_id:null}).eq('product_id',id),
-        sb.from('order_items').update({product_id:null}).eq('product_id',id),
-        sb.from('purchase_order_items').update({product_id:null}).eq('product_id',id),
-        sb.from('inquiries').update({from_product_id:null}).eq('from_product_id',id),
-        sb.from('samples').update({from_product_id:null}).eq('from_product_id',id)
-      ])
-    }
+    await Promise.all([
+      sb.from('quote_items').update({product_id:null}).eq('product_id',id),
+      sb.from('order_items').update({product_id:null}).eq('product_id',id),
+      sb.from('purchase_order_items').update({product_id:null}).eq('product_id',id),
+      sb.from('inquiries').update({from_product_id:null}).eq('from_product_id',id),
+      sb.from('samples').update({from_product_id:null}).eq('from_product_id',id)
+    ])
     const{error}=await sb.from('products').delete().eq('id',id)
     if(error){showToast('刪除失敗：'+error.message,'error');return}
     await loadProducts();closeModal('modal-product')
