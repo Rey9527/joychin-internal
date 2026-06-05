@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.44</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.45</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6745,8 +6745,9 @@ async function generateQuotePDF(headerId){
   items.forEach((it,idx)=>{
     const fp=it.final_price!=null?parseFloat(it.final_price):0
     const qty=parseFloat(it.qty||0)
-    const cpu=it.customer_pricing_unit
-    const wm=parseFloat(it.width_m||0)
+    const cpu=it.customer_pricing_unit||it.pricing_unit||null
+    const catWmPdf=it.product_id?products.find(p=>String(p.id)===String(it.product_id))?.width_m:null
+    const wm=parseFloat(it.width_m??catWmPdf??0)
     const unitSuffix=cpu==='m2'?' /m²':cpu==='m'?' /m':it.unit?' /'+it.unit:''
     const amount=cpu==='m2'&&wm>0?fp*wm*qty:qty>0?fp*qty:0
     total+=amount
