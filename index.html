@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.10.45</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.0</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -590,6 +590,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
             <button id="pvmode-list" onclick="setProductViewMode('list')" title="List view" style="padding:5px 9px;border:none;background:transparent;color:#666;cursor:pointer;font-size:14px">☰</button>
           </div>
           <button class="btn btn-ghost btn-sm" onclick="openInventoryModal()" data-i18n="btn_inventory">📦 庫存管理</button>
+          <button class="btn btn-ghost btn-sm" onclick="openMergeProductsTool()">⊕ 合併產品</button>
           <button class="btn btn-primary" onclick="openProductModal()" data-i18n="btn_new_product">+ 新增產品</button>
         </div>
       </div>
@@ -904,6 +905,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="modal-box sm">
     <div class="modal-hd" id="modal-product-hd"></div>
     <div class="modal-bd" id="modal-product-bd"></div>
+  </div>
+</div>
+
+<!-- 合併產品 Modal -->
+<div class="modal-overlay" id="modal-merge-products" onclick="closeModalOnBg(event,'modal-merge-products')">
+  <div class="modal-box sm">
+    <div class="modal-hd" id="modal-merge-hd"></div>
+    <div class="modal-bd" id="modal-merge-bd"></div>
   </div>
 </div>
 
@@ -3750,7 +3759,9 @@ function fillOrderItemFromProduct(mode,pid){
   const prefix=mode==='edit'?'oi':'noi'
   const nameEl=document.getElementById(prefix+'-name');if(nameEl)nameEl.value=p.product_name
   const productIdEl=document.getElementById(prefix+'-product-id');if(productIdEl)productIdEl.value=String(p.id)
-  const specEl=document.getElementById(prefix+'-spec');if(specEl)specEl.value=p.notes||''
+  const hasColors=p.color_variants?.length
+  const specEl=document.getElementById(prefix+'-spec')
+  if(specEl)specEl.value=hasColors?'':(p.notes||'')
   const unitEl=document.getElementById(prefix+'-unit');if(unitEl)unitEl.value=p.unit||getOrderUnitOptions()[0]||''
   const priceEl=document.getElementById(prefix+'-price');if(priceEl)priceEl.value=p.cost_price||''
   const currencyEl=document.getElementById(prefix+'-currency');if(currencyEl)currencyEl.value=p.currency||currencyEl.value||'USD'
@@ -3758,6 +3769,20 @@ function fillOrderItemFromProduct(mode,pid){
   const cpuEl=document.getElementById(prefix+'-cpu');if(cpuEl&&p.pricing_unit)cpuEl.value=p.pricing_unit
   if(prefix==='oi')refreshOiNewCalc()
   else noiCpuChange()
+  document.getElementById(prefix+'-color-picker')?.remove()
+  if(hasColors&&specEl){
+    const wrap=document.createElement('div')
+    wrap.id=prefix+'-color-picker'
+    wrap.style.cssText='display:flex;flex-wrap:wrap;gap:4px;margin-top:4px'
+    wrap.innerHTML=p.color_variants.map(c=>'<button type="button" onclick="_pickOiColor(\''+prefix+'\',\''+c.replace(/'/g,"\\'")+'\',this)" style="padding:2px 10px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>').join('')
+    specEl.parentElement?.appendChild(wrap)
+  }
+}
+function _pickOiColor(prefix,color,btn){
+  const specEl=document.getElementById(prefix+'-spec');if(specEl)specEl.value=color
+  const wrap=document.getElementById(prefix+'-color-picker')
+  if(wrap)wrap.querySelectorAll('button').forEach(b=>{b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.color='#555'})
+  btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
 }
 function openOrderProductPicker(mode){
   const rows=products.filter(p=>p.is_active!==false).map(p=>{
@@ -5795,6 +5820,7 @@ function inqRowHtml(i){
 }
 
 let _nfRowCount=0
+let _pdColorVariants=[]
 function genInqId(offset=0){const d=new Date();return 'INQ-'+d.getFullYear()+'-'+String(inquiries.length+32+offset).padStart(3,'0')}
 
 async function showNewInqForm(){
@@ -5895,12 +5921,31 @@ function pickInqProduct(productId){
   const specEl=document.getElementById('nf-spec-'+idx)
   if(prodEl)prodEl.value=p.product_name
   if(idEl)idEl.value=p.id
-  if(specEl&&!specEl.value&&p.notes)specEl.value=p.notes
+  const hasColors=p.color_variants?.length
+  if(specEl){if(!hasColors&&!specEl.value&&p.notes)specEl.value=p.notes;else if(hasColors)specEl.value=''}
   const supSel=document.getElementById('nf-supplier')
   if(supSel&&!supSel.value&&p.supplier_id){
     const sup=suppliers.find(s=>s.id===p.supplier_id)
     if(sup){const opt=[...supSel.options].find(o=>o.value===sup.company);if(opt)supSel.value=sup.company}
   }
+  const row=document.getElementById('nf-row-'+idx)
+  document.getElementById('nf-color-wrap-'+idx)?.remove()
+  if(hasColors&&row){
+    const wrap=document.createElement('div')
+    wrap.id='nf-color-wrap-'+idx
+    wrap.style.cssText='margin-top:6px'
+    wrap.innerHTML='<div style="font-size:11px;color:#666;margin-bottom:4px">顏色變體</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:4px">'+
+      p.color_variants.map(c=>'<button type="button" onclick="nfSelectColor('+idx+',\''+c.replace(/'/g,"\\'")+ '\',this)" style="padding:2px 10px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>').join('')+
+      '</div>'
+    row.appendChild(wrap)
+  }
+}
+function nfSelectColor(idx,color,btn){
+  const specEl=document.getElementById('nf-spec-'+idx);if(specEl)specEl.value=color
+  const wrap=document.getElementById('nf-color-wrap-'+idx)
+  if(wrap)wrap.querySelectorAll('button').forEach(b=>{b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.color='#555'})
+  btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
 }
 
 async function createInquiry(){
@@ -8282,6 +8327,7 @@ function renderProducts(){
 function openProductModal(id){
   const p=id?products.find(x=>x.id===id):null
   const isEdit=!!p
+  _pdColorVariants=p?.color_variants?[...p.color_variants]:[]
   const _supByCompany=new Map()
   suppliers.forEach(s=>{if(!_supByCompany.has(s.company))_supByCompany.set(s.company,s.id)})
   const _supCompanies=[..._supByCompany.entries()].sort((a,b)=>a[0].localeCompare(b[0],'zh-TW'))
@@ -8322,6 +8368,12 @@ function openProductModal(id){
     '<div><label>幣別</label><select id="pd-currency">'+buildOptions(CURRENCY_OPTIONS,p?.currency)+'</select></div>'+
     '</div>'+
     '<div style="margin-bottom:10px"><label>備註</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:10px"><label>顏色 / 變體清單 <span style="font-size:10px;font-weight:400;color:#aaa">（如 Yellow、Red… 同價格的顏色選項）</span></label>'+
+    '<div id="pd-color-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:24px">'+
+    (_pdColorVariants.length?_pdColorVariants.map((c,i)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#0F6E56;border:1px solid #b2dfdb;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(c)+'<button onclick="pdRemoveColor('+i+')" style="background:none;border:none;color:#0F6E56;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join(''):'<span style="font-size:11px;color:#ccc">尚未設定</span>')+
+    '</div>'+
+    '<div style="display:flex;gap:6px"><input id="pd-new-color" placeholder="輸入顏色名稱，按 Enter 新增" style="flex:1;font-size:12px" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pdAddColor()}" /><button class="btn btn-ghost btn-sm" onclick="pdAddColor()">+ 新增</button></div>'+
+    '</div>'+
     '<div class="divider"></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>更新週期</label>'+
@@ -8365,6 +8417,20 @@ async function _finishSaveProduct(msg){
   showToast(msg||'產品已更新')
 }
 
+function _pdRenderColorChips(){
+  const el=document.getElementById('pd-color-chips');if(!el)return
+  el.innerHTML=_pdColorVariants.length
+    ?_pdColorVariants.map((c,i)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#0F6E56;border:1px solid #b2dfdb;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(c)+'<button onclick="pdRemoveColor('+i+')" style="background:none;border:none;color:#0F6E56;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join('')
+    :'<span style="font-size:11px;color:#ccc">尚未設定</span>'
+}
+function pdAddColor(){
+  const el=document.getElementById('pd-new-color')
+  const val=(el?.value||'').trim();if(!val)return
+  if(_pdColorVariants.includes(val)){showToast('已有此顏色','warn');return}
+  _pdColorVariants.push(val);if(el)el.value='';_pdRenderColorChips()
+}
+function pdRemoveColor(idx){_pdColorVariants.splice(idx,1);_pdRenderColorChips()}
+
 async function saveProduct(id){
   const name=document.getElementById('pd-name').value.trim()
   if(!name){showToast('請填寫產品名稱','error');return}
@@ -8388,7 +8454,8 @@ async function saveProduct(id){
     product_type:document.querySelector('[name=pd-type]:checked')?.value||null,
     base_paper_weight:parseFloat(document.getElementById('pd-base-paper-weight')?.value)||null,
     total_weight:parseFloat(document.getElementById('pd-total-weight')?.value)||null,
-    thickness_um:parseFloat(document.getElementById('pd-thickness-um')?.value)||null
+    thickness_um:parseFloat(document.getElementById('pd-thickness-um')?.value)||null,
+    color_variants:_pdColorVariants.length?_pdColorVariants:null
   }
   let error
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
@@ -8485,6 +8552,89 @@ async function deleteProduct(id,name){
     showToast('已刪除')
   })
 }
+function openMergeProductsTool(){
+  document.getElementById('modal-merge-hd').innerHTML=
+    '<div style="font-size:14px;font-weight:600">合併產品 / 管理變體</div>'+
+    '<button class="modal-close" onclick="closeModal(\'modal-merge-products\')">×</button>'
+  const prodOpts=products.filter(p=>p.is_active!==false).sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW')).map(p=>'<option value="'+p.id+'">'+esc(p.product_name)+'</option>').join('')
+  document.getElementById('modal-merge-bd').innerHTML=
+    '<div style="font-size:12px;color:#666;background:#FFFBEA;border:1px solid #F5C842;border-radius:4px;padding:8px 12px;margin-bottom:12px">將多個顏色變體舊產品合併成一個基礎產品。被合併的產品會標記為停用，所有歷史記錄（詢價、報價、訂單）自動更新。</div>'+
+    '<div style="margin-bottom:12px"><label>目標（保留）產品 <span class="req">*</span></label>'+
+    '<select id="merge-target-id" onchange="_onMergeTargetChange()"><option value="">— 選擇要保留的產品 —</option>'+prodOpts+'</select></div>'+
+    '<div id="merge-source-section" style="display:none">'+
+    '<label style="display:block;margin-bottom:6px">要合併進去的產品 <span style="font-size:10px;color:#aaa">勾選後確認顏色名稱</span></label>'+
+    '<div id="merge-source-list"></div>'+
+    '<div id="merge-action" style="margin-top:12px;display:none">'+
+    '<button class="btn btn-primary" onclick="executeMergeProducts()">執行合併</button>'+
+    '<button class="btn btn-ghost" onclick="closeModal(\'modal-merge-products\')" style="margin-left:8px">取消</button>'+
+    '</div></div>'
+  document.getElementById('modal-merge-products').classList.add('open')
+}
+function _onMergeTargetChange(){
+  const targetId=parseInt(document.getElementById('merge-target-id').value)||null
+  const sec=document.getElementById('merge-source-section')
+  if(!targetId){sec.style.display='none';return}
+  sec.style.display='block'
+  const targetProd=products.find(p=>p.id===targetId)
+  const others=products.filter(p=>p.is_active!==false&&p.id!==targetId).sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW'))
+  document.getElementById('merge-source-list').innerHTML=others.length?others.map(p=>{
+    const suggested=_suggestMergeColor(p.product_name,targetProd?.product_name||'')
+    const sup=suppliers.find(s=>s.id===p.supplier_id)
+    return '<label style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #f5f5f0;cursor:pointer">'+
+      '<input type="checkbox" class="merge-src-chk" data-pid="'+p.id+'" onchange="_updateMergeAction()" style="width:auto;margin:0;flex-shrink:0" />'+
+      '<div style="flex:1;min-width:0">'+
+      '<div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.product_name)+'</div>'+
+      (sup?'<div style="font-size:10px;color:#aaa">'+esc(sup.company)+(p.cost_price?' · '+fmtP(p.cost_price)+' '+(p.currency||''):'')+'</div>':'')+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'+
+      '<span style="font-size:10px;color:#aaa;white-space:nowrap">顏色名稱：</span>'+
+      '<input class="merge-src-color" data-pid="'+p.id+'" value="'+esc(suggested)+'" placeholder="顏色（選填）" style="width:110px;font-size:11px;padding:3px 6px;border:1px solid #e5e5e0;border-radius:4px" />'+
+      '</div></label>'
+  }).join(''):'<div style="font-size:12px;color:#aaa;padding:10px 0">沒有其他可合併的產品</div>'
+}
+function _suggestMergeColor(sourceName,targetName){
+  const paren=sourceName.match(/[（(]([^）)]+)[）)]/)
+  if(paren)return paren[1].trim()
+  if(targetName){const stripped=sourceName.replace(targetName,'').trim().replace(/^[-_\s（(]+|[-_\s）)]+$/g,'');if(stripped&&stripped!==sourceName)return stripped}
+  return ''
+}
+function _updateMergeAction(){
+  const checked=[...document.querySelectorAll('.merge-src-chk:checked')]
+  document.getElementById('merge-action').style.display=checked.length?'block':'none'
+}
+async function executeMergeProducts(){
+  const targetId=parseInt(document.getElementById('merge-target-id').value)||null
+  if(!targetId){showToast('請選擇目標產品','error');return}
+  const targetProd=products.find(p=>p.id===targetId);if(!targetProd)return
+  const checked=[...document.querySelectorAll('.merge-src-chk:checked')]
+  if(!checked.length){showToast('請至少勾選一個要合併的產品','error');return}
+  const mergeItems=checked.map(cb=>{
+    const pid=parseInt(cb.dataset.pid)
+    const colorInput=document.querySelector('.merge-src-color[data-pid="'+pid+'"]')
+    return{id:pid,color:(colorInput?.value||'').trim()}
+  })
+  confirmModal('確定要合併 '+mergeItems.length+' 個產品到「'+targetProd.product_name+'」？被合併的產品將標記為停用。',async()=>{
+    let newColors=[...(targetProd.color_variants||[])]
+    for(const{id:oldId,color}of mergeItems){
+      const colorUpdate=color?{spec:color}:{}
+      await Promise.all([
+        sb.from('inquiries').update({from_product_id:targetId,product:targetProd.product_name,...colorUpdate}).eq('from_product_id',oldId),
+        sb.from('quote_items').update({product_id:targetId,product:targetProd.product_name,...colorUpdate}).eq('product_id',oldId),
+        sb.from('order_items').update({product_id:targetId,product_name:targetProd.product_name,...colorUpdate}).eq('product_id',oldId),
+        sb.from('purchase_order_items').update({product_id:targetId,product_name:targetProd.product_name}).eq('product_id',oldId),
+        sb.from('samples').update({from_product_id:targetId,product_name:targetProd.product_name}).eq('from_product_id',oldId),
+        sb.from('products').update({is_active:false}).eq('id',oldId)
+      ])
+      if(color&&!newColors.includes(color))newColors.push(color)
+    }
+    await sb.from('products').update({color_variants:newColors.length?newColors:null}).eq('id',targetId)
+    await Promise.all([loadProducts(),loadInquiries(),loadOrders(),loadQuotes()])
+    renderProducts();renderInquiries();renderOrders()
+    closeModal('modal-merge-products')
+    showToast('合併完成！已處理 '+mergeItems.length+' 個產品')
+  })
+}
+
 async function createInquiryFromProduct(productId){
   const p=products.find(x=>x.id===productId);if(!p)return
   const sup=suppliers.find(s=>s.id===p.supplier_id)
