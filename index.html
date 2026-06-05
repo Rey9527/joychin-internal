@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.1</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.2</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8550,22 +8550,27 @@ async function deleteProduct(id,name){
     sb.from('inquiries').select('id',{count:'exact',head:true}).eq('from_product_id',id)
   ])
   const refCount=(qiCount||0)+(oiCount||0)+(inqCount||0)
+  const doDelete=async()=>{
+    if(refCount>0){
+      await Promise.all([
+        sb.from('quote_items').update({product_id:null}).eq('product_id',id),
+        sb.from('order_items').update({product_id:null}).eq('product_id',id),
+        sb.from('purchase_order_items').update({product_id:null}).eq('product_id',id),
+        sb.from('inquiries').update({from_product_id:null}).eq('from_product_id',id),
+        sb.from('samples').update({from_product_id:null}).eq('from_product_id',id)
+      ])
+    }
+    const{error}=await sb.from('products').delete().eq('id',id)
+    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    await loadProducts();closeModal('modal-product')
+    populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
+    showToast('已刪除')
+  }
   if(refCount>0){
-    confirmModal('「'+name+'」有 '+refCount+' 筆關聯記錄（報價單/訂單/詢價），無法直接刪除。\n\n要改為標記「停用」嗎？（記錄保留，產品不再出現於新建流程）',async()=>{
-      const{error}=await sb.from('products').update({is_active:false}).eq('id',id)
-      if(error){showToast('操作失敗：'+error.message,'error');return}
-      await loadProducts();closeModal('modal-product')
-      populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
-      showToast('已標記為停用')
-    })
+    const msg='「'+name+'」有 '+refCount+' 筆關聯記錄。\n\n強制刪除會解除所有關聯（訂單/報價單/詢價記錄保留，但不再連結到此產品）。\n\n確定要刪除嗎？'
+    confirmModal(msg,doDelete)
   }else{
-    confirmModal('確定要刪除「'+name+'」嗎？',async()=>{
-      const{error}=await sb.from('products').delete().eq('id',id)
-      if(error){showToast('刪除失敗：'+error.message,'error');return}
-      await loadProducts();closeModal('modal-product')
-      populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
-      showToast('已刪除')
-    })
+    confirmModal('確定要刪除「'+name+'」嗎？',doDelete)
   }
 }
 function openMergeProductsTool(){
