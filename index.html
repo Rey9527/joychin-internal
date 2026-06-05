@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.2</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.3</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8544,13 +8544,15 @@ async function createVersionsForChecked(productId,newCost,newCurrency){
 }
 
 async function deleteProduct(id,name){
-  const[{count:qiCount},{count:oiCount},{count:inqCount}]=await Promise.all([
-    sb.from('quote_items').select('id',{count:'exact',head:true}).eq('product_id',id),
-    sb.from('order_items').select('id',{count:'exact',head:true}).eq('product_id',id),
-    sb.from('inquiries').select('id',{count:'exact',head:true}).eq('from_product_id',id)
+  const[{data:qiRows},{data:oiRows},{data:inqRows}]=await Promise.all([
+    sb.from('quote_items').select('id,product,header_id').eq('product_id',id).limit(20),
+    sb.from('order_items').select('id,product_name,order_id').eq('product_id',id).limit(20),
+    sb.from('inquiries').select('id,product,customer').eq('from_product_id',id).limit(20)
   ])
-  const refCount=(qiCount||0)+(oiCount||0)+(inqCount||0)
+  const qi=qiRows||[],oi=oiRows||[],inq=inqRows||[]
+  const refCount=qi.length+oi.length+inq.length
   const doDelete=async()=>{
+    document.getElementById('del-prod-overlay')?.remove()
     if(refCount>0){
       await Promise.all([
         sb.from('quote_items').update({product_id:null}).eq('product_id',id),
@@ -8566,12 +8568,31 @@ async function deleteProduct(id,name){
     populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
     showToast('已刪除')
   }
-  if(refCount>0){
-    const msg='「'+name+'」有 '+refCount+' 筆關聯記錄。\n\n強制刪除會解除所有關聯（訂單/報價單/詢價記錄保留，但不再連結到此產品）。\n\n確定要刪除嗎？'
-    confirmModal(msg,doDelete)
-  }else{
-    confirmModal('確定要刪除「'+name+'」嗎？',doDelete)
-  }
+  if(!refCount){confirmModal('確定要刪除「'+name+'」嗎？',doDelete);return}
+  // Custom overlay showing linked records
+  document.getElementById('del-prod-overlay')?.remove()
+  const ov=document.createElement('div')
+  ov.id='del-prod-overlay'
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px'
+  const makeLink=(label,onclick)=>'<a href="#" onclick="event.preventDefault();document.getElementById(\'del-prod-overlay\').remove();'+onclick+'" style="font-size:11px;color:#0F6E56;text-decoration:none;white-space:nowrap">'+label+'</a>'
+  const qiSection=qi.length?'<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:#555;margin-bottom:4px">報價單（'+qi.length+'）</div>'+[...new Map(qi.map(r=>[r.header_id,r])).values()].map(r=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #f5f5f0"><span style="font-size:11px;color:#333">'+esc(r.header_id)+'</span>'+makeLink('開啟','switchTab(\'quotes\');setTimeout(()=>openQuoteModal(\''+r.header_id+'\'),300)')+'</div>').join('')+'</div>':''
+  const oiSection=oi.length?'<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:#555;margin-bottom:4px">訂單（'+oi.length+'）</div>'+[...new Map(oi.map(r=>[r.order_id,r])).values()].map(r=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #f5f5f0"><span style="font-size:11px;color:#333">'+esc(r.order_id)+'</span>'+makeLink('開啟','switchTab(\'orders\');setTimeout(()=>openOrderModal(\''+r.order_id+'\'),300)')+'</div>').join('')+'</div>':''
+  const inqSection=inq.length?'<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:#555;margin-bottom:4px">詢價單（'+inq.length+'）</div>'+inq.map(r=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #f5f5f0"><span style="font-size:11px;color:#333">'+esc(r.id)+' · '+esc(r.customer||'')+'</span>'+makeLink('開啟','switchTab(\'inquiry\');setTimeout(()=>openInqModal(\''+r.id+'\'),300)')+'</div>').join('')+'</div>':''
+  ov.innerHTML='<div style="background:#fff;border-radius:6px;width:100%;max-width:440px;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25)">'+
+    '<div style="padding:14px 18px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center">'+
+    '<div style="font-size:13px;font-weight:600;color:#A32D2D">刪除「'+esc(name)+'」</div>'+
+    '<button onclick="document.getElementById(\'del-prod-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
+    '</div>'+
+    '<div style="padding:14px 18px">'+
+    '<div style="font-size:12px;color:#666;margin-bottom:12px">此產品有以下關聯記錄，刪除後這些記錄將解除與此產品的連結（內容保留）。</div>'+
+    qiSection+oiSection+inqSection+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+    '<button class="btn btn-sm" style="background:#A32D2D;color:#fff;border:none" onclick="window._delProdFn&&window._delProdFn()">確認刪除</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'del-prod-overlay\').remove()">取消</button>'+
+    '</div></div></div>'
+  window._delProdFn=doDelete
+  document.body.appendChild(ov)
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()})
 }
 function openMergeProductsTool(){
   document.getElementById('modal-merge-hd').innerHTML=
