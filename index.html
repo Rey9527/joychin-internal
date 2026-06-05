@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.3</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.4</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8545,11 +8545,13 @@ async function createVersionsForChecked(productId,newCost,newCurrency){
 
 async function deleteProduct(id,name){
   const[{data:qiRows},{data:oiRows},{data:inqRows}]=await Promise.all([
-    sb.from('quote_items').select('id,product,header_id').eq('product_id',id).limit(20),
+    sb.from('quote_items').select('id,product,header_id,quote_headers(status)').eq('product_id',id).limit(50),
     sb.from('order_items').select('id,product_name,order_id').eq('product_id',id).limit(20),
     sb.from('inquiries').select('id,product,customer').eq('from_product_id',id).limit(20)
   ])
-  const qi=qiRows||[],oi=oiRows||[],inq=inqRows||[]
+  // Only warn about active quote versions; superseded ones are cleaned up silently
+  const qi=(qiRows||[]).filter(r=>r.quote_headers?.status!=='superseded')
+  const oi=oiRows||[],inq=inqRows||[]
   const refCount=qi.length+oi.length+inq.length
   const doDelete=async()=>{
     document.getElementById('del-prod-overlay')?.remove()
