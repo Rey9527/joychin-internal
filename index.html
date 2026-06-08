@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.6</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.7</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -6463,10 +6463,11 @@ function renderQuoteModalBd(){
   const itemsHtml=items.map((it,idx)=>{
     const cp=parseFloat(it.cost_price||0)
     const applyCustoms=shouldApplyCustoms(it)
-    const{afterCustoms,final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyCustoms)
+    const{final}=calcQuote(cp,it.customs_fee_pct,it.margin_pct,applyCustoms)
+    const normCost=_qiNormCost(it)
     const cur=it.cost_currency||'USD'
-    const fp=it.final_price!=null?it.final_price:parseFloat(final.toFixed(4))
-    const mgn=afterCustoms>0?Math.round((fp/afterCustoms-1)*10000)/100:0
+    const fp=it.final_price!=null?parseFloat(it.final_price):parseFloat(final.toFixed(4))
+    const mgn=normCost>0?Math.round((fp/normCost-1)*10000)/100:0
     const mgnColor=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'
     const cpu=it.customer_pricing_unit||it.pricing_unit||null
     const _catWm=it.product_id?products.find(p=>String(p.id)===String(it.product_id))?.width_m:null
