@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.10</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.11</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8603,6 +8603,7 @@ async function deleteProduct(id,name){
     ])
     const{error}=await sb.from('products').delete().eq('id',id)
     if(error){showToast('刪除失敗：'+error.message,'error');return}
+    logActivity('刪除產品','product',String(id),name)
     await loadProducts();closeModal('modal-product')
     populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
     showToast('已刪除')
