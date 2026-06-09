@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.26</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.27</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -590,7 +590,6 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
             <button id="pvmode-list" onclick="setProductViewMode('list')" title="List view" style="padding:5px 9px;border:none;background:transparent;color:#666;cursor:pointer;font-size:14px">☰</button>
           </div>
           <button class="btn btn-ghost btn-sm" onclick="openInventoryModal()" data-i18n="btn_inventory">📦 庫存管理</button>
-          <button class="btn btn-ghost btn-sm" onclick="openMergeProductsTool()">⊕ 合併產品</button>
           <button class="btn btn-primary" onclick="openProductModal()" data-i18n="btn_new_product">+ 新增產品</button>
         </div>
       </div>
@@ -908,14 +907,6 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   </div>
 </div>
 
-<!-- 合併產品 Modal -->
-<div class="modal-overlay" id="modal-merge-products" onclick="closeModalOnBg(event,'modal-merge-products')">
-  <div class="modal-box sm">
-    <div class="modal-hd" id="modal-merge-hd"></div>
-    <div class="modal-bd" id="modal-merge-bd"></div>
-  </div>
-</div>
-
 <!-- 樣品詳情 Modal -->
 <div class="modal-overlay" id="modal-sample" onclick="closeModalOnBg(event,'modal-sample')">
   <div class="modal-box lg">
@@ -1135,6 +1126,9 @@ const I18N={
     inv_log_title:'📋 庫存異動記錄',inv_no_log:'尚無庫存異動記錄',
     inv_edit_hint:'編輯模式：直接填入實際盤點數量，Enter 跳下一筆，完成後按「確認儲存」',
     inv_col_product:'產品',inv_col_safe:'安全水位',inv_col_stock:'現有庫存',inv_col_note:'備註',
+    inv_no_products:'尚無產品',inv_updated_prefix:'更新 ',inv_note_ph:'備註...',
+    inv_log_change:'調整量',inv_log_before:'調整前',inv_log_after:'調整後',inv_log_time:'時間',
+    toast_no_changes:'沒有任何變更',toast_stock_updated:'庫存已更新 {n} 筆',err_inv_log:'異動記錄寫入失敗：',
     lbl_base_paper_weight:'基紙重量（g/m²）',lbl_total_weight:'總重（kg）',
     lbl_last_reviewed:'上次確認',lbl_reviewed_short:'確認',
     fp_search_ph:'搜尋名稱、SKU...',
@@ -1363,7 +1357,7 @@ const I18N={
     val_name_email:'請填寫姓名與 Email',val_all_fields:'請填寫所有欄位',val_wrong_pwd:'目前密碼不正確',
     val_pwd_mismatch:'新密碼與確認密碼不一致',val_pwd_min_length:'密碼至少需要 {n} 個字元',
     val_new_pwd:'請輸入新密碼',val_group_name:'請輸入群組名稱',
-    val_select_quote:'請至少勾選一張報價單',val_select_merge:'請至少勾選一個要合併的產品',
+    val_select_quote:'請至少勾選一張報價單',
     val_select_target:'請選擇目標產品',val_missing_product_link:'缺少產品關聯或成本資料',
     val_parse_cost:'無法解析成本金額',val_product_not_found:'找不到對應產品，請重新確認關聯',
     val_no_changes:'沒有任何變更',val_color_exists:'已有此顏色',val_variant_exists:'已有此選項',
@@ -1379,7 +1373,6 @@ const I18N={
     toast_alloc_staged:'分配已加入暫存',toast_order_linked:'關聯客戶訂單已新增',
     toast_inventory_updated:'庫存已更新 {n} 筆',toast_quote_created:'報價單 {id} 已建立',
     toast_inq_created:'詢價單已建立',toast_cost_updated:'產品目錄成本已更新',
-    toast_merge_done:'合併完成！已處理 {n} 個產品',
     toast_customer_updated:'客戶已更新',toast_customer_added:'客戶已新增',
     toast_customer_contact_added:'客戶聯絡人已新增',toast_customer_reviewed:'已標記今日回顧',
     toast_supplier_saved:'供應商資料已儲存',toast_supplier_contact_added:'供應商聯絡人已新增',
@@ -1400,7 +1393,6 @@ const I18N={
     confirm_switch_supplier:'切換供應商將清空採購車，確定嗎？',confirm_unsaved:'有未儲存的變更，確定要離開嗎？',
     confirm_update_inventory:'確認更新 {n} 筆庫存？\n{summary}',confirm_del_generic:'確定要刪除「{name}」嗎？',
     confirm_user_action:'確定要{action}此使用者嗎？',confirm_del_user:'確定要刪除使用者「{name}」嗎？',
-    confirm_merge_products:'確定要合併 {n} 個產品到「{target}」？被合併的產品將標記為停用。',
     toast_group_updated:'群組已更新',toast_group_created:'群組已建立',
     toast_items_added:'已加入 {n} 筆品項',
     confirm_del_group:'確定要刪除群組「{name}」嗎？',
@@ -1423,6 +1415,9 @@ const I18N={
     inv_log_title:'📋 Stock Change Log',inv_no_log:'No stock changes recorded',
     inv_edit_hint:'Edit mode: enter actual counts directly. Press Enter for next item, then click "Confirm & Save".',
     inv_col_product:'Product',inv_col_safe:'Safe Level',inv_col_stock:'Stock',inv_col_note:'Note',
+    inv_no_products:'No products',inv_updated_prefix:'Updated ',inv_note_ph:'Note...',
+    inv_log_change:'Change',inv_log_before:'Before',inv_log_after:'After',inv_log_time:'Time',
+    toast_no_changes:'No changes',toast_stock_updated:'Stock updated: {n} items',err_inv_log:'Failed to write log: ',
     lbl_base_paper_weight:'Base Paper Weight (g/m²)',lbl_total_weight:'Total Weight (kg)',
     lbl_last_reviewed:'Last Confirmed',lbl_reviewed_short:'Confirmed',
     fp_search_ph:'Search name, SKU...',
@@ -1651,7 +1646,7 @@ const I18N={
     val_name_email:'Please fill in name and email',val_all_fields:'Please fill in all fields',val_wrong_pwd:'Current password is incorrect',
     val_pwd_mismatch:'New password and confirmation do not match',val_pwd_min_length:'Password must be at least {n} characters',
     val_new_pwd:'Please enter new password',val_group_name:'Please enter group name',
-    val_select_quote:'Please select at least one quote',val_select_merge:'Please select at least one product to merge',
+    val_select_quote:'Please select at least one quote',
     val_select_target:'Please select a target product',val_missing_product_link:'Missing product link or cost data',
     val_parse_cost:'Cannot parse cost amount',val_product_not_found:'Product not found, please verify link',
     val_no_changes:'No changes made',val_color_exists:'This color already exists',val_variant_exists:'This variant already exists',
@@ -1667,7 +1662,6 @@ const I18N={
     toast_alloc_staged:'Allocation staged',toast_order_linked:'Customer order linked',
     toast_inventory_updated:'{n} inventory records updated',toast_quote_created:'Quote {id} created',
     toast_inq_created:'Inquiry created',toast_cost_updated:'Product catalog cost updated',
-    toast_merge_done:'Merge complete! Processed {n} products',
     toast_customer_updated:'Customer updated',toast_customer_added:'Customer added',
     toast_customer_contact_added:'Customer contact added',toast_customer_reviewed:'Marked as reviewed today',
     toast_supplier_saved:'Supplier saved',toast_supplier_contact_added:'Supplier contact added',
@@ -1688,7 +1682,6 @@ const I18N={
     confirm_switch_supplier:'Switching supplier will clear the cart. Continue?',confirm_unsaved:'You have unsaved changes — leave anyway?',
     confirm_update_inventory:'Update {n} inventory records?\n{summary}',confirm_del_generic:'Delete "{name}"?',
     confirm_user_action:'{action} this user?',confirm_del_user:'Delete user "{name}"?',
-    confirm_merge_products:'Merge {n} products into "{target}"? Merged products will be marked inactive.',
     toast_group_updated:'Group updated',toast_group_created:'Group created',
     toast_items_added:'{n} items added',
     confirm_del_group:'Delete group "{name}"?',
@@ -1711,6 +1704,9 @@ const I18N={
     inv_log_title:'📋 บันทึกความเคลื่อนไหวสต็อก',inv_no_log:'ยังไม่มีรายการเปลี่ยนแปลงสต็อก',
     inv_edit_hint:'โหมดแก้ไข: กรอกจำนวนจริง กด Enter ไปรายการถัดไป แล้วกด "ยืนยันและบันทึก"',
     inv_col_product:'สินค้า',inv_col_safe:'ระดับความปลอดภัย',inv_col_stock:'สต็อกปัจจุบัน',inv_col_note:'หมายเหตุ',
+    inv_no_products:'ไม่มีสินค้า',inv_updated_prefix:'อัปเดต ',inv_note_ph:'หมายเหตุ...',
+    inv_log_change:'การเปลี่ยนแปลง',inv_log_before:'ก่อน',inv_log_after:'หลัง',inv_log_time:'เวลา',
+    toast_no_changes:'ไม่มีการเปลี่ยนแปลง',toast_stock_updated:'อัปเดตสต็อกแล้ว {n} รายการ',err_inv_log:'ไม่สามารถบันทึกรายการ: ',
     lbl_base_paper_weight:'น้ำหนักกระดาษฐาน (g/m²)',lbl_total_weight:'น้ำหนักรวม (kg)',
     lbl_last_reviewed:'ยืนยันล่าสุด',lbl_reviewed_short:'ยืนยัน',
     fp_search_ph:'ค้นหาชื่อ, SKU...',
@@ -1939,7 +1935,7 @@ const I18N={
     val_name_email:'กรุณากรอกชื่อและอีเมล',val_all_fields:'กรุณากรอกข้อมูลทุกช่อง',val_wrong_pwd:'รหัสผ่านปัจจุบันไม่ถูกต้อง',
     val_pwd_mismatch:'รหัสผ่านใหม่และการยืนยันไม่ตรงกัน',val_pwd_min_length:'รหัสผ่านต้องมีอย่างน้อย {n} ตัวอักษร',
     val_new_pwd:'กรุณากรอกรหัสผ่านใหม่',val_group_name:'กรุณากรอกชื่อกลุ่ม',
-    val_select_quote:'กรุณาเลือกอย่างน้อยหนึ่งใบเสนอราคา',val_select_merge:'กรุณาเลือกอย่างน้อยหนึ่งสินค้าเพื่อรวม',
+    val_select_quote:'กรุณาเลือกอย่างน้อยหนึ่งใบเสนอราคา',
     val_select_target:'กรุณาเลือกสินค้าเป้าหมาย',val_missing_product_link:'ไม่พบข้อมูลเชื่อมโยงสินค้าหรือต้นทุน',
     val_parse_cost:'ไม่สามารถวิเคราะห์จำนวนต้นทุนได้',val_product_not_found:'ไม่พบสินค้า กรุณาตรวจสอบการเชื่อมโยง',
     val_no_changes:'ไม่มีการเปลี่ยนแปลง',val_color_exists:'สีนี้มีอยู่แล้ว',val_variant_exists:'ตัวเลือกนี้มีอยู่แล้ว',
@@ -1955,7 +1951,6 @@ const I18N={
     toast_alloc_staged:'จัดเก็บการจัดสรรชั่วคราวแล้ว',toast_order_linked:'เชื่อมโยงคำสั่งซื้อแล้ว',
     toast_inventory_updated:'อัปเดตสต็อก {n} รายการแล้ว',toast_quote_created:'สร้างใบเสนอราคา {id} แล้ว',
     toast_inq_created:'สร้างการสอบถามแล้ว',toast_cost_updated:'อัปเดตต้นทุนสินค้าแล้ว',
-    toast_merge_done:'รวมสำเร็จ! ดำเนินการ {n} สินค้า',
     toast_customer_updated:'อัปเดตลูกค้าแล้ว',toast_customer_added:'เพิ่มลูกค้าแล้ว',
     toast_customer_contact_added:'เพิ่มผู้ติดต่อลูกค้าแล้ว',toast_customer_reviewed:'ทำเครื่องหมายรีวิววันนี้แล้ว',
     toast_supplier_saved:'บันทึกซัพพลายเออร์แล้ว',toast_supplier_contact_added:'เพิ่มผู้ติดต่อซัพพลายเออร์แล้ว',
@@ -1976,7 +1971,6 @@ const I18N={
     confirm_switch_supplier:'เปลี่ยนซัพพลายเออร์จะล้างตะกร้า ดำเนินการต่อไหม?',confirm_unsaved:'มีการเปลี่ยนแปลงที่ยังไม่บันทึก ออกไหม?',
     confirm_update_inventory:'ยืนยันการอัปเดต {n} รายการสต็อก?\n{summary}',confirm_del_generic:'ลบ "{name}" ใช่ไหม?',
     confirm_user_action:'{action}ผู้ใช้นี้ใช่ไหม?',confirm_del_user:'ลบผู้ใช้ "{name}" ใช่ไหม?',
-    confirm_merge_products:'รวม {n} สินค้าเข้า "{target}"? สินค้าที่รวมจะถูกทำเครื่องหมายว่าไม่ใช้งาน',
     toast_group_updated:'อัปเดตกลุ่มแล้ว',toast_group_created:'สร้างกลุ่มแล้ว',
     toast_items_added:'เพิ่ม {n} รายการแล้ว',
     confirm_del_group:'ลบกลุ่ม "{name}" ใช่ไหม?',
@@ -8730,8 +8724,8 @@ function openInventoryModal(editMode){
   const bd=document.getElementById('modal-inventory-bd')
   const allProds=products.filter(p=>p.is_active!==false).sort((a,b)=>(a.product_name||'').localeCompare(b.product_name||''))
   if(!allProds.length){
-    bd.innerHTML='<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">尚無產品</div>'+
-      '<div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">關閉</button></div>'
+    bd.innerHTML='<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">'+t('inv_no_products')+'</div>'+
+      '<div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal(\'modal-inventory\')">'+t('btn_close')+'</button></div>'
     document.getElementById('modal-inventory').classList.add('open')
     return
   }
@@ -8749,16 +8743,17 @@ function openInventoryModal(editMode){
     const isWarn=safe!=null&&qty>safe&&qty<safe*1.5
     const sup=suppliers.find(x=>x.id===p.supplier_id)
     const col=isLow?'#A32D2D':isWarn?'#7A5B00':'#333'
-    const updAt=p.stock_updated_at?new Date(p.stock_updated_at).toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'}):null
+    const _dtLocale=_lang==='en'?'en-US':_lang==='th'?'th-TH':'zh-TW'
+    const updAt=p.stock_updated_at?new Date(p.stock_updated_at).toLocaleDateString(_dtLocale,{month:'2-digit',day:'2-digit'}):null
     const nextId=editMode&&allProds[i+1]?'inv-qty-'+allProds[i+1].id:null
     const enterNav=nextId?'if(event.key===\'Enter\'){event.preventDefault();document.getElementById(\''+nextId+'\')?.focus()}':''
     html+='<div style="display:grid;grid-template-columns:'+COL+';gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid #f5f4f0">'+
       '<div><div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
-      '<div style="font-size:10px;color:#aaa">'+(sup?esc(sup.company||''):'')+(updAt?' · 更新 '+updAt:'')+'</div></div>'+
+      '<div style="font-size:10px;color:#aaa">'+(sup?esc(sup.company||''):'')+(updAt?' · '+t('inv_updated_prefix')+updAt:'')+'</div></div>'+
       '<div style="text-align:right;font-size:12px;color:#888">'+(safe!=null?safe+' '+(getInventoryUnit()):'—')+'</div>'+
       (editMode
-        ?'<div><input type="number" id="inv-qty-'+p.id+'" value="'+Math.round(qty)+'" step="0.01" min="0" style="text-align:right;width:100%;'+(isLow?'color:#A32D2D;font-weight:600':'')+'" onkeydown="'+enterNav+'" /></div>'+
-         '<div><input type="text" id="inv-note-'+p.id+'" placeholder="備註..." style="font-size:12px" /></div>'
+        ?'<div><input type="number" id="inv-qty-'+p.id+'" value="'+Math.round(qty)+'" step="1" min="0" style="text-align:right;width:100%;'+(isLow?'color:#A32D2D;font-weight:600':'')+'" onkeydown="'+enterNav+'" /></div>'+
+         '<div><input type="text" id="inv-note-'+p.id+'" placeholder="'+t('inv_note_ph')+'" style="font-size:12px" /></div>'
         :'<div style="text-align:right;font-size:13px;font-weight:600;color:'+col+'">'+(isLow?'⚠ ':isWarn?'● ':'')+qty+' '+(getInventoryUnit())+'</div>'
       )+
       '</div>'
@@ -8789,7 +8784,7 @@ async function saveInventoryAdjustments(){
       updates.push({p,qtyBefore,newQty,change:newQty-qtyBefore,note:document.getElementById('inv-note-'+p.id)?.value?.trim()||null})
     }
   })
-  if(!updates.length){showToast('沒有任何變更');return}
+  if(!updates.length){showToast(t('toast_no_changes'));return}
   const summary=updates.map(u=>(u.change>0?'+':'')+u.change.toFixed(0)+' '+u.p.product_name).join('、')
   confirmModal(t('confirm_update_inventory').replace('{n}',updates.length).replace('{summary}',summary),async()=>{
     const now=new Date().toISOString()
@@ -8797,14 +8792,14 @@ async function saveInventoryAdjustments(){
       const{error}=await sb.from('products').update({stock_qty:u.newQty}).eq('id',u.p.id)
       if(error){showToast(t('err_update')+error.message,'error');return}
       const{error:logErr}=await sb.from('inventory_logs').insert({product_id:u.p.id,change_qty:u.change,qty_before:u.qtyBefore,qty_after:u.newQty,note:u.note,source:'manual',created_by:currentUser?.auth_id||null})
-      if(logErr){showToast('異動記錄寫入失敗：'+logErr.message,'error');return}
+      if(logErr){showToast(t('err_inv_log')+logErr.message,'error');return}
     }
     await logActivity('更新庫存','inventory','batch',updates.length+' 筆 — '+summary)
     await loadProducts()
     renderProducts()
     renderDashboard()
     openInventoryModal()
-    showToast('庫存已更新 '+updates.length+' 筆')
+    showToast(t('toast_stock_updated').replace('{n}',updates.length))
   })
 }
 
@@ -8823,13 +8818,14 @@ async function _renderInventoryLog(){
   if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">'+t('inv_no_log')+'</div>';return}
   const COL='1fr 70px 70px 70px 120px 130px'
   el.innerHTML='<div style="display:grid;grid-template-columns:'+COL+';gap:8px;padding:0 4px 6px;font-size:11px;color:#aaa;font-weight:500;border-bottom:1px solid #e5e5e0;margin-bottom:4px">'+
-    '<div>'+t('inv_col_product')+'</div><div style="text-align:right">調整量</div><div style="text-align:right">調整前</div><div style="text-align:right">調整後</div><div>'+t('inv_col_note')+'</div><div style="text-align:right">時間</div></div>'+
+    '<div>'+t('inv_col_product')+'</div><div style="text-align:right">'+t('inv_log_change')+'</div><div style="text-align:right">'+t('inv_log_before')+'</div><div style="text-align:right">'+t('inv_log_after')+'</div><div>'+t('inv_col_note')+'</div><div style="text-align:right">'+t('inv_log_time')+'</div></div>'+
     data.map(r=>{
       const p=products.find(x=>String(x.id)===String(r.product_id))
       const change=parseFloat(r.change_qty)||0
       const color=change>0?'#3B6D11':change<0?'#A32D2D':'#888'
       const sign=change>0?'+':''
-      const dt=r.created_at?new Date(r.created_at).toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'
+      const _logLocale=_lang==='en'?'en-US':_lang==='th'?'th-TH':'zh-TW'
+      const dt=r.created_at?new Date(r.created_at).toLocaleString(_logLocale,{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'
       return '<div style="display:grid;grid-template-columns:'+COL+';gap:8px;align-items:center;padding:7px 4px;border-bottom:1px solid #f5f4f0">'+
         '<div style="font-size:12px;font-weight:500">'+esc(p?p.product_name:'#'+r.product_id)+'</div>'+
         '<div style="text-align:right;font-size:13px;font-weight:600;color:'+color+'">'+sign+change+'</div>'+
@@ -9255,89 +9251,6 @@ async function deleteProduct(id,name){
   document.body.appendChild(ov)
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()})
 }
-function openMergeProductsTool(){
-  document.getElementById('modal-merge-hd').innerHTML=
-    '<div style="font-size:14px;font-weight:600">合併產品 / 管理變體</div>'+
-    '<button class="modal-close" onclick="closeModal(\'modal-merge-products\')">×</button>'
-  const prodOpts=products.filter(p=>p.is_active!==false).sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW')).map(p=>'<option value="'+p.id+'">'+esc(p.product_name)+'</option>').join('')
-  document.getElementById('modal-merge-bd').innerHTML=
-    '<div style="font-size:12px;color:#666;background:#FFFBEA;border:1px solid #F5C842;border-radius:4px;padding:8px 12px;margin-bottom:12px">將多個顏色變體舊產品合併成一個基礎產品。被合併的產品會標記為停用，所有歷史記錄（詢價、報價、訂單）自動更新。</div>'+
-    '<div style="margin-bottom:12px"><label>目標（保留）產品 <span class="req">*</span></label>'+
-    '<select id="merge-target-id" onchange="_onMergeTargetChange()"><option value="">— 選擇要保留的產品 —</option>'+prodOpts+'</select></div>'+
-    '<div id="merge-source-section" style="display:none">'+
-    '<label style="display:block;margin-bottom:6px">要合併進去的產品 <span style="font-size:10px;color:#aaa">勾選後確認顏色名稱</span></label>'+
-    '<div id="merge-source-list"></div>'+
-    '<div id="merge-action" style="margin-top:12px;display:none">'+
-    '<button class="btn btn-primary" onclick="executeMergeProducts()">執行合併</button>'+
-    '<button class="btn btn-ghost" onclick="closeModal(\'modal-merge-products\')" style="margin-left:8px">取消</button>'+
-    '</div></div>'
-  document.getElementById('modal-merge-products').classList.add('open')
-}
-function _onMergeTargetChange(){
-  const targetId=parseInt(document.getElementById('merge-target-id').value)||null
-  const sec=document.getElementById('merge-source-section')
-  if(!targetId){sec.style.display='none';return}
-  sec.style.display='block'
-  const targetProd=products.find(p=>p.id===targetId)
-  const others=products.filter(p=>p.is_active!==false&&p.id!==targetId).sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW'))
-  document.getElementById('merge-source-list').innerHTML=others.length?others.map(p=>{
-    const suggested=_suggestMergeColor(p.product_name,targetProd?.product_name||'')
-    const sup=suppliers.find(s=>s.id===p.supplier_id)
-    return '<label style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #f5f5f0;cursor:pointer">'+
-      '<input type="checkbox" class="merge-src-chk" data-pid="'+p.id+'" onchange="_updateMergeAction()" style="width:auto;margin:0;flex-shrink:0" />'+
-      '<div style="flex:1;min-width:0">'+
-      '<div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.product_name)+'</div>'+
-      (sup?'<div style="font-size:10px;color:#aaa">'+esc(sup.company)+(p.cost_price?' · '+fmtP(p.cost_price)+' '+(p.currency||''):'')+'</div>':'')+
-      '</div>'+
-      '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'+
-      '<span style="font-size:10px;color:#aaa;white-space:nowrap">顏色名稱：</span>'+
-      '<input class="merge-src-color" data-pid="'+p.id+'" value="'+esc(suggested)+'" placeholder="顏色（選填）" style="width:110px;font-size:11px;padding:3px 6px;border:1px solid #e5e5e0;border-radius:4px" />'+
-      '</div></label>'
-  }).join(''):'<div style="font-size:12px;color:#aaa;padding:10px 0">沒有其他可合併的產品</div>'
-}
-function _suggestMergeColor(sourceName,targetName){
-  const paren=sourceName.match(/[（(]([^）)]+)[）)]/)
-  if(paren)return paren[1].trim()
-  if(targetName){const stripped=sourceName.replace(targetName,'').trim().replace(/^[-_\s（(]+|[-_\s）)]+$/g,'');if(stripped&&stripped!==sourceName)return stripped}
-  return ''
-}
-function _updateMergeAction(){
-  const checked=[...document.querySelectorAll('.merge-src-chk:checked')]
-  document.getElementById('merge-action').style.display=checked.length?'block':'none'
-}
-async function executeMergeProducts(){
-  const targetId=parseInt(document.getElementById('merge-target-id').value)||null
-  if(!targetId){showToast('請選擇目標產品','error');return}
-  const targetProd=products.find(p=>p.id===targetId);if(!targetProd)return
-  const checked=[...document.querySelectorAll('.merge-src-chk:checked')]
-  if(!checked.length){showToast('請至少勾選一個要合併的產品','error');return}
-  const mergeItems=checked.map(cb=>{
-    const pid=parseInt(cb.dataset.pid)
-    const colorInput=document.querySelector('.merge-src-color[data-pid="'+pid+'"]')
-    return{id:pid,color:(colorInput?.value||'').trim()}
-  })
-  confirmModal(t('confirm_merge_products').replace('{n}',mergeItems.length).replace('{target}',targetProd.product_name),async()=>{
-    let newColors=[...(targetProd.color_variants||[])]
-    for(const{id:oldId,color}of mergeItems){
-      const colorUpdate=color?{spec:color}:{}
-      await Promise.all([
-        sb.from('inquiries').update({from_product_id:targetId,product:targetProd.product_name,...colorUpdate}).eq('from_product_id',oldId),
-        sb.from('quote_items').update({product_id:targetId,product:targetProd.product_name,...colorUpdate}).eq('product_id',oldId),
-        sb.from('order_items').update({product_id:targetId,product_name:targetProd.product_name,...colorUpdate}).eq('product_id',oldId),
-        sb.from('purchase_order_items').update({product_id:targetId,product_name:targetProd.product_name}).eq('product_id',oldId),
-        sb.from('samples').update({from_product_id:targetId,product_name:targetProd.product_name}).eq('from_product_id',oldId),
-        sb.from('products').update({is_active:false}).eq('id',oldId)
-      ])
-      if(color&&!newColors.includes(color))newColors.push(color)
-    }
-    await sb.from('products').update({color_variants:newColors.length?newColors:null}).eq('id',targetId)
-    await Promise.all([loadProducts(),loadInquiries(),loadOrders(),loadQuotes()])
-    renderProducts();renderInquiries();renderOrders()
-    closeModal('modal-merge-products')
-    showToast('合併完成！已處理 '+mergeItems.length+' 個產品')
-  })
-}
-
 async function createInquiryFromProduct(productId){
   const p=products.find(x=>x.id===productId);if(!p)return
   const sup=suppliers.find(s=>s.id===p.supplier_id)
