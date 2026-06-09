@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.13</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.14</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -5582,19 +5582,24 @@ function _pshopShowAddOptions(productId){
     '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(p.product_name)+'</div>'+
     '<div style="font-size:11px;color:#888;margin-bottom:16px">採購選項</div>'+
     colorSection+
-    '<div style="margin-bottom:16px">'+
-    '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">印刷</div>'+
-    '<div style="display:flex;gap:16px;margin-bottom:10px">'+
-    '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pshop-print" value="" checked onchange="pshopOptPrintChange(this)" style="width:auto;margin:0"> 無</label>'+
-    '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pshop-print" value="yes" onchange="pshopOptPrintChange(this)" style="width:auto;margin:0"> 有</label>'+
-    '</div>'+
-    '<div id="pshop-print-detail" style="display:none;padding-left:2px;display:none">'+
-    '<div style="display:flex;flex-direction:column;gap:8px">'+
-    '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="radio" name="pshop-print-type" value="方格" style="width:auto;margin:0"> 方格</label>'+
-    '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="radio" name="pshop-print-type" value="直條" style="width:auto;margin:0"> 直條</label>'+
-    '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="radio" name="pshop-print-type" value="other" onchange="document.getElementById(\'pshop-print-other-txt\').style.display=\'block\'" style="width:auto;margin:0"> 其他</label>'+
-    '<input id="pshop-print-other-txt" placeholder="說明印刷方式..." style="display:none;font-size:12px;margin-left:22px;width:calc(100% - 22px)" />'+
-    '</div></div></div>'+
+    (()=>{
+      const _dph=!!p.printing
+      const _dpt=p.printing==='方格'?'方格':p.printing==='直條'?'直條':p.printing?'other':''
+      const _dpo=_dpt==='other'?(p.printing||''):''
+      return '<div style="margin-bottom:16px">'+
+      '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">印刷</div>'+
+      '<div style="display:flex;gap:16px;margin-bottom:10px">'+
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pshop-print" value="" '+(!_dph?'checked':'')+' onchange="pshopOptPrintChange(this)" style="width:auto;margin:0"> 無</label>'+
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pshop-print" value="yes" '+(_dph?'checked':'')+' onchange="pshopOptPrintChange(this)" style="width:auto;margin:0"> 有</label>'+
+      '</div>'+
+      '<div id="pshop-print-detail" style="display:'+(_dph?'block':'none')+';padding-left:2px">'+
+      '<div style="display:flex;flex-direction:column;gap:8px">'+
+      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="radio" name="pshop-print-type" value="方格" '+(_dpt==='方格'?'checked':'')+' onchange="document.getElementById(\'pshop-print-other-txt\').style.display=\'none\'" style="width:auto;margin:0"> 方格</label>'+
+      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="radio" name="pshop-print-type" value="直條" '+(_dpt==='直條'?'checked':'')+' onchange="document.getElementById(\'pshop-print-other-txt\').style.display=\'none\'" style="width:auto;margin:0"> 直條</label>'+
+      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="radio" name="pshop-print-type" value="other" '+(_dpt==='other'?'checked':'')+' onchange="document.getElementById(\'pshop-print-other-txt\').style.display=\'block\'" style="width:auto;margin:0"> 其他</label>'+
+      '<input id="pshop-print-other-txt" value="'+esc(_dpo)+'" placeholder="說明印刷方式..." style="display:'+(_dpt==='other'?'block':'none')+';font-size:12px;margin-left:22px;width:calc(100% - 22px)" />'+
+      '</div></div></div>'
+    })()+
     '<div style="display:flex;gap:8px">'+
     '<button class="btn btn-primary btn-sm" onclick="_pshopConfirmAdd('+productId+')">加入推車</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pshop-options-overlay\').remove()">取消</button>'+
@@ -8382,6 +8387,7 @@ function renderProducts(){
             (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
             '</div>':'')+
           '<div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
+          (p.printing?'<div style="font-size:10px;color:#7B5EA7;margin-top:1px">印刷：'+esc(p.printing)+'</div>':'')+
         '</div>'+
         '<div style="flex-shrink:0;text-align:right;font-size:11px;color:#888;padding-left:12px;min-width:0;max-width:45%">'+
           '<div style="color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(sup?esc(sup.company):'—')+'</div>'+
@@ -8445,6 +8451,22 @@ function openProductModal(id){
     '</div>'+
     '<div style="display:flex;gap:6px"><input id="pd-new-color" placeholder="輸入顏色名稱，按 Enter 新增" style="flex:1;font-size:12px" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pdAddColor()}" /><button class="btn btn-ghost btn-sm" onclick="pdAddColor()">+ 新增</button></div>'+
     '</div>'+
+    (()=>{
+      const _ph=!!p?.printing
+      const _pt=p?.printing==='方格'?'方格':p?.printing==='直條'?'直條':p?.printing?'other':''
+      const _po=_pt==='other'?(p?.printing||''):''
+      return '<div style="margin-bottom:10px"><label>印刷</label>'+
+      '<div style="display:flex;gap:12px;align-items:center;margin-top:4px;flex-wrap:wrap">'+
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print" value="" '+(!_ph?'checked':'')+' onchange="document.getElementById(\'pd-print-type-wrap\').style.display=\'none\'" style="width:auto;margin:0"> 無</label>'+
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print" value="yes" '+(_ph?'checked':'')+' onchange="document.getElementById(\'pd-print-type-wrap\').style.display=\'flex\'" style="width:auto;margin:0"> 有</label>'+
+      '</div>'+
+      '<div id="pd-print-type-wrap" style="display:'+(_ph?'flex':'none')+';gap:12px;align-items:center;margin-top:6px;flex-wrap:wrap">'+
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print-type" value="方格" '+(_pt==='方格'?'checked':'')+' onchange="document.getElementById(\'pd-print-other-wrap\').style.display=\'none\'" style="width:auto;margin:0"> 方格</label>'+
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print-type" value="直條" '+(_pt==='直條'?'checked':'')+' onchange="document.getElementById(\'pd-print-other-wrap\').style.display=\'none\'" style="width:auto;margin:0"> 直條</label>'+
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print-type" value="other" '+(_pt==='other'?'checked':'')+' onchange="document.getElementById(\'pd-print-other-wrap\').style.display=\'block\'" style="width:auto;margin:0"> 其他</label>'+
+      '<div id="pd-print-other-wrap" style="display:'+(_pt==='other'?'block':'none')+'"><input id="pd-print-other-txt" value="'+esc(_po)+'" placeholder="說明..." style="font-size:12px;width:100px" /></div>'+
+      '</div></div>'
+    })()+
     '<div class="divider"></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>更新週期</label>'+
@@ -8526,7 +8548,8 @@ async function saveProduct(id){
     base_paper_weight:parseFloat(document.getElementById('pd-base-paper-weight')?.value)||null,
     total_weight:parseFloat(document.getElementById('pd-total-weight')?.value)||null,
     thickness_um:parseFloat(document.getElementById('pd-thickness-um')?.value)||null,
-    color_variants:_pdColorVariants.length?_pdColorVariants:null
+    color_variants:_pdColorVariants.length?_pdColorVariants:null,
+    printing:(()=>{const has=document.querySelector('[name=pd-print]:checked')?.value==='yes';if(!has)return null;const tv=document.querySelector('[name=pd-print-type]:checked')?.value||'方格';return tv==='other'?(document.getElementById('pd-print-other-txt')?.value.trim()||'其他'):tv})()
   }
   let error
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
