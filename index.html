@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.23</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.24</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1224,6 +1224,16 @@ const I18N={
     coa_no_shipment:'📋 提醒已設定 — 待船運建立後，出貨時向供應商索取 COA',
     coa_waiting_etd:'⏳ 等待出貨',coa_waiting_remind:' — 屆時記得向供應商索取 COA',
     coa_etd_overdue:'⚠ ETD 已過 — 請確認是否已向供應商取得 COA，取得後上傳存檔',
+    coa_pending_title:'COA 待收追蹤',coa_pending_none:'無待收 COA ✓',coa_pending_badge:'COA 待收',
+    btn_open_order:'開啟訂單',
+    qi_update_cost:'📦 更新目錄成本',qi_not_catalog:'非目錄',qi_customs_pct:'清關手續費 %',qi_customs_pct2:'清關費 %',
+    qi_apply:'套用',qi_landed_cost:'到岸成本：',qi_quote_price:'報價（含清關含利潤）',qi_margin:'利潤率 ',
+    qi_width:'寬幅',qi_from_catalog:'來自目錄',qi_pricing_unit_cost:'計價單位（成本）',
+    qi_customer_unit:'報給客戶的單位',qi_lead_time:'交期',qi_need_width:'⚠ 需填寬幅',
+    qi_add_qty_btn:'+ 增加',qi_est_profit:'預計總利潤',qi_confirm_add:'確認加入',qi_fill_hint:'填入報價後按確認加入列表',lbl_pending_save:'待儲存',
+    qi_price_ph:'輸入報給客戶的價格',qi_width_conv:'寬幅（mm）— 單位 m² ↔ m 換算用',qi_width_conv_ph:'填入才能換算 m² ↔ m',
+    val_enter_qty:'請輸入有效數量',val_qty_exists:'此數量已存在',val_select_pricing_unit:'請選擇計價單位',
+    toast_qi_saved:'品項已儲存',
     ord_status_section:'訂單狀態',
     status_confirmed:'已確認',status_processing:'處理中',status_ready:'備貨完成',
     status_shipped:'已出貨',status_delivered:'已到客戶',status_completed:'已完成',status_cancelled:'已取消',
@@ -1502,6 +1512,16 @@ const I18N={
     coa_no_shipment:'📋 Reminder set — Request COA from supplier when shipment is created',
     coa_waiting_etd:'⏳ Awaiting shipment',coa_waiting_remind:' — Remember to request COA from supplier',
     coa_etd_overdue:'⚠ ETD passed — Confirm whether COA has been obtained from supplier, then upload for filing',
+    coa_pending_title:'COA Pending Tracker',coa_pending_none:'No pending COA ✓',coa_pending_badge:'COA Pending',
+    btn_open_order:'Open Order',
+    qi_update_cost:'📦 Update Catalog Cost',qi_not_catalog:'Not Catalog',qi_customs_pct:'Customs Fee %',qi_customs_pct2:'Customs %',
+    qi_apply:'Apply',qi_landed_cost:'Landed Cost: ',qi_quote_price:'Quote Price',qi_margin:'Margin: ',
+    qi_width:'Width',qi_from_catalog:'From catalog',qi_pricing_unit_cost:'Pricing Unit (Cost)',
+    qi_customer_unit:'Unit to Customer',qi_lead_time:'Lead Time',qi_need_width:'⚠ Width required',
+    qi_add_qty_btn:'+ Add',qi_est_profit:'Est. Total Profit',qi_confirm_add:'Confirm',qi_fill_hint:'Fill in quote price then confirm',lbl_pending_save:'Unsaved',
+    qi_price_ph:'Price quoted to customer',qi_width_conv:'Width (mm) — for m²↔m conversion',qi_width_conv_ph:'Required for m²↔m conversion',
+    val_enter_qty:'Enter a valid qty',val_qty_exists:'This qty already exists',val_select_pricing_unit:'Please select pricing unit',
+    toast_qi_saved:'Item saved',
     ord_status_section:'Order Status',
     status_confirmed:'Confirmed',status_processing:'Processing',status_ready:'Ready',
     status_shipped:'Shipped',status_delivered:'Delivered',status_completed:'Completed',status_cancelled:'Cancelled',
@@ -1780,6 +1800,16 @@ const I18N={
     coa_no_shipment:'📋 ตั้งการแจ้งเตือนแล้ว — ขอ COA จากซัพพลายเออร์เมื่อสร้างการขนส่ง',
     coa_waiting_etd:'⏳ รอการขนส่ง',coa_waiting_remind:' — อย่าลืมขอ COA จากซัพพลายเออร์',
     coa_etd_overdue:'⚠ ETD ผ่านแล้ว — กรุณายืนยันว่าได้รับ COA จากซัพพลายเออร์หรือยัง แล้วอัพโหลดเก็บไว้',
+    coa_pending_title:'ติดตาม COA ค้างรับ',coa_pending_none:'ไม่มี COA ค้างรับ ✓',coa_pending_badge:'COA ค้างรับ',
+    btn_open_order:'เปิดคำสั่งซื้อ',
+    qi_update_cost:'📦 อัปเดตต้นทุน',qi_not_catalog:'ไม่ใช่แคตตาล็อก',qi_customs_pct:'ค่าธรรมเนียมศุลกากร %',qi_customs_pct2:'ศุลกากร %',
+    qi_apply:'ใช้',qi_landed_cost:'ต้นทุนรวม: ',qi_quote_price:'ราคาเสนอ',qi_margin:'อัตรากำไร: ',
+    qi_width:'ความกว้าง',qi_from_catalog:'จากแคตตาล็อก',qi_pricing_unit_cost:'หน่วยราคา (ต้นทุน)',
+    qi_customer_unit:'หน่วยสำหรับลูกค้า',qi_lead_time:'ระยะเวลานำ',qi_need_width:'⚠ ต้องระบุความกว้าง',
+    qi_add_qty_btn:'+ เพิ่ม',qi_est_profit:'กำไรรวมโดยประมาณ',qi_confirm_add:'ยืนยัน',qi_fill_hint:'กรอกราคาเสนอแล้วกดยืนยัน',lbl_pending_save:'ยังไม่บันทึก',
+    qi_price_ph:'ราคาที่เสนอลูกค้า',qi_width_conv:'ความกว้าง (มม.) — สำหรับแปลง m²↔m',qi_width_conv_ph:'จำเป็นสำหรับการแปลง m²↔m',
+    val_enter_qty:'กรุณาระบุจำนวนที่ถูกต้อง',val_qty_exists:'จำนวนนี้มีอยู่แล้ว',val_select_pricing_unit:'กรุณาเลือกหน่วยราคา',
+    toast_qi_saved:'บันทึกรายการแล้ว',
     ord_status_section:'สถานะคำสั่งซื้อ',
     status_confirmed:'ยืนยันแล้ว',status_processing:'กำลังดำเนินการ',status_ready:'พร้อมแล้ว',
     status_shipped:'จัดส่งแล้ว',status_delivered:'ส่งถึงลูกค้าแล้ว',status_completed:'เสร็จสิ้น',status_cancelled:'ยกเลิกแล้ว',
@@ -3024,9 +3054,9 @@ function renderDashboard(){
       return orderLinkedShipments(o.id).some(sh=>sh.etd&&sh.etd<=today)
     })
     ph+='<div style="background:#fff;border:1px solid '+(coaPendingOrders.length?'#FCA5A5':'#e5e5e0')+';border-radius:4px;padding:14px 16px;margin-bottom:16px">'
-    ph+='<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:10px">'+(coaPendingOrders.length?'⚠ ':'')+'COA 待收追蹤</div>'
+    ph+='<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:10px">'+(coaPendingOrders.length?'⚠ ':'')+t('coa_pending_title')+'</div>'
     if(!coaPendingOrders.length){
-      ph+='<div style="color:#3B6D11;font-size:13px">無待收 COA ✓</div>'
+      ph+='<div style="color:#3B6D11;font-size:13px">'+t('coa_pending_none')+'</div>'
     }else{
       coaPendingOrders.forEach(o=>{
         const cust=customers.find(c=>String(c.id)===String(o.customer_id))
@@ -3036,7 +3066,7 @@ function renderDashboard(){
         ph+='<div style="font-size:13px;font-weight:500;color:#991B1B">'+esc(o.id)+'</div>'
         ph+='<div style="font-size:11px;color:#666;margin-top:2px">'+(cust?esc(cust.company):'—')+' · ETD: '+passedShs.map(sh=>sh.etd).join(', ')+'</div>'
         ph+='</div>'
-        ph+='<button class="btn btn-ghost btn-sm" style="white-space:nowrap;flex-shrink:0" onclick="switchTab(\'orders\');setTimeout(()=>openOrderModal(\''+esc(o.id)+'\'),80)">開啟訂單</button>'
+        ph+='<button class="btn btn-ghost btn-sm" style="white-space:nowrap;flex-shrink:0" onclick="switchTab(\'orders\');setTimeout(()=>openOrderModal(\''+esc(o.id)+'\'),80)">'+t('btn_open_order')+'</button>'
         ph+='</div>'
       })
     }
@@ -3061,7 +3091,7 @@ function renderDashboard(){
     {label:'Orders Need Action',count:orderAlertIds().size,tab:'orders'},
     {label:'PO Without Shipment',count:purchaseOrders.filter(p=>!_poEx.includes(p.status)&&!_poLk.has(String(p.id))).length,tab:'purchases'},
     {label:'Samples Pending',count:_sampleIds.size,tab:'samples'},
-    {label:'COA 待收',count:_coaPendingCnt,tab:'orders'},
+    {label:t('coa_pending_badge'),count:_coaPendingCnt,tab:'orders'},
   ]
   const cardsHtml=moduleCards.map(c=>{
     const alert=c.count>0
@@ -3398,7 +3428,7 @@ function renderOrders(){
       (o.customer_ref_no?'<span style="font-size:11px;color:#aaa">客戶單號：'+esc(o.customer_ref_no)+'</span>':'')+
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+orderStatusLabel(st.id)+'</span>'+
       (o.source==='verbal'&&(o.approval_status||'none')==='none'?'<span class="badge" style="background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D">待審批</span>':'')+
-      (()=>{if(!o.requires_coa)return '';const today=new Date().toISOString().slice(0,10);const hasCoa=orderCoaDocs.some(d=>String(d.order_id)===String(o.id));if(hasCoa)return '<span class="badge" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7">COA ✓</span>';const lshs=orderLinkedShipments(o.id);const etdPassed=lshs.some(sh=>sh.etd&&sh.etd<=today);if(etdPassed)return '<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5">⚠ COA 待收</span>';return '<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>';})()+
+      (()=>{if(!o.requires_coa)return '';const today=new Date().toISOString().slice(0,10);const hasCoa=orderCoaDocs.some(d=>String(d.order_id)===String(o.id));if(hasCoa)return '<span class="badge" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7">COA ✓</span>';const lshs=orderLinkedShipments(o.id);const etdPassed=lshs.some(sh=>sh.etd&&sh.etd<=today);if(etdPassed)return '<span class="badge" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5">'+t('coa_pending_badge')+'</span>';return '<span class="badge" style="background:#F0EBF5;color:#6B3FA0;border:1px solid #D4BFEA">COA</span>';})()+
       '</div>'+
       '<div style="font-size:12px;color:#666">'+
       (cust?cust.company:'—')+' · '+(sup?sup.company:'—')+
@@ -7491,7 +7521,7 @@ function _qiUpdateEffCost(it){
   const cp=parseFloat(it.cost_price||0)
   const applyC=shouldApplyCustoms(it)
   const eff=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
-  el.textContent=cp>0?(applyC?'到岸成本：'+fmtP(eff):fmtP(cp))+' '+(it.cost_currency||''):''
+  el.textContent=cp>0?(applyC?t('qi_landed_cost')+fmtP(eff):fmtP(cp))+' '+(it.cost_currency||''):''
 }
 function _qiNormCost(it){
   const cp=parseFloat(it.cost_price||0)
@@ -7536,41 +7566,41 @@ function openQuoteItemModal(itemId){
   document.getElementById('modal-quote-item-bd').innerHTML=
     '<div class="grid-2" style="margin-bottom:12px">'+
     '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>Supplier Cost</span>'+
-    (it.product_id?'<a href="#" style="font-size:10px;color:#0F6E56;text-decoration:none" onclick="event.preventDefault();closeModal(\'modal-quote-item\');goUpdateProductCost('+it.product_id+')">📦 更新目錄成本</a>':'<span style="font-size:10px;color:#bbb">非目錄</span>')+
+    (it.product_id?'<a href="#" style="font-size:10px;color:#0F6E56;text-decoration:none" onclick="event.preventDefault();closeModal(\'modal-quote-item\');goUpdateProductCost('+it.product_id+')">'+t('qi_update_cost')+'</a>':'<span style="font-size:10px;color:#bbb">'+t('qi_not_catalog')+'</span>')+
     '</label><input type="number" value="'+(it.cost_price||'')+'" placeholder="0.0000" step="0.0001"'+ro+' /></div>'+
-    '<div><label>幣別</label><select'+dis+'>'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(it.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
-    '<div><label style="display:flex;justify-content:space-between"><span>清關手續費 %</span>'+
+    '<div><label>'+t('lbl_currency')+'</label><select'+dis+'>'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(it.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div><label style="display:flex;justify-content:space-between"><span>'+t('qi_customs_pct')+'</span>'+
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
-    '<input type="checkbox" id="qi-modal-customs-chk" '+(applyCustoms?'checked':'')+' '+(canApplyCustoms?'':'disabled')+' '+(editable&&canApplyCustoms?'onchange="qiModalCustomsChange(this.checked)"':'')+' style="width:auto"> 套用</label></label>'+
+    '<input type="checkbox" id="qi-modal-customs-chk" '+(applyCustoms?'checked':'')+' '+(canApplyCustoms?'':'disabled')+' '+(editable&&canApplyCustoms?'onchange="qiModalCustomsChange(this.checked)"':'')+' style="width:auto"> '+t('qi_apply')+'</label></label>'+
     '<input type="number" id="qi-modal-customs-pct" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" '+(editable&&canApplyCustoms?'onchange="qiModalChange(\'customs_fee_pct\',parseFloat(this.value))"':'')+(!editable||!canApplyCustoms?' disabled style="background:#f5f5f2;color:#666"':'')+' />'+
-    '<div id="qi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyCustoms?'到岸成本：'+fmtP(cp*(1+parseFloat(it.customs_fee_pct??7.5)/100)):fmtP(cp))+' '+(it.cost_currency||''):'')+'</div>'+
+    '<div id="qi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyCustoms?t('qi_landed_cost')+fmtP(cp*(1+parseFloat(it.customs_fee_pct??7.5)/100)):fmtP(cp))+' '+(it.cost_currency||''):'')+'</div>'+
     '</div>'+
-    '<div><label>報價（含清關含利潤）</label>'+
+    '<div><label>'+t('qi_quote_price')+'</label>'+
     '<input type="number" id="qi-modal-fp" value="'+fmtP(fp)+'" step="0.0001" '+(editable?'onchange="qiModalFpChange(parseFloat(this.value))"':dis)+' />'+
-    '<div id="qi-modal-mgn" style="font-size:10px;margin-top:3px;color:'+mgnColor+'">利潤率 '+mgn.toFixed(2)+'%</div>'+
+    '<div id="qi-modal-mgn" style="font-size:10px;margin-top:3px;color:'+mgnColor+'">'+t('qi_margin')+mgn.toFixed(2)+'%</div>'+
     '</div>'+
-    '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>寬幅</span>'+
-    (it.product_id?'<span style="font-size:10px;color:#aaa">來自目錄</span>':(editable?'<span style="font-size:10px;color:#aaa">mm</span>':''))+'</label>'+
+    '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>'+t('qi_width')+'</span>'+
+    (it.product_id?'<span style="font-size:10px;color:#aaa">'+t('qi_from_catalog')+'</span>':(editable?'<span style="font-size:10px;color:#aaa">mm</span>':''))+'</label>'+
     (it.product_id||!editable
       ?'<input type="text" value="'+(dispWidthM!=null?Math.round(dispWidthM*1000)+'mm':'—')+'"'+ro+' />'
-      :'<input type="number" id="qi-modal-width" value="'+(it.width_m!=null?Math.round(it.width_m*1000):'')+'" placeholder="例：3200" step="1" min="0" onchange="qiModalWidthChange(parseFloat(this.value)||0)" />'
+      :'<input type="number" id="qi-modal-width" value="'+(it.width_m!=null?Math.round(it.width_m*1000):'')+'" placeholder="e.g. 3200" step="1" min="0" onchange="qiModalWidthChange(parseFloat(this.value)||0)" />'
     )+'</div>'+
-    '<div><label>計價單位（成本）<span class="req">*</span></label><select '+(editable?'onchange="qiModalChange(\'pricing_unit\',this.value)"':dis)+'>'+
+    '<div><label>'+t('qi_pricing_unit_cost')+'<span class="req">*</span></label><select '+(editable?'onchange="qiModalChange(\'pricing_unit\',this.value)"':dis)+'>'+
     '<option value="">—</option>'+
-    '<option value="m2"'+(!it.pricing_unit||it.pricing_unit==='m2'?' selected':'')+'>平方米 m²</option>'+
-    '<option value="m"'+(it.pricing_unit==='m'?' selected':'')+'>米 m</option>'+
+    '<option value="m2"'+(!it.pricing_unit||it.pricing_unit==='m2'?' selected':'')+'>m²</option>'+
+    '<option value="m"'+(it.pricing_unit==='m'?' selected':'')+'>m</option>'+
     '</select></div>'+
-    '<div><label>報給客戶的單位</label><select '+(editable?'onchange="qiModalChange(\'customer_pricing_unit\',this.value)"':dis)+'>'+
+    '<div><label>'+t('qi_customer_unit')+'</label><select '+(editable?'onchange="qiModalChange(\'customer_pricing_unit\',this.value)"':dis)+'>'+
     '<option value="">—</option>'+
     '<option value="m2"'+(!it.customer_pricing_unit||it.customer_pricing_unit==='m2'?' selected':'')+'>m²</option>'+
     '<option value="m"'+(it.customer_pricing_unit==='m'?' selected':'')+'>m</option>'+
     '</select></div>'+
-    '<div><label>MOQ</label><input id="qi-modal-moq" value="'+(it.moq||'')+'" placeholder="例：1000m²" '+(editable?'onchange="qiModalChange(\'moq\',this.value)"':ro)+' /></div>'+
-    '<div><label>交期</label><input id="qi-modal-lead" value="'+(it.lead_time||'')+'" placeholder="例：30天" '+(editable?'onchange="qiModalChange(\'lead_time\',this.value)"':ro)+' /></div>'+
+    '<div><label>MOQ</label><input id="qi-modal-moq" value="'+(it.moq||'')+'" placeholder="e.g. 1000m²" '+(editable?'onchange="qiModalChange(\'moq\',this.value)"':ro)+' /></div>'+
+    '<div><label>'+t('qi_lead_time')+'</label><input id="qi-modal-lead" value="'+(it.lead_time||'')+'" placeholder="e.g. 30 days" '+(editable?'onchange="qiModalChange(\'lead_time\',this.value)"':ro)+' /></div>'+
     '</div>'+
     '<div style="font-size:10px;color:'+(supplierNeedsCustoms(it.supplier_id)?'#666':'#0F6E56')+';margin-bottom:12px">'+getSupplierCustomsHint(it.supplier_id)+'</div>'+
     '<div id="qi-profit-section"></div>'+
-    (editable?'<div class="modal-foot"><button class="btn btn-primary btn-sm" onclick="saveQuoteItem()">儲存</button><button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote-item\')">取消</button></div>':'')
+    (editable?'<div class="modal-foot"><button class="btn btn-primary btn-sm" onclick="saveQuoteItem()">'+t('btn_save_info')+'</button><button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote-item\')">'+t('btn_cancel')+'</button></div>':'')
   document.getElementById('modal-quote-item').classList.add('open')
   renderQiProfitSection()
 }
@@ -7586,7 +7616,7 @@ function qiModalChange(field,value){
     it.margin_pct=mgn
     _qPendingItems[_selectedQiId].margin_pct=mgn
     const mgnEl=document.getElementById('qi-modal-mgn')
-    if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent='利潤率 '+mgn.toFixed(2)+'%'}
+    if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent=t('qi_margin')+mgn.toFixed(2)+'%'}
     _qiUpdateEffCost(it)
     renderQiProfitSection()
   }
@@ -7603,7 +7633,7 @@ function qiModalCustomsChange(checked){
     it.margin_pct=mgn
     _qPendingItems[_selectedQiId].margin_pct=mgn
     const mgnEl=document.getElementById('qi-modal-mgn')
-    if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent='利潤率 '+mgn.toFixed(2)+'%'}
+    if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent=t('qi_margin')+mgn.toFixed(2)+'%'}
     _qiUpdateEffCost(it)
     renderQiProfitSection()
   }
@@ -7628,7 +7658,7 @@ function qiModalFpChange(fp){
   _qPendingItems[_selectedQiId].final_price=it.final_price
   _qPendingItems[_selectedQiId].margin_pct=mgn
   const mgnEl=document.getElementById('qi-modal-mgn')
-  if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent='利潤率 '+mgn.toFixed(2)+'%'}
+  if(mgnEl){const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56';mgnEl.style.color=mc;mgnEl.textContent=t('qi_margin')+mgn.toFixed(2)+'%'}
   renderQiProfitSection()
 }
 async function saveQuoteItem(){
@@ -7636,14 +7666,14 @@ async function saveQuoteItem(){
   const changes=_qPendingItems[_selectedQiId]
   const it=quoteItems.find(x=>String(x.id)===_selectedQiId)
   const pu='pricing_unit' in changes?changes.pricing_unit:it?.pricing_unit
-  if(!pu){showToast('請選擇計價單位','error');return}
+  if(!pu){showToast(t('val_select_pricing_unit'),'error');return}
   const{error}=await sb.from('quote_items').update(changes).eq('id',_selectedQiId)
   if(error){showToast(t('err_save')+error.message,'error');return}
   delete _qPendingItems[_selectedQiId]
   await loadQuotes()
   closeModal('modal-quote-item')
   renderQuoteModalBd()
-  showToast('品項已儲存')
+  showToast(t('toast_qi_saved'))
 }
 function qHeaderChange(field,value){
   _qPendingHeader[field]=value
@@ -7841,18 +7871,18 @@ function renderQiProfitSection(){
     '<div style="border-top:1px solid #e5e5e0;margin-top:12px;padding:12px 0 4px">'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
     '<div style="font-size:12px;font-weight:500;color:#444">Profit Simulation <span style="font-size:10px;font-weight:400;color:#888">('+cur+')</span>'+
-    (needWidth?'<span style="font-size:10px;color:#e88a00;margin-left:6px">⚠ 需填寬幅</span>':'')+'</div>'+
+    (needWidth?'<span style="font-size:10px;color:#e88a00;margin-left:6px">'+t('qi_need_width')+'</span>':'')+'</div>'+
     '<div style="display:flex;gap:4px;align-items:center">'+
     '<input type="number" id="qi-new-bp" placeholder="Qty" min="1" style="width:90px;font-size:11px;padding:3px 6px;border:1px solid #e5e5e0;border-radius:4px" />'+
-    '<button class="btn btn-ghost btn-sm" onclick="qiAddQtyBreakpoint()" style="font-size:11px;padding:2px 8px">+ 增加 / Add</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="qiAddQtyBreakpoint()" style="font-size:11px;padding:2px 8px">'+t('qi_add_qty_btn')+'</button>'+
     '</div></div>'+
     '<div style="display:flex;align-items:flex-end;gap:6px;height:'+(BAR_MAX+40)+'px;padding-bottom:4px">'+bars+'</div>'+
     '</div>'
 }
 function qiAddQtyBreakpoint(){
   const v=parseFloat(document.getElementById('qi-new-bp')?.value||0)
-  if(!v||v<=0){showToast('請輸入有效數量','error');return}
-  if(_qiProfitQtys.includes(v)){showToast('此數量已存在','error');return}
+  if(!v||v<=0){showToast(t('val_enter_qty'),'error');return}
+  if(_qiProfitQtys.includes(v)){showToast(t('val_qty_exists'),'error');return}
   _qiProfitQtys=[..._qiProfitQtys,v].sort((a,b)=>a-b)
   renderQiProfitSection()
 }
@@ -7927,7 +7957,7 @@ function buildQSimResults(eligible){
     const isNeg=total<0
     return '<div style="margin-bottom:6px">'+
       '<div style="display:flex;justify-content:space-between;align-items:center">'+
-      '<span style="font-size:11px;color:#666">預計總利潤</span>'+
+      '<span style="font-size:11px;color:#666">'+t('qi_est_profit')+'</span>'+
       '<span style="font-size:13px;font-weight:700;color:'+(isNeg?'#e55':'#0F6E56')+'">'+(total>=0?'+':'')+Math.round(total).toLocaleString('en')+' '+cur+'</span>'+
       '</div>'+bar+'</div>'
   }).join('')
@@ -7960,30 +7990,30 @@ function openNewPendingItemEdit(data){
     '<div style="padding:14px 18px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:flex-start">'+
     '<div><div style="font-size:13px;font-weight:600">'+esc(data.product)+'</div>'+
     (data.spec?'<div style="font-size:11px;color:#aaa;margin-top:1px">'+esc(data.spec)+'</div>':'')+
-    '<div style="margin-top:4px;font-size:11px;color:#888">填入報價後按確認加入列表</div></div>'+
+    '<div style="margin-top:4px;font-size:11px;color:#888">'+t('qi_fill_hint')+'</div></div>'+
     '<button onclick="document.getElementById(\'npi-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1;margin-top:-2px">×</button>'+
     '</div>'+
     '<div style="padding:14px 18px" class="grid-2">'+
     '<div><label>Supplier Cost</label><input type="number" value="'+(data.cost_price||'')+'" readonly style="background:#f5f5f2;color:#666;cursor:default" /></div>'+
-    '<div><label>幣別</label><select disabled style="background:#f5f5f2;color:#666">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(data.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
-    '<div><label style="display:flex;justify-content:space-between"><span>清關費 %</span>'+
+    '<div><label>'+t('lbl_currency')+'</label><select disabled style="background:#f5f5f2;color:#666">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(data.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div><label style="display:flex;justify-content:space-between"><span>'+t('qi_customs_pct2')+'</span>'+
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
-    '<input type="checkbox" id="npi-ac" '+(applyC?'checked':'')+' onchange="npiCalcMgn()" style="width:auto"> 套用</label></label>'+
+    '<input type="checkbox" id="npi-ac" '+(applyC?'checked':'')+' onchange="npiCalcMgn()" style="width:auto"> '+t('qi_apply')+'</label></label>'+
     '<input type="number" id="npi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="npiCalcMgn()" />'+
-    '<div id="npi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?'到岸成本：'+fmtP(cp*(1+cpct/100)):fmtP(cp))+' '+(data.cost_currency||''):'')+'</div></div>'+
-    '<div><label>報價（含清關含利潤）</label>'+
-    '<input type="number" id="npi-fp" value="'+(calcFp!=null?fmtP(calcFp):'')+'" step="0.0001" placeholder="輸入報給客戶的價格" onchange="npiCalcMgn()" />'+
-    '<div id="npi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
-    '<div><label>計價單位（成本）</label><select id="npi-pu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
-    '<div><label>報給客戶的單位</label><select id="npi-cpu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
-    '<div style="grid-column:span 2"><label>寬幅（mm）— 單位 m² ↔ m 換算用</label>'+
-    '<input type="number" id="npi-wm" value="'+(data.width_m!=null?Math.round(data.width_m*1000):'')+'" min="0" step="1" placeholder="填入才能換算 m² ↔ m" oninput="npiCalcMgn()" /></div>'+
-    '<div><label>MOQ</label><input id="npi-moq" value="" placeholder="例：1000m²" /></div>'+
-    '<div><label>交期</label><input id="npi-lead" value="" placeholder="例：30天" /></div>'+
+    '<div id="npi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?t('qi_landed_cost')+fmtP(cp*(1+cpct/100)):fmtP(cp))+' '+(data.cost_currency||''):'')+'</div></div>'+
+    '<div><label>'+t('qi_quote_price')+'</label>'+
+    '<input type="number" id="npi-fp" value="'+(calcFp!=null?fmtP(calcFp):'')+'" step="0.0001" placeholder="'+t('qi_price_ph')+'" onchange="npiCalcMgn()" />'+
+    '<div id="npi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?t('qi_margin')+mgn.toFixed(2)+'%':'')+'</div></div>'+
+    '<div><label>'+t('qi_pricing_unit_cost')+'</label><select id="npi-pu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>'+t('qi_customer_unit')+'</label><select id="npi-cpu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div style="grid-column:span 2"><label>'+t('qi_width_conv')+'</label>'+
+    '<input type="number" id="npi-wm" value="'+(data.width_m!=null?Math.round(data.width_m*1000):'')+'" min="0" step="1" placeholder="'+t('qi_width_conv_ph')+'" oninput="npiCalcMgn()" /></div>'+
+    '<div><label>MOQ</label><input id="npi-moq" value="" placeholder="e.g. 1000m²" /></div>'+
+    '<div><label>'+t('qi_lead_time')+'</label><input id="npi-lead" value="" placeholder="e.g. 30 days" /></div>'+
     '</div>'+
     '<div style="padding:0 18px 16px;display:flex;gap:8px">'+
-    '<button class="btn btn-primary btn-sm" onclick="confirmNewPendingItem()">確認加入</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'npi-overlay\').remove()">取消</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="confirmNewPendingItem()">'+t('qi_confirm_add')+'</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'npi-overlay\').remove()">'+t('btn_cancel')+'</button>'+
     '</div></div>'
   document.body.appendChild(overlay)
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
@@ -8006,13 +8036,13 @@ function npiCalcMgn(){
   const cpct=parseFloat(document.getElementById('npi-cpct')?.value||0)
   const eff=ac?cp*(1+cpct/100):cp
   const effEl=document.getElementById('npi-eff-cost')
-  if(effEl)effEl.textContent=cp>0?(ac?'到岸成本：'+fmtP(eff):fmtP(cp))+' '+(_draftNewItem?.cost_currency||''):''
+  if(effEl)effEl.textContent=cp>0?(ac?t('qi_landed_cost')+fmtP(eff):fmtP(cp))+' '+(_draftNewItem?.cost_currency||''):''
   const costNorm=_npiNormCost()
   const fp=parseFloat(document.getElementById('npi-fp')?.value||0)
   const mgn=costNorm>0&&fp?Math.round((fp/costNorm-1)*10000)/100:null
   const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
   const el=document.getElementById('npi-mgn')
-  if(el){el.style.color=mc;el.textContent=fp&&mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':''}
+  if(el){el.style.color=mc;el.textContent=fp&&mgn!=null?t('qi_margin')+mgn.toFixed(2)+'%':''}
 }
 function confirmNewPendingItem(){
   if(!_draftNewItem)return
@@ -8080,30 +8110,30 @@ function openPendingItemModal(key){
     '<div style="padding:14px 18px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:flex-start">'+
     '<div><div style="font-size:13px;font-weight:600">'+esc(pit.product)+'</div>'+
     (pit.spec?'<div style="font-size:11px;color:#aaa;margin-top:1px">'+esc(pit.spec)+'</div>':'')+
-    '<div style="margin-top:4px"><span style="font-size:10px;color:#3B6D11;background:#EAF3DE;border:1px solid #B5D68A;border-radius:3px;padding:1px 6px">待儲存</span></div></div>'+
+    '<div style="margin-top:4px"><span style="font-size:10px;color:#3B6D11;background:#EAF3DE;border:1px solid #B5D68A;border-radius:3px;padding:1px 6px">'+t('lbl_pending_save')+'</span></div></div>'+
     '<button onclick="document.getElementById(\'pmi-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1;margin-top:-2px">×</button>'+
     '</div>'+
     '<div style="padding:14px 18px" class="grid-2">'+
     '<div><label>Supplier Cost</label><input type="number" value="'+(pit.cost_price||'')+'" readonly style="background:#f5f5f2;color:#666;cursor:default" /></div>'+
-    '<div><label>幣別</label><select disabled style="background:#f5f5f2;color:#666">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(pit.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
-    '<div><label style="display:flex;justify-content:space-between"><span>清關費 %</span>'+
+    '<div><label>'+t('lbl_currency')+'</label><select disabled style="background:#f5f5f2;color:#666">'+['USD','THB','TWD','CNY','EUR'].map(c=>'<option'+(pit.cost_currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div><label style="display:flex;justify-content:space-between"><span>'+t('qi_customs_pct2')+'</span>'+
     '<label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;cursor:pointer">'+
-    '<input type="checkbox" id="pmi-ac" '+(applyC?'checked':'')+' onchange="pmiCalcMgn('+key+')" style="width:auto"> 套用</label></label>'+
+    '<input type="checkbox" id="pmi-ac" '+(applyC?'checked':'')+' onchange="pmiCalcMgn('+key+')" style="width:auto"> '+t('qi_apply')+'</label></label>'+
     '<input type="number" id="pmi-cpct" value="'+cpct+'" min="0" max="50" step="0.5" onchange="pmiCalcMgn('+key+')" />'+
-    '<div id="pmi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?'到岸成本：'+fmtP(cp*(1+cpct/100)):fmtP(cp))+' '+(pit.cost_currency||''):'')+'</div></div>'+
-    '<div><label>報價（含清關含利潤）</label>'+
-    '<input type="number" id="pmi-fp" value="'+(fp!=null?fmtP(fp):'')+'" step="0.0001" placeholder="輸入報給客戶的價格" onchange="pmiCalcMgn('+key+')" />'+
-    '<div id="pmi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
-    '<div><label>計價單位（成本）</label><select id="pmi-pu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
-    '<div><label>報給客戶的單位</label><select id="pmi-cpu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
-    '<div style="grid-column:span 2"><label>寬幅（mm）— 單位 m² ↔ m 換算用</label>'+
-    '<input type="number" id="pmi-wm" value="'+(pit.width_m!=null?Math.round(pit.width_m*1000):'')+'" min="0" step="1" placeholder="填入才能換算 m² ↔ m" oninput="pmiCalcMgn('+key+')" /></div>'+
-    '<div><label>MOQ</label><input id="pmi-moq" value="'+(pit.moq||'')+'" placeholder="例：1000m²" /></div>'+
-    '<div><label>交期</label><input id="pmi-lead" value="'+(pit.lead_time||'')+'" placeholder="例：30天" /></div>'+
+    '<div id="pmi-eff-cost" style="font-size:10px;color:#888;margin-top:3px">'+(cp>0?(applyC?t('qi_landed_cost')+fmtP(cp*(1+cpct/100)):fmtP(cp))+' '+(pit.cost_currency||''):'')+'</div></div>'+
+    '<div><label>'+t('qi_quote_price')+'</label>'+
+    '<input type="number" id="pmi-fp" value="'+(fp!=null?fmtP(fp):'')+'" step="0.0001" placeholder="'+t('qi_price_ph')+'" onchange="pmiCalcMgn('+key+')" />'+
+    '<div id="pmi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?t('qi_margin')+mgn.toFixed(2)+'%':'')+'</div></div>'+
+    '<div><label>'+t('qi_pricing_unit_cost')+'</label><select id="pmi-pu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>'+t('qi_customer_unit')+'</label><select id="pmi-cpu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div style="grid-column:span 2"><label>'+t('qi_width_conv')+'</label>'+
+    '<input type="number" id="pmi-wm" value="'+(pit.width_m!=null?Math.round(pit.width_m*1000):'')+'" min="0" step="1" placeholder="'+t('qi_width_conv_ph')+'" oninput="pmiCalcMgn('+key+')" /></div>'+
+    '<div><label>MOQ</label><input id="pmi-moq" value="'+(pit.moq||'')+'" placeholder="e.g. 1000m²" /></div>'+
+    '<div><label>'+t('qi_lead_time')+'</label><input id="pmi-lead" value="'+(pit.lead_time||'')+'" placeholder="e.g. 30 days" /></div>'+
     '</div>'+
     '<div style="padding:0 18px 16px;display:flex;gap:8px">'+
-    '<button class="btn btn-primary btn-sm" onclick="savePendingItemEdit('+key+')">確認</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pmi-overlay\').remove()">取消</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="savePendingItemEdit('+key+')">'+t('btn_ok')+'</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pmi-overlay\').remove()">'+t('btn_cancel')+'</button>'+
     '</div></div>'
   document.body.appendChild(overlay)
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
@@ -8115,13 +8145,13 @@ function pmiCalcMgn(key){
   const cpct=parseFloat(document.getElementById('pmi-cpct')?.value||0)
   const eff=ac?cp*(1+cpct/100):cp
   const effEl=document.getElementById('pmi-eff-cost')
-  if(effEl)effEl.textContent=cp>0?(ac?'到岸成本：'+fmtP(eff):fmtP(cp))+' '+(pit.cost_currency||''):''
+  if(effEl)effEl.textContent=cp>0?(ac?t('qi_landed_cost')+fmtP(eff):fmtP(cp))+' '+(pit.cost_currency||''):''
   const costNorm=_pmiNormCost(key)
   const fp=parseFloat(document.getElementById('pmi-fp')?.value||0)
   const mgn=costNorm>0&&fp?Math.round((fp/costNorm-1)*10000)/100:null
   const mc=mgn!=null?(mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'):'#aaa'
   const el=document.getElementById('pmi-mgn')
-  if(el){el.style.color=mc;el.textContent=fp&&mgn!=null?'利潤率 '+mgn.toFixed(2)+'%':''}
+  if(el){el.style.color=mc;el.textContent=fp&&mgn!=null?t('qi_margin')+mgn.toFixed(2)+'%':''}
 }
 function savePendingItemEdit(key){
   const pit=_pendingQuoteItems.find(x=>x._key===key)
@@ -8591,7 +8621,7 @@ function openNqItemEdit(idx){
     '<input type="number" id="nqe-cpct" value="'+(it.customs_fee_pct??7.5)+'" min="0" max="50" step="0.5" '+(canApplyCustoms?'':'disabled style="background:#f5f5f2;color:#666"')+' onchange="nqeCalcMgn('+idx+')" /></div>'+
     '<div><label>報價（含清關含利潤）</label>'+
     '<input type="number" id="nqe-fp" value="'+(fp?fmtP(fp):'')+'" step="0.0001" placeholder="輸入報給客戶的價格" onchange="nqeCalcMgn('+idx+')" />'+
-    '<div id="nqe-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(fp?'利潤率 '+mgn.toFixed(2)+'%':'')+'</div></div>'+
+    '<div id="nqe-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(fp?t('qi_margin')+mgn.toFixed(2)+'%':'')+'</div></div>'+
     '<div><label>客戶計價單位</label><select id="nqe-cpu"><option value="">—</option><option value="m2"'+(it.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(it.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
     '<div><label>MOQ</label><input id="nqe-moq" value="'+(it.moq||'')+'" placeholder="例：1000m²" /></div>'+
     '<div><label>交期</label><input id="nqe-lead" value="'+(it.lead_time||'')+'" placeholder="例：30天" /></div>'+
@@ -8614,7 +8644,7 @@ function nqeCalcMgn(idx){
   const mgn=afterCustoms>0&&fp?Math.round((fp/afterCustoms-1)*10000)/100:0
   const mc=mgn<5?'#e55':mgn<15?'#e88a00':'#0F6E56'
   const el=document.getElementById('nqe-mgn')
-  if(el){el.style.color=mc;el.textContent=fp?'利潤率 '+mgn.toFixed(2)+'%':''}
+  if(el){el.style.color=mc;el.textContent=fp?t('qi_margin')+mgn.toFixed(2)+'%':''}
 }
 function nqeCustomsChange(idx,checked){
   const it=_nqItems[idx]
