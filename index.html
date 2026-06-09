@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.25</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.26</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1332,7 +1332,7 @@ const I18N={
     pd_edit_title:'編輯產品',pd_new_title_lbl:'新增產品',
     pd_select_supplier:'— 選擇供應商 —',pd_type_label:'類型',pd_no_type:'無',
     pd_meters_per_roll:'每卷米數',pd_meters_ph:'固定規格填入，客製化留空',
-    pd_thickness:'厚度（μm）',pd_unit_m2:'平方米 m²',pd_unit_m:'米 m',
+    pd_thickness:'厚度（μm）',pd_unit_m2:'平方米 m²',pd_unit_m:'米 m',pd_unit_kg:'公斤 kg',
     pd_color_variants_label:'顏色 / 變體清單',pd_color_hint:'（如 Yellow、Red… 同價格的顏色選項）',
     pd_not_set:'尚未設定',pd_color_input_ph:'輸入顏色名稱，按 Enter 新增',pd_add_variant:'+ 新增',
     pd_printing_variants_label:'印刷變體',pd_printing_hint:'（可選的印刷方式，如 方格、直條…）',
@@ -1620,7 +1620,7 @@ const I18N={
     pd_edit_title:'Edit Product',pd_new_title_lbl:'New Product',
     pd_select_supplier:'— Select Supplier —',pd_type_label:'Type',pd_no_type:'None',
     pd_meters_per_roll:'Meters/Roll',pd_meters_ph:'Fixed spec; leave blank if custom',
-    pd_thickness:'Thickness (μm)',pd_unit_m2:'Square Meter m²',pd_unit_m:'Meter m',
+    pd_thickness:'Thickness (μm)',pd_unit_m2:'Square Meter m²',pd_unit_m:'Meter m',pd_unit_kg:'Kilogram kg',
     pd_color_variants_label:'Colors / Variants',pd_color_hint:'(e.g. Yellow, Red — same-price color options)',
     pd_not_set:'Not set',pd_color_input_ph:'Enter color name, press Enter',pd_add_variant:'+ Add',
     pd_printing_variants_label:'Printing Variants',pd_printing_hint:'(Optional print patterns)',
@@ -1908,7 +1908,7 @@ const I18N={
     pd_edit_title:'แก้ไขสินค้า',pd_new_title_lbl:'สินค้าใหม่',
     pd_select_supplier:'— เลือกซัพพลายเออร์ —',pd_type_label:'ประเภท',pd_no_type:'ไม่มี',
     pd_meters_per_roll:'เมตร/ม้วน',pd_meters_ph:'กรอกถ้าเป็นมาตรฐาน',
-    pd_thickness:'ความหนา (μm)',pd_unit_m2:'ตารางเมตร m²',pd_unit_m:'เมตร m',
+    pd_thickness:'ความหนา (μm)',pd_unit_m2:'ตารางเมตร m²',pd_unit_m:'เมตร m',pd_unit_kg:'กิโลกรัม kg',
     pd_color_variants_label:'สี / รูปแบบ',pd_color_hint:'(เช่น Yellow, Red — ตัวเลือกสีราคาเดียวกัน)',
     pd_not_set:'ยังไม่ได้ตั้งค่า',pd_color_input_ph:'ป้อนชื่อสี กด Enter เพิ่ม',pd_add_variant:'+ เพิ่ม',
     pd_printing_variants_label:'รูปแบบการพิมพ์',pd_printing_hint:'(รูปแบบการพิมพ์ที่เลือกได้)',
@@ -2114,8 +2114,8 @@ function canAccessPurchases(){
 const DEFAULT_APP_SETTINGS={
   default_customs_fee_pct:'7.5',
   default_margin_pct:'20',
-  default_cost_currency:'USD',
-  default_quote_currency:'USD',
+  default_cost_currency:'THB',
+  default_quote_currency:'THB',
   default_customer_review_days:'180',
   default_product_review_days:'90',
   inquiry_warn_days:'2',
@@ -3576,7 +3576,7 @@ function openPurchaseItemForm(){
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><label>數量 <span class="req">*</span></label><input id="poi-qty" placeholder="數量" type="number" inputmode="decimal" /></div><div><label>單位 <span class="req">*</span></label><input id="poi-unit" placeholder="單位" /></div></div>'+
       '<div><label>單價 <span class="req">*</span></label><input id="poi-price" placeholder="單價" type="number" inputmode="decimal" /></div>'+
       '<div><label>幣別</label><select id="poi-currency">'+currencyOpts+'</select></div>'+
-      '<div><label>計價單位</label><select id="poi-pricing-unit"><option value="">—</option><option value="m2">平方米 m²</option><option value="m">米 m</option></select></div>'+
+      '<div><label>'+t('lbl_pricing_unit')+'</label><select id="poi-pricing-unit"><option value="">—</option><option value="m2">'+t('pd_unit_m2')+'</option><option value="m">'+t('pd_unit_m')+'</option><option value="kg">'+t('pd_unit_kg')+'</option></select></div>'+
       '<div><label>寬幅（mm）</label><input id="poi-width-mm" type="number" step="1" placeholder="例如 1070" /></div>'+
       '</div>'+
       '<div class="modal-foot"><button class="btn btn-primary" onclick="addPurchaseItem()">加入品項</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">取消</button></div>'+
@@ -7589,6 +7589,7 @@ function openQuoteItemModal(itemId){
     '<option value="">—</option>'+
     '<option value="m2"'+(!it.pricing_unit||it.pricing_unit==='m2'?' selected':'')+'>m²</option>'+
     '<option value="m"'+(it.pricing_unit==='m'?' selected':'')+'>m</option>'+
+    '<option value="kg"'+(it.pricing_unit==='kg'?' selected':'')+'>kg</option>'+
     '</select></div>'+
     '<div><label>'+t('qi_customer_unit')+'</label><select '+(editable?'onchange="qiModalChange(\'customer_pricing_unit\',this.value)"':dis)+'>'+
     '<option value="">—</option>'+
@@ -8004,7 +8005,7 @@ function openNewPendingItemEdit(data){
     '<div><label>'+t('qi_quote_price')+'</label>'+
     '<input type="number" id="npi-fp" value="'+(calcFp!=null?fmtP(calcFp):'')+'" step="0.0001" placeholder="'+t('qi_price_ph')+'" onchange="npiCalcMgn()" />'+
     '<div id="npi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?t('qi_margin')+mgn.toFixed(2)+'%':'')+'</div></div>'+
-    '<div><label>'+t('qi_pricing_unit_cost')+'</label><select id="npi-pu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>'+t('qi_pricing_unit_cost')+'</label><select id="npi-pu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.pricing_unit==='m'?' selected':'')+'>m</option><option value="kg"'+(data.pricing_unit==='kg'?' selected':'')+'>kg</option></select></div>'+
     '<div><label>'+t('qi_customer_unit')+'</label><select id="npi-cpu" onchange="npiCalcMgn()"><option value="">—</option><option value="m2"'+(data.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(data.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
     '<div style="grid-column:span 2"><label>'+t('qi_width_conv')+'</label>'+
     '<input type="number" id="npi-wm" value="'+(data.width_m!=null?Math.round(data.width_m*1000):'')+'" min="0" step="1" placeholder="'+t('qi_width_conv_ph')+'" oninput="npiCalcMgn()" /></div>'+
@@ -8124,7 +8125,7 @@ function openPendingItemModal(key){
     '<div><label>'+t('qi_quote_price')+'</label>'+
     '<input type="number" id="pmi-fp" value="'+(fp!=null?fmtP(fp):'')+'" step="0.0001" placeholder="'+t('qi_price_ph')+'" onchange="pmiCalcMgn('+key+')" />'+
     '<div id="pmi-mgn" style="font-size:10px;margin-top:3px;color:'+mc+'">'+(mgn!=null?t('qi_margin')+mgn.toFixed(2)+'%':'')+'</div></div>'+
-    '<div><label>'+t('qi_pricing_unit_cost')+'</label><select id="pmi-pu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
+    '<div><label>'+t('qi_pricing_unit_cost')+'</label><select id="pmi-pu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.pricing_unit==='m'?' selected':'')+'>m</option><option value="kg"'+(pit.pricing_unit==='kg'?' selected':'')+'>kg</option></select></div>'+
     '<div><label>'+t('qi_customer_unit')+'</label><select id="pmi-cpu" onchange="pmiCalcMgn('+key+')"><option value="">—</option><option value="m2"'+(pit.customer_pricing_unit==='m2'?' selected':'')+'>m²</option><option value="m"'+(pit.customer_pricing_unit==='m'?' selected':'')+'>m</option></select></div>'+
     '<div style="grid-column:span 2"><label>'+t('qi_width_conv')+'</label>'+
     '<input type="number" id="pmi-wm" value="'+(pit.width_m!=null?Math.round(pit.width_m*1000):'')+'" min="0" step="1" placeholder="'+t('qi_width_conv_ph')+'" oninput="pmiCalcMgn('+key+')" /></div>'+
@@ -8998,8 +8999,9 @@ function openProductModal(id){
     '<option value="">'+t('ord_select')+'</option>'+
     '<option value="m2"'+(p?.pricing_unit==='m2'?' selected':'')+'>'+t('pd_unit_m2')+'</option>'+
     '<option value="m"'+(p?.pricing_unit==='m'?' selected':'')+'>'+t('pd_unit_m')+'</option>'+
+    '<option value="kg"'+(p?.pricing_unit==='kg'?' selected':'')+'>'+t('pd_unit_kg')+'</option>'+
     '</select></div>'+
-    '<div><label>'+t('lbl_currency')+'</label><select id="pd-currency">'+buildOptions(CURRENCY_OPTIONS,p?.currency)+'</select></div>'+
+    '<div><label>'+t('lbl_currency')+'</label><select id="pd-currency">'+buildOptions(CURRENCY_OPTIONS,p?.currency||getSettingValue('default_cost_currency','THB'))+'</select></div>'+
     '</div>'+
     '<div style="margin-bottom:10px"><label>'+t('lbl_notes')+'</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
     '<div style="margin-bottom:10px"><label>'+t('pd_color_variants_label')+' <span style="font-size:10px;font-weight:400;color:#aaa">'+t('pd_color_hint')+'</span></label>'+
