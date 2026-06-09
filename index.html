@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.24</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.25</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -3410,7 +3410,7 @@ function renderOrders(){
     if(fCust){const c=customers.find(x=>x.id===o.customer_id);if(c?.company!==fCust)return false}
     if(fSup){const s=suppliers.find(x=>x.id===o.supplier_id);if(s?.company!==fSup)return false}
     return true
-  })
+  }).sort((a,b)=>(b.order_date||b.created_at||'').localeCompare(a.order_date||a.created_at||''))
   if(sum)sum.textContent=list.length+' 筆訂單'
   if(!list.length){el.innerHTML='<div class="loading">尚無訂單資料</div>';return}
   const _alertIds=orderAlertIds()
@@ -10642,7 +10642,7 @@ function renderCustomerPortal(){
   }
 
   // ── 訂單 section ──
-  const custOrders=orders.filter(o=>custIds.has(String(o.customer_id))).sort((a,b)=>(b.order_date||'').localeCompare(a.order_date||''))
+  const custOrders=orders.filter(o=>custIds.has(String(o.customer_id))).sort((a,b)=>(b.order_date||b.created_at||'').localeCompare(a.order_date||a.created_at||''))
   let ordHtml=''
   if(custOrders.length){
     ordHtml=custOrders.map(o=>{
