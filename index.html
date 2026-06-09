@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.15</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.16</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1223,6 +1223,31 @@ const I18N={
     lbl_customer_po_placeholder:'客戶系統的訂單編號（選填）',
     lbl_product_placeholder:'可手動輸入或從目錄帶入',
     lbl_width_placeholder:'例如 1070（m²計價時必填）',
+    lbl_status:'狀態',lbl_subtotal:'小計',lbl_total:'總金額',lbl_cost_price:'成本價',lbl_spec_optional:'規格（選填）',lbl_printing_prefix:'印刷：',
+    q_from_catalog:'從產品目錄選',q_from_inquiry:'從詢價單帶入',q_manual_entry:'手動輸入',
+    q_select_inquiry:'選擇詢價單',q_import_items:'帶入品項',q_no_cost:'未填成本',
+    q_items_section:'品項明細',q_click_to_edit:'點擊品項可編輯',q_no_items:'尚無品項',
+    q_needs_sample_review:'客戶接受後需等待樣品確認',
+    q_create_sample_title:'建立新樣品',q_spec_editable:'規格（可修改）',q_init_stock:'初始庫存',q_create_sample_btn:'建立樣品',
+    q_ship_sample_title:'登記寄樣',q_select_sample:'選擇樣品',q_ship_date:'寄出日期',
+    q_tracking_optional:'運單號（選填）',q_tracking_label:'運單：',
+    q_ship_confirm_btn:'登記寄樣並進入確認階段 →',q_no_sample_found:'找不到對應樣品，可從此報價直接建立：',
+    q_no_sample_link:'＋ 找不到對應樣品？從此報價建立',
+    q_save_draft:'儲存草稿',q_send_to_order:'送去訂單 →',q_pending_save:'待儲存',
+    q_status_sent:'⚠ 此報價單已送出，如需修改請點「修改報價」',
+    q_status_sample_pending:'📦 客戶已接受報價，請登記寄樣後進入確認階段',
+    q_sample_sent:'⏳ 樣品已寄出',q_awaiting_quality:' — 等待客戶確認品質',
+    q_status_accepted:'✓ 客戶已接受，可送去訂單建立正式訂單',
+    q_status_rejected:'此報價單已被拒絕',
+    po_new_title:'新增採購單',po_detail_title:'採購單詳情',
+    po_accounting_no:'會計編號',po_expected_delivery:'預計交貨日',
+    po_linked_shipments:'關聯船運',po_no_shipments:'尚未安排船運',
+    po_items_section:'品項明細',po_from_order:'來自訂單',po_record_arrival:'登記到貨',
+    po_apply_cost:'存入成本價',po_this_arrival:'本次到貨',
+    po_quality_issue:'品質問題 → 開立客訴',po_no_items:'尚未新增品項',
+    po_create_btn:'建立採購單',po_send_supplier:'標記為已發給供應商 →',
+    po_in_production_btn:'標記生產中 →',po_complete_btn:'標記完成 ✓',po_cancel_btn:'取消採購單',
+    po_status_section:'狀態',
   },
   en:{
     nav_sales:'Sales',nav_contacts:'Contacts',nav_products:'Products',nav_settings:'Settings',
@@ -1329,6 +1354,31 @@ const I18N={
     lbl_customer_po_placeholder:'Customer ref no. (optional)',
     lbl_product_placeholder:'Type or pick from catalog',
     lbl_width_placeholder:'e.g. 1070 (required for m²)',
+    lbl_status:'Status',lbl_subtotal:'Subtotal',lbl_total:'Total',lbl_cost_price:'Cost Price',lbl_spec_optional:'Spec (optional)',lbl_printing_prefix:'Printing:',
+    q_from_catalog:'From Catalog',q_from_inquiry:'From Inquiry',q_manual_entry:'Manual Entry',
+    q_select_inquiry:'Select Inquiry',q_import_items:'Import Items',q_no_cost:'No cost',
+    q_items_section:'Line Items',q_click_to_edit:'Click item to edit',q_no_items:'No items yet',
+    q_needs_sample_review:'Require sample confirmation after acceptance',
+    q_create_sample_title:'Create New Sample',q_spec_editable:'Spec (editable)',q_init_stock:'Initial Stock',q_create_sample_btn:'Create Sample',
+    q_ship_sample_title:'Record Sample Shipment',q_select_sample:'Select Sample',q_ship_date:'Ship Date',
+    q_tracking_optional:'Tracking No. (optional)',q_tracking_label:'Tracking: ',
+    q_ship_confirm_btn:'Record Shipment & Enter Review →',q_no_sample_found:'No matching sample — create from this quote:',
+    q_no_sample_link:'＋ No matching sample? Create from this quote',
+    q_save_draft:'Save Draft',q_send_to_order:'Send to Order →',q_pending_save:'Unsaved',
+    q_status_sent:'⚠ This quote has been sent. Click "Revise" to modify.',
+    q_status_sample_pending:'📦 Customer accepted. Record sample shipment to proceed.',
+    q_sample_sent:'⏳ Sample sent',q_awaiting_quality:' — Awaiting customer feedback',
+    q_status_accepted:'✓ Customer accepted. Send to Orders to create a formal order.',
+    q_status_rejected:'This quote has been rejected.',
+    po_new_title:'New Purchase Order',po_detail_title:'Purchase Order Details',
+    po_accounting_no:'Accounting No.',po_expected_delivery:'Expected Delivery',
+    po_linked_shipments:'Related Shipments',po_no_shipments:'No shipments arranged',
+    po_items_section:'Line Items',po_from_order:'From order',po_record_arrival:'Record Arrival',
+    po_apply_cost:'Apply Cost Price',po_this_arrival:'Current Arrival',
+    po_quality_issue:'Quality Issue → File Complaint',po_no_items:'No items added yet',
+    po_create_btn:'Create Purchase Order',po_send_supplier:'Send to Supplier →',
+    po_in_production_btn:'In Production →',po_complete_btn:'Mark Complete ✓',po_cancel_btn:'Cancel PO',
+    po_status_section:'Status',
   },
   th:{
     nav_sales:'ขาย',nav_contacts:'รายชื่อ',nav_products:'สินค้า',nav_settings:'ตั้งค่า',
@@ -1435,6 +1485,31 @@ const I18N={
     lbl_customer_po_placeholder:'เลขสั่งซื้อลูกค้า (ไม่บังคับ)',
     lbl_product_placeholder:'พิมพ์หรือเลือกจากแคตตาล็อก',
     lbl_width_placeholder:'เช่น 1070 (จำเป็นสำหรับ m²)',
+    lbl_status:'สถานะ',lbl_subtotal:'รวมย่อย',lbl_total:'ยอดรวม',lbl_cost_price:'ราคาต้นทุน',lbl_spec_optional:'สเปค (ไม่บังคับ)',lbl_printing_prefix:'การพิมพ์:',
+    q_from_catalog:'จากแคตตาล็อก',q_from_inquiry:'จากใบสอบถาม',q_manual_entry:'กรอกเอง',
+    q_select_inquiry:'เลือกใบสอบถาม',q_import_items:'นำเข้ารายการ',q_no_cost:'ยังไม่มีต้นทุน',
+    q_items_section:'รายการสินค้า',q_click_to_edit:'คลิกรายการเพื่อแก้ไข',q_no_items:'ยังไม่มีรายการ',
+    q_needs_sample_review:'ต้องยืนยันตัวอย่างหลังลูกค้ายอมรับ',
+    q_create_sample_title:'สร้างตัวอย่างใหม่',q_spec_editable:'สเปค (แก้ไขได้)',q_init_stock:'สต็อกเริ่มต้น',q_create_sample_btn:'สร้างตัวอย่าง',
+    q_ship_sample_title:'บันทึกการจัดส่งตัวอย่าง',q_select_sample:'เลือกตัวอย่าง',q_ship_date:'วันที่จัดส่ง',
+    q_tracking_optional:'เลขติดตาม (ไม่บังคับ)',q_tracking_label:'เลขติดตาม: ',
+    q_ship_confirm_btn:'บันทึกการจัดส่ง & เข้าสู่การตรวจสอบ →',q_no_sample_found:'ไม่พบตัวอย่างที่ตรงกัน — สร้างจากใบเสนอราคานี้:',
+    q_no_sample_link:'＋ ไม่พบตัวอย่าง? สร้างจากใบเสนอราคานี้',
+    q_save_draft:'บันทึกร่าง',q_send_to_order:'ส่งไปยังคำสั่งซื้อ →',q_pending_save:'ยังไม่ได้บันทึก',
+    q_status_sent:'⚠ ส่งใบเสนอราคาแล้ว คลิก "แก้ไข" เพื่อแก้ไข',
+    q_status_sample_pending:'📦 ลูกค้ายอมรับแล้ว บันทึกการจัดส่งตัวอย่างเพื่อดำเนินการต่อ',
+    q_sample_sent:'⏳ ส่งตัวอย่างแล้ว',q_awaiting_quality:' — รอผลตอบรับจากลูกค้า',
+    q_status_accepted:'✓ ลูกค้ายอมรับแล้ว ส่งไปยังคำสั่งซื้อเพื่อสร้างคำสั่งซื้อ',
+    q_status_rejected:'ใบเสนอราคานี้ถูกปฏิเสธแล้ว',
+    po_new_title:'ใบสั่งซื้อใหม่',po_detail_title:'รายละเอียดใบสั่งซื้อ',
+    po_accounting_no:'เลขที่บัญชี',po_expected_delivery:'วันส่งมอบโดยประมาณ',
+    po_linked_shipments:'การขนส่งที่เชื่อมโยง',po_no_shipments:'ยังไม่ได้จัดการขนส่ง',
+    po_items_section:'รายการสินค้า',po_from_order:'จากคำสั่งซื้อ',po_record_arrival:'บันทึกการรับสินค้า',
+    po_apply_cost:'ใช้ราคาต้นทุน',po_this_arrival:'รับสินค้าครั้งนี้',
+    po_quality_issue:'ปัญหาคุณภาพ → เปิดการร้องเรียน',po_no_items:'ยังไม่ได้เพิ่มรายการ',
+    po_create_btn:'สร้างใบสั่งซื้อ',po_send_supplier:'ส่งให้ซัพพลายเออร์ →',
+    po_in_production_btn:'กำลังผลิต →',po_complete_btn:'ทำเครื่องหมายว่าเสร็จสิ้น ✓',po_cancel_btn:'ยกเลิกใบสั่งซื้อ',
+    po_status_section:'สถานะ',
   }
 }
 let _lang=localStorage.getItem('joychin_lang')||'zh'
@@ -4721,33 +4796,33 @@ function openPurchaseModal(id, prefill={}){
     .map(s=>'<option value="'+s.id+'"'+(String(s.id)===String(prefillSupplierId)?' selected':'')+'>'+s.company+'</option>')
     .join('')
   const currencyOpts=buildOptions(CURRENCY_OPTIONS,p?.currency||prefill.currency)
-  document.getElementById('modal-purchase-hd').textContent=isNew?'新增採購單':'採購單詳情'
-  let html='<div class="section-title">基本資料</div><div class="grid-2" style="margin-bottom:12px">'+
-    '<div><label>供應商 <span class="req">*</span></label><select id="pp-supplier" onchange="_isDirty=true">'+supOpts+'</select></div>'+
-    '<div><label>會計編號</label><input id="pp-accounting" value="'+(p?.accounting_no||'')+'" placeholder="選填" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
-    '<div><label>預計交貨日</label><input type="date" id="pp-expected" value="'+(p?.expected_delivery||'')+'" onchange="_isDirty=true" /></div>'+
-    '<div><label>幣別</label><select id="pp-currency" onchange="_isDirty=true">'+currencyOpts+'</select></div>'+
+  document.getElementById('modal-purchase-hd').textContent=isNew?t('po_new_title'):t('po_detail_title')
+  let html='<div class="section-title">'+t('ord_basic_info')+'</div><div class="grid-2" style="margin-bottom:12px">'+
+    '<div><label>'+t('lbl_supplier')+' <span class="req">*</span></label><select id="pp-supplier" onchange="_isDirty=true">'+supOpts+'</select></div>'+
+    '<div><label>'+t('po_accounting_no')+'</label><input id="pp-accounting" value="'+(p?.accounting_no||'')+'" placeholder="選填" oninput="_isDirty=true" onchange="_isDirty=true" /></div>'+
+    '<div><label>'+t('po_expected_delivery')+'</label><input type="date" id="pp-expected" value="'+(p?.expected_delivery||'')+'" onchange="_isDirty=true" /></div>'+
+    '<div><label>'+t('lbl_currency')+'</label><select id="pp-currency" onchange="_isDirty=true">'+currencyOpts+'</select></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>備註</label><textarea id="pp-notes" oninput="_isDirty=true" onchange="_isDirty=true">'+(p?.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:10px"><label>'+t('lbl_notes')+'</label><textarea id="pp-notes" oninput="_isDirty=true" onchange="_isDirty=true">'+(p?.notes||'')+'</textarea></div>'+
     '<div style="margin-bottom:14px">'+
     '<label style="display:flex;align-items:center;gap:6px;color:#854F0B;font-weight:600">⚠ '+t('po_supplier_instr')+' <span style="font-size:11px;font-weight:400;color:#888">'+t('po_instr_hint')+'</span></label>'+
     '<textarea id="pp-supplier-instr" rows="2" style="border-color:#E2B36D;background:#FFFBF3" oninput="_isDirty=true" onchange="_isDirty=true" placeholder="例：此批貨需橫放，不可疊高超過3層；請以防潮袋包裝每捲...">'+(p?.supplier_instructions||'')+'</textarea>'+
     (p?.supplier_instructions?'<div style="font-size:11px;color:#854F0B;margin-top:4px">'+t('po_instr_set')+'</div>':'')+
     '</div>'
   if(p){
-    html+='<div class="divider"></div><div style="margin-bottom:12px"><div class="section-title">關聯船運</div>'+
+    html+='<div class="divider"></div><div style="margin-bottom:12px"><div class="section-title">'+t('po_linked_shipments')+'</div>'+
       (linkedShipments.length
         ? linkedShipments.map(sh=>{
             const st=shipmentStatusObj(sh.status)
             const meta=[sh.etd?('ETD '+sh.etd):null,sh.eta?('ETA '+sh.eta):null].filter(Boolean).join(' · ')
             return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #e5e5e0;border-radius:4px;background:#fff;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">'+esc(sh.shipment_no||'—')+'</div>'+(meta?'<div style="font-size:11px;color:#888;margin-top:2px">'+meta+'</div>':'')+'</div><span class="badge" style="background:'+st.bg+';color:'+st.color+';border:1px solid '+st.color+'">'+st.label+'</span><button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="closeModal(\'modal-purchase\');switchTab(\'shipments\');setTimeout(()=>openShipmentModal('+sh.id+'),80)">→ Go to Shipment</button></div>'
           }).join('')
-        : '<div style="font-size:12px;color:#aaa;padding:4px 0 10px">尚未安排船運</div>')+
+        : '<div style="font-size:12px;color:#aaa;padding:4px 0 10px">'+t('po_no_shipments')+'</div>')+
       '</div>'
   }
   if(p||isNew||prefill.items){
     const items=p?purchaseOrderItems.filter(i=>i.po_id===p.id):(window._pendingPurchaseItems||prefill.items||[])
-    html+='<div class="divider"></div><div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="section-title" style="margin-bottom:0">品項明細</div><button class="btn btn-primary btn-sm" onclick="openPurchaseItemForm()">+ 新增品項</button></div><div id="po-items">'+((items.length?items.map(i=>{
+    html+='<div class="divider"></div><div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="section-title" style="margin-bottom:0">'+t('po_items_section')+'</div><button class="btn btn-primary btn-sm" onclick="openPurchaseItemForm()">'+t('btn_add_item')+'</button></div><div id="po-items">'+((items.length?items.map(i=>{
       const _qty=parseFloat(i.qty||i.quantity||0)||0
       const _up=parseFloat(i.unit_price||i.price||0)||0
       const _prod=(i.product_id?products.find(pr=>String(pr.id)===String(i.product_id)):null)||products.find(pr=>pr.product_name===i.product_name&&(pr.spec||null)===(i.spec||null))||null
@@ -4769,52 +4844,52 @@ function openPurchaseModal(id, prefill={}){
         ?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0;line-height:1;align-self:start" onclick="deletePendingPurchaseItem(\''+esc(String(i.temp_key||''))+'\')">×</button>'
         :(receivedQty===0?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0;line-height:1;align-self:start" onclick="deletePurchaseItem('+i.id+')">×</button>':'')
       const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto) auto;gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:4px;background:#fff">'+
-        '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(i.printing?'<div style="font-size:11px;color:#7B5EA7;margin-top:2px">印刷：'+esc(i.printing)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+rcvColor+'">'+rcvLabel+' — '+receivedQty+' / '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
-        '<div style="text-align:right"><div style="font-size:10px;color:#888">數量</div><div style="font-size:12px;font-weight:500">'+(i.qty||i.quantity||0)+' '+(i.unit||'')+'</div></div>'+
-        '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+fmtP(_dispUp)+' '+(_costPrice!==null?_costCurrency:(i.currency||'USD'))+(_punit==='m2'?' /m²':'')+(_hasDiffCost?'<span style="font-size:10px;color:#aaa;margin-left:4px;text-decoration:line-through">'+fmtP(_up)+'</span>':'')+'</div>'+(!isNew&&_hasDiffCost?'<button onclick="applyCostPrice('+i.id+','+_costPrice.toFixed(4)+',\''+_costCurrency+'\')" style="background:none;border:1px solid #0F6E56;color:#0F6E56;border-radius:3px;cursor:pointer;font-size:10px;padding:2px 5px;margin-top:3px;white-space:nowrap">存入成本價</button>':'')+'</div>'+
-        '<div style="text-align:right"><div style="font-size:10px;color:#888">小計</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+fmtP(lineTotal)+'</div>'+(_punit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+'</div>'+
+        '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(i.printing?'<div style="font-size:11px;color:#7B5EA7;margin-top:2px">'+t('lbl_printing_prefix')+esc(i.printing)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">'+t('po_from_order')+' '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+rcvColor+'">'+rcvLabel+' — '+receivedQty+' / '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">'+t('po_record_arrival')+'</button>':'')+'</div>'+
+        '<div style="text-align:right"><div style="font-size:10px;color:#888">'+t('lbl_qty')+'</div><div style="font-size:12px;font-weight:500">'+(i.qty||i.quantity||0)+' '+(i.unit||'')+'</div></div>'+
+        '<div style="text-align:right"><div style="font-size:10px;color:#888">'+t('lbl_unit_price')+'</div><div style="font-size:12px;font-weight:500">'+fmtP(_dispUp)+' '+(_costPrice!==null?_costCurrency:(i.currency||'USD'))+(_punit==='m2'?' /m²':'')+(_hasDiffCost?'<span style="font-size:10px;color:#aaa;margin-left:4px;text-decoration:line-through">'+fmtP(_up)+'</span>':'')+'</div>'+(!isNew&&_hasDiffCost?'<button onclick="applyCostPrice('+i.id+','+_costPrice.toFixed(4)+',\''+_costCurrency+'\')" style="background:none;border:1px solid #0F6E56;color:#0F6E56;border-radius:3px;cursor:pointer;font-size:10px;padding:2px 5px;margin-top:3px;white-space:nowrap">'+t('po_apply_cost')+'</button>':'')+'</div>'+
+        '<div style="text-align:right"><div style="font-size:10px;color:#888">'+t('lbl_subtotal')+'</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+fmtP(lineTotal)+'</div>'+(_punit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+'</div>'+
         delBtn+
       '</div>'
       const linksBlock=renderPurchaseItemLinksBlock(i,{pending:isNew,purchaseOrderId:p?.id||null})
-      const arrivalBlock=(!isNew&&i.id?'<div id="arrival-input-'+i.id+'" style="display:none;padding:8px 12px;background:#f9f9f7;border:1px solid #e5e5e0;border-top:none;border-radius:0 0 4px 4px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label style="font-size:12px;color:#666;white-space:nowrap">本次到貨</label><input id="arrival-qty-'+i.id+'" type="number" min="0.01" step="0.01" data-no-dirty="true" style="width:80px" placeholder="數量" /><button class="btn btn-primary btn-sm" style="height:32px" onclick="submitArrival('+i.id+')">確認</button><button class="btn btn-ghost btn-sm" style="height:32px" onclick="document.getElementById(\'arrival-input-'+i.id+'\').style.display=\'none\'">取消</button><button class="btn btn-ghost btn-sm" style="height:32px;color:#C0392B;border-color:#C0392B" onclick="openComplaintFromArrival('+i.id+')">品質問題 → 開立客訴</button></div></div>':'')
+      const arrivalBlock=(!isNew&&i.id?'<div id="arrival-input-'+i.id+'" style="display:none;padding:8px 12px;background:#f9f9f7;border:1px solid #e5e5e0;border-top:none;border-radius:0 0 4px 4px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label style="font-size:12px;color:#666;white-space:nowrap">'+t('po_this_arrival')+'</label><input id="arrival-qty-'+i.id+'" type="number" min="0.01" step="0.01" data-no-dirty="true" style="width:80px" placeholder="數量" /><button class="btn btn-primary btn-sm" style="height:32px" onclick="submitArrival('+i.id+')">'+t('btn_add')+'</button><button class="btn btn-ghost btn-sm" style="height:32px" onclick="document.getElementById(\'arrival-input-'+i.id+'\').style.display=\'none\'">'+t('btn_cancel')+'</button><button class="btn btn-ghost btn-sm" style="height:32px;color:#C0392B;border-color:#C0392B" onclick="openComplaintFromArrival('+i.id+')">'+t('po_quality_issue')+'</button></div></div>':'')
       return '<div style="padding:10px 0;border-bottom:1px solid #f0f0eb"><div>'+itemBody+'</div>'+arrivalBlock+linksBlock+'</div>'
-    }).join(''):'<div style="border:1px dashed #d9d9d2;border-radius:4px;padding:14px;background:#fbfbf8;color:#666;font-size:12px">尚未新增品項</div>')+
-    (items.length?'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">總金額 '+items.reduce((s,i)=>{const q=parseFloat(i.qty||i.quantity||0)||0;const pr=(i.product_id?products.find(x=>String(x.id)===String(i.product_id)):null)||products.find(x=>x.product_name===i.product_name&&(x.spec||null)===(i.spec||null))||null;const up=pr?.cost_price!=null?parseFloat(pr.cost_price):(parseFloat(i.unit_price||i.price||0)||0);const wm=parseFloat(i.width_m||pr?.width_m||0);const pu=i.pricing_unit||pr?.pricing_unit||null;return s+(pu==='m2'&&wm>0?q*up*wm:q*up)},0).toFixed(2)+' '+(p?.currency||items[0]?.currency||'')+'</div>':'')
+    }).join(''):'<div style="border:1px dashed #d9d9d2;border-radius:4px;padding:14px;background:#fbfbf8;color:#666;font-size:12px">'+t('po_no_items')+'</div>')+
+    (items.length?'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">'+t('lbl_total')+' '+items.reduce((s,i)=>{const q=parseFloat(i.qty||i.quantity||0)||0;const pr=(i.product_id?products.find(x=>String(x.id)===String(i.product_id)):null)||products.find(x=>x.product_name===i.product_name&&(x.spec||null)===(i.spec||null))||null;const up=pr?.cost_price!=null?parseFloat(pr.cost_price):(parseFloat(i.unit_price||i.price||0)||0);const wm=parseFloat(i.width_m||pr?.width_m||0);const pu=i.pricing_unit||pr?.pricing_unit||null;return s+(pu==='m2'&&wm>0?q*up*wm:q*up)},0).toFixed(2)+' '+(p?.currency||items[0]?.currency||'')+'</div>':'')
     )+'</div></div>'
   }
   if(!isNew){
-    html+='<div style="margin:12px 0 4px"><div class="section-title" style="margin-bottom:6px">狀態</div>'+
+    html+='<div style="margin:12px 0 4px"><div class="section-title" style="margin-bottom:6px">'+t('po_status_section')+'</div>'+
     '<div class="status-btns">'+PURCHASE_STATUS.map(s=>{const isCurrent=p.status===s.id;return '<button class="status-btn" style="background:'+(isCurrent?s.bg:'transparent')+';color:'+(isCurrent?s.color:'#aaa')+';border-color:'+(isCurrent?s.color:'#e5e5e0')+';'+(isCurrent?'font-weight:600':'')+'" '+(isCurrent?'disabled':'onclick="updatePurchaseStatusDirect(\''+s.id+'\')"')+'>'+s.label+'</button>'}).join('')+'</div></div>'
   }
   let buttons='<div class="modal-foot" style="justify-content:space-between">'
   if(isNew){
-    buttons+='<button class="btn btn-primary" onclick="createPurchaseOrder()">建立採購單</button>'
+    buttons+='<button class="btn btn-primary" onclick="createPurchaseOrder()">'+t('po_create_btn')+'</button>'
   }else{
     const st=p.status
     let actionBtns='<div style="display:flex;gap:8px;flex-wrap:wrap">'
     if(st==='pending_approval'&&hasPermission('approve')){
-      actionBtns+='<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="approvePurchaseOrder()">審批通過 ✓</button>'
-      actionBtns+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="rejectPurchaseOrder()">拒絕 ✗</button>'
+      actionBtns+='<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="approvePurchaseOrder()">'+t('btn_approve')+'</button>'
+      actionBtns+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="rejectPurchaseOrder()">'+t('btn_reject_ord')+'</button>'
     }else if(st==='pending_approval'&&!hasPermission('approve')){
-      actionBtns+='<span style="font-size:11px;color:#185FA5;background:#E6F1FB;padding:4px 8px;border-radius:4px">等待主管審批</span>'
+      actionBtns+='<span style="font-size:11px;color:#185FA5;background:#E6F1FB;padding:4px 8px;border-radius:4px">'+t('ord_waiting_approval')+'</span>'
     }
     if(st==='draft'){
-      actionBtns+='<button class="btn btn-primary btn-sm" onclick="updatePurchaseStatus(\'sent\')">標記為已發給供應商 →</button>'
+      actionBtns+='<button class="btn btn-primary btn-sm" onclick="updatePurchaseStatus(\'sent\')">'+t('po_send_supplier')+'</button>'
     }else if(st==='sent'){
-      actionBtns+='<button class="btn btn-primary btn-sm" onclick="updatePurchaseStatus(\'in_production\')">標記生產中 →</button>'
+      actionBtns+='<button class="btn btn-primary btn-sm" onclick="updatePurchaseStatus(\'in_production\')">'+t('po_in_production_btn')+'</button>'
     }else if(st==='received'){
-      actionBtns+='<button class="btn btn-primary btn-sm" onclick="updatePurchaseStatus(\'completed\')">標記完成 ✓</button>'
+      actionBtns+='<button class="btn btn-primary btn-sm" onclick="updatePurchaseStatus(\'completed\')">'+t('po_complete_btn')+'</button>'
     }
     if(!['cancelled','completed'].includes(st)){
-      actionBtns+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D" onclick="cancelPurchaseOrder()">取消採購單</button>'
+      actionBtns+='<button class="btn btn-ghost btn-sm" style="color:#A32D2D" onclick="cancelPurchaseOrder()">'+t('po_cancel_btn')+'</button>'
     }
     if(!['cancelled','completed','received'].includes(st)){
-      actionBtns+='<button class="btn btn-primary btn-sm" onclick="savePurchaseOrder()">儲存</button>'
+      actionBtns+='<button class="btn btn-primary btn-sm" onclick="savePurchaseOrder()">'+t('btn_save_info')+'</button>'
     }
     actionBtns+='</div>'
     buttons+=actionBtns
   }
-  buttons+='<button class="btn btn-ghost" onclick="closeModal(\'modal-purchase\')">關閉</button></div>'
+  buttons+='<button class="btn btn-ghost" onclick="closeModal(\'modal-purchase\')">'+t('btn_close')+'</button></div>'
   html+=buttons
   document.getElementById('modal-purchase-bd').innerHTML=html
   enableDirtyTracking('modal-purchase-bd')
@@ -6544,7 +6619,7 @@ function renderQuoteModalBd(){
       '</div>'+
       '<div style="font-size:11px;color:#888;white-space:nowrap">'+wmmStr+'</div>'+
       '<div style="text-align:right;white-space:nowrap">'+
-      (cp>0?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+fmtP(fp)+' '+cur+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">未填成本</div>')+
+      (cp>0?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+fmtP(fp)+' '+cur+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">'+t('q_no_cost')+'</div>')+
       '</div>'+
       '<div style="font-size:10px;font-weight:500;color:'+mgnColor+';background:'+mgnColor+'18;padding:2px 6px;border-radius:4px;white-space:nowrap">'+(cp>0?mgn.toFixed(1)+'%':'—')+'</div>'+
       (editable?'<button onclick="event.stopPropagation();removeQuoteItem(\''+it.id+'\')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;flex-shrink:0">×</button>':'')+
@@ -6553,48 +6628,48 @@ function renderQuoteModalBd(){
 
   const addItemSection=editable?
     '<div style="margin-top:8px;position:relative;display:inline-block">'+
-    '<button class="btn btn-ghost btn-sm" onclick="qToggleAddMenu()">+ 新增品項</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="qToggleAddMenu()">'+t('btn_add_item')+'</button>'+
     '<div id="q-add-menu" style="display:none;position:absolute;top:100%;left:0;margin-top:2px;background:#fff;border:1px solid #e5e5e0;border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:100;min-width:180px">'+
-    '<div class="product-option" onclick="openQuoteCatalogPicker();qHideAddMenu()">從產品目錄選</div>'+
-    '<div class="product-option" onclick="qShowInqForm()">從詢價單帶入</div>'+
-    '<div class="product-option" style="border-bottom:none" onclick="qShowManualForm()">手動輸入</div>'+
+    '<div class="product-option" onclick="openQuoteCatalogPicker();qHideAddMenu()">'+t('q_from_catalog')+'</div>'+
+    '<div class="product-option" onclick="qShowInqForm()">'+t('q_from_inquiry')+'</div>'+
+    '<div class="product-option" style="border-bottom:none" onclick="qShowManualForm()">'+t('q_manual_entry')+'</div>'+
     '</div>'+
     '</div>'+
     '<div id="q-add-inq-form" style="display:none;margin-top:8px;padding:12px;border:1px solid #e5e5e0;border-radius:6px;background:#fafaf8">'+
-    '<div style="margin-bottom:8px"><label>選擇詢價單</label>'+
-    '<select id="q-inq-select"><option value="">— 選擇 —</option>'+
+    '<div style="margin-bottom:8px"><label>'+t('q_select_inquiry')+'</label>'+
+    '<select id="q-inq-select"><option value="">— '+t('ord_select').replace('— ','').replace(' —','') +' —</option>'+
     inquiries.filter(i=>i.status!=='closed').map(i=>'<option value="'+esc(i.id)+'">'+esc(i.id)+' — '+esc(i.customer||'—')+' — '+esc(i.product||'—')+'</option>').join('')+
     '</select></div>'+
     '<div style="display:flex;gap:6px">'+
-    '<button class="btn btn-primary btn-sm" onclick="qAddFromInquiry()">帶入品項</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'q-add-inq-form\').style.display=\'none\'">取消</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="qAddFromInquiry()">'+t('q_import_items')+'</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'q-add-inq-form\').style.display=\'none\'">'+t('btn_cancel')+'</button>'+
     '</div></div>'+
     '<div id="q-add-manual-form" style="display:none;margin-top:8px;padding:12px;border:1px solid #e5e5e0;border-radius:6px;background:#fafaf8">'+
     '<div class="grid-2" style="margin-bottom:8px">'+
-    '<div style="grid-column:1/-1"><label>產品名稱 <span class="req">*</span></label><input id="q-manual-product" placeholder="e.g. Release Paper 80g"></div>'+
-    '<div style="grid-column:1/-1"><label>規格（選填）</label><input id="q-manual-spec" placeholder="e.g. 1.0m wide, white"></div>'+
-    '<div><label>成本價</label><input id="q-manual-price" type="number" min="0" step="0.0001" placeholder="0.00"></div>'+
-    '<div><label>幣別</label><select id="q-manual-currency"><option>USD</option><option>THB</option><option>CNY</option></select></div>'+
+    '<div style="grid-column:1/-1"><label>'+t('lbl_product')+' <span class="req">*</span></label><input id="q-manual-product" placeholder="e.g. Release Paper 80g"></div>'+
+    '<div style="grid-column:1/-1"><label>'+t('lbl_spec_optional')+'</label><input id="q-manual-spec" placeholder="e.g. 1.0m wide, white"></div>'+
+    '<div><label>'+t('lbl_cost_price')+'</label><input id="q-manual-price" type="number" min="0" step="0.0001" placeholder="0.00"></div>'+
+    '<div><label>'+t('lbl_currency')+'</label><select id="q-manual-currency"><option>USD</option><option>THB</option><option>CNY</option></select></div>'+
     '</div>'+
     '<div style="display:flex;gap:6px">'+
-    '<button class="btn btn-primary btn-sm" onclick="qAddManualItem()">新增</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'q-add-manual-form\').style.display=\'none\'">取消</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="qAddManualItem()">'+t('btn_add')+'</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'q-add-manual-form\').style.display=\'none\'">'+t('btn_cancel')+'</button>'+
     '</div></div>'
     :''
 
   const linkedShipment=h.ref_sample_shipment_id?sampleShipmentsOut.find(s=>s.id===h.ref_sample_shipment_id):null
 
   const statusBanner=
-    h.status==='sent'?'<div style="background:#FEF3E2;border:1px solid #E2C97E;border-radius:4px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⚠ 此報價單已送出，如需修改請點「修改報價」</div>':
-    h.status==='sample_pending'?'<div style="background:#FDEBD0;border:1px solid #F0A868;border-radius:4px;padding:8px 12px;font-size:12px;color:#8A4B00;margin-bottom:12px">📦 客戶已接受報價，請登記寄樣後進入確認階段</div>':
-    h.status==='sample_review'?'<div style="background:#FFF6DA;border:1px solid #E2C97E;border-radius:4px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">⏳ 樣品已寄出'+(linkedShipment?' · '+(linkedShipment.shipped_date||'')+(linkedShipment.tracking_no?' · 運單：'+linkedShipment.tracking_no:''):'')+' — 等待客戶確認品質</div>':
-    h.status==='accepted'?'<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:4px;padding:8px 12px;font-size:12px;color:#2E7D32;margin-bottom:12px">✓ 客戶已接受，可送去訂單建立正式訂單</div>':
-    h.status==='rejected'?'<div style="background:#f5f5f2;border:1px solid #ddd;border-radius:4px;padding:8px 12px;font-size:12px;color:#888;margin-bottom:12px">此報價單已被拒絕</div>':
+    h.status==='sent'?'<div style="background:#FEF3E2;border:1px solid #E2C97E;border-radius:4px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">'+t('q_status_sent')+'</div>':
+    h.status==='sample_pending'?'<div style="background:#FDEBD0;border:1px solid #F0A868;border-radius:4px;padding:8px 12px;font-size:12px;color:#8A4B00;margin-bottom:12px">'+t('q_status_sample_pending')+'</div>':
+    h.status==='sample_review'?'<div style="background:#FFF6DA;border:1px solid #E2C97E;border-radius:4px;padding:8px 12px;font-size:12px;color:#7A5800;margin-bottom:12px">'+t('q_sample_sent')+(linkedShipment?' · '+(linkedShipment.shipped_date||'')+(linkedShipment.tracking_no?' · '+t('q_tracking_label')+linkedShipment.tracking_no:''):'')+t('q_awaiting_quality')+'</div>':
+    h.status==='accepted'?'<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:4px;padding:8px 12px;font-size:12px;color:#2E7D32;margin-bottom:12px">'+t('q_status_accepted')+'</div>':
+    h.status==='rejected'?'<div style="background:#f5f5f2;border:1px solid #ddd;border-radius:4px;padding:8px 12px;font-size:12px;color:#888;margin-bottom:12px">'+t('q_status_rejected')+'</div>':
     ''
 
   const sampleReviewCheck=(editable||h.status==='sent'||h.status==='sample_pending'||h.status==='sample_review')?
     '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#555;margin-bottom:12px;cursor:pointer">'+
-    '<input type="checkbox" '+(h.needs_sample_review?'checked':'')+' onchange="qHeaderChange(\'needs_sample_review\',this.checked)" style="width:13px;height:13px;margin:0;cursor:pointer;accent-color:#0F6E56"> 客戶接受後需等待樣品確認</label>':''
+    '<input type="checkbox" '+(h.needs_sample_review?'checked':'')+' onchange="qHeaderChange(\'needs_sample_review\',this.checked)" style="width:13px;height:13px;margin:0;cursor:pointer;accent-color:#0F6E56"> '+t('q_needs_sample_review')+'</label>':''
 
   const matchingItemProductIds=items.map(it=>it.product_id).filter(Boolean)
   const matchingSamples=samples.filter(s=>
@@ -6603,35 +6678,35 @@ function renderQuoteModalBd(){
   )
   const newSampleFormHtml=
     '<div id="q-new-sample-form" style="display:none;margin-top:10px;padding:10px 12px;background:#f8f8f5;border-radius:4px;border:1px solid #e0e0d8">'+
-    '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:8px">建立新樣品</div>'+
+    '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:8px">'+t('q_create_sample_title')+'</div>'+
     '<div style="display:grid;gap:6px">'+
-    '<div><label>產品</label><select id="q-new-sample-product" onchange="qFillNewSampleSpec(this)">'+
+    '<div><label>'+t('lbl_product')+'</label><select id="q-new-sample-product" onchange="qFillNewSampleSpec(this)">'+
     items.map(it=>'<option value="'+(it.product_id||'')+'" data-spec="'+esc(it.spec||'')+'">'+esc(it.product||'')+'</option>').join('')+
     '</select></div>'+
-    '<div><label>規格（可修改）</label><input type="text" id="q-new-sample-spec" value="'+esc(items[0]?.spec||'')+'" placeholder="選填"></div>'+
-    '<div><label>初始庫存</label><input type="number" id="q-new-sample-init-qty" value="0" min="0" step="0.01"></div>'+
-    '<button class="btn btn-primary btn-sm" onclick="qCreateSampleFromQuote()">建立樣品</button>'+
+    '<div><label>'+t('q_spec_editable')+'</label><input type="text" id="q-new-sample-spec" value="'+esc(items[0]?.spec||'')+'" placeholder="選填"></div>'+
+    '<div><label>'+t('q_init_stock')+'</label><input type="number" id="q-new-sample-init-qty" value="0" min="0" step="0.01"></div>'+
+    '<button class="btn btn-primary btn-sm" onclick="qCreateSampleFromQuote()">'+t('q_create_sample_btn')+'</button>'+
     '</div></div>'
 
   const sampleShipForm=h.status==='sample_pending'?
     '<div class="divider"></div>'+
     '<div style="margin-bottom:16px">'+
-    '<div class="section-title" style="margin-bottom:8px">登記寄樣</div>'+
+    '<div class="section-title" style="margin-bottom:8px">'+t('q_ship_sample_title')+'</div>'+
     (matchingSamples.length?
       '<div style="display:grid;gap:8px">'+
-      '<div><label>選擇樣品</label><select id="q-ship-sample">'+
+      '<div><label>'+t('q_select_sample')+'</label><select id="q-ship-sample">'+
       matchingSamples.map(s=>'<option value="'+s.id+'">'+esc(s.product_name)+(s.spec?' — '+esc(s.spec):'')+' (庫存：'+s.stock_qty+')</option>').join('')+
       '</select></div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
-      '<div><label>寄出日期</label><input type="date" id="q-ship-date" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
-      '<div><label>數量</label><input type="number" id="q-ship-qty" value="1" min="0.01" step="0.01"></div>'+
+      '<div><label>'+t('q_ship_date')+'</label><input type="date" id="q-ship-date" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
+      '<div><label>'+t('lbl_qty')+'</label><input type="number" id="q-ship-qty" value="1" min="0.01" step="0.01"></div>'+
       '</div>'+
-      '<div><label>運單號（選填）</label><input type="text" id="q-ship-tracking" placeholder="e.g. EMS123456789TH"></div>'+
-      '<button class="btn btn-primary btn-sm" style="margin-top:4px" onclick="qRecordSampleShipment()">登記寄樣並進入確認階段 →</button>'+
-      '<div style="margin-top:6px"><a href="#" style="font-size:11px;color:#0F6E56;text-decoration:none" onclick="event.preventDefault();document.getElementById(\'q-new-sample-form\').style.display=\'block\';this.style.display=\'none\'">＋ 找不到對應樣品？從此報價建立</a>'+newSampleFormHtml+'</div>'+
+      '<div><label>'+t('q_tracking_optional')+'</label><input type="text" id="q-ship-tracking" placeholder="e.g. EMS123456789TH"></div>'+
+      '<button class="btn btn-primary btn-sm" style="margin-top:4px" onclick="qRecordSampleShipment()">'+t('q_ship_confirm_btn')+'</button>'+
+      '<div style="margin-top:6px"><a href="#" style="font-size:11px;color:#0F6E56;text-decoration:none" onclick="event.preventDefault();document.getElementById(\'q-new-sample-form\').style.display=\'block\';this.style.display=\'none\'">'+t('q_no_sample_link')+'</a>'+newSampleFormHtml+'</div>'+
       '</div>'
       :
-      '<div style="font-size:12px;color:#888;margin-bottom:8px">找不到對應樣品，可從此報價直接建立：</div>'+
+      '<div style="font-size:12px;color:#888;margin-bottom:8px">'+t('q_no_sample_found')+'</div>'+
       newSampleFormHtml.replace('display:none','display:block')
     )+
     '</div>'
@@ -6640,9 +6715,9 @@ function renderQuoteModalBd(){
   const footHtml=
     '<div style="display:flex;gap:8px">'+
     '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 Export PDF</button>'+
-    (editable?'<button class="btn btn-primary btn-sm" onclick="saveQuote()">儲存草稿</button>':'')+
-    (h.status==='accepted'?'<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">送去訂單 →</button>':'')+
-    '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">關閉</button>'+
+    (editable?'<button class="btn btn-primary btn-sm" onclick="saveQuote()">'+t('q_save_draft')+'</button>':'')+
+    (h.status==='accepted'?'<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">'+t('q_send_to_order')+'</button>':'')+
+    '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">'+t('btn_close')+'</button>'+
     '</div>'
 
   const notesField=editable
@@ -6687,20 +6762,20 @@ function renderQuoteModalBd(){
       (fp!=null?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+fmtP(fp)+' '+cur+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">'+(cp>0?'成本 '+fmtP(cp)+' '+cur:'未填成本')+'</div>')+
       '</div>'+
       (mgn!=null?'<div style="font-size:10px;font-weight:500;color:'+mgnColor+';background:'+mgnColor+'18;padding:2px 6px;border-radius:4px;white-space:nowrap">'+mgn.toFixed(1)+'%</div>':'')+
-      '<span style="font-size:10px;color:#3B6D11;background:#EAF3DE;border:1px solid #B5D68A;border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">待儲存</span>'+
+      '<span style="font-size:10px;color:#3B6D11;background:#EAF3DE;border:1px solid #B5D68A;border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">'+t('q_pending_save')+'</span>'+
       '<button onclick="event.stopPropagation();qRemovePendingItem('+pit._key+')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;flex-shrink:0">×</button>'+
       '</div>'
   }).join('')
 
   document.getElementById('modal-quote-bd').innerHTML=
-    '<div style="margin-bottom:12px"><div class="section-title" style="margin-bottom:6px">狀態</div>'+
+    '<div style="margin-bottom:12px"><div class="section-title" style="margin-bottom:6px">'+t('lbl_status')+'</div>'+
     '<div class="status-btns">'+QUO_STATUS.filter(s=>s.id!=='superseded').map(s=>{const isCurrent=h.status===s.id;return '<button class="status-btn" style="background:'+(isCurrent?s.bg:'transparent')+';color:'+(isCurrent?s.color:'#aaa')+';border-color:'+(isCurrent?s.color:'#e5e5e0')+';'+(isCurrent?'font-weight:600':'')+'" '+(isCurrent?'disabled':'onclick="updateQuoteStatusDirect(\''+s.id+'\')"')+'>'+s.label+'</button>'}).join('')+'</div></div>'+
     statusBanner+
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
-    '<span class="section-title" style="margin-bottom:0">品項明細</span>'+
-    '<span style="font-size:10px;color:#aaa">點擊品項可編輯</span>'+
+    '<span class="section-title" style="margin-bottom:0">'+t('q_items_section')+'</span>'+
+    '<span style="font-size:10px;color:#aaa">'+t('q_click_to_edit')+'</span>'+
     '</div>'+
-    (items.length||_pendingQuoteItems.length?itemsHtml+pendingItemsHtml:'<div style="font-size:12px;color:#aaa;margin-bottom:10px">尚無品項</div>')+
+    (items.length||_pendingQuoteItems.length?itemsHtml+pendingItemsHtml:'<div style="font-size:12px;color:#aaa;margin-bottom:10px">'+t('q_no_items')+'</div>')+
     addItemSection+
     (items.length?buildQSimSection(items):'')+
     sampleShipForm+
@@ -6708,7 +6783,7 @@ function renderQuoteModalBd(){
     sampleReviewCheck+
     '<div class="divider"></div>'+
     tradeFields+
-    '<div style="margin-bottom:16px"><label>備註</label>'+notesField+'</div>'+
+    '<div style="margin-bottom:16px"><label>'+t('lbl_notes')+'</label>'+notesField+'</div>'+
     renderQuoteHistory(h.id)+
     '<div class="modal-foot" style="justify-content:space-between;align-items:center">'+footHtml+'</div>'
 }
