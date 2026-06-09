@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.8</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.9</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -5549,22 +5549,46 @@ function pshopUpdateRollsHint(productId, metersPerRoll){
   hintEl.textContent=qty>0?'約 '+(Math.round(qty/metersPerRoll*10)/10).toFixed(1)+' 卷':''
 }
 
-function pshopAddToCart(productId){
+function pshopAddToCart(productId,color){
   const p=products.find(x=>x.id===productId)
   if(!p)return
+  if(p.color_variants?.length&&color===undefined){
+    _pshopShowColorPicker(productId);return
+  }
+  const spec=color||p.spec||null
   const qtyEl=document.getElementById('pshop-qty-'+productId)
   const qty=parseFloat(qtyEl?.value)||1
   const rolls_qty=p.meters_per_roll?Math.round(qty/p.meters_per_roll*10)/10:null
-  const existing=_pshopCart.findIndex(c=>c.product_id===productId&&!c.ref_order_id)
+  const existing=_pshopCart.findIndex(c=>c.product_id===productId&&c.spec===spec&&!c.ref_order_id)
   if(existing>=0){
     _pshopCart[existing].qty=qty
     _pshopCart[existing].rolls_qty=rolls_qty
   } else {
-    _pshopCart.push({product_id:p.id,product_name:p.product_name,spec:p.spec||null,unit:'m',unit_price:p.cost_price||0,currency:p.currency||'USD',qty,rolls_qty,ref_order_id:null,meters_per_roll:p.meters_per_roll||null,width_m:p.width_m||null,pricing_unit:p.pricing_unit||null})
+    _pshopCart.push({product_id:p.id,product_name:p.product_name,spec,unit:'m',unit_price:p.cost_price||0,currency:p.currency||'USD',qty,rolls_qty,ref_order_id:null,meters_per_roll:p.meters_per_roll||null,width_m:p.width_m||null,pricing_unit:p.pricing_unit||null})
   }
+  document.getElementById('pshop-color-picker-overlay')?.remove()
   renderPshopProductArea()
   renderPshopCart()
   pshopSyncResponsive()
+}
+function _pshopShowColorPicker(productId){
+  const p=products.find(x=>x.id===productId);if(!p)return
+  document.getElementById('pshop-color-picker-overlay')?.remove()
+  const qtyEl=document.getElementById('pshop-qty-'+productId)
+  const qty=parseFloat(qtyEl?.value)||1
+  const ov=document.createElement('div')
+  ov.id='pshop-color-picker-overlay'
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px'
+  ov.innerHTML='<div style="background:#fff;border-radius:8px;padding:20px;max-width:320px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
+    '<div style="font-size:13px;font-weight:600;margin-bottom:4px">'+esc(p.product_name)+'</div>'+
+    '<div style="font-size:11px;color:#888;margin-bottom:14px">選擇顏色 / 規格</div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">'+
+    p.color_variants.map(c=>'<button onclick="pshopAddToCart('+productId+',\''+c.replace(/'/g,"\\'")+'\');" style="padding:6px 14px;border-radius:20px;border:1px solid #e5e5e0;background:#fff;font-size:12px;cursor:pointer;color:#333" onmouseover="this.style.borderColor=\'#0F6E56\';this.style.color=\'#0F6E56\'" onmouseout="this.style.borderColor=\'#e5e5e0\';this.style.color=\'#333\'">'+esc(c)+'</button>').join('')+
+    '</div>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pshop-color-picker-overlay\').remove()">取消</button>'+
+    '</div>'
+  document.body.appendChild(ov)
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()})
 }
 
 function pshopAddFromOrder(orderId){
