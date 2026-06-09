@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.18</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.19</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1324,6 +1324,60 @@ const I18N={
     nc_quick_title:'快速新增客戶',cust_create_title:'新增客戶聯絡人',
     btn_details:'詳情',cust_last_reviewed:'上次回顧：',
     cust_days_left:'剩 {n} 天',cust_days_overdue:'已過 {n} 天',
+    confirm_title:'確認',btn_ok:'確定',
+    err_save:'儲存失敗：',err_add:'新增失敗：',err_del:'刪除失敗：',err_update:'更新失敗：',err_create:'建立失敗：',err_reset:'重設失敗：',
+    err_verify_pwd:'驗證目前密碼失敗：',err_sync_customer:'客戶名稱同步失敗：',err_sync_supplier:'供應商名稱同步失敗：',
+    err_load_ships:'載入船運失敗：',err_load_ship_links:'載入船運關聯失敗：',err_load_ship_items:'載入貨物明細失敗：',
+    err_load_po:'載入採購單失敗：',err_load_po_items:'載入採購單品項失敗：',err_load_po_links:'載入採購單關聯訂單失敗：',
+    val_product_name:'請填寫產品名稱',val_select_customer:'請選擇客戶',val_valid_qty:'請填寫有效數量',
+    val_valid_alloc_qty:'請填寫有效的分配數量',val_select_order:'請選擇客戶訂單',val_select_source:'請選擇來源',
+    val_defect_desc:'請填寫異常描述',val_alloc_target:'缺少分配目標',val_select_pdf:'請選擇 PDF 檔案',
+    val_name_company:'請填寫姓名和公司',val_required_fields:'請填寫必要欄位',val_linked_company:'請選擇綁定公司',
+    val_name_email:'請填寫姓名與 Email',val_all_fields:'請填寫所有欄位',val_wrong_pwd:'目前密碼不正確',
+    val_pwd_mismatch:'新密碼與確認密碼不一致',val_pwd_min_length:'密碼至少需要 {n} 個字元',
+    val_new_pwd:'請輸入新密碼',val_group_name:'請輸入群組名稱',
+    val_select_quote:'請至少勾選一張報價單',val_select_merge:'請至少勾選一個要合併的產品',
+    val_select_target:'請選擇目標產品',val_missing_product_link:'缺少產品關聯或成本資料',
+    val_parse_cost:'無法解析成本金額',val_product_not_found:'找不到對應產品，請重新確認關聯',
+    val_no_changes:'沒有任何變更',val_color_exists:'已有此顏色',val_variant_exists:'已有此選項',
+    val_qty_exceeds_stock:'寄出數量不能超過目前庫存（{n}）',val_etd_required:'請填寫 ETD',
+    val_select_product_item:'請選擇至少一項產品',val_name_co_country_email:'請填寫姓名、公司、國家和 Email',
+    val_dup_po_order:'同一採購品項對同一訂單已存在，請直接調整原本那筆',
+    val_dup_order_po:'同一張訂單與同一採購品項已存在，請直接調整原本那筆',
+    toast_deleted:'已刪除',toast_updated:'已更新',
+    toast_copied_email:'已複製郵件內容',toast_settings_saved:'設定已儲存',
+    toast_sample_added:'樣品已新增',toast_sample_updated:'樣品資料已更新',toast_sample_deleted:'樣品已刪除',
+    toast_request_added:'索取記錄已新增',toast_ship_sent_added:'寄出記錄已新增，庫存已扣除',
+    toast_feedback_saved:'回饋已登記',toast_supplier_shipped:'已標記供應商出貨',toast_arrived:'已標記到貨，庫存已更新',
+    toast_alloc_staged:'分配已加入暫存',toast_order_linked:'關聯客戶訂單已新增',
+    toast_inventory_updated:'庫存已更新 {n} 筆',toast_quote_created:'報價單 {id} 已建立',
+    toast_inq_created:'詢價單已建立',toast_cost_updated:'產品目錄成本已更新',
+    toast_merge_done:'合併完成！已處理 {n} 個產品',
+    toast_customer_updated:'客戶已更新',toast_customer_added:'客戶已新增',
+    toast_customer_contact_added:'客戶聯絡人已新增',toast_customer_reviewed:'已標記今日回顧',
+    toast_supplier_saved:'供應商資料已儲存',toast_supplier_contact_added:'供應商聯絡人已新增',
+    toast_user_added:'使用者已新增',toast_user_updated:'使用者資料已更新',
+    toast_pwd_updated:'密碼已更新',toast_pwd_reset:'密碼已重設',toast_group_deleted:'群組已刪除',
+    toast_shipment_created:'船運批次已建立',toast_shipment_updated:'船運資料已更新',toast_shipment_no_created:'船運 {no} 已建立',
+    toast_link_copied:'已複製：{name} 的連結',toast_copy_manual:'請手動複製',
+    toast_complaint_created:'客訴已建立',toast_complaint_updated:'客訴已更新',
+    toast_order_updated:'訂單已更新',toast_status_updated:'狀態已更新',
+    toast_product_updated:'產品已更新',toast_product_added:'產品已新增',
+    user_activate:'啟用',user_deactivate:'停用',
+    confirm_del_sample:'確定要刪除這筆樣品嗎？',confirm_del_request:'確定要刪除此索取記錄嗎？',
+    confirm_del_complaint:'確定要刪除這筆客訴嗎？',
+    confirm_del_shipment:'確定要刪除船運「{no}」？關聯的採購單連結也會一併移除。',
+    confirm_del_order:'確定要刪除此訂單嗎？',confirm_reject_order:'確定要拒絕此口頭承諾訂單嗎？',
+    confirm_change_status:'確定要將狀態改為「{s}」嗎？',confirm_cancel_po:'確定要取消此採購單嗎？',
+    confirm_del_item:'確定要刪除此品項嗎？',confirm_discard_cart:'有商品在採購車中，確定要放棄並返回嗎？',
+    confirm_switch_supplier:'切換供應商將清空採購車，確定嗎？',confirm_unsaved:'有未儲存的變更，確定要離開嗎？',
+    confirm_update_inventory:'確認更新 {n} 筆庫存？\n{summary}',confirm_del_generic:'確定要刪除「{name}」嗎？',
+    confirm_user_action:'確定要{action}此使用者嗎？',confirm_del_user:'確定要刪除使用者「{name}」嗎？',
+    confirm_merge_products:'確定要合併 {n} 個產品到「{target}」？被合併的產品將標記為停用。',
+    toast_group_updated:'群組已更新',toast_group_created:'群組已建立',
+    toast_items_added:'已加入 {n} 筆品項',
+    confirm_del_group:'確定要刪除群組「{name}」嗎？',
+    confirm_del_group_members:'\n（{n} 位成員將移除群組）',
   },
   en:{
     nav_sales:'Sales',nav_contacts:'Contacts',nav_products:'Products',nav_settings:'Settings',
@@ -1531,6 +1585,60 @@ const I18N={
     nc_quick_title:'Quick Add Customer',cust_create_title:'New Customer Contact',
     btn_details:'Details',cust_last_reviewed:'Last Reviewed: ',
     cust_days_left:'{n} days left',cust_days_overdue:'{n} days overdue',
+    confirm_title:'Confirm',btn_ok:'OK',
+    err_save:'Save failed: ',err_add:'Add failed: ',err_del:'Delete failed: ',err_update:'Update failed: ',err_create:'Create failed: ',err_reset:'Reset failed: ',
+    err_verify_pwd:'Failed to verify current password: ',err_sync_customer:'Customer name sync failed: ',err_sync_supplier:'Supplier name sync failed: ',
+    err_load_ships:'Failed to load shipments: ',err_load_ship_links:'Failed to load shipment links: ',err_load_ship_items:'Failed to load cargo items: ',
+    err_load_po:'Failed to load purchase orders: ',err_load_po_items:'Failed to load PO items: ',err_load_po_links:'Failed to load PO order links: ',
+    val_product_name:'Please enter product name',val_select_customer:'Please select a customer',val_valid_qty:'Please enter a valid quantity',
+    val_valid_alloc_qty:'Please enter a valid allocation quantity',val_select_order:'Please select a customer order',val_select_source:'Please select a source',
+    val_defect_desc:'Please describe the defect',val_alloc_target:'Missing allocation target',val_select_pdf:'Please select a PDF file',
+    val_name_company:'Please fill in name and company',val_required_fields:'Please fill in required fields',val_linked_company:'Please select a linked company',
+    val_name_email:'Please fill in name and email',val_all_fields:'Please fill in all fields',val_wrong_pwd:'Current password is incorrect',
+    val_pwd_mismatch:'New password and confirmation do not match',val_pwd_min_length:'Password must be at least {n} characters',
+    val_new_pwd:'Please enter new password',val_group_name:'Please enter group name',
+    val_select_quote:'Please select at least one quote',val_select_merge:'Please select at least one product to merge',
+    val_select_target:'Please select a target product',val_missing_product_link:'Missing product link or cost data',
+    val_parse_cost:'Cannot parse cost amount',val_product_not_found:'Product not found, please verify link',
+    val_no_changes:'No changes made',val_color_exists:'This color already exists',val_variant_exists:'This variant already exists',
+    val_qty_exceeds_stock:'Quantity cannot exceed current stock ({n})',val_etd_required:'Please enter ETD',
+    val_select_product_item:'Please select at least one product',val_name_co_country_email:'Please fill in name, company, country and email',
+    val_dup_po_order:'This PO item is already linked to this order — adjust the existing entry',
+    val_dup_order_po:'This order is already linked to this PO item — adjust the existing entry',
+    toast_deleted:'Deleted',toast_updated:'Updated',
+    toast_copied_email:'Email content copied',toast_settings_saved:'Settings saved',
+    toast_sample_added:'Sample added',toast_sample_updated:'Sample updated',toast_sample_deleted:'Sample deleted',
+    toast_request_added:'Request record added',toast_ship_sent_added:'Shipment record added, stock deducted',
+    toast_feedback_saved:'Feedback saved',toast_supplier_shipped:'Marked as shipped by supplier',toast_arrived:'Marked as received, stock updated',
+    toast_alloc_staged:'Allocation staged',toast_order_linked:'Customer order linked',
+    toast_inventory_updated:'{n} inventory records updated',toast_quote_created:'Quote {id} created',
+    toast_inq_created:'Inquiry created',toast_cost_updated:'Product catalog cost updated',
+    toast_merge_done:'Merge complete! Processed {n} products',
+    toast_customer_updated:'Customer updated',toast_customer_added:'Customer added',
+    toast_customer_contact_added:'Customer contact added',toast_customer_reviewed:'Marked as reviewed today',
+    toast_supplier_saved:'Supplier saved',toast_supplier_contact_added:'Supplier contact added',
+    toast_user_added:'User added',toast_user_updated:'User updated',
+    toast_pwd_updated:'Password updated',toast_pwd_reset:'Password reset',toast_group_deleted:'Group deleted',
+    toast_shipment_created:'Shipment batch created',toast_shipment_updated:'Shipment updated',toast_shipment_no_created:'Shipment {no} created',
+    toast_link_copied:'Copied: {name}\'s link',toast_copy_manual:'Please copy manually',
+    toast_complaint_created:'Complaint created',toast_complaint_updated:'Complaint updated',
+    toast_order_updated:'Order updated',toast_status_updated:'Status updated',
+    toast_product_updated:'Product updated',toast_product_added:'Product added',
+    user_activate:'Activate',user_deactivate:'Deactivate',
+    confirm_del_sample:'Delete this sample?',confirm_del_request:'Delete this request record?',
+    confirm_del_complaint:'Delete this complaint?',
+    confirm_del_shipment:'Delete shipment "{no}"? Associated PO links will also be removed.',
+    confirm_del_order:'Delete this order?',confirm_reject_order:'Reject this verbal order?',
+    confirm_change_status:'Change status to "{s}"?',confirm_cancel_po:'Cancel this purchase order?',
+    confirm_del_item:'Delete this item?',confirm_discard_cart:'Cart has items — discard and return?',
+    confirm_switch_supplier:'Switching supplier will clear the cart. Continue?',confirm_unsaved:'You have unsaved changes — leave anyway?',
+    confirm_update_inventory:'Update {n} inventory records?\n{summary}',confirm_del_generic:'Delete "{name}"?',
+    confirm_user_action:'{action} this user?',confirm_del_user:'Delete user "{name}"?',
+    confirm_merge_products:'Merge {n} products into "{target}"? Merged products will be marked inactive.',
+    toast_group_updated:'Group updated',toast_group_created:'Group created',
+    toast_items_added:'{n} items added',
+    confirm_del_group:'Delete group "{name}"?',
+    confirm_del_group_members:'\n({n} members will be removed from the group)',
   },
   th:{
     nav_sales:'ขาย',nav_contacts:'รายชื่อ',nav_products:'สินค้า',nav_settings:'ตั้งค่า',
@@ -1738,6 +1846,60 @@ const I18N={
     nc_quick_title:'เพิ่มลูกค้าด่วน',cust_create_title:'ผู้ติดต่อลูกค้าใหม่',
     btn_details:'รายละเอียด',cust_last_reviewed:'รีวิวล่าสุด: ',
     cust_days_left:'เหลือ {n} วัน',cust_days_overdue:'เกิน {n} วัน',
+    confirm_title:'ยืนยัน',btn_ok:'ตกลง',
+    err_save:'บันทึกล้มเหลว: ',err_add:'เพิ่มล้มเหลว: ',err_del:'ลบล้มเหลว: ',err_update:'อัปเดตล้มเหลว: ',err_create:'สร้างล้มเหลว: ',err_reset:'รีเซ็ตล้มเหลว: ',
+    err_verify_pwd:'ยืนยันรหัสผ่านปัจจุบันล้มเหลว: ',err_sync_customer:'ซิงค์ชื่อลูกค้าล้มเหลว: ',err_sync_supplier:'ซิงค์ชื่อซัพพลายเออร์ล้มเหลว: ',
+    err_load_ships:'โหลดข้อมูลการขนส่งล้มเหลว: ',err_load_ship_links:'โหลดข้อมูลเชื่อมโยงล้มเหลว: ',err_load_ship_items:'โหลดรายการสินค้าล้มเหลว: ',
+    err_load_po:'โหลดใบสั่งซื้อล้มเหลว: ',err_load_po_items:'โหลดรายการใบสั่งซื้อล้มเหลว: ',err_load_po_links:'โหลดข้อมูลเชื่อมโยงล้มเหลว: ',
+    val_product_name:'กรุณากรอกชื่อสินค้า',val_select_customer:'กรุณาเลือกลูกค้า',val_valid_qty:'กรุณากรอกจำนวนที่ถูกต้อง',
+    val_valid_alloc_qty:'กรุณากรอกจำนวนการจัดสรรที่ถูกต้อง',val_select_order:'กรุณาเลือกคำสั่งซื้อ',val_select_source:'กรุณาเลือกแหล่งที่มา',
+    val_defect_desc:'กรุณาอธิบายข้อบกพร่อง',val_alloc_target:'ไม่พบเป้าหมายการจัดสรร',val_select_pdf:'กรุณาเลือกไฟล์ PDF',
+    val_name_company:'กรุณากรอกชื่อและบริษัท',val_required_fields:'กรุณากรอกข้อมูลที่จำเป็น',val_linked_company:'กรุณาเลือกบริษัทที่เชื่อมโยง',
+    val_name_email:'กรุณากรอกชื่อและอีเมล',val_all_fields:'กรุณากรอกข้อมูลทุกช่อง',val_wrong_pwd:'รหัสผ่านปัจจุบันไม่ถูกต้อง',
+    val_pwd_mismatch:'รหัสผ่านใหม่และการยืนยันไม่ตรงกัน',val_pwd_min_length:'รหัสผ่านต้องมีอย่างน้อย {n} ตัวอักษร',
+    val_new_pwd:'กรุณากรอกรหัสผ่านใหม่',val_group_name:'กรุณากรอกชื่อกลุ่ม',
+    val_select_quote:'กรุณาเลือกอย่างน้อยหนึ่งใบเสนอราคา',val_select_merge:'กรุณาเลือกอย่างน้อยหนึ่งสินค้าเพื่อรวม',
+    val_select_target:'กรุณาเลือกสินค้าเป้าหมาย',val_missing_product_link:'ไม่พบข้อมูลเชื่อมโยงสินค้าหรือต้นทุน',
+    val_parse_cost:'ไม่สามารถวิเคราะห์จำนวนต้นทุนได้',val_product_not_found:'ไม่พบสินค้า กรุณาตรวจสอบการเชื่อมโยง',
+    val_no_changes:'ไม่มีการเปลี่ยนแปลง',val_color_exists:'สีนี้มีอยู่แล้ว',val_variant_exists:'ตัวเลือกนี้มีอยู่แล้ว',
+    val_qty_exceeds_stock:'จำนวนเกินสต็อกปัจจุบัน ({n})',val_etd_required:'กรุณากรอก ETD',
+    val_select_product_item:'กรุณาเลือกอย่างน้อยหนึ่งสินค้า',val_name_co_country_email:'กรุณากรอกชื่อ บริษัท ประเทศ และอีเมล',
+    val_dup_po_order:'รายการนี้เชื่อมโยงกับคำสั่งซื้อนี้แล้ว กรุณาแก้ไขรายการเดิม',
+    val_dup_order_po:'คำสั่งซื้อนี้เชื่อมโยงกับรายการนี้แล้ว กรุณาแก้ไขรายการเดิม',
+    toast_deleted:'ลบแล้ว',toast_updated:'อัปเดตแล้ว',
+    toast_copied_email:'คัดลอกเนื้อหาอีเมลแล้ว',toast_settings_saved:'บันทึกการตั้งค่าแล้ว',
+    toast_sample_added:'เพิ่มตัวอย่างแล้ว',toast_sample_updated:'อัปเดตตัวอย่างแล้ว',toast_sample_deleted:'ลบตัวอย่างแล้ว',
+    toast_request_added:'เพิ่มบันทึกการขอแล้ว',toast_ship_sent_added:'เพิ่มบันทึกการส่งแล้ว หักสต็อกแล้ว',
+    toast_feedback_saved:'บันทึกผลตอบรับแล้ว',toast_supplier_shipped:'ทำเครื่องหมายว่าซัพพลายเออร์จัดส่งแล้ว',toast_arrived:'รับสินค้าแล้ว อัปเดตสต็อกแล้ว',
+    toast_alloc_staged:'จัดเก็บการจัดสรรชั่วคราวแล้ว',toast_order_linked:'เชื่อมโยงคำสั่งซื้อแล้ว',
+    toast_inventory_updated:'อัปเดตสต็อก {n} รายการแล้ว',toast_quote_created:'สร้างใบเสนอราคา {id} แล้ว',
+    toast_inq_created:'สร้างการสอบถามแล้ว',toast_cost_updated:'อัปเดตต้นทุนสินค้าแล้ว',
+    toast_merge_done:'รวมสำเร็จ! ดำเนินการ {n} สินค้า',
+    toast_customer_updated:'อัปเดตลูกค้าแล้ว',toast_customer_added:'เพิ่มลูกค้าแล้ว',
+    toast_customer_contact_added:'เพิ่มผู้ติดต่อลูกค้าแล้ว',toast_customer_reviewed:'ทำเครื่องหมายรีวิววันนี้แล้ว',
+    toast_supplier_saved:'บันทึกซัพพลายเออร์แล้ว',toast_supplier_contact_added:'เพิ่มผู้ติดต่อซัพพลายเออร์แล้ว',
+    toast_user_added:'เพิ่มผู้ใช้แล้ว',toast_user_updated:'อัปเดตผู้ใช้แล้ว',
+    toast_pwd_updated:'อัปเดตรหัสผ่านแล้ว',toast_pwd_reset:'รีเซ็ตรหัสผ่านแล้ว',toast_group_deleted:'ลบกลุ่มแล้ว',
+    toast_shipment_created:'สร้างการขนส่งแล้ว',toast_shipment_updated:'อัปเดตการขนส่งแล้ว',toast_shipment_no_created:'สร้างการขนส่ง {no} แล้ว',
+    toast_link_copied:'คัดลอกลิงก์ของ {name} แล้ว',toast_copy_manual:'กรุณาคัดลอกด้วยตนเอง',
+    toast_complaint_created:'สร้างการร้องเรียนแล้ว',toast_complaint_updated:'อัปเดตการร้องเรียนแล้ว',
+    toast_order_updated:'อัปเดตคำสั่งซื้อแล้ว',toast_status_updated:'อัปเดตสถานะแล้ว',
+    toast_product_updated:'อัปเดตสินค้าแล้ว',toast_product_added:'เพิ่มสินค้าแล้ว',
+    user_activate:'เปิดใช้งาน',user_deactivate:'ปิดใช้งาน',
+    confirm_del_sample:'ลบตัวอย่างนี้ใช่ไหม?',confirm_del_request:'ลบบันทึกการขอนี้ใช่ไหม?',
+    confirm_del_complaint:'ลบการร้องเรียนนี้ใช่ไหม?',
+    confirm_del_shipment:'ลบการขนส่ง "{no}"? ลิงก์ใบสั่งซื้อที่เชื่อมโยงจะถูกลบด้วย',
+    confirm_del_order:'ลบคำสั่งซื้อนี้ใช่ไหม?',confirm_reject_order:'ปฏิเสธคำสั่งซื้อแบบปากเปล่าใช่ไหม?',
+    confirm_change_status:'เปลี่ยนสถานะเป็น "{s}" ใช่ไหม?',confirm_cancel_po:'ยกเลิกใบสั่งซื้อนี้ใช่ไหม?',
+    confirm_del_item:'ลบรายการนี้ใช่ไหม?',confirm_discard_cart:'มีสินค้าในตะกร้า ต้องการยกเลิกและกลับไหม?',
+    confirm_switch_supplier:'เปลี่ยนซัพพลายเออร์จะล้างตะกร้า ดำเนินการต่อไหม?',confirm_unsaved:'มีการเปลี่ยนแปลงที่ยังไม่บันทึก ออกไหม?',
+    confirm_update_inventory:'ยืนยันการอัปเดต {n} รายการสต็อก?\n{summary}',confirm_del_generic:'ลบ "{name}" ใช่ไหม?',
+    confirm_user_action:'{action}ผู้ใช้นี้ใช่ไหม?',confirm_del_user:'ลบผู้ใช้ "{name}" ใช่ไหม?',
+    confirm_merge_products:'รวม {n} สินค้าเข้า "{target}"? สินค้าที่รวมจะถูกทำเครื่องหมายว่าไม่ใช้งาน',
+    toast_group_updated:'อัปเดตกลุ่มแล้ว',toast_group_created:'สร้างกลุ่มแล้ว',
+    toast_items_added:'เพิ่ม {n} รายการแล้ว',
+    confirm_del_group:'ลบกลุ่ม "{name}" ใช่ไหม?',
+    confirm_del_group_members:'\n({n} สมาชิกจะถูกลบออกจากกลุ่ม)',
   }
 }
 let _lang=localStorage.getItem('joychin_lang')||'zh'
@@ -1774,11 +1936,11 @@ function confirmModal(msg,onConfirm){
   ov.className='modal-overlay open'
   ov.innerHTML=
     '<div class="modal-box sm" style="max-width:360px">'+
-    '<div class="modal-hd"><div style="font-size:14px;font-weight:600">確認</div></div>'+
+    '<div class="modal-hd"><div style="font-size:14px;font-weight:600">'+t('confirm_title')+'</div></div>'+
     '<div class="modal-bd"><p style="font-size:13px;line-height:1.6">'+msg+'</p></div>'+
     '<div class="modal-foot" style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px">'+
-    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\''+id+'\').remove()">取消</button>'+
-    '<button class="btn btn-primary btn-sm" id="'+id+'-ok">確定</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\''+id+'\').remove()">'+t('btn_cancel')+'</button>'+
+    '<button class="btn btn-primary btn-sm" id="'+id+'-ok">'+t('btn_ok')+'</button>'+
     '</div></div>'
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()})
   document.body.appendChild(ov)
@@ -2133,9 +2295,9 @@ async function loadShipments(){
   shipments=s||[]
   shipmentPurchaseOrders=spo||[]
   shipmentItems=si||[]
-  if(shipErr)showToast('載入船運失敗：'+shipErr.message,'error')
-  if(linkErr)showToast('載入船運關聯失敗：'+linkErr.message,'error')
-  if(siErr)showToast('載入貨物明細失敗：'+siErr.message,'error')
+  if(shipErr)showToast(t('err_load_ships')+shipErr.message,'error')
+  if(linkErr)showToast(t('err_load_ship_links')+linkErr.message,'error')
+  if(siErr)showToast(t('err_load_ship_items')+siErr.message,'error')
   updatePurchaseBadge()
 }
 
@@ -2148,9 +2310,9 @@ async function loadPurchaseOrders(){
   purchaseOrders=po||[]
   purchaseOrderItems=poi||[]
   purchaseOrderOrderLinks=pool||[]
-  if(poErr)showToast('載入採購單失敗：'+poErr.message,'error')
-  if(poiErr)showToast('載入採購單品項失敗：'+poiErr.message,'error')
-  if(poolErr)showToast('載入採購單關聯訂單失敗：'+poolErr.message,'error')
+  if(poErr)showToast(t('err_load_po')+poErr.message,'error')
+  if(poiErr)showToast(t('err_load_po_items')+poiErr.message,'error')
+  if(poolErr)showToast(t('err_load_po_links')+poolErr.message,'error')
   updatePurchaseBadge()
 }
 
@@ -2367,7 +2529,7 @@ async function _createSample(){
     from_inquiry_id:document.getElementById('sm-inq')?.value.trim()||null,
     notes:document.getElementById('sm-notes')?.value.trim()||null
   })
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   logActivity('新增樣品','sample',name,'')
   await loadSamples();closeModal('modal-sample');renderSamples();showToast('樣品已新增')
 }
@@ -2558,15 +2720,15 @@ async function saveSampleBasic(){
     from_inquiry_id:document.getElementById('sm-e-inq')?.value||null,
     notes:document.getElementById('sm-e-notes')?.value.trim()||null
   }).eq('id',selectedSampleId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   logActivity('更新樣品','sample',String(selectedSampleId),name)
   await loadSamples();_renderSampleModal();renderSamples();showToast('樣品資料已更新')
 }
 
 async function deleteSample(){
-  confirmModal('確定要刪除這筆樣品嗎？',async()=>{
+  confirmModal(t('confirm_del_sample'),async()=>{
     const{error}=await sb.from('samples').delete().eq('id',selectedSampleId)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_del')+error.message,'error');return}
     logActivity('刪除樣品','sample',String(selectedSampleId),'')
     await loadSamples();renderSamples();closeModal('modal-sample');showToast('樣品已刪除')
   })
@@ -2582,7 +2744,7 @@ async function submitSampleRequest(){
     notes:document.getElementById('smr-notes')?.value.trim()||null,
     status:'pending'
   })
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   logActivity('索取樣品','sample',String(selectedSampleId),'')
   await loadSamples();_renderSampleModal();renderSamples();showToast('索取記錄已新增')
 }
@@ -2609,28 +2771,28 @@ async function saveRequestEdit(reqId){
   const date=document.getElementById('smreq-date-'+reqId)?.value||null
   const notes=document.getElementById('smreq-note-'+reqId)?.value.trim()||null
   const{error}=await sb.from('sample_requests_in').update({qty,requested_date:date,notes}).eq('id',reqId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   await loadSamples();_renderSampleModal();showToast('已更新')
 }
 
 async function deleteRequest(reqId){
-  confirmModal('確定要刪除此索取記錄嗎？',async()=>{
+  confirmModal(t('confirm_del_request'),async()=>{
     const{error}=await sb.from('sample_requests_in').delete().eq('id',reqId)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
-    await loadSamples();_renderSampleModal();renderSamples();showToast('已刪除')
+    if(error){showToast(t('err_del')+error.message,'error');return}
+    await loadSamples();_renderSampleModal();renderSamples();showToast(t('toast_deleted'))
   })
 }
 
 async function markSupplierShipped(reqId){
   const today=new Date().toISOString().slice(0,10)
   const{error}=await sb.from('sample_requests_in').update({supplier_shipped_status:'shipped',shipped_date:today}).eq('id',reqId)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   await loadSamples();_renderSampleModal();renderSamples();showToast('已標記供應商出貨')
 }
 async function markRequestReceived(reqId,qty){
   const today=new Date().toISOString().slice(0,10)
   const{error}=await sb.from('sample_requests_in').update({status:'received',received_date:today}).eq('id',reqId)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   const s=samples.find(x=>x.id===selectedSampleId)
   const newQty=(s?.stock_qty??0)+(qty??0)
   await sb.from('samples').update({stock_qty:newQty}).eq('id',selectedSampleId)
@@ -2652,7 +2814,7 @@ async function submitSampleShipment(){
     qty,
     status:'shipped'
   })
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   const newQty=(s?.stock_qty??0)-qty
   await sb.from('samples').update({stock_qty:newQty}).eq('id',selectedSampleId)
   logActivity('寄出樣品','sample',String(selectedSampleId),'數量 '+qty)
@@ -2663,7 +2825,7 @@ async function submitShipFeedback(shipId){
   const status=document.getElementById('smfbs-'+shipId)?.value
   const feedback=document.getElementById('smfbt-'+shipId)?.value.trim()||null
   const{error}=await sb.from('sample_shipments_out').update({status,feedback}).eq('id',shipId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   await loadSamples();_renderSampleModal();renderSamples();showToast('回饋已登記')
 }
 
@@ -3097,15 +3259,15 @@ async function saveComplaint(){
   const{error}=isNew
     ?await sb.from('complaints').insert(payload)
     :await sb.from('complaints').update(payload).eq('id',selectedComplaintId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   logActivity(isNew?'建立客訴':'更新客訴','complaint',String(selectedComplaintId||payload.complaint_no||''),'')
   await loadComplaints();renderComplaints();closeModal('modal-complaint')
-  showToast(isNew?'客訴已建立':'客訴已更新')
+  showToast(t(isNew?'toast_complaint_created':'toast_complaint_updated'))
 }
 async function deleteComplaint(id){
-  confirmModal('確定要刪除這筆客訴嗎？',async()=>{
+  confirmModal(t('confirm_del_complaint'),async()=>{
     const{error}=await sb.from('complaints').delete().eq('id',id)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_del')+error.message,'error');return}
     logActivity('刪除客訴','complaint',String(id),'')
     await loadComplaints();renderComplaints();closeModal('modal-complaint')
   })
@@ -3457,7 +3619,7 @@ function renderShipments(){
 async function quickSetContainerSize(shipmentId,value,selectEl){
   if(selectEl)selectEl.style.color=value?'#1a1a1a':'#aaa'
   const{error}=await sb.from('shipments').update({container_size:value||null}).eq('id',shipmentId)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   const s=shipments.find(x=>String(x.id)===String(shipmentId))
   if(s)s.container_size=value||null
 }
@@ -3659,7 +3821,7 @@ async function deleteShipmentDoc(docId,filePath,shipmentId){
   }
   const{error:dbErr}=await sb.from('shipment_documents').delete().eq('id',docId)
   if(dbErr){showToast('記錄刪除失敗：'+dbErr.message,'error');return}
-  showToast('已刪除')
+  showToast(t('toast_deleted'))
   renderShipmentDocs(shipmentId)
 }
 
@@ -3667,7 +3829,7 @@ async function quickUpdateShipmentStatus(shipmentId,newStatus){
   const oldStatus=shipments.find(s=>String(s.id)===String(shipmentId))?.status||''
   if(oldStatus===newStatus)return
   const{error}=await sb.from('shipments').update({status:newStatus}).eq('id',shipmentId)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   logActivity('更新船運狀態','shipment',String(shipmentId),oldStatus+' → '+newStatus)
   await loadShipments()
   openShipmentModal(shipmentId)
@@ -3695,7 +3857,7 @@ async function setShipmentItemStatus(shipmentId,poItemId,status){
       status
     }))
   }
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   await loadShipments()
   openShipmentModal(shipmentId)
 }
@@ -3857,15 +4019,15 @@ async function saveShipment(id){
   renderShipments()
   closeModal('modal-shipment-edit')
   setTimeout(()=>openShipmentModal(finalId),120)
-  showToast(id===null?'船運批次已建立':'船運資料已更新')
+  showToast(t(id===null?'toast_shipment_created':'toast_shipment_updated'))
 }
 async function deleteShipment(id){
   const s=shipments.find(x=>String(x.id)===String(id))
-  confirmModal('確定要刪除船運「'+(s?.shipment_no||id)+'」？關聯的採購單連結也會一併移除。',async()=>{
+  confirmModal(t('confirm_del_shipment').replace('{no}',s?.shipment_no||id),async()=>{
     const{error:linkErr}=await sb.from('shipment_purchase_orders').delete().eq('shipment_id',id)
     if(linkErr){showToast('移除關聯失敗：'+linkErr.message,'error');return}
     const{error}=await sb.from('shipments').delete().eq('id',id)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_del')+error.message,'error');return}
     logActivity('刪除船運','shipment',String(id),s?.shipment_no||'')
     await loadShipments()
     closeModal('modal-shipment-edit')
@@ -4006,7 +4168,7 @@ async function _createOrder(){
     customer_ref_no:document.getElementById('noi-customer-ref')?.value.trim()||null,
     payment_term:document.getElementById('or-payment-term')?.value||null
   })
-  if(error){showToast('建立失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_create')+error.message,'error');return}
   const {error:itemError}=await sb.from('order_items').insert(_pendingOrderItems.map(it=>{
     const wm=parseFloat(it.width_m||0);const up=parseFloat(it.unit_price||0);const q=parseFloat(it.qty||0)
     const amt=it.customer_pricing_unit==='m2'&&wm>0?up*wm*q:up*q
@@ -4355,7 +4517,7 @@ function _renderOrderModal(){
   html+=selectableStatuses.map(s=>{
     const isCurrent=o.status===s.id
     return '<button class="status-btn" style="background:'+(isCurrent?s.bg:'transparent')+';color:'+(isCurrent?s.color:'#aaa')+';border-color:'+(isCurrent?s.color:'#e5e5e0')+';'+(isCurrent?'font-weight:600':'')+(isCurrent?'':';cursor:pointer')+'" '+
-      (isCurrent?'disabled':'onclick="confirmModal(\'確定要將狀態改為「'+orderStatusLabel(s.id)+'」嗎？\',()=>updateOrderStatus(\''+s.id+'\'))"')+
+      (isCurrent?'disabled':'onclick="confirmModal(t(\'confirm_change_status\').replace(\'{s}\',\''+orderStatusLabel(s.id)+'\'),()=>updateOrderStatus(\''+s.id+'\'))"')+
       '>'+orderStatusLabel(s.id)+'</button>'
   }).join('')
   html+='</div>'
@@ -4415,7 +4577,7 @@ async function saveOrderBasic(){
     payment_term:document.getElementById('ore-payment-term')?.value||null,
     requires_coa:!!(document.getElementById('ore-requires-coa')?.checked)
   }).eq('id',selectedOrderId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   _isDirty=false
   logActivity('更新訂單','order',String(selectedOrderId),'')
   await loadOrders();_renderOrderModal();renderOrders();showToast('訂單已更新')
@@ -4501,16 +4663,16 @@ async function deleteOrderDoc(docId,filePath,orderId){
   const{data:rem}=await sb.from('order_documents').select('order_id').eq('doc_type','coa').eq('order_id',orderId)
   if(!rem||rem.length===0)orderCoaDocs=orderCoaDocs.filter(d=>String(d.order_id)!==String(orderId))
   logActivity('刪除 COA','order',String(orderId),'')
-  showToast('已刪除')
+  showToast(t('toast_deleted'))
   renderOrderCoaDocs(orderId)
   renderOrders()
 }
 
 async function deleteOrder(){
-  confirmModal('確定要刪除此訂單嗎？',async()=>{
+  confirmModal(t('confirm_del_order'),async()=>{
     await sb.from('order_items').delete().eq('order_id',selectedOrderId)
     const{error}=await sb.from('orders').delete().eq('id',selectedOrderId)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_del')+error.message,'error');return}
     logActivity('刪除訂單','order',String(selectedOrderId),'')
     await loadOrders();closeModal('modal-order');renderOrders();showToast('訂單已刪除')
   })
@@ -4591,7 +4753,7 @@ async function submitOrderItem(){
     customer_pricing_unit:cpu,
     amount:parseFloat(amt.toFixed(4))
   })
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   const existingTotal=orderItems.filter(i=>i.order_id===selectedOrderId).reduce((s,i)=>s+_calcOiItemAmt(i),0)
   await sb.from('orders').update({total_amount:parseFloat((existingTotal+amt).toFixed(4))}).eq('id',selectedOrderId)
   await loadOrders();_renderOrderModal();renderOrders();showToast('品項已新增')
@@ -4599,7 +4761,7 @@ async function submitOrderItem(){
 
 async function deleteOrderItem(itemId){
   const{error}=await sb.from('order_items').delete().eq('id',itemId)
-  if(error){showToast('刪除失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_del')+error.message,'error');return}
   const remaining=orderItems.filter(i=>i.order_id===selectedOrderId&&i.id!==itemId)
   const total=remaining.reduce((s,i)=>s+_calcOiItemAmt(i),0)
   await sb.from('orders').update({total_amount:parseFloat(total.toFixed(4))}).eq('id',selectedOrderId)
@@ -4684,7 +4846,7 @@ async function saveOrderItems(){
     const payload={...changes}
     if(amt!=null)payload.amount=parseFloat(amt.toFixed(4))
     const{error}=await sb.from('order_items').update(payload).eq('id',id)
-    if(error){showToast('儲存失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_save')+error.message,'error');return}
   }
   const newTotal=itms.reduce((s,i)=>s+_calcOiAmt(i),0)
   await sb.from('orders').update({total_amount:newTotal}).eq('id',selectedOrderId)
@@ -4711,9 +4873,9 @@ async function updateOrderStatus(newStatus,extra={}){
     patch.notes=[order?.notes,stamp].filter(Boolean).join('\n')
   }
   const{error}=await sb.from('orders').update(patch).eq('id',selectedOrderId)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   logActivity('更新訂單狀態','order',String(selectedOrderId),newStatus)
-  await loadOrders();_renderOrderModal();renderOrders();showToast('狀態已更新')
+  await loadOrders();_renderOrderModal();renderOrders();showToast(t('toast_status_updated'))
 }
 
 async function approveOrder(orderId){
@@ -4725,7 +4887,7 @@ async function approveOrder(orderId){
 }
 
 async function rejectOrder(orderId){
-  confirmModal('確定要拒絕此口頭承諾訂單嗎？',async()=>{
+  confirmModal(t('confirm_reject_order'),async()=>{
     const{error}=await sb.from('orders').update({approval_status:'rejected'}).eq('id',orderId)
     if(error){showToast('操作失敗：'+error.message,'error');return}
     logActivity('退回訂單','order',String(orderId),'rejected')
@@ -5208,7 +5370,7 @@ async function createPurchaseOrder(){
   assignIfPresent(payload,'notes',document.getElementById('pp-notes')?.value?.trim())
   assignIfPresent(payload,'supplier_instructions',document.getElementById('pp-supplier-instr')?.value?.trim())
   const{error}=await sb.from('purchase_orders').insert(payload)
-  if(error){showToast('建立失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_create')+error.message,'error');return}
   const po=await sb.from('purchase_orders').select('*').eq('id',id).single()
   if(po.data&&window._pendingPurchaseItems){
     for(const item of window._pendingPurchaseItems){
@@ -5307,7 +5469,7 @@ async function submitCreatePurchaseFromOrder(){
   if(expected)payload.expected_delivery=expected
   if(notes)payload.notes=notes
   const{error}=await sb.from('purchase_orders').insert(payload)
-  if(error){showToast('建立失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_create')+error.message,'error');return}
   for(const oi of oItems){
     const prod=oi.product_id?products.find(p=>String(p.id)===String(oi.product_id)):null
     await sb.from('purchase_order_items').insert({
@@ -5347,7 +5509,7 @@ async function savePurchaseOrder(){
   assignIfPresent(payload,'notes',document.getElementById('pp-notes')?.value?.trim())
   assignIfPresent(payload,'supplier_instructions',document.getElementById('pp-supplier-instr')?.value?.trim())
   const{error}=await sb.from('purchase_orders').update(payload).eq('id',selectedPurchaseId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   _isDirty=false
   logActivity('更新採購單','purchase',String(selectedPurchaseId),'')
   await loadPurchaseOrders()
@@ -5419,23 +5581,23 @@ async function updatePurchaseStatus(status){
   if(!selectedPurchaseId)return
   const old=purchaseOrders.find(p=>String(p.id)===String(selectedPurchaseId))?.status||''
   const{error}=await sb.from('purchase_orders').update({status}).eq('id',selectedPurchaseId)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   logActivity('更新採購單狀態','purchase',String(selectedPurchaseId),old+' → '+status)
   _isDirty=false
   await loadPurchaseOrders()
   renderPurchaseOrders()
   openPurchaseModal(selectedPurchaseId)
-  showToast('狀態已更新')
+  showToast(t('toast_status_updated'))
 }
 async function updatePurchaseStatusDirect(status){
   const p=purchaseOrders.find(x=>String(x.id)===String(selectedPurchaseId))
   if(!p||p.status===status)return
-  confirmModal('確定要將狀態改為「'+(PURCHASE_STATUS.find(s=>s.id===status)?.label||status)+'」嗎？',()=>updatePurchaseStatus(status))
+  confirmModal(t('confirm_change_status').replace('{s}',PURCHASE_STATUS.find(s=>s.id===status)?.label||status),()=>updatePurchaseStatus(status))
 }
 
 async function cancelPurchaseOrder(){
   if(!selectedPurchaseId)return
-  confirmModal('確定要取消此採購單嗎？',async()=>{
+  confirmModal(t('confirm_cancel_po'),async()=>{
     const{error}=await sb.from('purchase_orders').update({status:'cancelled'}).eq('id',selectedPurchaseId)
     if(error){showToast('取消失敗：'+error.message,'error');return}
     _isDirty=false
@@ -5523,7 +5685,7 @@ async function addItemsFromOrder(orderId){
     _isDirty=false
     closeModal('modal-subform')
     openPurchaseModal(null,{keepPending:true,keepPendingLinks:true})
-    showToast(selectedItems.length+' 筆品項已加入')
+    showToast(t('toast_items_added').replace('{n}',selectedItems.length))
     return
   }
   for(const it of selectedItems){
@@ -5549,7 +5711,7 @@ async function addItemsFromOrder(orderId){
   closeModal('modal-subform')
   await loadPurchaseOrders()
   openPurchaseModal(selectedPurchaseId)
-  showToast(selectedItems.length+' 筆品項已加入')
+  showToast(t('toast_items_added').replace('{n}',selectedItems.length))
 }
 
 function showArrivalInput(itemId){
@@ -5570,15 +5732,15 @@ async function applyCostPrice(itemId,costPrice,currency){
   if(prod?.pricing_unit)update.pricing_unit=prod.pricing_unit
   if(prod?.width_m)update.width_m=prod.width_m
   const{error}=await sb.from('purchase_order_items').update(update).eq('id',itemId)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   await loadPurchaseOrders()
   openPurchaseModal(selectedPurchaseId)
   showToast('已套用成本價 '+fmtP(costPrice))
 }
 async function deletePurchaseItem(itemId){
-  confirmModal('確定要刪除此品項嗎？',async()=>{
+  confirmModal(t('confirm_del_item'),async()=>{
     const{error}=await sb.from('purchase_order_items').delete().eq('id',itemId)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_del')+error.message,'error');return}
     await loadPurchaseOrders()
     openPurchaseModal(selectedPurchaseId)
     showToast('品項已刪除')
@@ -5593,7 +5755,7 @@ async function submitArrival(itemId){
   if(!item)return
   const newReceived=(parseFloat(item.received_qty)||0)+arrived
   const{error}=await sb.from('purchase_order_items').update({received_qty:newReceived}).eq('id',itemId)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   if(item.product_id){
     const prod=products.find(x=>x.id===item.product_id)
     if(prod!=null){
@@ -5660,7 +5822,7 @@ function pshopShowTopbarControls(show){
 
 function pshopLeave(){
   if(_pshopCart.length){
-    confirmModal('有商品在採購車中，確定要放棄並返回嗎？',()=>{
+    confirmModal(t('confirm_discard_cart'),()=>{
       _pshopCart=[]
       _pshopActiveCompany=null
       pshopShowTopbarControls(false)
@@ -5715,7 +5877,7 @@ function renderPshopSupplierTabs(list){
 function pshopSelectCompany(company){
   if(company===_pshopActiveCompany)return
   if(_pshopCart.length){
-    confirmModal('切換供應商將清空採購車，確定嗎？',()=>{
+    confirmModal(t('confirm_switch_supplier'),()=>{
       _pshopCart=[]
       _pshopActiveCompany=company
       pshopInitPage()
@@ -5939,7 +6101,7 @@ function pshopAddFromOrder(orderId){
   renderPshopProductArea()
   renderPshopCart()
   pshopSyncResponsive()
-  showToast(items.length+' items added to cart')
+  showToast(t('toast_items_added').replace('{n}',items.length))
 }
 
 function pshopRemoveFromCart(idx){
@@ -6069,7 +6231,7 @@ async function confirmShopOrder(){
   if(delivery)payload.expected_delivery=delivery
   if(notes)payload.notes=notes
   const{error}=await sb.from('purchase_orders').insert(payload)
-  if(error){showToast('建立失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_create')+error.message,'error');return}
   for(const item of _pshopCart){
     const{error:ie}=await sb.from('purchase_order_items').insert({
       po_id:id,
@@ -6341,7 +6503,7 @@ async function createInquiry(){
     from_product_id:r.product_id
   }))
   const{error}=await sb.from('inquiries').insert(newInqs)
-  if(error){showToast('建立失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_create')+error.message,'error');return}
   newInqs.forEach(inq=>logActivity('新增詢價','inquiry',inq.id,''))
   await loadInquiries();hideNewInqForm();populateFilterCustomers();renderInquiries()
   selectedInqId=newInqs[0].id;openInqModal(newInqs[0].id)
@@ -6357,7 +6519,7 @@ function closeModal(id){
     if(id==='modal-purchase'){delete window._pendingLinkedOrderId}
   }
   if(_isDirty){
-    confirmModal('有未儲存的變更，確定要離開嗎？',()=>{
+    confirmModal(t('confirm_unsaved'),()=>{
       closeNow()
     })
   }else{
@@ -6584,7 +6746,7 @@ async function saveInqToProduct(inqId){
     is_active:document.getElementById('atp-active')?.value==='true'
   }
   const{data:inserted,error}=await sb.from('products').insert(data).select().single()
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   await loadProducts()
   if(inserted?.id){
     await sb.from('inquiries').update({from_product_id:inserted.id}).eq('id',inqId)
@@ -6635,7 +6797,7 @@ function inqPriceChange(){
 async function saveInquiry(){
   if(!Object.keys(_pendingInq).length){showToast('沒有變更');return}
   const{error}=await sb.from('inquiries').update(_pendingInq).eq('id',selectedInqId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   logActivity('更新詢價資料','inquiry',selectedInqId,Object.keys(_pendingInq).join(', '))
   _pendingInq={}
   await loadInquiries();renderInquiries();renderInqModalBd();renderInqModalHd()
@@ -7412,7 +7574,7 @@ async function saveQuoteItem(){
   const pu='pricing_unit' in changes?changes.pricing_unit:it?.pricing_unit
   if(!pu){showToast('請選擇計價單位','error');return}
   const{error}=await sb.from('quote_items').update(changes).eq('id',_selectedQiId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   delete _qPendingItems[_selectedQiId]
   await loadQuotes()
   closeModal('modal-quote-item')
@@ -7437,7 +7599,7 @@ async function updateQuoteStatusDirect(status){
     await sb.from('quote_changes').insert({header_id:h.id,changed_by:currentUser?.name||currentUser?.email||'unknown',change_type:'edit',note:'手動退回草稿前快照',snapshot,changed_at:new Date().toISOString()})
   }
   const{error}=await sb.from('quote_headers').update({status}).eq('id',selectedQuoteId)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   h.status=status
   if(_qPendingHeader)_qPendingHeader.status=status
   logActivity('更新報價狀態','quote',String(selectedQuoteId),oldStatus+' → '+status)
@@ -7997,7 +8159,7 @@ async function qSaveAndStatus(status){
 async function saveQuote(){
   if(Object.keys(_qPendingHeader).length){
     const{error}=await sb.from('quote_headers').update(_qPendingHeader).eq('id',selectedQuoteId)
-    if(error){showToast('儲存失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_save')+error.message,'error');return}
   }
   const results=await Promise.all(Object.entries(_qPendingItems).map(([id,changes])=>sb.from('quote_items').update(changes).eq('id',id)))
   const fail=results.find(r=>r.error)
@@ -8431,7 +8593,7 @@ async function submitNewQuote(){
   const{error}=await sb.from('quote_headers').insert({
     id:hId,inquiry_id:null,customer,supplier,version:1,status:'draft',notes,source:'direct'
   })
-  if(error){showToast('建立失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_create')+error.message,'error');return}
   if(_nqItems.length){
     const itemsToInsert=_nqItems.map(it=>({
       header_id:hId,
@@ -8534,11 +8696,11 @@ async function saveInventoryAdjustments(){
   })
   if(!updates.length){showToast('沒有任何變更');return}
   const summary=updates.map(u=>(u.change>0?'+':'')+u.change.toFixed(0)+' '+u.p.product_name).join('、')
-  confirmModal('確認更新 '+updates.length+' 筆庫存？\n'+summary,async()=>{
+  confirmModal(t('confirm_update_inventory').replace('{n}',updates.length).replace('{summary}',summary),async()=>{
     const now=new Date().toISOString()
     for(const u of updates){
       const{error}=await sb.from('products').update({stock_qty:u.newQty}).eq('id',u.p.id)
-      if(error){showToast('更新失敗：'+error.message,'error');return}
+      if(error){showToast(t('err_update')+error.message,'error');return}
       const{error:logErr}=await sb.from('inventory_logs').insert({product_id:u.p.id,change_qty:u.change,qty_before:u.qtyBefore,qty_after:u.newQty,note:u.note,source:'manual',created_by:currentUser?.auth_id||null})
       if(logErr){showToast('異動記錄寫入失敗：'+logErr.message,'error');return}
     }
@@ -8798,7 +8960,7 @@ async function _finishSaveProduct(msg){
   closeModal('modal-product')
   closeModal('modal-cost-impact')
   populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
-  showToast(msg||'產品已更新')
+  showToast(msg||t('toast_product_updated'))
 }
 
 function _pdRenderColorChips(){
@@ -8859,7 +9021,7 @@ async function saveProduct(id){
   let error
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
   else{({error}=await sb.from('products').insert(data))}
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
 
   if(id&&existing&&existing.product_name!==name){
     const oldName=existing.product_name
@@ -8965,13 +9127,13 @@ async function deleteProduct(id,name){
       sb.from('samples').update({from_product_id:null}).eq('from_product_id',id)
     ])
     const{error}=await sb.from('products').delete().eq('id',id)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_del')+error.message,'error');return}
     logActivity('刪除產品','product',String(id),name)
     await loadProducts();closeModal('modal-product')
     populateProductSupplierFilter();renderProducts();updateProductOverdueAlert()
-    showToast('已刪除')
+    showToast(t('toast_deleted'))
   }
-  if(!refCount){confirmModal('確定要刪除「'+name+'」嗎？',doDelete);return}
+  if(!refCount){confirmModal(t('confirm_del_generic').replace('{name}',name),doDelete);return}
   // Custom overlay showing linked records
   document.getElementById('del-prod-overlay')?.remove()
   const ov=document.createElement('div')
@@ -9058,7 +9220,7 @@ async function executeMergeProducts(){
     const colorInput=document.querySelector('.merge-src-color[data-pid="'+pid+'"]')
     return{id:pid,color:(colorInput?.value||'').trim()}
   })
-  confirmModal('確定要合併 '+mergeItems.length+' 個產品到「'+targetProd.product_name+'」？被合併的產品將標記為停用。',async()=>{
+  confirmModal(t('confirm_merge_products').replace('{n}',mergeItems.length).replace('{target}',targetProd.product_name),async()=>{
     let newColors=[...(targetProd.color_variants||[])]
     for(const{id:oldId,color}of mergeItems){
       const colorUpdate=color?{spec:color}:{}
@@ -9111,7 +9273,7 @@ async function updateProductCostFromInquiry(inqId){
     currency:rawCur,
     last_reviewed_at:today
   }).eq('id',i.from_product_id).select()
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   if(!updated||!updated.length){showToast('找不到對應產品，請重新確認關聯','error');return}
   await loadProducts();renderProducts();updateProductOverdueAlert()
   showToast('產品目錄成本已更新')
@@ -9221,7 +9383,7 @@ async function createCustomer(){
     industry:document.getElementById('nc-industry').value.trim()||null,
     notes:document.getElementById('nc-notes').value.trim()||null,
     review_days:getCustomerReviewDays()})
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   logActivity('新增客戶','customer','','')
   await loadCustomers();hideNewCustomerForm();renderCustomers()
 }
@@ -9240,7 +9402,7 @@ async function submitCreateCustomerFromModal(prefix='cc',closeTarget='modal-cust
     payment_term:document.getElementById(prefix+'-payment-term')?.value||null,
     review_days:getCustomerReviewDays()
   }).select().single()
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   _isDirty=false
   await loadCustomers()
   closeModal(closeTarget)
@@ -9250,7 +9412,7 @@ async function submitCreateCustomerFromModal(prefix='cc',closeTarget='modal-cust
 }
 
 async function deleteCustomer(id,company){
-  confirmModal('確定要刪除「'+company+'」嗎？',async()=>{
+  confirmModal(t('confirm_del_generic').replace('{name}',company),async()=>{
     await sb.from('customers').delete().eq('id',id)
     await loadCustomers();renderCustomers()
   })
@@ -9367,7 +9529,7 @@ async function _quickCreateCustomer(){
     country:document.getElementById('qc-country')?.value||null,
     review_days:getCustomerReviewDays()
   }).select().single()
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   await loadCustomers()
   document.getElementById('quick-add-customer-overlay')?.remove()
   // 更新詢價 Modal 的客戶下拉並自動選到新客戶
@@ -9451,7 +9613,7 @@ async function createUser(){
   if(groupId)insertPayload.group_id=parseInt(groupId)
   if(linkedCo)insertPayload.linked_company=linkedCo
   const{error}=await sb.from('users').insert(insertPayload)
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   await loadUsers()
   closeModal('modal-new-user')
   renderUsersMgmt()
@@ -9551,7 +9713,7 @@ async function saveUserDetail(userId){
     patch.linked_company=linkedCo
   }
   const{error}=await sb.from('users').update(patch).eq('id',userId)
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   if(isSelf)persistCurrentUser({...currentUser,...patch})
   await loadUsers()
   if(isSelf&&currentUser){
@@ -9593,7 +9755,7 @@ async function submitChangePassword(){
   if(newPwd!==confirm){showToast('新密碼與確認密碼不一致','error');return}
   if(newPwd.length<4){showToast('密碼至少需要 4 個字元','error');return}
   const{error}=await sb.from('users').update({password_hash:newPwd}).eq('id',currentUser.id)
-  if(error){showToast('更新失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_update')+error.message,'error');return}
   persistCurrentUser({...currentUser,password_hash:newPwd})
   await loadUsers()
   closeModal('modal-change-pwd')
@@ -9629,25 +9791,25 @@ async function submitResetUserPassword(){
 }
 
 async function toggleUserActive(userId,currentActive){
-  const action=currentActive?'停用':'啟用'
-  confirmModal('確定要'+action+'此使用者嗎？',async()=>{
+  const action=currentActive?t('user_deactivate'):t('user_activate')
+  confirmModal(t('confirm_user_action').replace('{action}',action),async()=>{
     const{error}=await sb.from('users').update({is_active:!currentActive}).eq('id',userId)
-    if(error){showToast(action+'失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_update')+error.message,'error');return}
     await loadUsers()
     renderUsersMgmt()
     logActivity('變更使用者狀態','user',String(userId),action)
-    showToast('已'+action)
+    showToast(action)
   })
 }
 
 async function deleteUser(userId,userName){
-  confirmModal('確定要刪除使用者「'+userName+'」嗎？',async()=>{
+  confirmModal(t('confirm_del_user').replace('{name}',userName),async()=>{
     const{error}=await sb.from('users').delete().eq('id',userId)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_del')+error.message,'error');return}
     await loadUsers()
     renderUsersMgmt()
     logActivity('刪除使用者','user',String(userId),userName)
-    showToast('已刪除')
+    showToast(t('toast_deleted'))
   })
 }
 
@@ -9776,26 +9938,26 @@ async function saveGroup(){
   }else{
     ;({error}=await sb.from('user_groups').insert(payload))
   }
-  if(error){showToast('儲存失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_save')+error.message,'error');return}
   await loadUserGroups()
   closeModal('modal-group')
   renderUserGroups()
-  showToast(_editingGroupId?'群組已更新':'群組已建立')
+  showToast(t(_editingGroupId?'toast_group_updated':'toast_group_created'))
 }
 
 async function deleteGroup(groupId){
   const g=userGroups.find(x=>String(x.id)===String(groupId))
   const memberCount=users.filter(u=>String(u.group_id)===String(groupId)).length
-  const msg='確定要刪除群組「'+(g?.name||groupId)+'」嗎？'+(memberCount?'\n（'+memberCount+' 位成員將移除群組）':'')
+  const msg=t('confirm_del_group').replace('{name}',g?.name||groupId)+(memberCount?t('confirm_del_group_members').replace('{n}',memberCount):'')
   confirmModal(msg,async()=>{
     const{error}=await sb.from('user_groups').delete().eq('id',groupId)
-    if(error){showToast('刪除失敗：'+error.message,'error');return}
+    if(error){showToast(t('err_del')+error.message,'error');return}
     await loadUserGroups()
     await loadUsers()
     closeModal('modal-group')
     renderUserGroups()
     renderUsersMgmt()
-    showToast('群組已刪除')
+    showToast(t('toast_group_deleted'))
   })
 }
 
@@ -9901,7 +10063,7 @@ async function createSupplier(){
     whatsapp:document.getElementById('ns-whatsapp').value.trim()||null,
     specialty:document.getElementById('ns-specialty').value.trim()||null,
     salutation:document.getElementById('ns-salutation').value.trim()||null}).select().single()
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   logActivity('新增供應商','supplier','','')
   await loadSuppliers();hideNewSupplierForm();renderSupplierMgmt()
 }
@@ -9920,7 +10082,7 @@ async function submitCreateSupplierFromModal(prefix='cs',closeTarget='modal-supp
     specialty:document.getElementById(prefix+'-specialty')?.value.trim()||null,
     salutation:document.getElementById(prefix+'-salutation')?.value.trim()||null
   }).select().single()
-  if(error){showToast('新增失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_add')+error.message,'error');return}
   _isDirty=false
   await loadSuppliers()
   closeModal(closeTarget)
@@ -9930,7 +10092,7 @@ async function submitCreateSupplierFromModal(prefix='cs',closeTarget='modal-supp
 }
 
 async function deleteSupplier(id,name){
-  confirmModal('確定要刪除「'+name+'」嗎？',async()=>{
+  confirmModal(t('confirm_del_generic').replace('{name}',name),async()=>{
     await sb.from('suppliers').delete().eq('id',id)
     await loadSuppliers();renderSupplierMgmt()
   })
