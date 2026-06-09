@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.20</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.21</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -2002,6 +2002,11 @@ const SESSION_ACTIVE_TAB_KEY='activeTab'
 const CURRENCY_OPTIONS=['USD','THB','TWD','CNY','EUR','JPY']
 const TRANSPORT_OPTIONS=['海運','空運','陸運','快遞']
 const PAYMENT_TERM_OPTIONS=['現金','預付','Net 7','Net 15','Net 30','Net 45','Net 60','Net 90','月結30天','月結60天']
+const PRINTING_VARIANT_TRANS={
+  '直線':{en:'Straight',th:'เส้นตรง'},
+  '方格':{en:'Grid',th:'ตาราง'},
+}
+function tPrintingVariant(v){return(_lang!=='zh'&&PRINTING_VARIANT_TRANS[v]?.[_lang])||v}
 const COUNTRY_OPTION_PAIRS=[
   ['TH','泰國 TH'],
   ['TW','台灣 TW'],
@@ -6109,7 +6114,7 @@ function _pshopShowAddOptions(productId){
       '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">'+t('pshop_printing_section')+'</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:6px" id="pshop-opt-printings">'+
       '<button type="button" onclick="pshopOptSelectPrinting(null,this)" style="padding:5px 14px;border-radius:20px;border:2px solid #7B5EA7;background:#F3EEF9;font-size:12px;cursor:pointer;color:#7B5EA7" id="pshop-print-none-btn">'+t('pshop_no_printing')+'</button>'+
-      p.printing_variants.map(c=>'<button type="button" onclick="pshopOptSelectPrinting(\''+c.replace(/'/g,"\\'")+'\',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e5e0;background:#fff;font-size:12px;cursor:pointer;color:#333">'+esc(c)+'</button>').join('')+
+      p.printing_variants.map(c=>'<button type="button" onclick="pshopOptSelectPrinting(\''+c.replace(/'/g,"\\'")+'\',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e5e0;background:#fff;font-size:12px;cursor:pointer;color:#333">'+esc(tPrintingVariant(c))+'</button>').join('')+
       '</div></div>':'')+
     '<div style="display:flex;gap:8px">'+
     '<button class="btn btn-primary btn-sm" onclick="_pshopConfirmAdd('+productId+')">'+t('pshop_add_to_cart')+'</button>'+
@@ -6187,7 +6192,7 @@ function renderPshopCartRowsInto(el){
     '<div style="flex:1;min-width:0">'+
     '<div style="font-size:12px;font-weight:500;word-break:break-all">'+esc(c.product_name)+'</div>'+
     (c.spec?'<div style="font-size:10px;color:#0F6E56;font-weight:500">'+esc(c.spec)+'</div>':'')+
-    (c.printing?'<div style="font-size:10px;color:#7B5EA7;font-weight:500">'+t('lbl_printing_prefix')+esc(c.printing)+'</div>':'')+
+    (c.printing?'<div style="font-size:10px;color:#7B5EA7;font-weight:500">'+t('lbl_printing_prefix')+esc(tPrintingVariant(c.printing))+'</div>':'')+
     (c.ref_order_id?'<div style="font-size:10px;color:#aaa">'+t('pshop_from_order')+esc(c.ref_order_id)+'</div>':'')+
     '<div style="font-size:11px;color:#555">'+c.qty+' m'+(c.rolls_qty?' <span style="color:#888">'+t('pshop_rolls_inline').replace('{n}',parseFloat(c.rolls_qty).toFixed(1))+'</span>':'')+
     t('pshop_unit_price')+fmtP(c.unit_price||0)+' '+(c.currency||'')+'</div>'+
@@ -8897,7 +8902,7 @@ function renderProducts(){
             (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
             '</div>':'')+
           '<div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
-          (p.printing_variants?.length?'<div style="font-size:10px;color:#7B5EA7;margin-top:1px">'+t('lbl_printing_prefix')+p.printing_variants.map(esc).join('・')+'</div>':'')+
+          (p.printing_variants?.length?'<div style="font-size:10px;color:#7B5EA7;margin-top:1px">'+t('lbl_printing_prefix')+p.printing_variants.map(v=>esc(tPrintingVariant(v))).join('・')+'</div>':'')+
         '</div>'+
         '<div style="flex-shrink:0;text-align:right;font-size:11px;color:#888;padding-left:12px;min-width:0;max-width:45%">'+
           '<div style="color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(sup?esc(sup.company):'—')+'</div>'+
