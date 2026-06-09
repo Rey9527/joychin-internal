@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.19</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.20</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1170,9 +1170,25 @@ const I18N={
     settings_admin:'僅管理者可調整全域規則',
     pshop_import_order:'從訂單帶入品項',pshop_expand:'展開 ▾',
     pshop_cart:'採購車',pshop_checkout_btn:'前往結算',
+    pshop_qty_placeholder:'數量（米）',pshop_qty_short:'數量',
+    pshop_rolls_hint:'約 {n} 卷',pshop_rolls_inline:'（約 {n} 卷）',
+    pshop_in_cart:'✓ 已加入',pshop_buy:'採購',
+    pshop_no_products:'此供應商沒有產品目錄',
+    pshop_layout_grid:'▦ 方格',pshop_layout_list:'☰ 列表',
+    pshop_purchased_badge:'已採購',pshop_has_po:'已有採購單',
+    pshop_no_orders:'此供應商沒有可帶入的訂單品項',
+    pshop_collapse:'收起 ▴',pshop_expand:'展開 ▾',
+    pshop_options_title:'採購選項',pshop_color_section:'顏色 / 規格',
+    pshop_printing_section:'印刷方式',pshop_no_printing:'無',
+    pshop_add_to_cart:'加入推車',
+    val_select_color:'請選擇顏色',val_select_printing:'請選擇印刷方式',
+    pshop_total_prefix:'總計 ',pshop_cart_empty:'尚未選購任何產品',
+    pshop_from_order:'來自 ',pshop_unit_price:' · 單價 ',pshop_selected_count:'已選 {n} 項',
     pshop_confirm_title:'確認採購',pshop_acct_no:'會計編號（選填）',
     pshop_delivery:'預計交貨日',pshop_currency:'幣別',pshop_notes:'備註',
     pshop_cancel_btn:'取消',pshop_confirm_btn:'確認建立採購單',
+    pshop_err_cart_empty:'採購車為空',pshop_err_no_supplier:'請先選擇供應商',pshop_err_supplier_nf:'找不到供應商',
+    pshop_order_ref:'（訂單 {n}）',toast_po_created:'採購單 {id} 已建立',
     docs_search:'搜尋產品、文件類型、標籤...',
     docs_info:'業務助理可直接搜尋並複製連結給客戶',docs_upload:'+ 上傳新文件',
     not_logged_in:'未登入',
@@ -1431,9 +1447,25 @@ const I18N={
     settings_admin:'Admin only — global rules',
     pshop_import_order:'Import from Order',pshop_expand:'Expand ▾',
     pshop_cart:'Cart',pshop_checkout_btn:'Checkout',
+    pshop_qty_placeholder:'Qty (m)',pshop_qty_short:'Qty',
+    pshop_rolls_hint:'~{n} rolls',pshop_rolls_inline:'(~{n} rolls)',
+    pshop_in_cart:'✓ Added',pshop_buy:'Add',
+    pshop_no_products:'No products from this supplier',
+    pshop_layout_grid:'▦ Grid',pshop_layout_list:'☰ List',
+    pshop_purchased_badge:'Purchased',pshop_has_po:'PO exists',
+    pshop_no_orders:'No order items from this supplier',
+    pshop_collapse:'Collapse ▴',pshop_expand:'Expand ▾',
+    pshop_options_title:'Purchase Options',pshop_color_section:'Color / Spec',
+    pshop_printing_section:'Printing',pshop_no_printing:'None',
+    pshop_add_to_cart:'Add to Cart',
+    val_select_color:'Please select a color',val_select_printing:'Please select a printing style',
+    pshop_total_prefix:'Total: ',pshop_cart_empty:'No items in cart',
+    pshop_from_order:'From: ',pshop_unit_price:' · Unit: ',pshop_selected_count:'{n} selected',
     pshop_confirm_title:'Confirm Purchase Order',pshop_acct_no:'Acct No. (optional)',
     pshop_delivery:'Est. Delivery Date',pshop_currency:'Currency',pshop_notes:'Notes',
     pshop_cancel_btn:'Cancel',pshop_confirm_btn:'Confirm PO',
+    pshop_err_cart_empty:'Cart is empty',pshop_err_no_supplier:'Please select a supplier first',pshop_err_supplier_nf:'Supplier not found',
+    pshop_order_ref:'(Order {n})',toast_po_created:'PO {id} created',
     docs_search:'Search product, doc type, tag...',
     cp_select:'— Select Customer —',cp_empty:'Select a customer to view data',cp_no_inq:'No inquiries for this customer',cp_no_order:'No orders for this customer',cp_sec_inq:'Inquiries',cp_sec_order:'Orders',cp_sample_shipped:'Sample shipped',cp_sample_not_shipped:'Not yet shipped',cp_no_ship:'No shipment',
     sp_select:'— Select Supplier —',sp_empty:'Select a supplier to view data',sp_no_inq:'No inquiries for this supplier',sp_no_po:'No purchase orders for this supplier',sp_no_sh:'No shipment records for this supplier',sp_no_ship_linked:'No shipment scheduled',sp_tab_inq:'Inquiries',sp_tab_po:'Purchase Orders',sp_tab_sh:'Shipments',
@@ -1692,9 +1724,25 @@ const I18N={
     settings_admin:'ผู้ดูแลระบบเท่านั้น',
     pshop_import_order:'นำเข้าจากคำสั่งซื้อ',pshop_expand:'ขยาย ▾',
     pshop_cart:'ตะกร้า',pshop_checkout_btn:'ชำระเงิน',
+    pshop_qty_placeholder:'จำนวน (ม.)',pshop_qty_short:'จำนวน',
+    pshop_rolls_hint:'~{n} ม้วน',pshop_rolls_inline:'(~{n} ม้วน)',
+    pshop_in_cart:'✓ เพิ่มแล้ว',pshop_buy:'ซื้อ',
+    pshop_no_products:'ซัพพลายเออร์นี้ไม่มีสินค้า',
+    pshop_layout_grid:'▦ ตาราง',pshop_layout_list:'☰ รายการ',
+    pshop_purchased_badge:'สั่งซื้อแล้ว',pshop_has_po:'มีใบสั่งซื้อแล้ว',
+    pshop_no_orders:'ไม่มีรายการสินค้าจากซัพพลายเออร์นี้',
+    pshop_collapse:'ย่อ ▴',pshop_expand:'ขยาย ▾',
+    pshop_options_title:'ตัวเลือกการซื้อ',pshop_color_section:'สี / สเปค',
+    pshop_printing_section:'การพิมพ์',pshop_no_printing:'ไม่มี',
+    pshop_add_to_cart:'ใส่ตะกร้า',
+    val_select_color:'กรุณาเลือกสี',val_select_printing:'กรุณาเลือกรูปแบบการพิมพ์',
+    pshop_total_prefix:'รวม: ',pshop_cart_empty:'ยังไม่มีสินค้าในตะกร้า',
+    pshop_from_order:'จาก: ',pshop_unit_price:' · ราคา: ',pshop_selected_count:'เลือก {n} รายการ',
     pshop_confirm_title:'ยืนยันใบสั่งซื้อ',pshop_acct_no:'เลขบัญชี (ไม่บังคับ)',
     pshop_delivery:'วันส่งมอบโดยประมาณ',pshop_currency:'สกุลเงิน',pshop_notes:'หมายเหตุ',
     pshop_cancel_btn:'ยกเลิก',pshop_confirm_btn:'สร้างใบสั่งซื้อ',
+    pshop_err_cart_empty:'ตะกร้าว่างเปล่า',pshop_err_no_supplier:'กรุณาเลือกซัพพลายเออร์ก่อน',pshop_err_supplier_nf:'ไม่พบซัพพลายเออร์',
+    pshop_order_ref:'(คำสั่งซื้อ {n})',toast_po_created:'สร้างใบสั่งซื้อ {id} แล้ว',
     docs_search:'ค้นหาสินค้า, ประเภทเอกสาร, แท็ก...',
     cp_select:'— เลือกลูกค้า —',cp_empty:'เลือกลูกค้าเพื่อดูข้อมูล',cp_no_inq:'ลูกค้านี้ยังไม่มีการสอบถาม',cp_no_order:'ลูกค้านี้ยังไม่มีคำสั่งซื้อ',cp_sec_inq:'การสอบถาม',cp_sec_order:'คำสั่งซื้อ',cp_sample_shipped:'ส่งตัวอย่างแล้ว',cp_sample_not_shipped:'ยังไม่ได้ส่ง',cp_no_ship:'ยังไม่มีการขนส่ง',
     sp_select:'— เลือกซัพพลายเออร์ —',sp_empty:'เลือกซัพพลายเออร์เพื่อดูข้อมูล',sp_no_inq:'ซัพพลายเออร์นี้ยังไม่มีการสอบถาม',sp_no_po:'ซัพพลายเออร์นี้ยังไม่มีใบสั่งซื้อ',sp_no_sh:'ซัพพลายเออร์นี้ยังไม่มีบันทึกการขนส่ง',sp_no_ship_linked:'ยังไม่ได้จัดการขนส่ง',sp_tab_inq:'การสอบถาม',sp_tab_po:'ใบสั่งซื้อ',sp_tab_sh:'การขนส่ง',
@@ -5491,7 +5539,7 @@ async function submitCreatePurchaseFromOrder(){
   closeModal('modal-subform')
   await loadPurchaseOrders()
   _renderOrderModal()
-  showToast('採購單 '+id+' 已建立')
+  showToast(t('toast_po_created').replace('{id}',id))
 }
 
 async function savePurchaseOrder(){
@@ -5912,19 +5960,19 @@ function renderPshopProductArea(){
         '</div>'+
         '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'+
         '<div style="display:flex;align-items:center;gap:4px">'+
-        '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量（米）" style="width:70px" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
+        '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="'+t('pshop_qty_placeholder')+'" style="width:70px" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
         '<span style="font-size:11px;color:#666;white-space:nowrap">m</span>'+
         '</div>'+
         (p.meters_per_roll?'<div id="pshop-rolls-hint-'+p.id+'" style="font-size:10px;color:#888">'+
-        (cartItem?'約 '+(Math.round(cartItem.qty/p.meters_per_roll*10)/10).toFixed(1)+' 卷':'')+'</div>':'')+
-        '<button class="btn btn-primary btn-sm" style="width:100%" onclick="pshopAddToCart('+p.id+')">'+(inCart?'✓ 已加入':'<i data-lucide="shopping-cart" style="width:12px;height:12px;margin-right:3px;vertical-align:-1px"></i>採購')+'</button>'+
+        (cartItem?t('pshop_rolls_hint').replace('{n}',(Math.round(cartItem.qty/p.meters_per_roll*10)/10).toFixed(1)):'')+'</div>':'')+
+        '<button class="btn btn-primary btn-sm" style="width:100%" onclick="pshopAddToCart('+p.id+')">'+(inCart?t('pshop_in_cart'):'<i data-lucide="shopping-cart" style="width:12px;height:12px;margin-right:3px;vertical-align:-1px"></i>'+t('pshop_buy'))+'</button>'+
         '</div>'+
         '</div>'
-    }).join('')||'<div style="color:#aaa;font-size:13px;padding:20px 0">此供應商沒有產品目錄</div>'
+    }).join('')||'<div style="color:#aaa;font-size:13px;padding:20px 0">'+t('pshop_no_products')+'</div>'
   } else {
     const toggleBar='<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:4px">'+
-      '<button onclick="pshopSetLayout(\'grid\')" style="padding:4px 10px;border:1px solid #ddd;border-radius:6px;background:'+(_pshopLayout==='grid'?'#0F6E56':'#fff')+';color:'+(_pshopLayout==='grid'?'#fff':'#555')+';cursor:pointer;font-size:12px">▦ 方格</button>'+
-      '<button onclick="pshopSetLayout(\'list\')" style="padding:4px 10px;border:1px solid #ddd;border-radius:6px;background:'+(_pshopLayout==='list'?'#0F6E56':'#fff')+';color:'+(_pshopLayout==='list'?'#fff':'#555')+';cursor:pointer;font-size:12px">☰ 列表</button>'+
+      '<button onclick="pshopSetLayout(\'grid\')" style="padding:4px 10px;border:1px solid #ddd;border-radius:6px;background:'+(_pshopLayout==='grid'?'#0F6E56':'#fff')+';color:'+(_pshopLayout==='grid'?'#fff':'#555')+';cursor:pointer;font-size:12px">'+t('pshop_layout_grid')+'</button>'+
+      '<button onclick="pshopSetLayout(\'list\')" style="padding:4px 10px;border:1px solid #ddd;border-radius:6px;background:'+(_pshopLayout==='list'?'#0F6E56':'#fff')+';color:'+(_pshopLayout==='list'?'#fff':'#555')+';cursor:pointer;font-size:12px">'+t('pshop_layout_list')+'</button>'+
       '</div>'
     if(_pshopLayout==='list'){
       el.style.cssText=''
@@ -5939,13 +5987,13 @@ function renderPshopProductArea(){
           (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:11px;color:#0F6E56;font-weight:500">'+fmtP(p.cost_price)+' '+(p.currency||'')+'</div>':'')+
           '</div>'+
           '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'+
-          '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量" style="width:72px" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
+          '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="'+t('pshop_qty_short')+'" style="width:72px" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
           '<span style="font-size:12px;color:#666">m</span>'+
-          (p.meters_per_roll?'<span id="pshop-rolls-hint-'+p.id+'" style="font-size:11px;color:#888;min-width:44px">'+(cartItem?'約 '+(Math.round(cartItem.qty/p.meters_per_roll*10)/10).toFixed(1)+' 卷':'')+'</span>':'')+
-          '<button class="btn btn-primary btn-sm" style="height:32px" onclick="pshopAddToCart('+p.id+')">'+(inCart?'✓ 已加入':'<i data-lucide="shopping-cart" style="width:12px;height:12px;margin-right:3px;vertical-align:-1px"></i>採購')+'</button>'+
+          (p.meters_per_roll?'<span id="pshop-rolls-hint-'+p.id+'" style="font-size:11px;color:#888;min-width:44px">'+(cartItem?t('pshop_rolls_hint').replace('{n}',(Math.round(cartItem.qty/p.meters_per_roll*10)/10).toFixed(1)):'')+'</span>':'')+
+          '<button class="btn btn-primary btn-sm" style="height:32px" onclick="pshopAddToCart('+p.id+')">'+(inCart?t('pshop_in_cart'):'<i data-lucide="shopping-cart" style="width:12px;height:12px;margin-right:3px;vertical-align:-1px"></i>'+t('pshop_buy'))+'</button>'+
           '</div>'+
           '</div>'
-      }).join('')+(list.length?'':'<div style="color:#aaa;font-size:13px;padding:20px 0">此供應商沒有產品目錄</div>')+'</div>'
+      }).join('')+(list.length?'':'<div style="color:#aaa;font-size:13px;padding:20px 0">'+t('pshop_no_products')+'</div>')+'</div>'
     } else {
       el.style.cssText=''
       el.innerHTML=toggleBar+'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">'+list.map(p=>{
@@ -5958,16 +6006,16 @@ function renderPshopProductArea(){
           (hasPermission('view_cost')&&p.cost_price?'<div style="font-size:12px;color:#0F6E56;font-weight:500">'+fmtP(p.cost_price)+' '+(p.currency||'')+'</div>':'')+
           '<div style="margin-top:auto">'+
           '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'+
-          '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="數量（米）" style="flex:1;min-width:0" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
+          '<input type="number" id="pshop-qty-'+p.id+'" min="1" value="'+(cartItem?cartItem.qty:1)+'" placeholder="'+t('pshop_qty_placeholder')+'" style="flex:1;min-width:0" oninput="pshopUpdateRollsHint('+p.id+','+( p.meters_per_roll||'null')+')" />'+
           '<span style="font-size:12px;color:#666;white-space:nowrap;flex-shrink:0">m</span>'+
           '</div>'+
           '<div id="pshop-rolls-hint-'+p.id+'" style="font-size:11px;color:#888;min-height:16px;margin-bottom:4px">'+
-          (p.meters_per_roll&&cartItem?'約 '+(Math.round(cartItem.qty/p.meters_per_roll*10)/10).toFixed(1)+' 卷':'')+
+          (p.meters_per_roll&&cartItem?t('pshop_rolls_hint').replace('{n}',(Math.round(cartItem.qty/p.meters_per_roll*10)/10).toFixed(1)):'')+
           '</div>'+
-          '<button class="btn btn-primary btn-sm" style="width:100%" onclick="pshopAddToCart('+p.id+')">'+(inCart?'✓ 已加入':'<i data-lucide="shopping-cart" style="width:12px;height:12px;margin-right:3px;vertical-align:-1px"></i>採購')+'</button>'+
+          '<button class="btn btn-primary btn-sm" style="width:100%" onclick="pshopAddToCart('+p.id+')">'+(inCart?t('pshop_in_cart'):'<i data-lucide="shopping-cart" style="width:12px;height:12px;margin-right:3px;vertical-align:-1px"></i>'+t('pshop_buy'))+'</button>'+
           '</div>'+
           '</div>'
-      }).join('')+(list.length?'':'<div style="color:#aaa;font-size:13px;padding:20px 0;grid-column:1/-1">此供應商沒有產品目錄</div>')+'</div>'
+      }).join('')+(list.length?'':'<div style="color:#aaa;font-size:13px;padding:20px 0;grid-column:1/-1">'+t('pshop_no_products')+'</div>')+'</div>'
     }
   }
   if(typeof lucide!=='undefined')lucide.createIcons()
@@ -5979,16 +6027,16 @@ function renderPshopOrderSection(){
   const supIds=pshopGetActiveSupplierIds()
   const eligible=orders.filter(o=>o.status!=='cancelled'&&(o.approval_status||'none')!=='rejected')
   const withItems=eligible.filter(o=>supIds.includes(o.supplier_id)&&orderItems.some(i=>i.order_id===o.id))
-  if(!withItems.length){el.innerHTML='<div style="color:#aaa;font-size:12px">此供應商沒有可帶入的訂單品項</div>';return}
+  if(!withItems.length){el.innerHTML='<div style="color:#aaa;font-size:12px">'+t('pshop_no_orders')+'</div>';return}
   const purchasedOrderIds=new Set(purchaseOrderItems.map(i=>String(i.ref_order_id)).filter(Boolean))
   el.innerHTML=withItems.map(o=>{
     const items=orderItems.filter(i=>i.order_id===o.id)
     const custName=o.customer_name||o.customer_id||'—'
     const alreadyPurchased=purchasedOrderIds.has(String(o.id))
-    const badge=alreadyPurchased?'<span style="font-size:10px;color:#999;background:#f0f0ec;border:1px solid #ddd;border-radius:3px;padding:1px 6px;margin-left:6px">已採購</span>':''
+    const badge=alreadyPurchased?'<span style="font-size:10px;color:#999;background:#f0f0ec;border:1px solid #ddd;border-radius:3px;padding:1px 6px;margin-left:6px">'+t('pshop_purchased_badge')+'</span>':''
     const btn=alreadyPurchased
-      ?'<button class="btn btn-sm" style="margin-top:8px;color:#aaa;border-color:#ddd;cursor:not-allowed" disabled>已有採購單</button>'
-      :'<button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="pshopAddFromOrder(\''+o.id+'\')">Add to Cart</button>'
+      ?'<button class="btn btn-sm" style="margin-top:8px;color:#aaa;border-color:#ddd;cursor:not-allowed" disabled>'+t('pshop_has_po')+'</button>'
+      :'<button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="pshopAddFromOrder(\''+o.id+'\')">'+t('pshop_add_to_cart')+'</button>'
     return '<div style="border:1px solid #e5e5e0;border-radius:4px;margin-bottom:8px;overflow:hidden">'+
       '<div style="background:#f9f9f7;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">'+
       '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px"><span style="font-size:12px;font-weight:600">'+esc(o.id)+'</span><span style="font-size:11px;color:#888">— '+esc(custName)+'</span>'+badge+'</div>'+
@@ -6006,7 +6054,7 @@ function togglePshopOrderSection(){
   const body=document.getElementById('pshop-order-body')
   const icon=document.getElementById('pshop-order-toggle-icon')
   if(body)body.style.display=_pshopOrderSectionOpen?'block':'none'
-  if(icon)icon.textContent=_pshopOrderSectionOpen?'收起 ▴':'展開 ▾'
+  if(icon)icon.textContent=_pshopOrderSectionOpen?t('pshop_collapse'):t('pshop_expand')
 }
 
 function pshopSetLayout(layout){
@@ -6020,7 +6068,7 @@ function pshopUpdateRollsHint(productId, metersPerRoll){
   if(!hintEl)return
   if(!metersPerRoll){hintEl.textContent='';return}
   const qty=parseFloat(qtyEl?.value)||0
-  hintEl.textContent=qty>0?'約 '+(Math.round(qty/metersPerRoll*10)/10).toFixed(1)+' 卷':''
+  hintEl.textContent=qty>0?t('pshop_rolls_hint').replace('{n}',(Math.round(qty/metersPerRoll*10)/10).toFixed(1)):''
 }
 
 function pshopAddToCart(productId,spec,printing){
@@ -6044,7 +6092,7 @@ function _pshopShowAddOptions(productId){
   const hasColors=p.color_variants?.length
   const colorSection=hasColors?
     '<div style="margin-bottom:16px">'+
-    '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">顏色 / 規格 <span style="color:#e55;font-size:10px">*</span></div>'+
+    '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">'+t('pshop_color_section')+' <span style="color:#e55;font-size:10px">*</span></div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:6px" id="pshop-opt-colors">'+
     p.color_variants.map(c=>'<button type="button" onclick="pshopOptSelectColor(\''+c.replace(/'/g,"\\'")+'\',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e5e0;background:#fff;font-size:12px;cursor:pointer;color:#333">'+esc(c)+'</button>').join('')+
     '</div></div>':''
@@ -6054,18 +6102,18 @@ function _pshopShowAddOptions(productId){
   ov.innerHTML=
     '<div style="background:#fff;border-radius:8px;padding:20px;max-width:360px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
     '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(p.product_name)+'</div>'+
-    '<div style="font-size:11px;color:#888;margin-bottom:16px">採購選項</div>'+
+    '<div style="font-size:11px;color:#888;margin-bottom:16px">'+t('pshop_options_title')+'</div>'+
     colorSection+
     (p.printing_variants?.length?
       '<div style="margin-bottom:16px">'+
-      '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">印刷方式</div>'+
+      '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">'+t('pshop_printing_section')+'</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:6px" id="pshop-opt-printings">'+
-      '<button type="button" onclick="pshopOptSelectPrinting(null,this)" style="padding:5px 14px;border-radius:20px;border:2px solid #7B5EA7;background:#F3EEF9;font-size:12px;cursor:pointer;color:#7B5EA7" id="pshop-print-none-btn">無</button>'+
+      '<button type="button" onclick="pshopOptSelectPrinting(null,this)" style="padding:5px 14px;border-radius:20px;border:2px solid #7B5EA7;background:#F3EEF9;font-size:12px;cursor:pointer;color:#7B5EA7" id="pshop-print-none-btn">'+t('pshop_no_printing')+'</button>'+
       p.printing_variants.map(c=>'<button type="button" onclick="pshopOptSelectPrinting(\''+c.replace(/'/g,"\\'")+'\',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e5e0;background:#fff;font-size:12px;cursor:pointer;color:#333">'+esc(c)+'</button>').join('')+
       '</div></div>':'')+
     '<div style="display:flex;gap:8px">'+
-    '<button class="btn btn-primary btn-sm" onclick="_pshopConfirmAdd('+productId+')">加入推車</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pshop-options-overlay\').remove()">取消</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="_pshopConfirmAdd('+productId+')">'+t('pshop_add_to_cart')+'</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pshop-options-overlay\').remove()">'+t('btn_cancel')+'</button>'+
     '</div></div>'
   document.body.appendChild(ov)
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()})
@@ -6084,8 +6132,8 @@ function pshopOptSelectPrinting(val,btn){
 }
 function _pshopConfirmAdd(productId){
   const p=products.find(x=>x.id===productId);if(!p)return
-  if(p.color_variants?.length&&!_pshopOptSelectedColor){showToast('請選擇顏色','warn');return}
-  if(p.printing_variants?.length&&_pshopOptSelectedPrinting===null){showToast('請選擇印刷方式','warn');return}
+  if(p.color_variants?.length&&!_pshopOptSelectedColor){showToast(t('val_select_color'),'warn');return}
+  if(p.printing_variants?.length&&_pshopOptSelectedPrinting===null){showToast(t('val_select_printing'),'warn');return}
   pshopAddToCart(productId,_pshopOptSelectedColor||null,_pshopOptSelectedPrinting??null)
 }
 
@@ -6129,20 +6177,20 @@ function pshopCartTotalStr(){
   if(!_pshopCart.length)return''
   const total=_pshopCart.reduce((s,c)=>s+pshopItemAmt(c),0)
   const currency=_pshopCart[0]?.currency||'USD'
-  return'總計 '+total.toFixed(2)+' '+currency
+  return t('pshop_total_prefix')+total.toFixed(2)+' '+currency
 }
 
 function renderPshopCartRowsInto(el){
-  if(!_pshopCart.length){el.innerHTML='<div style="color:#aaa;font-size:12px;text-align:center;padding:16px">尚未選購任何產品</div>';return}
+  if(!_pshopCart.length){el.innerHTML='<div style="color:#aaa;font-size:12px;text-align:center;padding:16px">'+t('pshop_cart_empty')+'</div>';return}
   el.innerHTML=_pshopCart.map((c,i)=>
     '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0eb">'+
     '<div style="flex:1;min-width:0">'+
     '<div style="font-size:12px;font-weight:500;word-break:break-all">'+esc(c.product_name)+'</div>'+
     (c.spec?'<div style="font-size:10px;color:#0F6E56;font-weight:500">'+esc(c.spec)+'</div>':'')+
     (c.printing?'<div style="font-size:10px;color:#7B5EA7;font-weight:500">'+t('lbl_printing_prefix')+esc(c.printing)+'</div>':'')+
-    (c.ref_order_id?'<div style="font-size:10px;color:#aaa">來自 '+esc(c.ref_order_id)+'</div>':'')+
-    '<div style="font-size:11px;color:#555">'+c.qty+' m'+(c.rolls_qty?' <span style="color:#888">（約 '+parseFloat(c.rolls_qty).toFixed(1)+' 卷）</span>':'')+
-    ' · 單價 '+fmtP(c.unit_price||0)+' '+(c.currency||'')+'</div>'+
+    (c.ref_order_id?'<div style="font-size:10px;color:#aaa">'+t('pshop_from_order')+esc(c.ref_order_id)+'</div>':'')+
+    '<div style="font-size:11px;color:#555">'+c.qty+' m'+(c.rolls_qty?' <span style="color:#888">'+t('pshop_rolls_inline').replace('{n}',parseFloat(c.rolls_qty).toFixed(1))+'</span>':'')+
+    t('pshop_unit_price')+fmtP(c.unit_price||0)+' '+(c.currency||'')+'</div>'+
     '</div>'+
     '<div style="font-size:11px;color:#0F6E56;font-weight:600;white-space:nowrap;padding-top:2px">'+pshopItemAmt(c).toFixed(2)+(c.pricing_unit==='m2'&&c.width_m?'<div style="font-size:10px;color:#aaa;font-weight:400">×'+(c.width_m*1000).toFixed(0)+'mm</div>':'')+'</div>'+
     '<button onclick="pshopRemoveFromCart('+i+')" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:0 2px;line-height:1">✕</button>'+
@@ -6173,7 +6221,7 @@ function pshopSyncResponsive(){
   } else {
     if(mobileBtn)mobileBtn.style.display='none'
     if(desktopCart)desktopCart.style.display='block'
-    if(topSummary)topSummary.textContent=_pshopCart.length?'已選 '+_pshopCart.length+' 項':''
+    if(topSummary)topSummary.textContent=_pshopCart.length?t('pshop_selected_count').replace('{n}',_pshopCart.length):''
   }
 }
 
@@ -6193,18 +6241,18 @@ function closeMobileCart(){
 }
 
 function openPshopCheckout(){
-  if(!_pshopCart.length){showToast('採購車為空','error');return}
+  if(!_pshopCart.length){showToast(t('pshop_err_cart_empty'),'error');return}
   // render summary
   const el=document.getElementById('pshop-checkout-summary')
   if(el){
     const total=_pshopCart.reduce((s,c)=>s+pshopItemAmt(c),0)
     const currency=_pshopCart[0]?.currency||'USD'
-    el.innerHTML='<div style="margin-bottom:6px"><span style="color:#888">供應商：</span><strong>'+esc(_pshopActiveCompany||'')+'</strong></div>'+
+    el.innerHTML='<div style="margin-bottom:6px"><span style="color:#888">'+t('lbl_supplier')+'：</span><strong>'+esc(_pshopActiveCompany||'')+'</strong></div>'+
       _pshopCart.map(c=>{const wm=parseFloat(c.width_m||0);const wmNote=c.pricing_unit==='m2'&&wm>0?' <span style="color:#aaa;font-size:10px">×'+Math.round(wm*1000)+'mm</span>':'';return '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #f0f0eb">'+
-        '<span>'+esc(c.product_name)+wmNote+(c.ref_order_id?' <span style="color:#aaa;font-size:10px">（訂單 '+esc(c.ref_order_id)+'）</span>':'')+' × '+c.qty+(c.unit?' '+c.unit:'')+'</span>'+
+        '<span>'+esc(c.product_name)+wmNote+(c.ref_order_id?' <span style="color:#aaa;font-size:10px">'+t('pshop_order_ref').replace('{n}',esc(c.ref_order_id))+'</span>':'')+' × '+c.qty+(c.unit?' '+c.unit:'')+'</span>'+
         '<span style="color:#0F6E56">'+pshopItemAmt(c).toFixed(2)+'</span>'+
       '</div>'}).join('')+
-      '<div style="text-align:right;margin-top:6px;font-weight:600">總計 '+total.toFixed(2)+' '+currency+'</div>'
+      '<div style="text-align:right;margin-top:6px;font-weight:600">'+t('pshop_total_prefix')+total.toFixed(2)+' '+currency+'</div>'
     const currSel=document.getElementById('pshop-currency')
     if(currSel){currSel.innerHTML=buildOptions(CURRENCY_OPTIONS,currency)}
   }
@@ -6216,10 +6264,10 @@ function openPshopCheckout(){
 }
 
 async function confirmShopOrder(){
-  if(!_pshopActiveCompany){showToast('請先選擇供應商','error');return}
-  if(!_pshopCart.length){showToast('採購車為空','error');return}
+  if(!_pshopActiveCompany){showToast(t('pshop_err_no_supplier'),'error');return}
+  if(!_pshopCart.length){showToast(t('pshop_err_cart_empty'),'error');return}
   const supEntry=suppliers.find(s=>s.company===_pshopActiveCompany)
-  if(!supEntry){showToast('找不到供應商','error');return}
+  if(!supEntry){showToast(t('pshop_err_supplier_nf'),'error');return}
   const supplierId=supEntry.id
   const id=generatePurchaseId()
   const currency=document.getElementById('pshop-currency')?.value||'USD'
@@ -6248,12 +6296,12 @@ async function confirmShopOrder(){
       pricing_unit:item.pricing_unit||null,
       amount:pshopItemAmt(item)
     })
-    if(ie){showToast('品項新增失敗：'+ie.message,'error');return}
+    if(ie){showToast(t('err_add')+ie.message,'error');return}
   }
   _pshopCart=[]
   _pshopActiveCompany=null
   closeModal('modal-pshop-checkout')
-  showToast('採購單 '+id+' 已建立')
+  showToast(t('toast_po_created').replace('{id}',id))
   await loadPurchaseOrders()
   switchTab('purchases')
   renderPurchaseOrders()
