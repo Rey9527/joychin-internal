@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.12</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.13</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -4769,7 +4769,7 @@ function openPurchaseModal(id, prefill={}){
         ?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0;line-height:1;align-self:start" onclick="deletePendingPurchaseItem(\''+esc(String(i.temp_key||''))+'\')">×</button>'
         :(receivedQty===0?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0;line-height:1;align-self:start" onclick="deletePurchaseItem('+i.id+')">×</button>':'')
       const itemBody='<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,auto) auto;gap:10px;align-items:start;padding:10px 12px;border:1px solid #ecebe5;border-radius:4px;background:#fff">'+
-        '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+rcvColor+'">'+rcvLabel+' — '+receivedQty+' / '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
+        '<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+(i.product_name||i.product||'—')+'</div>'+(i.spec?'<div style="font-size:11px;color:#888;margin-top:2px">'+esc(i.spec)+'</div>':'')+(i.printing?'<div style="font-size:11px;color:#7B5EA7;margin-top:2px">印刷：'+esc(i.printing)+'</div>':'')+(refOrderId?'<div style="font-size:10px;color:#aaa;margin-top:2px">來自訂單 '+esc(String(refOrderId))+'</div>':'')+(!isNew?'<div style="font-size:11px;margin-top:4px;color:'+rcvColor+'">'+rcvLabel+' — '+receivedQty+' / '+totalQty+' '+(i.unit||'')+'</div>':'')+(canArrival?'<button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px;padding:3px 8px" onclick="showArrivalInput('+i.id+')">登記到貨</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">數量</div><div style="font-size:12px;font-weight:500">'+(i.qty||i.quantity||0)+' '+(i.unit||'')+'</div></div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">單價</div><div style="font-size:12px;font-weight:500">'+fmtP(_dispUp)+' '+(_costPrice!==null?_costCurrency:(i.currency||'USD'))+(_punit==='m2'?' /m²':'')+(_hasDiffCost?'<span style="font-size:10px;color:#aaa;margin-left:4px;text-decoration:line-through">'+fmtP(_up)+'</span>':'')+'</div>'+(!isNew&&_hasDiffCost?'<button onclick="applyCostPrice('+i.id+','+_costPrice.toFixed(4)+',\''+_costCurrency+'\')" style="background:none;border:1px solid #0F6E56;color:#0F6E56;border-radius:3px;cursor:pointer;font-size:10px;padding:2px 5px;margin-top:3px;white-space:nowrap">存入成本價</button>':'')+'</div>'+
         '<div style="text-align:right"><div style="font-size:10px;color:#888">小計</div><div style="font-size:12px;font-weight:600;color:#0F6E56">'+fmtP(lineTotal)+'</div>'+(_punit==='m2'&&_wm>0?'<div style="font-size:10px;color:#aaa">×'+(_wm*1000).toFixed(0)+'mm</div>':'')+'</div>'+
@@ -5773,6 +5773,7 @@ async function confirmShopOrder(){
       product_id:item.product_id||null,
       product_name:item.product_name,
       spec:item.spec||null,
+      printing:item.printing||null,
       qty:item.qty,
       unit:'m',
       unit_price:item.unit_price||0,
