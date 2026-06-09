@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.17</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.18</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1321,6 +1321,9 @@ const I18N={
     ec_add_contact:'＋ 新增同公司聯絡人',ec_contact_title:'新增同公司聯絡人',ec_mark_reviewed:'✓ 已回顧',
     supp_detail_title:'供應商詳情',es_multi_contacts:'此供應商共有 {n} 位聯絡人：',
     es_specialty:'專長產品',es_salutation:'郵件稱謂',es_salutation_ph:'例：王哥、李總、David',
+    nc_quick_title:'快速新增客戶',cust_create_title:'新增客戶聯絡人',
+    btn_details:'詳情',cust_last_reviewed:'上次回顧：',
+    cust_days_left:'剩 {n} 天',cust_days_overdue:'已過 {n} 天',
   },
   en:{
     nav_sales:'Sales',nav_contacts:'Contacts',nav_products:'Products',nav_settings:'Settings',
@@ -1525,6 +1528,9 @@ const I18N={
     ec_add_contact:'+ Add Same-Company Contact',ec_contact_title:'Add Same-Company Contact',ec_mark_reviewed:'✓ Mark Reviewed',
     supp_detail_title:'Supplier Details',es_multi_contacts:'This supplier has {n} contacts:',
     es_specialty:'Product Specialty',es_salutation:'Email Salutation',es_salutation_ph:'e.g. Mr. Wang, David',
+    nc_quick_title:'Quick Add Customer',cust_create_title:'New Customer Contact',
+    btn_details:'Details',cust_last_reviewed:'Last Reviewed: ',
+    cust_days_left:'{n} days left',cust_days_overdue:'{n} days overdue',
   },
   th:{
     nav_sales:'ขาย',nav_contacts:'รายชื่อ',nav_products:'สินค้า',nav_settings:'ตั้งค่า',
@@ -1729,6 +1735,9 @@ const I18N={
     ec_add_contact:'+ เพิ่มผู้ติดต่อบริษัทเดียวกัน',ec_contact_title:'เพิ่มผู้ติดต่อบริษัทเดียวกัน',ec_mark_reviewed:'✓ ทำเครื่องหมายรีวิวแล้ว',
     supp_detail_title:'รายละเอียดซัพพลายเออร์',es_multi_contacts:'ซัพพลายเออร์นี้มี {n} ผู้ติดต่อ:',
     es_specialty:'ความเชี่ยวชาญสินค้า',es_salutation:'คำขึ้นต้นอีเมล',es_salutation_ph:'เช่น คุณหวัง, คุณเดวิด',
+    nc_quick_title:'เพิ่มลูกค้าด่วน',cust_create_title:'ผู้ติดต่อลูกค้าใหม่',
+    btn_details:'รายละเอียด',cust_last_reviewed:'รีวิวล่าสุด: ',
+    cust_days_left:'เหลือ {n} วัน',cust_days_overdue:'เกิน {n} วัน',
   }
 }
 let _lang=localStorage.getItem('joychin_lang')||'zh'
@@ -5968,7 +5977,7 @@ function renderPshopCartRowsInto(el){
     '<div style="flex:1;min-width:0">'+
     '<div style="font-size:12px;font-weight:500;word-break:break-all">'+esc(c.product_name)+'</div>'+
     (c.spec?'<div style="font-size:10px;color:#0F6E56;font-weight:500">'+esc(c.spec)+'</div>':'')+
-    (c.printing?'<div style="font-size:10px;color:#7B5EA7;font-weight:500">印刷：'+esc(c.printing)+'</div>':'')+
+    (c.printing?'<div style="font-size:10px;color:#7B5EA7;font-weight:500">'+t('lbl_printing_prefix')+esc(c.printing)+'</div>':'')+
     (c.ref_order_id?'<div style="font-size:10px;color:#aaa">來自 '+esc(c.ref_order_id)+'</div>':'')+
     '<div style="font-size:11px;color:#555">'+c.qty+' m'+(c.rolls_qty?' <span style="color:#888">（約 '+parseFloat(c.rolls_qty).toFixed(1)+' 卷）</span>':'')+
     ' · 單價 '+fmtP(c.unit_price||0)+' '+(c.currency||'')+'</div>'+
@@ -6430,29 +6439,29 @@ function openSubformModal(title,bodyHtml){
 }
 function buildCustomerCreateForm(prefix,prefill={}){
   return '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>姓名 <span class="req">*</span></label><input id="'+prefix+'-name" value="'+escapeHtml(prefill.name||'')+'" /></div>'+
-    '<div><label>公司 <span class="req">*</span></label><input id="'+prefix+'-company" value="'+escapeHtml(prefill.company||'')+'" /></div>'+
-    '<div><label>Email</label><input id="'+prefix+'-email" value="'+escapeHtml(prefill.email||'')+'" /></div>'+
-    '<div><label>電話</label><input id="'+prefix+'-phone" value="'+escapeHtml(prefill.phone||'')+'" /></div>'+
-    '<div><label>國家</label><select id="'+prefix+'-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,prefill.country||'TH')+'</select></div>'+
-    '<div><label>行業</label><input id="'+prefix+'-industry" value="'+escapeHtml(prefill.industry||'')+'" /></div>'+
-    '<div style="grid-column:1/-1"><label>地址</label><textarea id="'+prefix+'-address" rows="2" style="resize:vertical">'+escapeHtml(prefill.address||'')+'</textarea></div>'+
-    '<div><label>付款條件</label><select id="'+prefix+'-payment-term"><option value="">— 選擇 —</option>'+PAYMENT_TERM_OPTIONS.map(t=>'<option value="'+t+'"'+(prefill.payment_term===t?' selected':'')+'>'+t+'</option>').join('')+'</select></div>'+
+    '<div><label>'+t('lbl_name')+' <span class="req">*</span></label><input id="'+prefix+'-name" value="'+escapeHtml(prefill.name||'')+'" /></div>'+
+    '<div><label>'+t('lbl_company')+' <span class="req">*</span></label><input id="'+prefix+'-company" value="'+escapeHtml(prefill.company||'')+'" /></div>'+
+    '<div><label>'+t('lbl_email')+'</label><input id="'+prefix+'-email" value="'+escapeHtml(prefill.email||'')+'" /></div>'+
+    '<div><label>'+t('lbl_phone')+'</label><input id="'+prefix+'-phone" value="'+escapeHtml(prefill.phone||'')+'" /></div>'+
+    '<div><label>'+t('lbl_country')+'</label><select id="'+prefix+'-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,prefill.country||'TH')+'</select></div>'+
+    '<div><label>'+t('lbl_industry')+'</label><input id="'+prefix+'-industry" value="'+escapeHtml(prefill.industry||'')+'" /></div>'+
+    '<div style="grid-column:1/-1"><label>'+t('lbl_address')+'</label><textarea id="'+prefix+'-address" rows="2" style="resize:vertical">'+escapeHtml(prefill.address||'')+'</textarea></div>'+
+    '<div><label>'+t('ec_payment_term')+'</label><select id="'+prefix+'-payment-term"><option value="">'+t('ord_select')+'</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'"'+(prefill.payment_term===pt?' selected':'')+'>'+pt+'</option>').join('')+'</select></div>'+
     '</div>'+
-    '<div style="margin-bottom:14px"><label>備註</label><textarea id="'+prefix+'-notes">'+escapeHtml(prefill.notes||'')+'</textarea></div>'
+    '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea id="'+prefix+'-notes">'+escapeHtml(prefill.notes||'')+'</textarea></div>'
 }
 function buildSupplierCreateForm(prefix,prefill={}){
   return '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>姓名 <span class="req">*</span></label><input id="'+prefix+'-name" value="'+escapeHtml(prefill.name||'')+'" /></div>'+
-    '<div><label>公司 <span class="req">*</span></label><input id="'+prefix+'-company" value="'+escapeHtml(prefill.company||'')+'" /></div>'+
-    '<div><label>國家 <span class="req">*</span></label><select id="'+prefix+'-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,prefill.country||'TH')+'</select></div>'+
-    '<div><label>職務</label><input id="'+prefix+'-role" value="'+escapeHtml(prefill.role||'')+'" /></div>'+
-    '<div><label>Email <span class="req">*</span></label><input id="'+prefix+'-email" value="'+escapeHtml(prefill.email||'')+'" /></div>'+
-    '<div><label>電話</label><input id="'+prefix+'-phone" value="'+escapeHtml(prefill.phone||'')+'" /></div>'+
+    '<div><label>'+t('lbl_name')+' <span class="req">*</span></label><input id="'+prefix+'-name" value="'+escapeHtml(prefill.name||'')+'" /></div>'+
+    '<div><label>'+t('lbl_company')+' <span class="req">*</span></label><input id="'+prefix+'-company" value="'+escapeHtml(prefill.company||'')+'" /></div>'+
+    '<div><label>'+t('lbl_country')+' <span class="req">*</span></label><select id="'+prefix+'-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,prefill.country||'TH')+'</select></div>'+
+    '<div><label>'+t('lbl_role')+'</label><input id="'+prefix+'-role" value="'+escapeHtml(prefill.role||'')+'" /></div>'+
+    '<div><label>'+t('lbl_email')+' <span class="req">*</span></label><input id="'+prefix+'-email" value="'+escapeHtml(prefill.email||'')+'" /></div>'+
+    '<div><label>'+t('lbl_phone')+'</label><input id="'+prefix+'-phone" value="'+escapeHtml(prefill.phone||'')+'" /></div>'+
     '<div><label>LINE ID</label><input id="'+prefix+'-line" value="'+escapeHtml(prefill.line_id||'')+'" /></div>'+
     '<div><label>WhatsApp</label><input id="'+prefix+'-whatsapp" value="'+escapeHtml(prefill.whatsapp||'')+'" /></div>'+
-    '<div><label>專長產品</label><input id="'+prefix+'-specialty" value="'+escapeHtml(prefill.specialty||'')+'" /></div>'+
-    '<div><label>郵件稱謂</label><input id="'+prefix+'-salutation" value="'+escapeHtml(prefill.salutation||'')+'" /></div>'+
+    '<div><label>'+t('es_specialty')+'</label><input id="'+prefix+'-specialty" value="'+escapeHtml(prefill.specialty||'')+'" /></div>'+
+    '<div><label>'+t('es_salutation')+'</label><input id="'+prefix+'-salutation" value="'+escapeHtml(prefill.salutation||'')+'" /></div>'+
     '</div>'
 }
 
@@ -8678,13 +8687,13 @@ function renderProducts(){
             (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
             '</div>':'')+
           '<div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
-          (p.printing_variants?.length?'<div style="font-size:10px;color:#7B5EA7;margin-top:1px">印刷：'+p.printing_variants.map(esc).join('・')+'</div>':'')+
+          (p.printing_variants?.length?'<div style="font-size:10px;color:#7B5EA7;margin-top:1px">'+t('lbl_printing_prefix')+p.printing_variants.map(esc).join('・')+'</div>':'')+
         '</div>'+
         '<div style="flex-shrink:0;text-align:right;font-size:11px;color:#888;padding-left:12px;min-width:0;max-width:45%">'+
           '<div style="color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(sup?esc(sup.company):'—')+'</div>'+
           (hasPermission('view_cost')&&p.cost_price?'<div style="color:#0F6E56;font-weight:500">'+fmtP(p.cost_price)+' '+(p.currency||'')+(p.last_reviewed_at?'<span style="font-size:10px;font-weight:400;color:#aaa;margin-left:2px">('+p.last_reviewed_at+')</span>':'')+'</div>':'')+
           stockHtml+
-          (daysLeft!==null?'<div>'+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天')+'</div>':'')+
+          (daysLeft!==null?'<div>'+(daysLeft>0?t('cust_days_left').replace('{n}',daysLeft):t('cust_days_overdue').replace('{n}',Math.abs(daysLeft)))+'</div>':'')+
         '</div>'+
         '</div>'
     }).join('')
@@ -9159,10 +9168,10 @@ function renderCustomers(){
         '</div>'+
         '<div style="font-size:11px;color:#666">'+[c.email,c.phone].filter(Boolean).join(' · ')+'</div>'+
         (c.notes?'<div style="font-size:11px;color:#aaa;margin-top:2px">'+c.notes+'</div>':'')+
-        (c.last_reviewed_at&&c.id===primary.id?'<div style="font-size:11px;color:#aaa;margin-top:2px">上次回顧：'+c.last_reviewed_at+(daysLeft!==null?' · '+(daysLeft>0?'剩 '+daysLeft+' 天':'已過 '+Math.abs(daysLeft)+' 天'):'')+'</div>':'')+
+        (c.last_reviewed_at&&c.id===primary.id?'<div style="font-size:11px;color:#aaa;margin-top:2px">'+t('cust_last_reviewed')+c.last_reviewed_at+(daysLeft!==null?' · '+(daysLeft>0?t('cust_days_left').replace('{n}',daysLeft):t('cust_days_overdue').replace('{n}',Math.abs(daysLeft))):'')+'</div>':'')+
         '</div>'+
         '<div style="display:flex;gap:6px;flex-shrink:0">'+
-        '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditCustomer('+c.id+')">詳情</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditCustomer('+c.id+')">'+t('btn_details')+'</button>'+
         '<button class="btn btn-ghost btn-sm" style="color:#aaa" onclick="event.stopPropagation();deleteCustomer('+c.id+',\''+c.name+'\')">×</button>'+
         '</div></div>'
       ).join('')+
@@ -9180,10 +9189,10 @@ function showNewCustomerForm(prefill={}){
 }
 function openCreateCustomerModal(prefill={}){
   _isDirty=false
-  document.getElementById('modal-customer-hd').innerHTML='<div style="font-size:14px;font-weight:600">新增客戶聯絡人</div><button class="modal-close" onclick="closeModal(\'modal-customer\')">×</button>'
+  document.getElementById('modal-customer-hd').innerHTML='<div style="font-size:14px;font-weight:600">'+t('cust_create_title')+'</div><button class="modal-close" onclick="closeModal(\'modal-customer\')">×</button>'
   document.getElementById('modal-customer-bd').innerHTML=
     buildCustomerCreateForm('cc',prefill)+
-    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateCustomerFromModal(\'cc\',\'modal-customer\')">新增</button></div>'
+    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateCustomerFromModal(\'cc\',\'modal-customer\')">'+t('btn_add')+'</button></div>'
   enableDirtyTracking('modal-customer-bd')
   document.getElementById('modal-customer').classList.add('open')
 }
@@ -9328,20 +9337,20 @@ function openQuickAddCustomer(){
   ov.innerHTML=
     '<div class="inline-overlay-box" style="max-width:420px;max-height:88vh;overflow-y:auto">'+
     '<div class="inline-overlay-hd">'+
-    '<div style="font-size:14px;font-weight:600">快速新增客戶</div>'+
+    '<div style="font-size:14px;font-weight:600">'+t('nc_quick_title')+'</div>'+
     '<button class="inline-overlay-close" onclick="document.getElementById(\'quick-add-customer-overlay\').remove()">×</button>'+
     '</div>'+
     '<div style="padding:16px 20px 20px">'+
     '<div class="grid-2" style="margin-bottom:12px">'+
-    '<div><label>聯絡人姓名 <span class="req">*</span></label><input id="qc-name" /></div>'+
-    '<div><label>公司名稱 <span class="req">*</span></label><input id="qc-company" /></div>'+
-    '<div><label>Email</label><input id="qc-email" type="email" /></div>'+
-    '<div><label>電話</label><input id="qc-phone" /></div>'+
-    '<div><label>國家</label><select id="qc-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,'TH')+'</select></div>'+
+    '<div><label>'+t('lbl_contact_name')+' <span class="req">*</span></label><input id="qc-name" /></div>'+
+    '<div><label>'+t('lbl_company_name')+' <span class="req">*</span></label><input id="qc-company" /></div>'+
+    '<div><label>'+t('lbl_email')+'</label><input id="qc-email" type="email" /></div>'+
+    '<div><label>'+t('lbl_phone')+'</label><input id="qc-phone" /></div>'+
+    '<div><label>'+t('lbl_country')+'</label><select id="qc-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,'TH')+'</select></div>'+
     '</div>'+
     '<div style="display:flex;gap:8px">'+
-    '<button class="btn btn-primary" onclick="_quickCreateCustomer()">新增客戶</button>'+
-    '<button class="btn btn-ghost" onclick="document.getElementById(\'quick-add-customer-overlay\').remove()">取消</button>'+
+    '<button class="btn btn-primary" onclick="_quickCreateCustomer()">'+t('nc_title')+'</button>'+
+    '<button class="btn btn-ghost" onclick="document.getElementById(\'quick-add-customer-overlay\').remove()">'+t('btn_cancel')+'</button>'+
     '</div></div></div>'
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()})
   document.body.appendChild(ov)
@@ -9841,7 +9850,7 @@ function renderSupplierMgmt(){
       '<div style="font-size:12px;font-weight:500;color:#333">'+s.name+(s.role?' <span style="font-size:10px;color:#aaa;font-weight:400">· '+s.role+'</span>':'')+'</div>'+
       '<div style="font-size:11px;color:#aaa;margin-top:1px">'+[s.email,s.phone,s.specialty].filter(Boolean).join(' · ')+'</div>'+
       '</div>'+
-      '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditSupplier('+s.id+')">詳情</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditSupplier('+s.id+')">'+t('btn_details')+'</button>'+
       '<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0" onclick="event.stopPropagation();deleteSupplier('+s.id+',\''+s.name+'\')">×</button>'+
       '</div>').join('')+
     '</div>').join('')
@@ -9857,10 +9866,10 @@ function showNewSupplierForm(prefill={}){
 }
 function openCreateSupplierModal(prefill={}){
   _isDirty=false
-  document.getElementById('modal-supplier-hd').innerHTML='<div style="font-size:14px;font-weight:600">新增供應商聯絡人</div><button class="modal-close" onclick="closeModal(\'modal-supplier\')">×</button>'
+  document.getElementById('modal-supplier-hd').innerHTML='<div style="font-size:14px;font-weight:600">'+t('ns_title')+'</div><button class="modal-close" onclick="closeModal(\'modal-supplier\')">×</button>'
   document.getElementById('modal-supplier-bd').innerHTML=
     buildSupplierCreateForm('cs',prefill)+
-    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateSupplierFromModal(\'cs\',\'modal-supplier\')">新增</button></div>'
+    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateSupplierFromModal(\'cs\',\'modal-supplier\')">'+t('btn_add')+'</button></div>'
   enableDirtyTracking('modal-supplier-bd')
   document.getElementById('modal-supplier').classList.add('open')
 }
