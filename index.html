@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.22</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.23</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -2004,7 +2004,15 @@ const SESSION_USER_KEY='currentUser'
 const SESSION_ACTIVE_TAB_KEY='activeTab'
 const CURRENCY_OPTIONS=['USD','THB','TWD','CNY','EUR','JPY']
 const TRANSPORT_OPTIONS=['海運','空運','陸運','快遞']
-const PAYMENT_TERM_OPTIONS=['現金','預付','Net 7','Net 15','Net 30','Net 45','Net 60','Net 90','月結30天','月結60天']
+const PAYMENT_TERM_OPTIONS=['現金','轉帳','月結30天','月結60天','月結90天']
+const PAYMENT_TERM_TRANS={
+  '現金':{en:'Cash',th:'เงินสด'},
+  '轉帳':{en:'Bank Transfer',th:'โอนเงิน'},
+  '月結30天':{en:'Net 30',th:'เครดิต 30 วัน'},
+  '月結60天':{en:'Net 60',th:'เครดิต 60 วัน'},
+  '月結90天':{en:'Net 90',th:'เครดิต 90 วัน'},
+}
+function tPaymentTerm(v){return(_lang!=='zh'&&PAYMENT_TERM_TRANS[v]?.[_lang])||v||''}
 const PRINTING_VARIANT_TRANS={
   '直線':{en:'Straight',th:'เส้นตรง'},
   '方格':{en:'Grid',th:'ตาราง'},
@@ -4142,7 +4150,7 @@ function openOrderModal(id){
       '<div><label>'+t('lbl_tracking_no')+'</label><input id="or-tracking" /></div>'+
       '<div><label>'+t('lbl_order_type')+'</label><select id="or-source" onchange="onOrderSourceChange()"><option value="confirmed">'+t('ord_type_confirmed')+'</option><option value="verbal">'+t('ord_type_verbal')+'</option></select></div>'+
       '<div><label>'+t('lbl_customer_po')+'</label><input id="noi-customer-ref" type="text" placeholder="'+t('lbl_customer_po_placeholder')+'" /></div>'+
-      '<div><label>付款條件</label><select id="or-payment-term"><option value="">— 選擇 —</option>'+PAYMENT_TERM_OPTIONS.map(t=>'<option value="'+t+'">'+t+'</option>').join('')+'</select></div>'+
+      '<div><label>'+t('ec_payment_term')+'</label><select id="or-payment-term"><option value="">'+t('ord_select')+'</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'">'+tPaymentTerm(pt)+'</option>').join('')+'</select></div>'+
       '</div>'+
       '<div id="or-verbal-warn" style="display:none;background:#FFF6D8;color:#8A6400;border:1px solid #E2B36D;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:10px">'+t('ord_verbal_warn')+'</div>'+
       '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea id="or-notes"></textarea></div>'+
@@ -4410,7 +4418,7 @@ function _renderOrderModal(){
     '<div><label>'+t('lbl_transport')+'</label><select id="ore-transport"><option value="">—</option>'+buildOptions(TRANSPORT_OPTIONS,o.transport_method)+'</select></div>'+
     '<div><label>'+t('lbl_tracking_no')+'</label><input id="ore-tracking" value="'+esc(o.tracking_no||'')+'" /></div>'+
     '<div><label>'+t('lbl_customer_po')+'</label><input id="oi-customer-ref" type="text" placeholder="'+t('lbl_customer_po_placeholder')+'" value="'+esc(o.customer_ref_no||'')+'" /></div>'+
-    '<div><label>付款條件</label><select id="ore-payment-term"><option value="">— 選擇 —</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'"'+(o.payment_term===pt?' selected':'')+'>'+pt+'</option>').join('')+'</select></div>'+
+    '<div><label>'+t('ec_payment_term')+'</label><select id="ore-payment-term"><option value="">'+t('ord_select')+'</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'"'+(o.payment_term===pt?' selected':'')+'>'+tPaymentTerm(pt)+'</option>').join('')+'</select></div>'+
     '</div>'+
     '<div style="margin-bottom:12px"><label>'+t('lbl_notes')+'</label><textarea id="ore-notes">'+esc(o.notes||'')+'</textarea></div>'+
     '<div style="margin-bottom:4px"><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:400"><input type="checkbox" id="ore-requires-coa" '+(o.requires_coa?'checked':'')+' style="width:auto;height:auto;cursor:pointer" onchange="document.getElementById(\'ord-coa-section\').style.display=this.checked?\'block\':\'none\'" /> '+t('lbl_requires_coa')+'</label></div>'+
@@ -6664,7 +6672,7 @@ function buildCustomerCreateForm(prefix,prefill={}){
     '<div><label>'+t('lbl_country')+'</label><select id="'+prefix+'-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,prefill.country||'TH')+'</select></div>'+
     '<div><label>'+t('lbl_industry')+'</label><input id="'+prefix+'-industry" value="'+escapeHtml(prefill.industry||'')+'" /></div>'+
     '<div style="grid-column:1/-1"><label>'+t('lbl_address')+'</label><textarea id="'+prefix+'-address" rows="2" style="resize:vertical">'+escapeHtml(prefill.address||'')+'</textarea></div>'+
-    '<div><label>'+t('ec_payment_term')+'</label><select id="'+prefix+'-payment-term"><option value="">'+t('ord_select')+'</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'"'+(prefill.payment_term===pt?' selected':'')+'>'+pt+'</option>').join('')+'</select></div>'+
+    '<div><label>'+t('ec_payment_term')+'</label><select id="'+prefix+'-payment-term"><option value="">'+t('ord_select')+'</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'"'+(prefill.payment_term===pt?' selected':'')+'>'+tPaymentTerm(pt)+'</option>').join('')+'</select></div>'+
     '</div>'+
     '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea id="'+prefix+'-notes">'+escapeHtml(prefill.notes||'')+'</textarea></div>'
 }
@@ -9489,7 +9497,7 @@ function openEditCustomer(id){
     '<div><label>'+t('lbl_country')+'</label><select id="ec-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,c.country)+'</select></div>'+
     '<div><label>'+t('lbl_industry')+'</label><input id="ec-industry" value="'+(c.industry||'')+'" /></div>'+
     '<div style="grid-column:1/-1"><label>'+t('lbl_address')+'</label><textarea id="ec-address" rows="2" style="resize:vertical">'+(c.address||'')+'</textarea></div>'+
-    '<div><label>'+t('ec_payment_term')+'</label><select id="ec-payment-term"><option value="">'+t('ord_select')+'</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'"'+(c.payment_term===pt?' selected':'')+'>'+pt+'</option>').join('')+'</select></div>'+
+    '<div><label>'+t('ec_payment_term')+'</label><select id="ec-payment-term"><option value="">'+t('ord_select')+'</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'"'+(c.payment_term===pt?' selected':'')+'>'+tPaymentTerm(pt)+'</option>').join('')+'</select></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>'+t('ec_review_days')+'</label><input value="'+getCustomerReviewDays()+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
