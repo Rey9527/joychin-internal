@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.21</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.22</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1242,6 +1242,7 @@ const I18N={
     lbl_status:'狀態',lbl_subtotal:'小計',lbl_total:'總金額',lbl_cost_price:'成本價',lbl_spec_optional:'規格（選填）',lbl_printing_prefix:'印刷：',
     q_from_catalog:'從產品目錄選',q_from_inquiry:'從詢價單帶入',q_manual_entry:'手動輸入',
     q_select_inquiry:'選擇詢價單',q_import_items:'帶入品項',q_no_cost:'未填成本',
+    q_catalog_title:'從產品目錄選擇',q_catalog_search_ph:'搜尋產品...',q_catalog_empty:'尚無產品目錄',q_catalog_no_results:'找不到符合產品',q_cost_na:'成本未填',
     q_items_section:'品項明細',q_click_to_edit:'點擊品項可編輯',q_no_items:'尚無品項',
     q_needs_sample_review:'客戶接受後需等待樣品確認',
     q_create_sample_title:'建立新樣品',q_spec_editable:'規格（可修改）',q_init_stock:'初始庫存',q_create_sample_btn:'建立樣品',
@@ -1519,6 +1520,7 @@ const I18N={
     lbl_status:'Status',lbl_subtotal:'Subtotal',lbl_total:'Total',lbl_cost_price:'Cost Price',lbl_spec_optional:'Spec (optional)',lbl_printing_prefix:'Printing:',
     q_from_catalog:'From Catalog',q_from_inquiry:'From Inquiry',q_manual_entry:'Manual Entry',
     q_select_inquiry:'Select Inquiry',q_import_items:'Import Items',q_no_cost:'No cost',
+    q_catalog_title:'Select from Catalog',q_catalog_search_ph:'Search products...',q_catalog_empty:'No products in catalog',q_catalog_no_results:'No matching products',q_cost_na:'No cost',
     q_items_section:'Line Items',q_click_to_edit:'Click item to edit',q_no_items:'No items yet',
     q_needs_sample_review:'Require sample confirmation after acceptance',
     q_create_sample_title:'Create New Sample',q_spec_editable:'Spec (editable)',q_init_stock:'Initial Stock',q_create_sample_btn:'Create Sample',
@@ -1796,6 +1798,7 @@ const I18N={
     lbl_status:'สถานะ',lbl_subtotal:'รวมย่อย',lbl_total:'ยอดรวม',lbl_cost_price:'ราคาต้นทุน',lbl_spec_optional:'สเปค (ไม่บังคับ)',lbl_printing_prefix:'การพิมพ์:',
     q_from_catalog:'จากแคตตาล็อก',q_from_inquiry:'จากใบสอบถาม',q_manual_entry:'กรอกเอง',
     q_select_inquiry:'เลือกใบสอบถาม',q_import_items:'นำเข้ารายการ',q_no_cost:'ยังไม่มีต้นทุน',
+    q_catalog_title:'เลือกจากแคตตาล็อก',q_catalog_search_ph:'ค้นหาสินค้า...',q_catalog_empty:'ยังไม่มีสินค้าในแคตตาล็อก',q_catalog_no_results:'ไม่พบสินค้าที่ตรงกัน',q_cost_na:'ยังไม่มีต้นทุน',
     q_items_section:'รายการสินค้า',q_click_to_edit:'คลิกรายการเพื่อแก้ไข',q_no_items:'ยังไม่มีรายการ',
     q_needs_sample_review:'ต้องยืนยันตัวอย่างหลังลูกค้ายอมรับ',
     q_create_sample_title:'สร้างตัวอย่างใหม่',q_spec_editable:'สเปค (แก้ไขได้)',q_init_stock:'สต็อกเริ่มต้น',q_create_sample_btn:'สร้างตัวอย่าง',
@@ -7672,13 +7675,13 @@ function openQuoteCatalogPicker(){
   overlay.innerHTML=
     '<div style="background:#fff;border-radius:6px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2)">'+
     '<div style="padding:16px 20px 12px;border-bottom:1px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;border-radius:6px 6px 0 0">'+
-    '<div style="font-size:14px;font-weight:600">從產品目錄選擇</div>'+
+    '<div style="font-size:14px;font-weight:600">'+t('q_catalog_title')+'</div>'+
     '<button onclick="document.getElementById(\'catalog-picker-overlay\').remove()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">×</button>'+
     '</div>'+
     '<div style="padding:12px 16px;border-bottom:1px solid #e5e5e0">'+
-    '<input id="catalog-picker-search" placeholder="搜尋產品..." oninput="filterQuoteCatalogPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:4px;border:1px solid #e5e5e0;font-size:12px" />'+
+    '<input id="catalog-picker-search" placeholder="'+t('q_catalog_search_ph')+'" oninput="filterQuoteCatalogPicker(this.value)" style="width:100%;padding:7px 11px;border-radius:4px;border:1px solid #e5e5e0;font-size:12px" />'+
     '</div>'+
-    '<div id="catalog-picker-list" style="overflow-y:auto;flex:1">'+(rows||'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">尚無產品目錄</div>')+'</div>'+
+    '<div id="catalog-picker-list" style="overflow-y:auto;flex:1">'+(rows||'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">'+t('q_catalog_empty')+'</div>')+'</div>'+
     '</div>'
   document.body.appendChild(overlay)
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})
@@ -7694,7 +7697,7 @@ function _buildQuoteCatalogRows(list){
       '<span style="font-size:12px">'+stIcon+'</span>'+
       '<div style="flex:1">'+
       '<div style="font-size:12px;font-weight:500;color:#1a1a1a">'+p.product_name+(p.product_code?' <span style="font-size:10px;color:#aaa;font-weight:400">'+p.product_code+'</span>':'')+'</div>'+
-      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+' · '+(p.cost_price?fmtP(p.cost_price)+' '+p.currency:'成本未填')+'</div>'+
+      '<div style="font-size:11px;color:#aaa;margin-top:1px">'+(sup?sup.company:'—')+' · '+(p.cost_price?fmtP(p.cost_price)+' '+p.currency:t('q_cost_na'))+'</div>'+
       '</div></div></div>'
   }).join('')
 }
@@ -7704,7 +7707,7 @@ function filterQuoteCatalogPicker(q){
   const kw=q.toLowerCase()
   const sorted=[...products].sort((a,b)=>a.product_name.localeCompare(b.product_name,'zh-TW'))
   const filtered=sorted.filter(p=>!kw||p.product_name.toLowerCase().includes(kw)||(p.product_code||'').toLowerCase().includes(kw))
-  list.innerHTML=filtered.length?_buildQuoteCatalogRows(filtered):'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">找不到符合產品</div>'
+  list.innerHTML=filtered.length?_buildQuoteCatalogRows(filtered):'<div style="padding:30px;text-align:center;color:#aaa;font-size:12px">'+t('q_catalog_no_results')+'</div>'
 }
 function pickCatalogForQuote(productId){
   const p=products.find(x=>x.id===productId);if(!p)return
@@ -7735,7 +7738,7 @@ async function syncHeaderSupplier(){
 
 async function removeQuoteItem(id){
   const{error}=await sb.from('quote_items').delete().eq('id',id)
-  if(error){showToast('移除失敗：'+error.message,'error');return}
+  if(error){showToast(t('err_del')+error.message,'error');return}
   await loadQuotes()
   renderQuoteModalBd()
 }
