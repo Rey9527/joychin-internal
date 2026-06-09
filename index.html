@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.14</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.15</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -5328,6 +5328,7 @@ function openComplaintFromArrival(itemId){
 let _pshopActiveCompany=null  // currently selected supplier company name
 let _pshopCart=[]             // [{product_id,product_name,spec,printing,unit,unit_price,currency,qty,ref_order_id}]
 let _pshopOptSelectedColor=null
+let _pshopOptSelectedPrinting=undefined
 let _pshopOrderSectionOpen=false
 let _pshopLayout='grid'       // 'grid' | 'list'
 
@@ -5566,6 +5567,7 @@ function pshopAddToCart(productId,spec,printing){
 function _pshopShowAddOptions(productId){
   const p=products.find(x=>x.id===productId);if(!p)return
   _pshopOptSelectedColor=null
+  _pshopOptSelectedPrinting=p.printing_variants?.length?null:undefined
   document.getElementById('pshop-options-overlay')?.remove()
   const hasColors=p.color_variants?.length
   const colorSection=hasColors?
@@ -5582,24 +5584,13 @@ function _pshopShowAddOptions(productId){
     '<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(p.product_name)+'</div>'+
     '<div style="font-size:11px;color:#888;margin-bottom:16px">採購選項</div>'+
     colorSection+
-    (()=>{
-      const _dph=!!p.printing
-      const _dpt=p.printing==='方格'?'方格':p.printing==='直條'?'直條':p.printing?'other':''
-      const _dpo=_dpt==='other'?(p.printing||''):''
-      return '<div style="margin-bottom:16px">'+
-      '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">印刷</div>'+
-      '<div style="display:flex;gap:16px;margin-bottom:10px">'+
-      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pshop-print" value="" '+(!_dph?'checked':'')+' onchange="pshopOptPrintChange(this)" style="width:auto;margin:0"> 無</label>'+
-      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pshop-print" value="yes" '+(_dph?'checked':'')+' onchange="pshopOptPrintChange(this)" style="width:auto;margin:0"> 有</label>'+
-      '</div>'+
-      '<div id="pshop-print-detail" style="display:'+(_dph?'block':'none')+';padding-left:2px">'+
-      '<div style="display:flex;flex-direction:column;gap:8px">'+
-      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="radio" name="pshop-print-type" value="方格" '+(_dpt==='方格'?'checked':'')+' onchange="document.getElementById(\'pshop-print-other-txt\').style.display=\'none\'" style="width:auto;margin:0"> 方格</label>'+
-      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="radio" name="pshop-print-type" value="直條" '+(_dpt==='直條'?'checked':'')+' onchange="document.getElementById(\'pshop-print-other-txt\').style.display=\'none\'" style="width:auto;margin:0"> 直條</label>'+
-      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="radio" name="pshop-print-type" value="other" '+(_dpt==='other'?'checked':'')+' onchange="document.getElementById(\'pshop-print-other-txt\').style.display=\'block\'" style="width:auto;margin:0"> 其他</label>'+
-      '<input id="pshop-print-other-txt" value="'+esc(_dpo)+'" placeholder="說明印刷方式..." style="display:'+(_dpt==='other'?'block':'none')+';font-size:12px;margin-left:22px;width:calc(100% - 22px)" />'+
-      '</div></div></div>'
-    })()+
+    (p.printing_variants?.length?
+      '<div style="margin-bottom:16px">'+
+      '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">印刷方式</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px" id="pshop-opt-printings">'+
+      '<button type="button" onclick="pshopOptSelectPrinting(null,this)" style="padding:5px 14px;border-radius:20px;border:2px solid #7B5EA7;background:#F3EEF9;font-size:12px;cursor:pointer;color:#7B5EA7" id="pshop-print-none-btn">無</button>'+
+      p.printing_variants.map(c=>'<button type="button" onclick="pshopOptSelectPrinting(\''+c.replace(/'/g,"\\'")+'\',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e5e0;background:#fff;font-size:12px;cursor:pointer;color:#333">'+esc(c)+'</button>').join('')+
+      '</div></div>':'')+
     '<div style="display:flex;gap:8px">'+
     '<button class="btn btn-primary btn-sm" onclick="_pshopConfirmAdd('+productId+')">加入推車</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pshop-options-overlay\').remove()">取消</button>'+
@@ -5612,21 +5603,18 @@ function pshopOptSelectColor(color,btn){
   document.querySelectorAll('#pshop-opt-colors button').forEach(b=>{b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.color='#333'})
   btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
 }
-function pshopOptPrintChange(radio){
-  const d=document.getElementById('pshop-print-detail')
-  if(d)d.style.display=radio.value==='yes'?'block':'none'
+function pshopOptSelectPrinting(val,btn){
+  _pshopOptSelectedPrinting=val
+  document.querySelectorAll('#pshop-opt-printings button').forEach(b=>{
+    b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.borderWidth='1px';b.style.color='#333'
+  })
+  btn.style.background='#F3EEF9';btn.style.borderColor='#7B5EA7';btn.style.borderWidth='2px';btn.style.color='#7B5EA7'
 }
 function _pshopConfirmAdd(productId){
   const p=products.find(x=>x.id===productId);if(!p)return
   if(p.color_variants?.length&&!_pshopOptSelectedColor){showToast('請選擇顏色','warn');return}
-  const printVal=document.querySelector('input[name="pshop-print"]:checked')?.value
-  let printing=null
-  if(printVal==='yes'){
-    const typeVal=document.querySelector('input[name="pshop-print-type"]:checked')?.value
-    if(!typeVal){showToast('請選擇印刷方式','warn');return}
-    printing=typeVal==='other'?(document.getElementById('pshop-print-other-txt')?.value.trim()||'其他'):typeVal
-  }
-  pshopAddToCart(productId,_pshopOptSelectedColor||null,printing)
+  if(p.printing_variants?.length&&_pshopOptSelectedPrinting===null){showToast('請選擇印刷方式','warn');return}
+  pshopAddToCart(productId,_pshopOptSelectedColor||null,_pshopOptSelectedPrinting??null)
 }
 
 function pshopAddFromOrder(orderId){
@@ -5896,6 +5884,7 @@ function inqRowHtml(i){
 
 let _nfRowCount=0
 let _pdColorVariants=[]
+let _pdPrintingVariants=[]
 function genInqId(offset=0){const d=new Date();return 'INQ-'+d.getFullYear()+'-'+String(inquiries.length+32+offset).padStart(3,'0')}
 
 async function showNewInqForm(){
@@ -8387,7 +8376,7 @@ function renderProducts(){
             (p.product_code?'<span style="font-size:10px;color:#aaa;font-family:monospace">'+esc(p.product_code)+'</span>':'')+
             '</div>':'')+
           '<div style="font-size:13px;font-weight:500">'+esc(p.product_name)+'</div>'+
-          (p.printing?'<div style="font-size:10px;color:#7B5EA7;margin-top:1px">印刷：'+esc(p.printing)+'</div>':'')+
+          (p.printing_variants?.length?'<div style="font-size:10px;color:#7B5EA7;margin-top:1px">印刷：'+p.printing_variants.map(esc).join('・')+'</div>':'')+
         '</div>'+
         '<div style="flex-shrink:0;text-align:right;font-size:11px;color:#888;padding-left:12px;min-width:0;max-width:45%">'+
           '<div style="color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(sup?esc(sup.company):'—')+'</div>'+
@@ -8405,6 +8394,7 @@ function openProductModal(id){
   const p=id?products.find(x=>x.id===id):null
   const isEdit=!!p
   _pdColorVariants=p?.color_variants?[...p.color_variants]:[]
+  _pdPrintingVariants=p?.printing_variants?[...p.printing_variants]:[]
   const _supByCompany=new Map()
   suppliers.forEach(s=>{if(!_supByCompany.has(s.company))_supByCompany.set(s.company,s.id)})
   const _supCompanies=[..._supByCompany.entries()].sort((a,b)=>a[0].localeCompare(b[0],'zh-TW'))
@@ -8451,22 +8441,12 @@ function openProductModal(id){
     '</div>'+
     '<div style="display:flex;gap:6px"><input id="pd-new-color" placeholder="輸入顏色名稱，按 Enter 新增" style="flex:1;font-size:12px" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pdAddColor()}" /><button class="btn btn-ghost btn-sm" onclick="pdAddColor()">+ 新增</button></div>'+
     '</div>'+
-    (()=>{
-      const _ph=!!p?.printing
-      const _pt=p?.printing==='方格'?'方格':p?.printing==='直條'?'直條':p?.printing?'other':''
-      const _po=_pt==='other'?(p?.printing||''):''
-      return '<div style="margin-bottom:10px"><label>印刷</label>'+
-      '<div style="display:flex;gap:12px;align-items:center;margin-top:4px;flex-wrap:wrap">'+
-      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print" value="" '+(!_ph?'checked':'')+' onchange="document.getElementById(\'pd-print-type-wrap\').style.display=\'none\'" style="width:auto;margin:0"> 無</label>'+
-      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print" value="yes" '+(_ph?'checked':'')+' onchange="document.getElementById(\'pd-print-type-wrap\').style.display=\'flex\'" style="width:auto;margin:0"> 有</label>'+
-      '</div>'+
-      '<div id="pd-print-type-wrap" style="display:'+(_ph?'flex':'none')+';gap:12px;align-items:center;margin-top:6px;flex-wrap:wrap">'+
-      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print-type" value="方格" '+(_pt==='方格'?'checked':'')+' onchange="document.getElementById(\'pd-print-other-wrap\').style.display=\'none\'" style="width:auto;margin:0"> 方格</label>'+
-      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print-type" value="直條" '+(_pt==='直條'?'checked':'')+' onchange="document.getElementById(\'pd-print-other-wrap\').style.display=\'none\'" style="width:auto;margin:0"> 直條</label>'+
-      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="radio" name="pd-print-type" value="other" '+(_pt==='other'?'checked':'')+' onchange="document.getElementById(\'pd-print-other-wrap\').style.display=\'block\'" style="width:auto;margin:0"> 其他</label>'+
-      '<div id="pd-print-other-wrap" style="display:'+(_pt==='other'?'block':'none')+'"><input id="pd-print-other-txt" value="'+esc(_po)+'" placeholder="說明..." style="font-size:12px;width:100px" /></div>'+
-      '</div></div>'
-    })()+
+    '<div style="margin-bottom:10px"><label>印刷變體 <span style="font-size:10px;font-weight:400;color:#aaa">（可選的印刷方式，如 方格、直條…）</span></label>'+
+    '<div id="pd-printing-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:24px">'+
+    (_pdPrintingVariants.length?_pdPrintingVariants.map((c,i)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#F3EEF9;color:#7B5EA7;border:1px solid #C9B8E8;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(c)+'<button onclick="pdRemovePrinting('+i+')" style="background:none;border:none;color:#7B5EA7;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join(''):'<span style="font-size:11px;color:#ccc">尚未設定</span>')+
+    '</div>'+
+    '<div style="display:flex;gap:6px"><input id="pd-new-printing" placeholder="輸入印刷方式，按 Enter 新增" style="flex:1;font-size:12px" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pdAddPrinting()}" /><button class="btn btn-ghost btn-sm" onclick="pdAddPrinting()">+ 新增</button></div>'+
+    '</div>'+
     '<div class="divider"></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
     '<div><label>更新週期</label>'+
@@ -8524,6 +8504,20 @@ function pdAddColor(){
 }
 function pdRemoveColor(idx){_pdColorVariants.splice(idx,1);_pdRenderColorChips()}
 
+function _pdRenderPrintingChips(){
+  const el=document.getElementById('pd-printing-chips');if(!el)return
+  el.innerHTML=_pdPrintingVariants.length
+    ?_pdPrintingVariants.map((c,i)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#F3EEF9;color:#7B5EA7;border:1px solid #C9B8E8;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(c)+'<button onclick="pdRemovePrinting('+i+')" style="background:none;border:none;color:#7B5EA7;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join('')
+    :'<span style="font-size:11px;color:#ccc">尚未設定</span>'
+}
+function pdAddPrinting(){
+  const el=document.getElementById('pd-new-printing')
+  const val=(el?.value||'').trim();if(!val)return
+  if(_pdPrintingVariants.includes(val)){showToast('已有此選項','warn');return}
+  _pdPrintingVariants.push(val);if(el)el.value='';_pdRenderPrintingChips()
+}
+function pdRemovePrinting(idx){_pdPrintingVariants.splice(idx,1);_pdRenderPrintingChips()}
+
 async function saveProduct(id){
   const name=document.getElementById('pd-name').value.trim()
   if(!name){showToast('請填寫產品名稱','error');return}
@@ -8549,7 +8543,7 @@ async function saveProduct(id){
     total_weight:parseFloat(document.getElementById('pd-total-weight')?.value)||null,
     thickness_um:parseFloat(document.getElementById('pd-thickness-um')?.value)||null,
     color_variants:_pdColorVariants.length?_pdColorVariants:null,
-    printing:(()=>{const has=document.querySelector('[name=pd-print]:checked')?.value==='yes';if(!has)return null;const tv=document.querySelector('[name=pd-print-type]:checked')?.value||'方格';return tv==='other'?(document.getElementById('pd-print-other-txt')?.value.trim()||'其他'):tv})()
+    printing_variants:_pdPrintingVariants.length?_pdPrintingVariants:null
   }
   let error
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
