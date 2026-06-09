@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.7</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.8</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -4835,9 +4835,19 @@ function fillPurchaseItemFromProduct(pid){
   const p=products.find(x=>x.id===pid);if(!p)return
   const nameEl=document.getElementById('poi-name');if(nameEl)nameEl.value=p.product_name||''
   const productIdEl=document.getElementById('poi-product-id');if(productIdEl)productIdEl.value=String(p.id)
+  const hasColors=p.color_variants?.length
+  const specEl=document.getElementById('poi-spec');if(specEl)specEl.value=hasColors?'':''
   const unitEl=document.getElementById('poi-unit');if(unitEl&&!unitEl.value)unitEl.value=p.unit||''
   const wEl=document.getElementById('poi-width-mm');if(wEl)wEl.value=p.width_m!=null?Math.round(p.width_m*1000):''
   const puEl=document.getElementById('poi-pricing-unit');if(puEl)puEl.value=p.pricing_unit||''
+  document.getElementById('poi-color-picker')?.remove()
+  if(hasColors&&specEl){
+    const wrap=document.createElement('div')
+    wrap.id='poi-color-picker'
+    wrap.style.cssText='display:flex;flex-wrap:wrap;gap:4px;margin-top:4px'
+    wrap.innerHTML=p.color_variants.map(c=>'<button type="button" onclick="_pickOiColor(\'poi\',\''+c.replace(/'/g,"\\'")+'\',this)" style="padding:2px 10px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>').join('')
+    specEl.parentElement?.appendChild(wrap)
+  }
 }
 function openPurchaseProductPicker(){
   const rows=products.filter(p=>p.is_active!==false).map(p=>{
