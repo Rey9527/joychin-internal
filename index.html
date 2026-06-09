@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.16</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.11.17</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1248,6 +1248,79 @@ const I18N={
     po_create_btn:'建立採購單',po_send_supplier:'標記為已發給供應商 →',
     po_in_production_btn:'標記生產中 →',po_complete_btn:'標記完成 ✓',po_cancel_btn:'取消採購單',
     po_status_section:'狀態',
+    smp_new_title:'新增樣品',smp_stock_qty:'庫存數量',smp_linked_inq:'關聯詢價',
+    lbl_optional_select:'— 選填 —',smp_go_inquiry:'→ 前往詢價單',
+    smp_save_basic:'儲存基本資料',btn_delete_sample:'刪除樣品',
+    smp_request_section:'索取記錄（向供應商）',smp_add_request:'+ 向供應商索取',
+    smp_request_date:'索取日期',smp_confirm_request:'確認索取',
+    smp_received:'已收到',smp_supplier_shipped:'供應商已出貨',
+    smp_mark_received:'標記已收到',smp_pending_ship:'待出貨',
+    smp_copy_email:'複製郵件內容',smp_no_requests:'尚無索取記錄',
+    smp_ship_section:'寄出記錄（給客戶）',smp_add_ship:'+ 寄給客戶',
+    smp_ship_date:'寄出日期',smp_confirm_ship:'確認寄出',
+    smp_fb_approved:'客戶接受',smp_fb_rejected:'客戶拒絕',smp_fb_revision:'需修改',
+    smp_fb_result:'回饋結果',smp_fb_content:'回饋內容',smp_save_fb:'儲存回饋',
+    smp_no_ships:'尚無寄出記錄',smp_record_fb:'登記回饋',
+    smp_feedback_prefix:'回饋：',smp_unknown_customer:'未知客戶',smp_shipped_badge:'已寄出',
+    btn_edit:'編輯',btn_delete:'刪除',lbl_qty_label:'數量',
+    cmp_new_title:'新增客訴',cmp_no_label:'客訴編號',cmp_source_label:'來源',
+    cmp_date_label:'發現日期',cmp_order_label:'關聯客戶訂單',cmp_po_label:'關聯採購單',
+    cmp_ship_label:'關聯船運',cmp_product_label:'問題產品',cmp_defect_qty:'異常數量',
+    cmp_defect_desc:'異常描述',cmp_credit_no:'折讓單編號',cmp_credit_ph:'取得後填入',
+    cmp_resolution_label:'處理結果',cmp_create_btn:'建立客訴',cmp_trace_chain:'追溯鏈',
+    cmp_chain_order:'客戶訂單',cmp_chain_po:'採購單',cmp_chain_ship:'船運批次',
+    sh_vessel_info:'🚢 船隻資訊',sh_confirm_receipt:'✓ 確認入庫',
+    sh_eta_overdue:'⚠ ETA 已到',sh_etd_overdue:'⚠ ETD 已到',
+    sh_cargo_section:'貨物明細',sh_no_po_hint:'請先關聯採購單，貨物明細將自動帶入',
+    sh_expected_qty:'預期數量',sh_receipt_status:'收貨狀態',
+    sh_item_received:'✓ 已收到',sh_item_missing:'✗ 短缺/未到',sh_item_unknown:'— 未確認',sh_item_short:'✗ 短缺',
+    sh_linked_po_section:'關聯採購單',sh_select_po:'— 選擇採購單 —',sh_attach_btn:'+ 掛入',
+    sh_acct_prefix:' / 會計單號：',sh_no_po:'尚未關聯採購單',
+    sh_docs_section:'文件',sh_loading:'載入中…',sh_upload_docs:'上傳文件',
+    sh_doc_type_label:'文件類型',
+    sh_doc_invoice:'商業發票 Invoice',sh_doc_packing:'裝箱單 Packing List',
+    sh_doc_bl:'提單 B/L',sh_doc_cert:'品質證明 Certificate',sh_doc_other:'其他 Other',
+    sh_select_pdf:'選擇 PDF',sh_upload_btn:'上傳',sh_no_docs:'尚無文件',
+    sh_preview:'預覽',sh_download:'下載',
+    sh_new_title:'新增船運批次',sh_no_label:'船運編號',sh_carrier:'承運商',
+    sh_vessel_name:'船名 / 航班',sh_container_type:'櫃型',sh_not_set:'— 未設定 —',
+    sh_pol:'起運港',sh_pod:'目的港',sh_po_count_suffix:' 筆採購單',
+    sh_container_ph:'— 櫃型 —',sh_create_btn:'建立',
+    inq_closed:'已結案',
+    inq_created_label:'詢價建立日',inq_tracking_label:'供應商回覆追蹤',
+    inq_not_tracked:'目前不列入未回覆追蹤',
+    inq_days_overdue:'已 {n} 天未回覆',inq_days_waiting:'已等待 {n} 天',
+    inq_update_status:'更新狀態',inq_supplier_reply:'供應商回覆',
+    inq_can_make:'能否生產',inq_can_make_tbd:'待確認',inq_can_make_yes:'可以',
+    inq_can_make_no:'不可以',inq_can_make_mod:'需修改規格',
+    inq_lead_time:'交期',inq_lead_time_ph:'例：30天',
+    inq_moq:'最低起訂量 MOQ',inq_moq_ph:'例：1000m²',
+    inq_raw_material:'原料條件',inq_raw_default:'原料廠商提供',
+    inq_supplier_price:'供應商成本報價（內部）',inq_cost_amount_ph:'成本金額',
+    inq_unit_select:'— 單位 —',
+    inq_toggle_tpl_hide:'收起範本',inq_toggle_tpl_show:'產生詢問供應商訊息',
+    inq_to_catalog:'📦 加入產品目錄',inq_update_cost:'📦 同步更新產品目錄成本',
+    inq_send_to_quote:'收到成本 → 送去報價',
+    inq_tpl_header:'詢問',inq_tpl_recipients:'收件人：',inq_copy_msg:'複製訊息',
+    pd_edit_title:'編輯產品',pd_new_title_lbl:'新增產品',
+    pd_select_supplier:'— 選擇供應商 —',pd_type_label:'類型',pd_no_type:'無',
+    pd_meters_per_roll:'每卷米數',pd_meters_ph:'固定規格填入，客製化留空',
+    pd_thickness:'厚度（μm）',pd_unit_m2:'平方米 m²',pd_unit_m:'米 m',
+    pd_color_variants_label:'顏色 / 變體清單',pd_color_hint:'（如 Yellow、Red… 同價格的顏色選項）',
+    pd_not_set:'尚未設定',pd_color_input_ph:'輸入顏色名稱，按 Enter 新增',pd_add_variant:'+ 新增',
+    pd_printing_variants_label:'印刷變體',pd_printing_hint:'（可選的印刷方式，如 方格、直條…）',
+    pd_printing_input_ph:'輸入印刷方式，按 Enter 新增',
+    pd_review_cycle:'更新週期',pd_review_30:'30 天（油價波動期）',pd_review_60:'60 天',
+    pd_review_90:'90 天（預設）',pd_review_180:'180 天',pd_review_365:'365 天',
+    pd_review_custom:'自訂',pd_review_days_ph:'輸入天數',
+    pd_active_label:'上架狀態',pd_active_on:'上架中',pd_active_off:'已下架',
+    pd_reinquiry:'🔄 重新詢價',
+    cust_detail_title:'客戶詳情',ec_multi_contacts:'此客戶共有 {n} 位聯絡人：',
+    lbl_company:'公司',lbl_email:'Email',lbl_address:'地址',
+    ec_payment_term:'付款條件',ec_review_days:'統一回顧週期（天）',ec_last_review:'上次回顧日期',
+    ec_add_contact:'＋ 新增同公司聯絡人',ec_contact_title:'新增同公司聯絡人',ec_mark_reviewed:'✓ 已回顧',
+    supp_detail_title:'供應商詳情',es_multi_contacts:'此供應商共有 {n} 位聯絡人：',
+    es_specialty:'專長產品',es_salutation:'郵件稱謂',es_salutation_ph:'例：王哥、李總、David',
   },
   en:{
     nav_sales:'Sales',nav_contacts:'Contacts',nav_products:'Products',nav_settings:'Settings',
@@ -1379,6 +1452,79 @@ const I18N={
     po_create_btn:'Create Purchase Order',po_send_supplier:'Send to Supplier →',
     po_in_production_btn:'In Production →',po_complete_btn:'Mark Complete ✓',po_cancel_btn:'Cancel PO',
     po_status_section:'Status',
+    smp_new_title:'New Sample',smp_stock_qty:'Stock Qty',smp_linked_inq:'Linked Inquiry',
+    lbl_optional_select:'— Optional —',smp_go_inquiry:'→ View Inquiry',
+    smp_save_basic:'Save Info',btn_delete_sample:'Delete Sample',
+    smp_request_section:'Sample Requests (from Supplier)',smp_add_request:'+ Request from Supplier',
+    smp_request_date:'Request Date',smp_confirm_request:'Confirm Request',
+    smp_received:'Received',smp_supplier_shipped:'Supplier Shipped',
+    smp_mark_received:'Mark Received',smp_pending_ship:'Pending Shipment',
+    smp_copy_email:'Copy Email',smp_no_requests:'No requests yet',
+    smp_ship_section:'Sample Shipments (to Customer)',smp_add_ship:'+ Ship to Customer',
+    smp_ship_date:'Ship Date',smp_confirm_ship:'Confirm Shipment',
+    smp_fb_approved:'Approved',smp_fb_rejected:'Rejected',smp_fb_revision:'Needs Revision',
+    smp_fb_result:'Feedback Result',smp_fb_content:'Feedback Notes',smp_save_fb:'Save Feedback',
+    smp_no_ships:'No shipments yet',smp_record_fb:'Record Feedback',
+    smp_feedback_prefix:'Feedback: ',smp_unknown_customer:'Unknown Customer',smp_shipped_badge:'Shipped',
+    btn_edit:'Edit',btn_delete:'Delete',lbl_qty_label:'Qty',
+    cmp_new_title:'New Complaint',cmp_no_label:'Complaint No.',cmp_source_label:'Source',
+    cmp_date_label:'Discovered Date',cmp_order_label:'Related Order',cmp_po_label:'Related PO',
+    cmp_ship_label:'Related Shipment',cmp_product_label:'Defective Product',cmp_defect_qty:'Defect Qty',
+    cmp_defect_desc:'Defect Description',cmp_credit_no:'Credit Note No.',cmp_credit_ph:'Fill in when received',
+    cmp_resolution_label:'Resolution',cmp_create_btn:'Create Complaint',cmp_trace_chain:'Traceability',
+    cmp_chain_order:'Customer Order',cmp_chain_po:'Purchase Order',cmp_chain_ship:'Shipment Batch',
+    sh_vessel_info:'🚢 Vessel Info',sh_confirm_receipt:'✓ Confirm Receipt',
+    sh_eta_overdue:'⚠ ETA Passed',sh_etd_overdue:'⚠ ETD Passed',
+    sh_cargo_section:'Cargo Details',sh_no_po_hint:'Link a PO first — cargo items will auto-populate.',
+    sh_expected_qty:'Expected Qty',sh_receipt_status:'Receipt Status',
+    sh_item_received:'✓ Received',sh_item_missing:'✗ Missing/Not Arrived',sh_item_unknown:'— Unknown',sh_item_short:'✗ Short',
+    sh_linked_po_section:'Linked Purchase Orders',sh_select_po:'— Select PO —',sh_attach_btn:'+ Attach',
+    sh_acct_prefix:' / Acct: ',sh_no_po:'No POs linked',
+    sh_docs_section:'Documents',sh_loading:'Loading…',sh_upload_docs:'Upload Document',
+    sh_doc_type_label:'Document Type',
+    sh_doc_invoice:'Commercial Invoice',sh_doc_packing:'Packing List',
+    sh_doc_bl:'Bill of Lading',sh_doc_cert:'Certificate',sh_doc_other:'Other',
+    sh_select_pdf:'Select PDF',sh_upload_btn:'Upload',sh_no_docs:'No documents yet',
+    sh_preview:'Preview',sh_download:'Download',
+    sh_new_title:'New Shipment',sh_no_label:'Shipment No.',sh_carrier:'Carrier',
+    sh_vessel_name:'Vessel / Flight',sh_container_type:'Container Type',sh_not_set:'— Not Set —',
+    sh_pol:'Port of Loading',sh_pod:'Port of Destination',sh_po_count_suffix:' POs',
+    sh_container_ph:'— Type —',sh_create_btn:'Create',
+    inq_closed:'Closed',
+    inq_created_label:'Created Date',inq_tracking_label:'Supplier Reply Tracking',
+    inq_not_tracked:'Not currently tracked',
+    inq_days_overdue:'{n} days no reply',inq_days_waiting:'Waiting {n} days',
+    inq_update_status:'Update Status',inq_supplier_reply:'Supplier Reply',
+    inq_can_make:'Can Produce?',inq_can_make_tbd:'TBD',inq_can_make_yes:'Yes',
+    inq_can_make_no:'No',inq_can_make_mod:'Spec Modification Needed',
+    inq_lead_time:'Lead Time',inq_lead_time_ph:'e.g. 30 days',
+    inq_moq:'MOQ',inq_moq_ph:'e.g. 1000m²',
+    inq_raw_material:'Raw Material',inq_raw_default:'Supplied by Manufacturer',
+    inq_supplier_price:'Supplier Cost Quote (Internal)',inq_cost_amount_ph:'Cost Amount',
+    inq_unit_select:'— Unit —',
+    inq_toggle_tpl_hide:'Hide Template',inq_toggle_tpl_show:'Generate Supplier Message',
+    inq_to_catalog:'📦 Add to Catalog',inq_update_cost:'📦 Sync Cost to Catalog',
+    inq_send_to_quote:'Got Cost → Send to Quote',
+    inq_tpl_header:'Message for',inq_tpl_recipients:'Recipients: ',inq_copy_msg:'Copy Message',
+    pd_edit_title:'Edit Product',pd_new_title_lbl:'New Product',
+    pd_select_supplier:'— Select Supplier —',pd_type_label:'Type',pd_no_type:'None',
+    pd_meters_per_roll:'Meters/Roll',pd_meters_ph:'Fixed spec; leave blank if custom',
+    pd_thickness:'Thickness (μm)',pd_unit_m2:'Square Meter m²',pd_unit_m:'Meter m',
+    pd_color_variants_label:'Colors / Variants',pd_color_hint:'(e.g. Yellow, Red — same-price color options)',
+    pd_not_set:'Not set',pd_color_input_ph:'Enter color name, press Enter',pd_add_variant:'+ Add',
+    pd_printing_variants_label:'Printing Variants',pd_printing_hint:'(Optional print patterns)',
+    pd_printing_input_ph:'Enter print type, press Enter',
+    pd_review_cycle:'Review Cycle',pd_review_30:'30 days (oil price volatile)',pd_review_60:'60 days',
+    pd_review_90:'90 days (default)',pd_review_180:'180 days',pd_review_365:'365 days',
+    pd_review_custom:'Custom',pd_review_days_ph:'Enter days',
+    pd_active_label:'Active Status',pd_active_on:'Active',pd_active_off:'Inactive',
+    pd_reinquiry:'🔄 Re-Inquire',
+    cust_detail_title:'Customer Details',ec_multi_contacts:'This customer has {n} contacts:',
+    lbl_company:'Company',lbl_email:'Email',lbl_address:'Address',
+    ec_payment_term:'Payment Term',ec_review_days:'Review Cycle (days)',ec_last_review:'Last Reviewed',
+    ec_add_contact:'+ Add Same-Company Contact',ec_contact_title:'Add Same-Company Contact',ec_mark_reviewed:'✓ Mark Reviewed',
+    supp_detail_title:'Supplier Details',es_multi_contacts:'This supplier has {n} contacts:',
+    es_specialty:'Product Specialty',es_salutation:'Email Salutation',es_salutation_ph:'e.g. Mr. Wang, David',
   },
   th:{
     nav_sales:'ขาย',nav_contacts:'รายชื่อ',nav_products:'สินค้า',nav_settings:'ตั้งค่า',
@@ -1510,6 +1656,79 @@ const I18N={
     po_create_btn:'สร้างใบสั่งซื้อ',po_send_supplier:'ส่งให้ซัพพลายเออร์ →',
     po_in_production_btn:'กำลังผลิต →',po_complete_btn:'ทำเครื่องหมายว่าเสร็จสิ้น ✓',po_cancel_btn:'ยกเลิกใบสั่งซื้อ',
     po_status_section:'สถานะ',
+    smp_new_title:'ตัวอย่างใหม่',smp_stock_qty:'จำนวนสต็อก',smp_linked_inq:'ใบสอบถามที่เชื่อมโยง',
+    lbl_optional_select:'— ไม่บังคับ —',smp_go_inquiry:'→ ดูใบสอบถาม',
+    smp_save_basic:'บันทึกข้อมูล',btn_delete_sample:'ลบตัวอย่าง',
+    smp_request_section:'บันทึกการขอตัวอย่าง (จากซัพพลายเออร์)',smp_add_request:'+ ขอจากซัพพลายเออร์',
+    smp_request_date:'วันที่ขอ',smp_confirm_request:'ยืนยันการขอ',
+    smp_received:'ได้รับแล้ว',smp_supplier_shipped:'ซัพพลายเออร์จัดส่งแล้ว',
+    smp_mark_received:'ทำเครื่องหมายว่าได้รับแล้ว',smp_pending_ship:'รอจัดส่ง',
+    smp_copy_email:'คัดลอกอีเมล',smp_no_requests:'ยังไม่มีการขอ',
+    smp_ship_section:'บันทึกการจัดส่ง (ถึงลูกค้า)',smp_add_ship:'+ จัดส่งให้ลูกค้า',
+    smp_ship_date:'วันที่จัดส่ง',smp_confirm_ship:'ยืนยันการจัดส่ง',
+    smp_fb_approved:'ลูกค้ายอมรับ',smp_fb_rejected:'ลูกค้าปฏิเสธ',smp_fb_revision:'ต้องแก้ไข',
+    smp_fb_result:'ผลตอบรับ',smp_fb_content:'เนื้อหาผลตอบรับ',smp_save_fb:'บันทึกผลตอบรับ',
+    smp_no_ships:'ยังไม่มีการจัดส่ง',smp_record_fb:'บันทึกผลตอบรับ',
+    smp_feedback_prefix:'ผลตอบรับ: ',smp_unknown_customer:'ลูกค้าไม่ทราบ',smp_shipped_badge:'จัดส่งแล้ว',
+    btn_edit:'แก้ไข',btn_delete:'ลบ',lbl_qty_label:'จำนวน',
+    cmp_new_title:'ร้องเรียนใหม่',cmp_no_label:'เลขร้องเรียน',cmp_source_label:'แหล่งที่มา',
+    cmp_date_label:'วันที่พบ',cmp_order_label:'คำสั่งซื้อที่เกี่ยวข้อง',cmp_po_label:'ใบสั่งซื้อที่เกี่ยวข้อง',
+    cmp_ship_label:'การขนส่งที่เกี่ยวข้อง',cmp_product_label:'สินค้าที่มีปัญหา',cmp_defect_qty:'จำนวนที่บกพร่อง',
+    cmp_defect_desc:'คำอธิบายข้อบกพร่อง',cmp_credit_no:'เลขใบลดหนี้',cmp_credit_ph:'กรอกเมื่อได้รับ',
+    cmp_resolution_label:'ผลการแก้ไข',cmp_create_btn:'สร้างการร้องเรียน',cmp_trace_chain:'การตรวจสอบย้อนกลับ',
+    cmp_chain_order:'คำสั่งซื้อลูกค้า',cmp_chain_po:'ใบสั่งซื้อ',cmp_chain_ship:'ชุดการขนส่ง',
+    sh_vessel_info:'🚢 ข้อมูลเรือ',sh_confirm_receipt:'✓ ยืนยันการรับสินค้า',
+    sh_eta_overdue:'⚠ ETA ผ่านแล้ว',sh_etd_overdue:'⚠ ETD ผ่านแล้ว',
+    sh_cargo_section:'รายละเอียดสินค้า',sh_no_po_hint:'เชื่อมโยงใบสั่งซื้อก่อน รายการสินค้าจะเติมอัตโนมัติ',
+    sh_expected_qty:'จำนวนที่คาดหวัง',sh_receipt_status:'สถานะการรับ',
+    sh_item_received:'✓ ได้รับแล้ว',sh_item_missing:'✗ ขาดหาย/ยังไม่มาถึง',sh_item_unknown:'— ยังไม่ยืนยัน',sh_item_short:'✗ ขาด',
+    sh_linked_po_section:'ใบสั่งซื้อที่เชื่อมโยง',sh_select_po:'— เลือกใบสั่งซื้อ —',sh_attach_btn:'+ แนบ',
+    sh_acct_prefix:' / บัญชี: ',sh_no_po:'ยังไม่ได้เชื่อมโยงใบสั่งซื้อ',
+    sh_docs_section:'เอกสาร',sh_loading:'กำลังโหลด…',sh_upload_docs:'อัพโหลดเอกสาร',
+    sh_doc_type_label:'ประเภทเอกสาร',
+    sh_doc_invoice:'ใบแจ้งหนี้พาณิชย์',sh_doc_packing:'ใบบรรจุ',
+    sh_doc_bl:'ใบตราส่งสินค้า',sh_doc_cert:'ใบรับรอง',sh_doc_other:'อื่นๆ',
+    sh_select_pdf:'เลือก PDF',sh_upload_btn:'อัพโหลด',sh_no_docs:'ยังไม่มีเอกสาร',
+    sh_preview:'ดูตัวอย่าง',sh_download:'ดาวน์โหลด',
+    sh_new_title:'การขนส่งใหม่',sh_no_label:'เลขที่การขนส่ง',sh_carrier:'สายการขนส่ง',
+    sh_vessel_name:'เรือ / เที่ยวบิน',sh_container_type:'ประเภทตู้',sh_not_set:'— ยังไม่ตั้งค่า —',
+    sh_pol:'ท่าเรือต้นทาง',sh_pod:'ท่าเรือปลายทาง',sh_po_count_suffix:' ใบสั่งซื้อ',
+    sh_container_ph:'— ประเภทตู้ —',sh_create_btn:'สร้าง',
+    inq_closed:'ปิดแล้ว',
+    inq_created_label:'วันที่สร้าง',inq_tracking_label:'ติดตามการตอบกลับ',
+    inq_not_tracked:'ไม่ได้ติดตามอยู่',
+    inq_days_overdue:'ยังไม่ตอบ {n} วัน',inq_days_waiting:'รอ {n} วัน',
+    inq_update_status:'อัปเดตสถานะ',inq_supplier_reply:'การตอบกลับซัพพลายเออร์',
+    inq_can_make:'ผลิตได้ไหม',inq_can_make_tbd:'รอยืนยัน',inq_can_make_yes:'ได้',
+    inq_can_make_no:'ไม่ได้',inq_can_make_mod:'ต้องแก้ไขสเปค',
+    inq_lead_time:'ระยะเวลา',inq_lead_time_ph:'เช่น 30 วัน',
+    inq_moq:'MOQ',inq_moq_ph:'เช่น 1000m²',
+    inq_raw_material:'วัสดุดิบ',inq_raw_default:'ซัพพลายเออร์จัดหา',
+    inq_supplier_price:'ราคาต้นทุนซัพพลายเออร์ (ภายใน)',inq_cost_amount_ph:'จำนวนต้นทุน',
+    inq_unit_select:'— หน่วย —',
+    inq_toggle_tpl_hide:'ซ่อนแม่แบบ',inq_toggle_tpl_show:'สร้างข้อความถึงซัพพลายเออร์',
+    inq_to_catalog:'📦 เพิ่มเข้าแค็ตตาล็อก',inq_update_cost:'📦 ซิงค์ราคาต้นทุน',
+    inq_send_to_quote:'ได้ต้นทุน → ส่งไปใบเสนอราคา',
+    inq_tpl_header:'ข้อความสำหรับ',inq_tpl_recipients:'ผู้รับ: ',inq_copy_msg:'คัดลอกข้อความ',
+    pd_edit_title:'แก้ไขสินค้า',pd_new_title_lbl:'สินค้าใหม่',
+    pd_select_supplier:'— เลือกซัพพลายเออร์ —',pd_type_label:'ประเภท',pd_no_type:'ไม่มี',
+    pd_meters_per_roll:'เมตร/ม้วน',pd_meters_ph:'กรอกถ้าเป็นมาตรฐาน',
+    pd_thickness:'ความหนา (μm)',pd_unit_m2:'ตารางเมตร m²',pd_unit_m:'เมตร m',
+    pd_color_variants_label:'สี / รูปแบบ',pd_color_hint:'(เช่น Yellow, Red — ตัวเลือกสีราคาเดียวกัน)',
+    pd_not_set:'ยังไม่ได้ตั้งค่า',pd_color_input_ph:'ป้อนชื่อสี กด Enter เพิ่ม',pd_add_variant:'+ เพิ่ม',
+    pd_printing_variants_label:'รูปแบบการพิมพ์',pd_printing_hint:'(รูปแบบการพิมพ์ที่เลือกได้)',
+    pd_printing_input_ph:'ป้อนรูปแบบการพิมพ์ กด Enter',
+    pd_review_cycle:'รอบการตรวจสอบ',pd_review_30:'30 วัน (ราคาน้ำมันผันผวน)',pd_review_60:'60 วัน',
+    pd_review_90:'90 วัน (ค่าเริ่มต้น)',pd_review_180:'180 วัน',pd_review_365:'365 วัน',
+    pd_review_custom:'กำหนดเอง',pd_review_days_ph:'ป้อนจำนวนวัน',
+    pd_active_label:'สถานะการใช้งาน',pd_active_on:'ใช้งาน',pd_active_off:'ไม่ใช้งาน',
+    pd_reinquiry:'🔄 สอบถามใหม่',
+    cust_detail_title:'รายละเอียดลูกค้า',ec_multi_contacts:'ลูกค้านี้มี {n} ผู้ติดต่อ:',
+    lbl_company:'บริษัท',lbl_email:'อีเมล',lbl_address:'ที่อยู่',
+    ec_payment_term:'เงื่อนไขการชำระเงิน',ec_review_days:'รอบรีวิว (วัน)',ec_last_review:'รีวิวล่าสุด',
+    ec_add_contact:'+ เพิ่มผู้ติดต่อบริษัทเดียวกัน',ec_contact_title:'เพิ่มผู้ติดต่อบริษัทเดียวกัน',ec_mark_reviewed:'✓ ทำเครื่องหมายรีวิวแล้ว',
+    supp_detail_title:'รายละเอียดซัพพลายเออร์',es_multi_contacts:'ซัพพลายเออร์นี้มี {n} ผู้ติดต่อ:',
+    es_specialty:'ความเชี่ยวชาญสินค้า',es_salutation:'คำขึ้นต้นอีเมล',es_salutation_ph:'เช่น คุณหวัง, คุณเดวิด',
   }
 }
 let _lang=localStorage.getItem('joychin_lang')||'zh'
@@ -1858,6 +2077,10 @@ const QUO_STATUS=[
   {id:'rejected',label:'客戶拒絕',color:'#A32D2D',bg:'#FCEBEB'},
   {id:'superseded',label:'已取代',color:'#aaa',bg:'#f5f5f2'},
 ]
+const _INQ_KEY={pending:'inq_pending',asked:'inq_asked',received:'inq_received',sent_to_quote:'inq_sent_quote',closed:'inq_closed'}
+const _QUO_KEY={draft:'q_draft',sent:'q_sent',sample_pending:'q_sample_pending',sample_review:'q_sample_review',accepted:'q_accepted',rejected:'q_rejected',superseded:'q_superseded'}
+function inqSObj(s){const o=sObj(s,INQ_STATUS);return{...o,label:t(_INQ_KEY[s])||o.label||s}}
+function quoSObj(s){const o=sObj(s,QUO_STATUS);return{...o,label:t(_QUO_KEY[s])||o.label||s}}
 
 let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteItems=[],settings={},products=[]
 let productViewMode=localStorage.getItem('productViewMode')||'grid'
@@ -2086,20 +2309,20 @@ function openSampleModal(id){
     // 新增模式
     const supOpts=[...new Set(suppliers.map(s=>s.company).filter(Boolean))].sort().map(co=>'<option value="'+esc(co)+'">'+esc(co)+'</option>').join('')
     document.getElementById('modal-sample-hd').innerHTML=
-      '<div style="font-size:14px;font-weight:600">新增樣品</div>'+
+      '<div style="font-size:14px;font-weight:600">'+t('smp_new_title')+'</div>'+
       '<button class="modal-close" onclick="closeModal(\'modal-sample\')">×</button>'
     document.getElementById('modal-sample-bd').innerHTML=
       '<div class="grid-2" style="margin-bottom:10px">'+
-      '<div><label>產品名稱 <span class="req">*</span></label><input id="sm-name" /></div>'+
-      '<div><label>規格</label><input id="sm-spec" /></div>'+
-      '<div><label>供應商</label><select id="sm-supplier"><option value="">— 選擇 —</option>'+supOpts+'</select></div>'+
+      '<div><label>'+t('lbl_product')+' <span class="req">*</span></label><input id="sm-name" /></div>'+
+      '<div><label>'+t('lbl_spec')+'</label><input id="sm-spec" /></div>'+
+      '<div><label>'+t('lbl_supplier')+'</label><select id="sm-supplier"><option value="">'+t('ord_select')+'</option>'+supOpts+'</select></div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
-      '<div><label>庫存數量</label><input id="sm-qty" type="number" value="0" /></div>'+
-      '<div><label>單位</label><input id="sm-unit" placeholder="例：pcs, rolls" /></div></div>'+
-      '<div><label>關聯詢價</label><select id="sm-inq" onchange="smInqChange()"><option value="">— 選填 —</option>'+inquiries.map(inq=>'<option value="'+esc(inq.id)+'">'+esc(inq.id)+(inq.customer?' — '+esc(displayCustomerName(inq.customer)):'')+(inq.product?' — '+esc(inq.product):'')+' </option>').join('')+'</select></div>'+
+      '<div><label>'+t('smp_stock_qty')+'</label><input id="sm-qty" type="number" value="0" /></div>'+
+      '<div><label>'+t('lbl_unit')+'</label><input id="sm-unit" placeholder="例：pcs, rolls" /></div></div>'+
+      '<div><label>'+t('smp_linked_inq')+'</label><select id="sm-inq" onchange="smInqChange()"><option value="">'+t('lbl_optional_select')+'</option>'+inquiries.map(inq=>'<option value="'+esc(inq.id)+'">'+esc(inq.id)+(inq.customer?' — '+esc(displayCustomerName(inq.customer)):'')+(inq.product?' — '+esc(inq.product):'')+' </option>').join('')+'</select></div>'+
       '</div>'+
-      '<div style="margin-bottom:14px"><label>備註</label><textarea id="sm-notes"></textarea></div>'+
-      '<button class="btn btn-primary" onclick="_createSample()">新增樣品</button>'
+      '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea id="sm-notes"></textarea></div>'+
+      '<button class="btn btn-primary" onclick="_createSample()">'+t('smp_new_title')+'</button>'
   } else {
     _renderSampleModal()
   }
@@ -2158,45 +2381,45 @@ function _renderSampleModal(){
   const supOpts=suppliers.map(x=>'<option value="'+x.id+'" '+(x.id===s.supplier_id?'selected':'')+'>'+x.company+'</option>').join('')
   const inqObj=s.from_inquiry_id?inquiries.find(x=>String(x.id)===String(s.from_inquiry_id)):null
   const inqDisplay=inqObj?esc(inqObj.id)+(inqObj.customer?' — '+esc(displayCustomerName(inqObj.customer)):'')+(inqObj.product?' — '+esc(inqObj.product):''):(s.from_inquiry_id?esc(s.from_inquiry_id):'')
-  const inqSelectOpts='<option value="">— 選填 —</option>'+inquiries.map(inq=>'<option value="'+esc(inq.id)+'" '+(String(s.from_inquiry_id)===String(inq.id)?'selected':'')+'>'+esc(inq.id)+(inq.customer?' — '+esc(displayCustomerName(inq.customer)):'')+(inq.product?' — '+esc(inq.product):'')+' </option>').join('')
-  const inqLink='<div><label>關聯詢價</label><div style="display:flex;gap:6px;align-items:center">'+
+  const inqSelectOpts='<option value="">'+t('lbl_optional_select')+'</option>'+inquiries.map(inq=>'<option value="'+esc(inq.id)+'" '+(String(s.from_inquiry_id)===String(inq.id)?'selected':'')+'>'+esc(inq.id)+(inq.customer?' — '+esc(displayCustomerName(inq.customer)):'')+(inq.product?' — '+esc(inq.product):'')+' </option>').join('')
+  const inqLink='<div><label>'+t('smp_linked_inq')+'</label><div style="display:flex;gap:6px;align-items:center">'+
     '<select id="sm-e-inq" style="flex:1">'+inqSelectOpts+'</select>'+
-    (s.from_inquiry_id?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="closeModal(\'modal-sample\');switchTab(\'inquiry\');setTimeout(()=>openInqModal(\''+esc(String(s.from_inquiry_id))+'\'),80)">→ 前往詢價單</button>':'')+
+    (s.from_inquiry_id?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="closeModal(\'modal-sample\');switchTab(\'inquiry\');setTimeout(()=>openInqModal(\''+esc(String(s.from_inquiry_id))+'\'),80)">'+t('smp_go_inquiry')+'</button>':'')+
     '</div>'+
     (inqDisplay?'<div style="font-size:11px;color:#888;margin-top:3px">'+inqDisplay+'</div>':'')+
     '</div>'
   let html=
-    '<div class="section-title">基本資料</div>'+
+    '<div class="section-title">'+t('ord_basic_info')+'</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>產品名稱 <span class="req">*</span></label><input id="sm-e-name" value="'+esc(s.product_name)+'" /></div>'+
-    '<div><label>規格</label><input id="sm-e-spec" value="'+esc(s.spec||'')+'" /></div>'+
-    '<div><label>供應商</label><select id="sm-e-supplier"><option value="">— 選擇 —</option>'+supOpts+'</select></div>'+
+    '<div><label>'+t('lbl_product')+' <span class="req">*</span></label><input id="sm-e-name" value="'+esc(s.product_name)+'" /></div>'+
+    '<div><label>'+t('lbl_spec')+'</label><input id="sm-e-spec" value="'+esc(s.spec||'')+'" /></div>'+
+    '<div><label>'+t('lbl_supplier')+'</label><select id="sm-e-supplier"><option value="">'+t('ord_select')+'</option>'+supOpts+'</select></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
-    '<div><label>庫存數量</label><input id="sm-e-qty" type="number" value="'+(s.stock_qty??0)+'" /></div>'+
-    '<div><label>單位</label><input id="sm-e-unit" value="'+esc(s.unit||'')+'" /></div></div>'+
+    '<div><label>'+t('smp_stock_qty')+'</label><input id="sm-e-qty" type="number" value="'+(s.stock_qty??0)+'" /></div>'+
+    '<div><label>'+t('lbl_unit')+'</label><input id="sm-e-unit" value="'+esc(s.unit||'')+'" /></div></div>'+
     inqLink+
     '</div>'+
-    '<div style="margin-bottom:12px"><label>備註</label><textarea id="sm-e-notes">'+esc(s.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:12px"><label>'+t('lbl_notes')+'</label><textarea id="sm-e-notes">'+esc(s.notes||'')+'</textarea></div>'+
     '<div style="display:flex;gap:8px;margin-bottom:4px">'+
-    '<button class="btn btn-primary btn-sm" onclick="saveSampleBasic()">儲存基本資料</button>'+
-    '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteSample()">刪除樣品</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="saveSampleBasic()">'+t('smp_save_basic')+'</button>'+
+    '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;border-color:#F09595" onclick="deleteSample()">'+t('btn_delete_sample')+'</button>'+
     '</div>'+
     '<div class="divider"></div>'
 
   // Section 2: Requests in
   html+=
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-    '<div class="section-title" style="margin-bottom:0">索取記錄（向供應商）</div>'+
-    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-req-form\')">+ 向供應商索取</button></div>'+
+    '<div class="section-title" style="margin-bottom:0">'+t('smp_request_section')+'</div>'+
+    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-req-form\')">'+t('smp_add_request')+'</button></div>'+
     '<div id="sm-req-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
     '<div class="grid-2" style="margin-bottom:8px">'+
-    '<div><label>數量 <span class="req">*</span></label><input id="smr-qty" type="number" min="0" /></div>'+
-    '<div><label>索取日期</label><input id="smr-date" type="date" value="'+today+'" /></div>'+
+    '<div><label>'+t('lbl_qty_label')+' <span class="req">*</span></label><input id="smr-qty" type="number" min="0" /></div>'+
+    '<div><label>'+t('smp_request_date')+'</label><input id="smr-date" type="date" value="'+today+'" /></div>'+
     '</div>'+
-    '<div style="margin-bottom:8px"><label>備註</label><input id="smr-notes" /></div>'+
+    '<div style="margin-bottom:8px"><label>'+t('lbl_notes')+'</label><input id="smr-notes" /></div>'+
     '<div style="display:flex;gap:8px">'+
-    '<button class="btn btn-primary btn-sm" onclick="submitSampleRequest()">確認索取</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-req-form\')">取消</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="submitSampleRequest()">'+t('smp_confirm_request')+'</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-req-form\')">'+t('btn_cancel')+'</button>'+
     '</div></div>'
 
   if(reqs.length){
@@ -2205,13 +2428,13 @@ function _renderSampleModal(){
       const supShipped=(r.supplier_shipped_status||'pending')==='shipped'
       let stBadge,actionBtn=''
       if(isReceived){
-        stBadge='<span class="badge" style="background:#EAF3DE;color:#3B6D11;border:1px solid #3B6D11">已收到'+(r.received_date?' · '+r.received_date:'')+' </span>'
+        stBadge='<span class="badge" style="background:#EAF3DE;color:#3B6D11;border:1px solid #3B6D11">'+t('smp_received')+(r.received_date?' · '+r.received_date:'')+' </span>'
       }else if(supShipped){
-        stBadge='<span class="badge" style="background:#E6F1FB;color:#185FA5;border:1px solid #185FA5">供應商已出貨'+(r.shipped_date?' · '+r.shipped_date:'')+' </span>'
-        actionBtn='<button class="btn btn-ghost btn-sm" style="color:#3B6D11;white-space:nowrap" onclick="markRequestReceived('+r.id+','+r.qty+')">標記已收到</button>'
+        stBadge='<span class="badge" style="background:#E6F1FB;color:#185FA5;border:1px solid #185FA5">'+t('smp_supplier_shipped')+(r.shipped_date?' · '+r.shipped_date:'')+' </span>'
+        actionBtn='<button class="btn btn-ghost btn-sm" style="color:#3B6D11;white-space:nowrap" onclick="markRequestReceived('+r.id+','+r.qty+')">'+t('smp_mark_received')+'</button>'
       }else{
-        stBadge='<span class="badge" style="background:#f0f0f0;color:#888;border:1px solid #ccc">待出貨</span>'
-        actionBtn='<button class="btn btn-ghost btn-sm" style="color:#185FA5;white-space:nowrap" onclick="markSupplierShipped('+r.id+')">供應商已出貨</button>'
+        stBadge='<span class="badge" style="background:#f0f0f0;color:#888;border:1px solid #ccc">'+t('smp_pending_ship')+'</span>'
+        actionBtn='<button class="btn btn-ghost btn-sm" style="color:#185FA5;white-space:nowrap" onclick="markSupplierShipped('+r.id+')">'+t('smp_supplier_shipped')+'</button>'
       }
       let emailTplHtml=''
       if(!isReceived){
@@ -2229,7 +2452,7 @@ function _renderSampleModal(){
         emailTplHtml='<div id="'+tplId+'" style="display:none;margin-top:8px;padding:10px;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px">'+
           '<div style="font-size:11px;font-weight:500;color:#444;margin-bottom:6px">Subject: '+esc(emailSubj)+'</div>'+
           '<textarea id="'+tplId+'-body" rows="13" style="width:100%;font-size:11px;font-family:monospace;border:1px solid #e5e5e0;border-radius:4px;padding:8px;resize:vertical;line-height:1.5">'+esc(body)+'</textarea>'+
-          '<div style="margin-top:6px"><button class="btn btn-ghost btn-sm" onclick="copySmEmailTpl(\''+tplId+'-body\')">複製郵件內容</button></div>'+
+          '<div style="margin-top:6px"><button class="btn btn-ghost btn-sm" onclick="copySmEmailTpl(\''+tplId+'-body\')">'+t('smp_copy_email')+'</button></div>'+
           '</div>'
       }
       html+='<div id="smreq-row-'+r.id+'" style="padding:8px 0;border-bottom:1px solid #f0f0eb">'+
@@ -2237,14 +2460,14 @@ function _renderSampleModal(){
         '<span style="font-size:11px;color:#555">'+(r.requested_date||'—')+'</span>'+
         '<span style="font-size:11px;color:#555">'+(r.qty!=null?r.qty:'—')+' '+esc(s.unit||'')+'</span>'+
         '<span style="font-size:11px;color:#888;flex:1">'+esc(r.notes||'')+'</span>'+
-        (!isReceived?'<button class="btn btn-ghost btn-sm" style="height:28px;white-space:nowrap" onclick="editRequestRow('+r.id+')">編輯</button>':'')+
-        '<button class="btn btn-ghost btn-sm" style="height:28px;color:#A32D2D;white-space:nowrap" onclick="deleteRequest('+r.id+')">刪除</button>'+
+        (!isReceived?'<button class="btn btn-ghost btn-sm" style="height:28px;white-space:nowrap" onclick="editRequestRow('+r.id+')">'+t('btn_edit')+'</button>':'')+
+        '<button class="btn btn-ghost btn-sm" style="height:28px;color:#A32D2D;white-space:nowrap" onclick="deleteRequest('+r.id+')">'+t('btn_delete')+'</button>'+
         '</div>'+
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+stBadge+actionBtn+'</div>'+
         emailTplHtml+'</div>'
     })
   } else {
-    html+='<div style="font-size:12px;color:#aaa;padding:8px 0;margin-bottom:4px">尚無索取記錄</div>'
+    html+='<div style="font-size:12px;color:#aaa;padding:8px 0;margin-bottom:4px">'+t('smp_no_requests')+'</div>'
   }
 
   html+='<div class="divider"></div>'
@@ -2254,55 +2477,55 @@ function _renderSampleModal(){
   const custOpts=custCosShip.map(co=>{const c=customers.find(x=>x.company===co);return '<option value="'+c.id+'">'+esc(co)+'</option>'}).join('')
   html+=
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-    '<div class="section-title" style="margin-bottom:0">寄出記錄（給客戶）</div>'+
-    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-ship-form\')">+ 寄給客戶</button></div>'+
+    '<div class="section-title" style="margin-bottom:0">'+t('smp_ship_section')+'</div>'+
+    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-ship-form\')">'+t('smp_add_ship')+'</button></div>'+
     '<div id="sm-ship-form" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:12px;margin-bottom:10px">'+
     '<div class="grid-2" style="margin-bottom:8px">'+
-    '<div><label>客戶 <span class="req">*</span></label><select id="sms-customer"><option value="">— 選擇 —</option>'+custOpts+'</select></div>'+
-    '<div><label>寄出日期</label><input id="sms-date" type="date" value="'+today+'" /></div>'+
-    '<div><label>快遞單號</label><input id="sms-tracking" /></div>'+
-    '<div><label>數量 <span class="req">*</span></label><input id="sms-qty" type="number" min="0" /></div>'+
+    '<div><label>'+t('lbl_customer')+' <span class="req">*</span></label><select id="sms-customer"><option value="">'+t('ord_select')+'</option>'+custOpts+'</select></div>'+
+    '<div><label>'+t('smp_ship_date')+'</label><input id="sms-date" type="date" value="'+today+'" /></div>'+
+    '<div><label>'+t('lbl_tracking_no')+'</label><input id="sms-tracking" /></div>'+
+    '<div><label>'+t('lbl_qty_label')+' <span class="req">*</span></label><input id="sms-qty" type="number" min="0" /></div>'+
     '</div>'+
     '<div style="display:flex;gap:8px">'+
-    '<button class="btn btn-primary btn-sm" onclick="submitSampleShipment()">確認寄出</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-ship-form\')">取消</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="submitSampleShipment()">'+t('smp_confirm_ship')+'</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-ship-form\')">'+t('btn_cancel')+'</button>'+
     '</div></div>'
 
   if(ships.length){
-    const fbStatusMap={approved:'客戶接受',rejected:'客戶拒絕',need_revision:'需修改'}
+    const fbStatusMap={approved:t('smp_fb_approved'),rejected:t('smp_fb_rejected'),need_revision:t('smp_fb_revision')}
     ships.forEach(r=>{
       const cust=customers.find(c=>c.id===r.customer_id)
       const isShipped=r.status==='shipped'
       let stBadge
-      if(isShipped)stBadge='<span class="badge" style="background:#E6F1FB;color:#185FA5;border:1px solid #185FA5">已寄出</span>'
-      else if(r.status==='approved')stBadge='<span class="badge" style="background:#EAF3DE;color:#3B6D11;border:1px solid #3B6D11">客戶接受</span>'
-      else if(r.status==='rejected')stBadge='<span class="badge" style="background:#FCEBEB;color:#A32D2D;border:1px solid #A32D2D">客戶拒絕</span>'
-      else if(r.status==='need_revision')stBadge='<span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #854F0B">需修改</span>'
+      if(isShipped)stBadge='<span class="badge" style="background:#E6F1FB;color:#185FA5;border:1px solid #185FA5">'+t('smp_shipped_badge')+'</span>'
+      else if(r.status==='approved')stBadge='<span class="badge" style="background:#EAF3DE;color:#3B6D11;border:1px solid #3B6D11">'+t('smp_fb_approved')+'</span>'
+      else if(r.status==='rejected')stBadge='<span class="badge" style="background:#FCEBEB;color:#A32D2D;border:1px solid #A32D2D">'+t('smp_fb_rejected')+'</span>'
+      else if(r.status==='need_revision')stBadge='<span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #854F0B">'+t('smp_fb_revision')+'</span>'
       else stBadge='<span class="badge" style="background:#f0f0f0;color:#888">'+r.status+'</span>'
       html+='<div style="padding:8px 0;border-bottom:1px solid #f0f0eb">'+
         '<div style="display:flex;align-items:center;gap:8px;font-size:12px">'+
-        '<span style="flex:1">'+(cust?cust.company:'未知客戶')+' · '+(r.shipped_date||'—')+
-        (r.tracking_no?' · '+r.tracking_no:'')+' · 數量 '+(r.qty||'—')+' '+(s.unit||'')+'</span>'+
+        '<span style="flex:1">'+(cust?cust.company:t('smp_unknown_customer'))+' · '+(r.shipped_date||'—')+
+        (r.tracking_no?' · '+r.tracking_no:'')+' · '+t('lbl_qty_label')+' '+(r.qty||'—')+' '+(s.unit||'')+'</span>'+
         stBadge+
-        (isShipped?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="toggleSmForm(\'sm-fb-'+r.id+'\')">登記回饋</button>':'')+
+        (isShipped?'<button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="toggleSmForm(\'sm-fb-'+r.id+'\')">'+t('smp_record_fb')+'</button>':'')+
         '</div>'+
-        (r.feedback?'<div style="font-size:11px;color:#666;margin-top:3px">回饋：'+esc(r.feedback)+'</div>':'')+
+        (r.feedback?'<div style="font-size:11px;color:#666;margin-top:3px">'+t('smp_feedback_prefix')+esc(r.feedback)+'</div>':'')+
         '<div id="sm-fb-'+r.id+'" style="display:none;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:10px;margin-top:6px">'+
         '<div class="grid-2" style="margin-bottom:8px">'+
-        '<div><label>回饋結果</label><select id="smfbs-'+r.id+'">'+
-        '<option value="approved">客戶接受</option>'+
-        '<option value="rejected">客戶拒絕</option>'+
-        '<option value="need_revision">需修改</option>'+
+        '<div><label>'+t('smp_fb_result')+'</label><select id="smfbs-'+r.id+'">'+
+        '<option value="approved">'+t('smp_fb_approved')+'</option>'+
+        '<option value="rejected">'+t('smp_fb_rejected')+'</option>'+
+        '<option value="need_revision">'+t('smp_fb_revision')+'</option>'+
         '</select></div></div>'+
-        '<div style="margin-bottom:8px"><label>回饋內容</label><textarea id="smfbt-'+r.id+'">'+esc(r.feedback||'')+'</textarea></div>'+
+        '<div style="margin-bottom:8px"><label>'+t('smp_fb_content')+'</label><textarea id="smfbt-'+r.id+'">'+esc(r.feedback||'')+'</textarea></div>'+
         '<div style="display:flex;gap:8px">'+
-        '<button class="btn btn-primary btn-sm" onclick="submitShipFeedback('+r.id+')">儲存回饋</button>'+
-        '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-fb-'+r.id+'\')">取消</button>'+
+        '<button class="btn btn-primary btn-sm" onclick="submitShipFeedback('+r.id+')">'+t('smp_save_fb')+'</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="toggleSmForm(\'sm-fb-'+r.id+'\')">'+t('btn_cancel')+'</button>'+
         '</div></div>'+
         '</div>'
     })
   } else {
-    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">尚無寄出記錄</div>'
+    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">'+t('smp_no_ships')+'</div>'
   }
 
   document.getElementById('modal-sample-bd').innerHTML=html
@@ -2724,8 +2947,8 @@ const COMPLAINT_STATUS=[
   {id:'pending_credit',label:'等待折讓單',color:'#854F0B',bg:'#FAEEDA'},
   {id:'resolved',label:'已結案',color:'#3B6D11',bg:'#EAF3DE'},
 ]
-function complaintSourceObj(src){return sObj(src,COMPLAINT_SOURCE)}
-function complaintStatusObj(st){return sObj(st,COMPLAINT_STATUS)}
+function complaintSourceObj(src){const o=sObj(src,COMPLAINT_SOURCE);return{...o,label:t('cmp_'+src)||o.label||src}}
+function complaintStatusObj(st){const o=sObj(st,COMPLAINT_STATUS);return{...o,label:t('cmp_'+st)||o.label||st}}
 function generateComplaintNo(){
   const d=new Date().toISOString().slice(0,10).replace(/-/g,'')
   const seq=(complaints.filter(c=>c.complaint_no&&c.complaint_no.startsWith('CMP-'+d)).length+1).toString().padStart(3,'0')
@@ -2789,55 +3012,55 @@ function openComplaintModal(id, prefill={}){
     const chainParts=[]
     if(c.related_order_id){
       const ord=orders.find(o=>String(o.id)===String(c.related_order_id))
-      chainParts.push('<span onclick="closeModal(\'modal-complaint\');openOrderModal(\''+esc(String(c.related_order_id))+'\')" style="cursor:pointer;color:#185FA5;text-decoration:underline">客戶訂單 '+esc(String(c.related_order_id))+(ord?.customer?' — '+esc(ord.customer):'')+' </span>')
+      chainParts.push('<span onclick="closeModal(\'modal-complaint\');openOrderModal(\''+esc(String(c.related_order_id))+'\')" style="cursor:pointer;color:#185FA5;text-decoration:underline">'+t('cmp_chain_order')+' '+esc(String(c.related_order_id))+(ord?.customer?' — '+esc(ord.customer):'')+' </span>')
     }
     if(c.related_purchase_order_id){
       const po=purchaseOrders.find(x=>String(x.id)===String(c.related_purchase_order_id))
       const sup=suppliers.find(x=>x.id===po?.supplier_id)
-      chainParts.push('<span onclick="closeModal(\'modal-complaint\');switchTab(\'purchases\');setTimeout(()=>openPurchaseModal(\''+esc(String(c.related_purchase_order_id))+'\'),80)" style="cursor:pointer;color:#185FA5;text-decoration:underline">採購單 '+esc(String(c.related_purchase_order_id))+(sup?' — '+esc(sup.company):'')+' </span>')
+      chainParts.push('<span onclick="closeModal(\'modal-complaint\');switchTab(\'purchases\');setTimeout(()=>openPurchaseModal(\''+esc(String(c.related_purchase_order_id))+'\'),80)" style="cursor:pointer;color:#185FA5;text-decoration:underline">'+t('cmp_chain_po')+' '+esc(String(c.related_purchase_order_id))+(sup?' — '+esc(sup.company):'')+' </span>')
     }
     if(c.related_shipment_id){
       const shp=shipments.find(x=>String(x.id)===String(c.related_shipment_id))
-      chainParts.push('<span onclick="closeModal(\'modal-complaint\');openShipmentModal(\''+c.related_shipment_id+'\')" style="cursor:pointer;color:#185FA5;text-decoration:underline">船運批次 '+(shp?esc(shp.shipment_no):'#'+c.related_shipment_id)+' </span>')
+      chainParts.push('<span onclick="closeModal(\'modal-complaint\');openShipmentModal(\''+c.related_shipment_id+'\')" style="cursor:pointer;color:#185FA5;text-decoration:underline">'+t('cmp_chain_ship')+' '+(shp?esc(shp.shipment_no):'#'+c.related_shipment_id)+' </span>')
     }
     if(chainParts.length){
       chainHtml='<div style="background:#EDF4FC;border:1px solid #C3D9F4;border-radius:4px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#333">'+
-        '<span style="color:#888;margin-right:6px">追溯鏈</span>'+chainParts.join('<span style="color:#aaa;margin:0 4px">→</span>')+
+        '<span style="color:#888;margin-right:6px">'+t('cmp_trace_chain')+'</span>'+chainParts.join('<span style="color:#aaa;margin:0 4px">→</span>')+
         '</div>'
     }
   }
   document.getElementById('modal-complaint-hd').innerHTML=
-    '<div style="font-size:14px;font-weight:600">'+(isNew?'新增客訴':esc(c.complaint_no))+'</div>'+
+    '<div style="font-size:14px;font-weight:600">'+(isNew?t('cmp_new_title'):esc(c.complaint_no))+'</div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-complaint\')">×</button>'
   document.getElementById('modal-complaint-bd').innerHTML=
     chainHtml+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>客訴編號</label><input id="cmp-no" value="'+esc(isNew?generateComplaintNo():c.complaint_no)+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
-    '<div><label>狀態</label><select id="cmp-status">'+COMPLAINT_STATUS.map(s=>'<option value="'+s.id+'" '+((c.status||'open')===s.id?'selected':'')+'>'+(s.label)+'</option>').join('')+'</select></div>'+
-    '<div><label>來源 <span class="req">*</span></label><select id="cmp-source">'+COMPLAINT_SOURCE.map(s=>'<option value="'+s.id+'" '+(c.source===s.id?'selected':'')+'>'+(s.label)+'</option>').join('')+'</select></div>'+
-    '<div><label>發現日期</label><input id="cmp-date" type="date" value="'+((c.created_at||'').slice(0,10)||new Date().toISOString().slice(0,10))+'" /></div>'+
+    '<div><label>'+t('cmp_no_label')+'</label><input id="cmp-no" value="'+esc(isNew?generateComplaintNo():c.complaint_no)+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+    '<div><label>'+t('lbl_status')+'</label><select id="cmp-status">'+COMPLAINT_STATUS.map(s=>'<option value="'+s.id+'" '+((c.status||'open')===s.id?'selected':'')+'>'+t('cmp_'+s.id)+'</option>').join('')+'</select></div>'+
+    '<div><label>'+t('cmp_source_label')+' <span class="req">*</span></label><select id="cmp-source">'+COMPLAINT_SOURCE.map(s=>'<option value="'+s.id+'" '+(c.source===s.id?'selected':'')+'>'+t('cmp_'+s.id)+'</option>').join('')+'</select></div>'+
+    '<div><label>'+t('cmp_date_label')+'</label><input id="cmp-date" type="date" value="'+((c.created_at||'').slice(0,10)||new Date().toISOString().slice(0,10))+'" /></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>客戶</label><select id="cmp-customer">'+custOpts+'</select></div>'+
-    '<div><label>供應商</label><select id="cmp-supplier">'+supOpts+'</select></div>'+
-    '<div><label>關聯客戶訂單</label><select id="cmp-order">'+orderOpts+'</select></div>'+
-    '<div><label>關聯採購單</label><select id="cmp-po">'+poOpts+'</select></div>'+
-    '<div><label>關聯船運</label><select id="cmp-shipment">'+shipOpts+'</select></div>'+
+    '<div><label>'+t('lbl_customer')+'</label><select id="cmp-customer">'+custOpts+'</select></div>'+
+    '<div><label>'+t('lbl_supplier')+'</label><select id="cmp-supplier">'+supOpts+'</select></div>'+
+    '<div><label>'+t('cmp_order_label')+'</label><select id="cmp-order">'+orderOpts+'</select></div>'+
+    '<div><label>'+t('cmp_po_label')+'</label><select id="cmp-po">'+poOpts+'</select></div>'+
+    '<div><label>'+t('cmp_ship_label')+'</label><select id="cmp-shipment">'+shipOpts+'</select></div>'+
     '<div></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>問題產品</label><input id="cmp-product" value="'+esc(effProductName)+'" placeholder="產品名稱" /></div>'+
-    '<div style="display:flex;gap:6px"><div style="flex:1"><label>異常數量</label><input id="cmp-qty" type="number" value="'+(c.defect_qty||'')+'" min="0" step="any" /></div><div style="width:80px"><label>單位</label><input id="cmp-unit" value="'+esc(effUnit)+'" /></div></div>'+
+    '<div><label>'+t('cmp_product_label')+'</label><input id="cmp-product" value="'+esc(effProductName)+'" placeholder="'+t('lbl_product')+'" /></div>'+
+    '<div style="display:flex;gap:6px"><div style="flex:1"><label>'+t('cmp_defect_qty')+'</label><input id="cmp-qty" type="number" value="'+(c.defect_qty||'')+'" min="0" step="any" /></div><div style="width:80px"><label>'+t('lbl_unit')+'</label><input id="cmp-unit" value="'+esc(effUnit)+'" /></div></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>異常描述 <span class="req">*</span></label><textarea id="cmp-desc">'+esc(c.defect_description||'')+'</textarea></div>'+
+    '<div style="margin-bottom:10px"><label>'+t('cmp_defect_desc')+' <span class="req">*</span></label><textarea id="cmp-desc">'+esc(c.defect_description||'')+'</textarea></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>折讓單編號</label><input id="cmp-credit" value="'+esc(c.credit_note_no||'')+'" placeholder="取得後填入" /></div>'+
+    '<div><label>'+t('cmp_credit_no')+'</label><input id="cmp-credit" value="'+esc(c.credit_note_no||'')+'" placeholder="'+t('cmp_credit_ph')+'" /></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>處理結果</label><textarea id="cmp-resolution">'+esc(c.resolution||'')+'</textarea></div>'+
-    '<div style="margin-bottom:14px"><label>備註</label><textarea id="cmp-notes">'+esc(c.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:10px"><label>'+t('cmp_resolution_label')+'</label><textarea id="cmp-resolution">'+esc(c.resolution||'')+'</textarea></div>'+
+    '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea id="cmp-notes">'+esc(c.notes||'')+'</textarea></div>'+
     '<div class="modal-foot">'+
-    '<button class="btn btn-primary" onclick="saveComplaint()">'+( isNew?'建立客訴':'儲存')+'</button>'+
-    (!isNew?'<button class="btn btn-ghost" style="color:#aaa" onclick="deleteComplaint(\''+id+'\')">刪除</button>':'')+
+    '<button class="btn btn-primary" onclick="saveComplaint()">'+(isNew?t('cmp_create_btn'):t('btn_save_info'))+'</button>'+
+    (!isNew?'<button class="btn btn-ghost" style="color:#aaa" onclick="deleteComplaint(\''+id+'\')">'+t('btn_delete')+'</button>':'')+
     '</div>'
   document.getElementById('modal-complaint').classList.add('open')
 }
@@ -2961,10 +3184,12 @@ function clearOrderFilters(){
 }
 
 function shipmentModeLabel(mode){
-  return ({sea:'海運',air:'空運',land:'陸運',express:'快遞'})[mode]||mode||'—'
+  const map={sea:'sh_sea',air:'sh_air',land:'sh_land',express:'sh_express'}
+  return map[mode]?t(map[mode]):mode||'—'
 }
 function shipmentStatusObj(status){
-  return sObj(status,[
+  const keyMap={planned:'sh_planned',booked:'sh_booked',in_transit:'sh_in_transit',customs_clearance:'sh_customs',completed:'sh_completed',cancelled:'sh_cancelled'}
+  const o=sObj(status,[
     {id:'planned',label:'已規劃',color:'#854F0B',bg:'#FAEEDA'},
     {id:'booked',label:'已訂艙',color:'#185FA5',bg:'#E6F1FB'},
     {id:'in_transit',label:'運送中',color:'#534AB7',bg:'#EEEDFE'},
@@ -2972,6 +3197,7 @@ function shipmentStatusObj(status){
     {id:'completed',label:'已完成',color:'#3B6D11',bg:'#EAF3DE'},
     {id:'cancelled',label:'已取消',color:'#888',bg:'#f0f0f0'}
   ])
+  return {...o,label:keyMap[status]?t(keyMap[status]):(o.label||status)}
 }
 function shipmentLinkedPurchases(shipmentId){
   return shipmentPurchaseOrders
@@ -3207,9 +3433,9 @@ function renderShipments(){
       [s.container_no?('櫃號 '+s.container_no):null,s.bl_no?('B/L '+s.bl_no):null,s.etd?('ETD '+s.etd):null,s.eta?('ETA '+s.eta):null].filter(Boolean).join(' · ')+
       '</div></div>'+
       '<div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+
-      '<div style="font-size:11px;color:#888">'+linked.length+' 筆採購單</div>'+
+      '<div style="font-size:11px;color:#888">'+linked.length+t('sh_po_count_suffix')+'</div>'+
       '<select style="font-size:11px;height:26px;padding:2px 24px 2px 6px;width:auto;color:'+(s.container_size?'#1a1a1a':'#aaa')+'" onclick="event.stopPropagation()" onchange="quickSetContainerSize('+s.id+',this.value,this)">'+
-        '<option value=""'+(s.container_size?'':' selected')+'>— 櫃型 —</option>'+
+        '<option value=""'+(s.container_size?'':' selected')+'>'+t('sh_container_ph')+'</option>'+
         '<option value="20gp"'+(s.container_size==='20gp'?' selected':'')+'>20\' GP</option>'+
         '<option value="40gp"'+(s.container_size==='40gp'?' selected':'')+'>40\' GP</option>'+
         '<option value="40hc"'+(s.container_size==='40hc'?' selected':'')+'>40\' HC</option>'+
@@ -3240,9 +3466,9 @@ function openShipmentModal(id){
   document.getElementById('modal-shipment-hd').innerHTML=
     '<div style="font-size:14px;font-weight:600">'+esc(s.shipment_no)+'</div>'+
     '<div style="display:flex;align-items:center;gap:8px">'+
-      '<button class="btn btn-ghost btn-sm" onclick="openShipmentEditModal('+id+')">🚢 船隻資訊</button>'+
-      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D" onclick="deleteShipment('+id+')">刪除</button>'+
-      (s.status==='customs_clearance'?'<button class="btn btn-primary btn-sm" onclick="openShipmentReceivePanel('+id+')">✓ 確認入庫</button>':'')+
+      '<button class="btn btn-ghost btn-sm" onclick="openShipmentEditModal('+id+')">'+t('sh_vessel_info')+'</button>'+
+      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D" onclick="deleteShipment('+id+')">'+t('btn_delete')+'</button>'+
+      (s.status==='customs_clearance'?'<button class="btn btn-primary btn-sm" onclick="openShipmentReceivePanel('+id+')">'+t('sh_confirm_receipt')+'</button>':'')+
       '<button class="modal-close" onclick="closeModal(\'modal-shipment\')">×</button>'+
     '</div>'
   const today=new Date().toISOString().slice(0,10)
@@ -3262,33 +3488,33 @@ function openShipmentModal(id){
       (s.atd?'<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ATD</div><div style="font-size:14px;font-weight:500">'+s.atd+'</div></div>':'')+
       (s.ata?'<div><div style="font-size:11px;color:#aaa;margin-bottom:2px">ATA</div><div style="font-size:14px;font-weight:500">'+s.ata+'</div></div>':'')+
     '</div>'+
-    '<div style="margin-bottom:12px"><div class="section-title" style="margin-bottom:6px">狀態</div>'+
+    '<div style="margin-bottom:12px"><div class="section-title" style="margin-bottom:6px">'+t('lbl_status')+'</div>'+
     '<div class="status-btns">'+['planned','booked','in_transit','customs_clearance','completed','cancelled'].map(sid=>{const stO=shipmentStatusObj(sid);const isCurrent=s.status===sid;return '<button class="status-btn" style="background:'+(isCurrent?stO.bg:'transparent')+';color:'+(isCurrent?stO.color:'#aaa')+';border-color:'+(isCurrent?stO.color:'#e5e5e0')+';'+(isCurrent?'font-weight:600':'')+'" '+(isCurrent?'disabled':'onclick="quickUpdateShipmentStatus(\''+id+'\',\''+sid+'\')"')+'>'+stO.label+'</button>'}).join('')+'</div>'+
-    (s.status==='in_transit'&&s.eta&&s.eta<=today?'<span style="font-size:11px;color:#A32D2D;margin-top:4px;display:block">⚠ ETA 已到</span>':'')+
-    (s.status==='booked'&&s.etd&&s.etd<=today?'<span style="font-size:11px;color:#A32D2D;margin-top:4px;display:block">⚠ ETD 已到</span>':'')+
+    (s.status==='in_transit'&&s.eta&&s.eta<=today?'<span style="font-size:11px;color:#A32D2D;margin-top:4px;display:block">'+t('sh_eta_overdue')+'</span>':'')+
+    (s.status==='booked'&&s.etd&&s.etd<=today?'<span style="font-size:11px;color:#A32D2D;margin-top:4px;display:block">'+t('sh_etd_overdue')+'</span>':'')+
     '</div>'+
     '<div class="divider"></div>'+
-    '<div class="section-title" style="margin-bottom:8px">貨物明細</div>'
+    '<div class="section-title" style="margin-bottom:8px">'+t('sh_cargo_section')+'</div>'
   const linkedPurchaseIdsForItems=shipmentPurchaseOrders.filter(x=>String(x.shipment_id)===String(id)).map(link=>String(link.purchase_order_id))
   const linkedPoItems=purchaseOrderItems.filter(item=>linkedPurchaseIdsForItems.includes(String(item.po_id)))
   const shItemsForShipment=shipmentItems.filter(x=>String(x.shipment_id)===String(id))
   if(!linkedPoItems.length){
-    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">請先關聯採購單，貨物明細將自動帶入</div>'
+    html+='<div style="font-size:12px;color:#aaa;padding:8px 0">'+t('sh_no_po_hint')+'</div>'
   }else{
     html+='<div style="overflow:auto;border:1px solid #e5e5e0;border-radius:4px;background:#fff;margin-bottom:8px">'+
       '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
       '<thead><tr style="background:#f7f7f3;color:#666">'+
-      '<th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">產品</th>'+
-      '<th style="text-align:right;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">預期數量</th>'+
-      '<th style="padding:8px;border-bottom:1px solid #ecebe5;font-weight:600;text-align:center">收貨狀態</th>'+
+      '<th style="text-align:left;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">'+t('lbl_product')+'</th>'+
+      '<th style="text-align:right;padding:8px;border-bottom:1px solid #ecebe5;font-weight:600">'+t('sh_expected_qty')+'</th>'+
+      '<th style="padding:8px;border-bottom:1px solid #ecebe5;font-weight:600;text-align:center">'+t('sh_receipt_status')+'</th>'+
       '</tr></thead><tbody>'+
       linkedPoItems.map(item=>{
         const si=shItemsForShipment.find(x=>(x.po_item_id&&x.po_item_id===item.id)||(String(x.po_id)===String(item.po_id)&&(item.product_id?x.product_id==item.product_id:x.product_name===item.product_name)))
         const status=si?.status||null
         const badgeStyle=status==='received'?'color:#0F6E56;font-weight:600':status==='missing'?'color:#A32D2D;font-weight:600':'color:#aaa'
-        const badgeText=status==='received'?'✓ 已收到':status==='missing'?'✗ 短缺/未到':'— 未確認'
-        const btnR='<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 8px'+(status==='received'?';background:#e6f4ef;color:#0F6E56':'')+'" onclick="setShipmentItemStatus('+id+','+item.id+',\'received\')">✓ 已收到</button>'
-        const btnM='<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 8px'+(status==='missing'?';background:#fdf0f0;color:#A32D2D':'')+'" onclick="setShipmentItemStatus('+id+','+item.id+',\'missing\')">✗ 短缺</button>'
+        const badgeText=status==='received'?t('sh_item_received'):status==='missing'?t('sh_item_missing'):t('sh_item_unknown')
+        const btnR='<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 8px'+(status==='received'?';background:#e6f4ef;color:#0F6E56':'')+'" onclick="setShipmentItemStatus('+id+','+item.id+',\'received\')">'+t('sh_item_received')+'</button>'
+        const btnM='<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 8px'+(status==='missing'?';background:#fdf0f0;color:#A32D2D':'')+'" onclick="setShipmentItemStatus('+id+','+item.id+',\'missing\')">'+t('sh_item_short')+'</button>'
         return '<tr>'+
           '<td style="padding:8px;border-bottom:1px solid #f3f3ef;font-weight:500">'+esc(item.product_name||'—')+(item.spec?'<div style="font-size:11px;color:#aaa">'+esc(item.spec)+'</div>':'')+'</td>'+
           '<td style="padding:8px;border-bottom:1px solid #f3f3ef;text-align:right;white-space:nowrap">'+(()=>{const q=parseFloat(item.qty||0);const w=parseFloat(item.width_m||0);const qFmt=q.toLocaleString('en');return w>0?qFmt+'m（'+Math.round(q*w).toLocaleString('en')+' m²）':qFmt+'m'})()+'</td>'+
@@ -3302,35 +3528,35 @@ function openShipmentModal(id){
   const availablePOs=purchaseOrders.filter(p=>!shipmentPurchaseOrders.some(link=>String(link.purchase_order_id)===String(p.id)&&String(link.shipment_id)===String(id)))
   const linkedPOs=shipmentLinkedPurchases(id)
   html+='<div class="divider"></div>'+
-    '<div class="section-title" style="margin-bottom:8px">關聯採購單</div>'+
+    '<div class="section-title" style="margin-bottom:8px">'+t('sh_linked_po_section')+'</div>'+
     '<div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">'+
-      '<select id="sh-purchase-link" style="flex:1"><option value="">— 選擇採購單 —</option>'+availablePOs.map(p=>{const sup=esc(resolvePurchaseSupplierName(p)||'—');const its=purchaseOrderItems.filter(i=>i.po_id===p.id);const prodParts=its.slice(0,2).map(i=>esc(i.product_name||'—'));const prodSummary=prodParts.join('、')+(its.length>2?' (+'+( its.length-2)+')':'');const stLabel=PURCHASE_STATUS.find(s=>s.id===p.status)?.label||p.status||'';return '<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+(p.accounting_no?' — '+esc(p.accounting_no):'')+' — '+sup+(prodSummary?' — '+prodSummary:'')+(stLabel?' — '+stLabel:'')+'</option>'}).join('')+'</select>'+
-      '<button class="btn btn-ghost btn-sm" style="height:32px;flex-shrink:0" onclick="attachPurchaseToShipment()">+ 掛入</button>'+
+      '<select id="sh-purchase-link" style="flex:1"><option value="">'+t('sh_select_po')+'</option>'+availablePOs.map(p=>{const sup=esc(resolvePurchaseSupplierName(p)||'—');const its=purchaseOrderItems.filter(i=>i.po_id===p.id);const prodParts=its.slice(0,2).map(i=>esc(i.product_name||'—'));const prodSummary=prodParts.join('、')+(its.length>2?' (+'+(its.length-2)+')':'');const stLabel=PURCHASE_STATUS.find(s=>s.id===p.status)?.label||p.status||'';return '<option value="'+esc(String(p.id))+'">'+esc(String(p.id))+(p.accounting_no?' — '+esc(p.accounting_no):'')+' — '+sup+(prodSummary?' — '+prodSummary:'')+(stLabel?' — '+stLabel:'')+'</option>'}).join('')+'</select>'+
+      '<button class="btn btn-ghost btn-sm" style="height:32px;flex-shrink:0" onclick="attachPurchaseToShipment()">'+t('sh_attach_btn')+'</button>'+
     '</div>'+
     (linkedPOs.length
       ? linkedPOs.map(p=>{
-          const poLabel=esc(String(p.id))+(p.accounting_no?' / 會計單號：'+esc(p.accounting_no):'')
-          return '<div class="row" style="cursor:pointer" onclick="openPurchaseModal(\''+esc(String(p.id))+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+poLabel+'</div><div style="font-size:11px;color:#888">'+esc(resolvePurchaseSupplierName(p)||'—')+' · '+esc(p.status||'')+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();detachPurchaseFromShipment('+id+',\''+esc(String(p.id))+'\')">移除</button></div>'
+          const poLabel=esc(String(p.id))+(p.accounting_no?t('sh_acct_prefix')+esc(p.accounting_no):'')
+          return '<div class="row" style="cursor:pointer" onclick="openPurchaseModal(\''+esc(String(p.id))+'\')"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+poLabel+'</div><div style="font-size:11px;color:#888">'+esc(resolvePurchaseSupplierName(p)||'—')+' · '+esc(p.status||'')+' · '+esc(purchaseOrderOrderSummary(p.id))+'</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();detachPurchaseFromShipment('+id+',\''+esc(String(p.id))+'\')">'+t('btn_delete')+'</button></div>'
         }).join('')
-      : '<div style="font-size:12px;color:#aaa;padding:4px 0">尚未關聯採購單</div>')
+      : '<div style="font-size:12px;color:#aaa;padding:4px 0">'+t('sh_no_po')+'</div>')
   html+='<div class="divider"></div>'+
-    '<div class="section-title" style="margin-bottom:8px">文件</div>'+
-    '<div id="sh-docs-list"><div style="font-size:12px;color:#aaa">載入中…</div></div>'+
+    '<div class="section-title" style="margin-bottom:8px">'+t('sh_docs_section')+'</div>'+
+    '<div id="sh-docs-list"><div style="font-size:12px;color:#aaa">'+t('sh_loading')+'</div></div>'+
     '<div style="margin-top:10px;border:1px dashed #d5d5cf;border-radius:4px;padding:10px 12px">'+
-      '<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:8px">上傳文件</div>'+
+      '<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:8px">'+t('sh_upload_docs')+'</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
-        '<div><label style="font-size:11px;color:#888;margin-bottom:3px;display:block">文件類型</label>'+
+        '<div><label style="font-size:11px;color:#888;margin-bottom:3px;display:block">'+t('sh_doc_type_label')+'</label>'+
           '<select id="sh-doc-type" style="width:100%">'+
-            '<option value="invoice">商業發票 Invoice</option>'+
-            '<option value="packing_list">裝箱單 Packing List</option>'+
-            '<option value="bl">提單 B/L</option>'+
-            '<option value="certificate">品質證明 Certificate</option>'+
-            '<option value="other">其他 Other</option>'+
+            '<option value="invoice">'+t('sh_doc_invoice')+'</option>'+
+            '<option value="packing_list">'+t('sh_doc_packing')+'</option>'+
+            '<option value="bl">'+t('sh_doc_bl')+'</option>'+
+            '<option value="certificate">'+t('sh_doc_cert')+'</option>'+
+            '<option value="other">'+t('sh_doc_other')+'</option>'+
           '</select></div>'+
-        '<div><label style="font-size:11px;color:#888;margin-bottom:3px;display:block">選擇 PDF</label>'+
+        '<div><label style="font-size:11px;color:#888;margin-bottom:3px;display:block">'+t('sh_select_pdf')+'</label>'+
           '<input type="file" id="sh-doc-file" accept=".pdf,application/pdf" style="height:auto;padding:4px 8px"></div>'+
       '</div>'+
-      '<button class="btn btn-ghost btn-sm" id="sh-doc-upload-btn" style="height:32px" onclick="uploadShipmentDocument(\''+id+'\')">上傳</button>'+
+      '<button class="btn btn-ghost btn-sm" id="sh-doc-upload-btn" style="height:32px" onclick="uploadShipmentDocument(\''+id+'\')">'+t('sh_upload_btn')+'</button>'+
     '</div>'
   document.getElementById('modal-shipment-bd').innerHTML=html
   document.getElementById('modal-shipment').classList.add('open')
@@ -3349,7 +3575,7 @@ async function renderShipmentDocs(shipmentId){
   const el=document.getElementById('sh-docs-list')
   if(!el)return
   const docs=await loadShipmentDocuments(shipmentId)
-  if(!docs.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:4px 0">尚無文件</div>';return}
+  if(!docs.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:4px 0">'+t('sh_no_docs')+'</div>';return}
   el.innerHTML=docs.map(d=>{
     const label=SH_DOC_TYPE_LABEL[d.doc_type]||d.doc_type||'Other'
     const bg={invoice:'#E6F1FB',packing_list:'#EAF3DE',bl:'#FEF9EC',certificate:'#F0EBF5',other:'#f0f0eb'}[d.doc_type]||'#f0f0eb'
@@ -3360,9 +3586,9 @@ async function renderShipmentDocs(shipmentId){
       '<span class="badge" style="background:'+bg+';color:'+clr+';border:1px solid '+clr+';white-space:nowrap;flex-shrink:0">'+esc(label)+'</span>'+
       '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.file_name)+'</div>'+
       '<div style="font-size:10px;color:#aaa">'+date+(d.uploaded_by?' · '+esc(d.uploaded_by):'')+(size?' · '+size:'')+'</div></div>'+
-      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="previewShipmentDoc(\''+esc(d.file_url||'')+'\',\''+esc(d.file_name||'')+'\')">預覽</button>'+
-      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="downloadShipmentDoc(\''+esc(d.file_url||'')+'\')">下載</button>'+
-      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;flex-shrink:0" onclick="deleteShipmentDoc('+d.id+',\''+esc(d.file_url||'')+'\',\''+shipmentId+'\')">刪除</button>'+
+      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="previewShipmentDoc(\''+esc(d.file_url||'')+'\',\''+esc(d.file_name||'')+'\')">'+t('sh_preview')+'</button>'+
+      '<button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="downloadShipmentDoc(\''+esc(d.file_url||'')+'\')">'+t('sh_download')+'</button>'+
+      '<button class="btn btn-ghost btn-sm" style="color:#A32D2D;flex-shrink:0" onclick="deleteShipmentDoc('+d.id+',\''+esc(d.file_url||'')+'\',\''+shipmentId+'\')">'+t('btn_delete')+'</button>'+
     '</div>'
   }).join('')
 }
@@ -3558,33 +3784,33 @@ async function saveShipmentReceive(shipmentId,useExplicit){
 function openShipmentEditModal(id){
   const isNew=id===null
   const s=isNew?null:shipments.find(x=>String(x.id)===String(id))
-  const transportOpts='<option value="sea">海運</option><option value="air">空運</option><option value="land">陸運</option><option value="express">快遞</option>'
-  const statusOpts='<option value="planned">已規劃</option><option value="booked">已訂艙</option><option value="in_transit">運送中</option><option value="customs_clearance">報關中</option><option value="completed">已完成</option><option value="cancelled">已取消</option>'
+  const transportOpts='<option value="sea">'+t('sh_sea')+'</option><option value="air">'+t('sh_air')+'</option><option value="land">'+t('sh_land')+'</option><option value="express">'+t('sh_express')+'</option>'
+  const statusOpts='<option value="planned">'+t('sh_planned')+'</option><option value="booked">'+t('sh_booked')+'</option><option value="in_transit">'+t('sh_in_transit')+'</option><option value="customs_clearance">'+t('sh_customs')+'</option><option value="completed">'+t('sh_completed')+'</option><option value="cancelled">'+t('sh_cancelled')+'</option>'
   document.getElementById('modal-shipment-edit-hd').innerHTML=
-    '<div style="font-size:14px;font-weight:600">'+(isNew?'新增船運批次':'🚢 船隻資訊')+'</div>'+
+    '<div style="font-size:14px;font-weight:600">'+(isNew?t('sh_new_title'):t('sh_vessel_info'))+'</div>'+
     '<div style="display:flex;align-items:center;gap:8px">'+
-      '<button class="btn btn-primary btn-sm" onclick="saveShipment('+(isNew?'null':id)+')">'+(isNew?'Create':'Save')+'</button>'+
+      '<button class="btn btn-primary btn-sm" onclick="saveShipment('+(isNew?'null':id)+')">'+(isNew?t('sh_create_btn'):t('btn_save_info'))+'</button>'+
       '<button class="modal-close" onclick="closeModal(\'modal-shipment-edit\')">×</button>'+
     '</div>'
   let html=
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>船運編號 <span class="req">*</span></label><input id="sh-no" value="'+esc(s?.shipment_no||generateShipmentNo())+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
-    '<div><label>運輸方式</label><select id="sh-mode">'+transportOpts.replace('value="'+(s?.transport_mode||'sea')+'"','value="'+(s?.transport_mode||'sea')+'" selected')+'</select></div>'+
-    '<div><label>狀態</label><select id="sh-status">'+statusOpts.replace('value="'+(s?.status||'planned')+'"','value="'+(s?.status||'planned')+'" selected')+'</select></div>'+
-    '<div><label>承運商</label><input id="sh-carrier" value="'+esc(s?.carrier||'')+'" /></div>'+
-    '<div><label>船名 / 航班</label><input id="sh-vessel" value="'+esc(s?.vessel_name||'')+'" /></div>'+
+    '<div><label>'+t('sh_no_label')+' <span class="req">*</span></label><input id="sh-no" value="'+esc(s?.shipment_no||generateShipmentNo())+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+    '<div><label>'+t('lbl_transport')+'</label><select id="sh-mode">'+transportOpts.replace('value="'+(s?.transport_mode||'sea')+'"','value="'+(s?.transport_mode||'sea')+'" selected')+'</select></div>'+
+    '<div><label>'+t('lbl_status')+'</label><select id="sh-status">'+statusOpts.replace('value="'+(s?.status||'planned')+'"','value="'+(s?.status||'planned')+'" selected')+'</select></div>'+
+    '<div><label>'+t('sh_carrier')+'</label><input id="sh-carrier" value="'+esc(s?.carrier||'')+'" /></div>'+
+    '<div><label>'+t('sh_vessel_name')+'</label><input id="sh-vessel" value="'+esc(s?.vessel_name||'')+'" /></div>'+
     '<div><label>Voyage No.</label><input id="sh-voyage" value="'+esc(s?.voyage_no||'')+'" /></div>'+
     '<div><label>Container No.</label><input id="sh-container" value="'+esc(s?.container_no||'')+'" /></div>'+
-    '<div><label>櫃型</label><select id="sh-container-size"><option value="">— 未設定 —</option><option value="20gp"'+(s?.container_size==='20gp'?' selected':'')+'>20\' GP（20呎一般）</option><option value="40gp"'+(s?.container_size==='40gp'?' selected':'')+'>40\' GP（40呎一般）</option><option value="40hc"'+(s?.container_size==='40hc'?' selected':'')+'>40\' HC（40呎高櫃）</option><option value="lcl"'+(s?.container_size==='lcl'?' selected':'')+'>LCL 拼箱</option></select></div>'+
+    '<div><label>'+t('sh_container_type')+'</label><select id="sh-container-size"><option value="">'+t('sh_not_set')+'</option><option value="20gp"'+(s?.container_size==='20gp'?' selected':'')+'>20\' GP</option><option value="40gp"'+(s?.container_size==='40gp'?' selected':'')+'>40\' GP</option><option value="40hc"'+(s?.container_size==='40hc'?' selected':'')+'>40\' HC</option><option value="lcl"'+(s?.container_size==='lcl'?' selected':'')+'>LCL</option></select></div>'+
     '<div><label>B/L No.</label><input id="sh-bl" value="'+esc(s?.bl_no||'')+'" /></div>'+
     '<div><label>ETD</label><input id="sh-etd" type="date" value="'+esc(s?.etd||'')+'" /></div>'+
     '<div><label>ETA</label><input id="sh-eta" type="date" value="'+esc(s?.eta||'')+'" /></div>'+
     '<div><label>ATD</label><input id="sh-atd" type="date" value="'+esc(s?.atd||'')+'" /></div>'+
     '<div><label>ATA</label><input id="sh-ata" type="date" value="'+esc(s?.ata||'')+'" /></div>'+
-    '<div><label>起運港</label><input id="sh-pol" value="'+esc(s?.port_of_loading||'')+'" /></div>'+
-    '<div><label>目的港</label><input id="sh-pod" value="'+esc(s?.port_of_destination||'')+'" /></div>'+
+    '<div><label>'+t('sh_pol')+'</label><input id="sh-pol" value="'+esc(s?.port_of_loading||'')+'" /></div>'+
+    '<div><label>'+t('sh_pod')+'</label><input id="sh-pod" value="'+esc(s?.port_of_destination||'')+'" /></div>'+
     '</div>'+
-    '<div style="margin-bottom:12px"><label>備註</label><textarea id="sh-notes">'+esc(s?.notes||'')+'</textarea></div>'
+    '<div style="margin-bottom:12px"><label>'+t('lbl_notes')+'</label><textarea id="sh-notes">'+esc(s?.notes||'')+'</textarea></div>'
   document.getElementById('modal-shipment-edit-bd').innerHTML=html
   enableDirtyTracking('modal-shipment-edit-bd')
   document.getElementById('modal-shipment-edit').classList.add('open')
@@ -6244,31 +6470,32 @@ function renderInqModalBd(){
   const sup=suppliers.filter(s=>s.company===i.supplier)
   const pendingDays=inquiryPendingDays(i)
   const supplierPriceParts=getInquirySupplierPriceParts(i.supplier_price)
+  const _inqSt=inqSObj(i.status)
   document.getElementById('modal-inq-bd').innerHTML=
-    '<div style="margin-bottom:10px">'+badge(i.status)+'</div>'+
+    '<div style="margin-bottom:10px"><span class="badge" style="background:'+_inqSt.bg+';color:'+_inqSt.color+';border:1px solid '+_inqSt.color+'">'+_inqSt.label+'</span></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>詢價建立日</label><input value="'+((i.created_at||'').slice(0,10)||'—')+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
-    '<div><label>供應商回覆追蹤</label><input value="'+(['pending','asked'].includes(i.status)?(pendingDays>=3?'已 '+pendingDays+' 天未回覆':'已等待 '+pendingDays+' 天'):'目前不列入未回覆追蹤')+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+    '<div><label>'+t('inq_created_label')+'</label><input value="'+((i.created_at||'').slice(0,10)||'—')+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+    '<div><label>'+t('inq_tracking_label')+'</label><input value="'+(['pending','asked'].includes(i.status)?(pendingDays>=3?t('inq_days_overdue').replace('{n}',pendingDays):t('inq_days_waiting').replace('{n}',pendingDays)):t('inq_not_tracked'))+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
     '</div>'+
-    '<div style="font-size:11px;font-weight:500;color:#666;margin-bottom:6px">更新狀態</div>'+
-    '<div class="status-btns">'+INQ_STATUS.map(s=>'<button class="status-btn" style="background:'+(i.status===s.id?s.bg:'transparent')+';color:'+(i.status===s.id?s.color:'#aaa')+';border-color:'+(i.status===s.id?s.color:'#e5e5e0')+'" onclick="updateInqStatus(\''+s.id+'\')">'+s.label+'</button>').join('')+'</div>'+
+    '<div style="font-size:11px;font-weight:500;color:#666;margin-bottom:6px">'+t('inq_update_status')+'</div>'+
+    '<div class="status-btns">'+INQ_STATUS.map(s=>{const lb=t(_INQ_KEY[s.id])||s.label;return '<button class="status-btn" style="background:'+(i.status===s.id?s.bg:'transparent')+';color:'+(i.status===s.id?s.color:'#aaa')+';border-color:'+(i.status===s.id?s.color:'#e5e5e0')+'" onclick="updateInqStatus(\''+s.id+'\')">'+lb+'</button>'}).join('')+'</div>'+
     '<div class="divider"></div>'+
-    '<div class="section-title">供應商回覆</div>'+
+    '<div class="section-title">'+t('inq_supplier_reply')+'</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>能否生產</label><select onchange="inqFieldChange(\'can_make\',this.value)">'+['待確認','可以','不可以','需修改規格'].map(o=>'<option'+(i.can_make===o?' selected':'')+'>'+o+'</option>').join('')+'</select></div>'+
-    '<div><label>交期</label><input value="'+(i.lead_time||'')+'" placeholder="例：30天" oninput="inqFieldChange(\'lead_time\',this.value)" /></div>'+
-    '<div><label>最低起訂量 MOQ</label><input value="'+(i.moq||'')+'" placeholder="例：1000m²" oninput="inqFieldChange(\'moq\',this.value)" /></div>'+
-    '<div><label>原料條件</label><input value="'+(i.raw_material||'原料廠商提供')+'" oninput="inqFieldChange(\'raw_material\',this.value)" /></div>'+
+    '<div><label>'+t('inq_can_make')+'</label><select onchange="inqFieldChange(\'can_make\',this.value)">'+[['待確認','inq_can_make_tbd'],['可以','inq_can_make_yes'],['不可以','inq_can_make_no'],['需修改規格','inq_can_make_mod']].map(([v,k])=>'<option value="'+v+'"'+(i.can_make===v?' selected':'')+'>'+t(k)+'</option>').join('')+'</select></div>'+
+    '<div><label>'+t('inq_lead_time')+'</label><input value="'+(i.lead_time||'')+'" placeholder="'+t('inq_lead_time_ph')+'" oninput="inqFieldChange(\'lead_time\',this.value)" /></div>'+
+    '<div><label>'+t('inq_moq')+'</label><input value="'+(i.moq||'')+'" placeholder="'+t('inq_moq_ph')+'" oninput="inqFieldChange(\'moq\',this.value)" /></div>'+
+    '<div><label>'+t('inq_raw_material')+'</label><input value="'+(i.raw_material||t('inq_raw_default'))+'" oninput="inqFieldChange(\'raw_material\',this.value)" /></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>供應商成本報價（內部）</label><div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px"><div><input type="number" value="'+supplierPriceParts.amount+'" placeholder="成本金額" step="0.0001" oninput="inqPriceChange()" id="inq-supplier-price-amount" /></div><div><select id="inq-supplier-price-currency" onchange="inqPriceChange()">'+buildOptions(CURRENCY_OPTIONS,supplierPriceParts.currency)+'</select></div><div><select id="inq-supplier-price-unit" onchange="inqPriceChange()"><option value="">— 單位 —</option>'+['m²','m','roll','kg','piece','sheet'].map(u=>'<option value="'+u+'"'+(supplierPriceParts.unit===u?' selected':'')+'>'+u+'</option>').join('')+'</select></div></div></div>'+
-    '<div style="margin-bottom:14px"><label>備註</label><textarea oninput="inqFieldChange(\'remarks\',this.value)">'+(i.remarks||'')+'</textarea></div>'+
+    '<div style="margin-bottom:10px"><label>'+t('inq_supplier_price')+'</label><div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px"><div><input type="number" value="'+supplierPriceParts.amount+'" placeholder="'+t('inq_cost_amount_ph')+'" step="0.0001" oninput="inqPriceChange()" id="inq-supplier-price-amount" /></div><div><select id="inq-supplier-price-currency" onchange="inqPriceChange()">'+buildOptions(CURRENCY_OPTIONS,supplierPriceParts.currency)+'</select></div><div><select id="inq-supplier-price-unit" onchange="inqPriceChange()"><option value="">'+t('inq_unit_select')+'</option>'+['m²','m','roll','kg','piece','sheet'].map(u=>'<option value="'+u+'"'+(supplierPriceParts.unit===u?' selected':'')+'>'+u+'</option>').join('')+'</select></div></div></div>'+
+    '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea oninput="inqFieldChange(\'remarks\',this.value)">'+(i.remarks||'')+'</textarea></div>'+
     '<div class="modal-foot" style="justify-content:space-between;align-items:center;margin-bottom:12px">'+
-    '<button class="btn btn-primary btn-sm" onclick="saveInquiry()">儲存</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="saveInquiry()">'+t('btn_save_info')+'</button>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
-    '<button class="btn btn-ghost btn-sm" onclick="toggleTpl()">'+(showTpl?'收起範本':'產生詢問供應商訊息')+'</button>'+
-    (i.supplier_price?'<button class="btn btn-ghost btn-sm" onclick="openAddInqToProduct(\''+i.id+'\')">📦 加入產品目錄</button>':'')+
-    (i.supplier_price&&i.from_product_id?'<button class="btn btn-ghost btn-sm" onclick="updateProductCostFromInquiry(\''+i.id+'\')">📦 同步更新產品目錄成本</button>':'')+
-    (i.supplier_price?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="sendToQuote(\''+i.id+'\')">收到成本 → 送去報價</button>':'')+
+    '<button class="btn btn-ghost btn-sm" onclick="toggleTpl()">'+(showTpl?t('inq_toggle_tpl_hide'):t('inq_toggle_tpl_show'))+'</button>'+
+    (i.supplier_price?'<button class="btn btn-ghost btn-sm" onclick="openAddInqToProduct(\''+i.id+'\')">'+t('inq_to_catalog')+'</button>':'')+
+    (i.supplier_price&&i.from_product_id?'<button class="btn btn-ghost btn-sm" onclick="updateProductCostFromInquiry(\''+i.id+'\')">'+t('inq_update_cost')+'</button>':'')+
+    (i.supplier_price?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="sendToQuote(\''+i.id+'\')">'+t('inq_send_to_quote')+'</button>':'')+
     '</div>'+
     '</div>'+
     (showTpl?buildTpl(i,sup):'')
@@ -6366,11 +6593,11 @@ function buildTpl(i,sup){
   const text=supName+' 您好，\n\n我司客戶有以下離型紙需求，請協助確認並報價：\n\n【產品規格】\n'+i.product+'\n'+(i.spec||'（規格待補充）')+'\n\n請提供以下資訊：\n1. 貴司是否可以生產此規格？\n2. 生產交期（從確認訂單起算）\n3. 最低起訂量（MOQ）\n4. 原料由貴司提供，請確認原料條件\n5. 報價（含包裝及運至工廠條件，FOB / CIF 請註明）\n6. 如需打樣，打樣費及時間\n\n請於 '+deadline+' 前回覆，謝謝。\n\n此致\nJOY CHIN PSA INCORPORATION CO LTD'
   window._tpl=text
   return '<div style="border-top:1px solid #e5e5e0;padding-top:12px">'+
-    '<div style="font-size:11px;font-weight:500;color:#666;margin-bottom:6px">詢問 '+i.supplier+' 的訊息'+
-    (sup.length?' <span style="color:#aaa;font-weight:400">收件人：'+sup.map(s=>s.name+'（'+s.email+'）').join('、')+'</span>':'')+
+    '<div style="font-size:11px;font-weight:500;color:#666;margin-bottom:6px">'+t('inq_tpl_header')+' '+i.supplier+
+    (sup.length?' <span style="color:#aaa;font-weight:400">'+t('inq_tpl_recipients')+sup.map(s=>s.name+'（'+s.email+'）').join('、')+'</span>':'')+
     '</div>'+
     '<div class="tpl-box">'+text+'</div>'+
-    '<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="copyTpl()">複製訊息</button></div>'
+    '<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="copyTpl()">'+t('inq_copy_msg')+'</button></div>'
 }
 
 function toggleTpl(){showTpl=!showTpl;renderInqModalBd()}
@@ -8476,82 +8703,82 @@ function openProductModal(id){
   const supOpts=_supCompanies.map(([company,id])=>'<option value="'+id+'"'+(p&&p.supplier_id===id?' selected':'')+'>'+company+'</option>').join('')
   const productReviewDays=getProductReviewDays()
   document.getElementById('modal-product-hd').innerHTML=
-    '<div style="font-size:14px;font-weight:600">'+(isEdit?'編輯產品':'新增產品')+'</div>'+
+    '<div style="font-size:14px;font-weight:600">'+(isEdit?t('pd_edit_title'):t('pd_new_title_lbl'))+'</div>'+
     '<button class="modal-close" onclick="closeModal(\'modal-product\')">×</button>'
   const _pdReviewDays=p?.review_days??productReviewDays
   const _pdReviewPreset=[30,60,90,180,365].includes(_pdReviewDays)?String(_pdReviewDays):'custom'
   const _isActive=p?.is_active!==false
   document.getElementById('modal-product-bd').innerHTML=
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>產品名稱 <span class="req">*</span></label><input id="pd-name" value="'+(p?.product_name||'')+'" placeholder="例：45g 矽離型紙" /></div>'+
-    '<div><label>供應商</label><select id="pd-supplier"><option value="">— 選擇供應商 —</option>'+supOpts+'</select></div>'+
+    '<div><label>'+t('lbl_product')+' <span class="req">*</span></label><input id="pd-name" value="'+(p?.product_name||'')+'" placeholder="例：45g 矽離型紙" /></div>'+
+    '<div><label>'+t('lbl_supplier')+'</label><select id="pd-supplier"><option value="">'+t('pd_select_supplier')+'</option>'+supOpts+'</select></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>類型</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">'+
-    ['',...PRODUCT_TYPES].map(t=>{
-      const active=(p?.product_type||'')===(t)
-      const c=t?PRODUCT_TYPE_COLORS[t]:{bg:'#f0f0eb',color:'#555'}
-      return '<label style="cursor:pointer"><input type="radio" name="pd-type" value="'+t+'" '+(active?'checked':'')+' style="display:none" /><span style="display:inline-block;padding:4px 12px;border-radius:6px;border:2px solid '+(active?(c.color):'#ddd')+';background:'+(active?c.bg:'#fff')+';color:'+(active?c.color:'#888')+';font-size:12px" onclick="document.querySelectorAll(\'[name=pd-type]\').forEach(r=>{const s=r.nextElementSibling;const cc=r.value?PRODUCT_TYPE_COLORS[r.value]:{bg:\'#f0f0eb\',color:\'#555\'};s.style.borderColor=r.checked?cc.color:\'#ddd\';s.style.background=r.checked?cc.bg:\'#fff\';s.style.color=r.checked?cc.color:\'#888\'})">'+( t||'無')+'</span></label>'
+    '<div style="margin-bottom:10px"><label>'+t('pd_type_label')+'</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">'+
+    ['',...PRODUCT_TYPES].map(ty=>{
+      const active=(p?.product_type||'')===(ty)
+      const c=ty?PRODUCT_TYPE_COLORS[ty]:{bg:'#f0f0eb',color:'#555'}
+      return '<label style="cursor:pointer"><input type="radio" name="pd-type" value="'+ty+'" '+(active?'checked':'')+' style="display:none" /><span style="display:inline-block;padding:4px 12px;border-radius:6px;border:2px solid '+(active?(c.color):'#ddd')+';background:'+(active?c.bg:'#fff')+';color:'+(active?c.color:'#888')+';font-size:12px" onclick="document.querySelectorAll(\'[name=pd-type]\').forEach(r=>{const s=r.nextElementSibling;const cc=r.value?PRODUCT_TYPE_COLORS[r.value]:{bg:\'#f0f0eb\',color:\'#555\'};s.style.borderColor=r.checked?cc.color:\'#ddd\';s.style.background=r.checked?cc.bg:\'#fff\';s.style.color=r.checked?cc.color:\'#888\'})">'+( ty||t('pd_no_type'))+'</span></label>'
     }).join('')+
     '</div></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>寬幅（mm）</label><input type="number" id="pd-width-mm" value="'+(p?.width_m!=null?Math.round(p.width_m*1000):'')+'" placeholder="例如 1070" step="1" /></div>'+
-    '<div><label>每卷米數</label><input type="number" id="pd-meters-per-roll" value="'+(p?.meters_per_roll||'')+'" placeholder="固定規格填入，客製化留空" step="0.01" /></div>'+
+    '<div><label>'+t('lbl_width_mm')+'</label><input type="number" id="pd-width-mm" value="'+(p?.width_m!=null?Math.round(p.width_m*1000):'')+'" placeholder="例如 1070" step="1" /></div>'+
+    '<div><label>'+t('pd_meters_per_roll')+'</label><input type="number" id="pd-meters-per-roll" value="'+(p?.meters_per_roll||'')+'" placeholder="'+t('pd_meters_ph')+'" step="0.01" /></div>'+
     '<div><label>'+t('lbl_base_paper_weight')+'</label><input type="number" id="pd-base-paper-weight" value="'+(p?.base_paper_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
     '<div><label>'+t('lbl_total_weight')+'</label><input type="number" id="pd-total-weight" value="'+(p?.total_weight||'')+'" placeholder="選填" step="0.01" /></div>'+
-    '<div><label>厚度（μm）</label><input type="number" id="pd-thickness-um" value="'+(p?.thickness_um||'')+'" placeholder="選填" step="0.1" min="0" /></div>'+
+    '<div><label>'+t('pd_thickness')+'</label><input type="number" id="pd-thickness-um" value="'+(p?.thickness_um||'')+'" placeholder="選填" step="0.1" min="0" /></div>'+
     '</div>'+
     '<div class="grid-3" style="margin-bottom:10px">'+
-    '<div><label>成本價</label><input type="number" id="pd-cost" value="'+(p?.cost_price||'')+'" placeholder="0.0000" step="0.0001" /></div>'+
-    '<div><label>計價單位</label><select id="pd-pricing-unit">'+
-    '<option value="">— 選擇 —</option>'+
-    '<option value="m2"'+(p?.pricing_unit==='m2'?' selected':'')+'>平方米 m²</option>'+
-    '<option value="m"'+(p?.pricing_unit==='m'?' selected':'')+'>米 m</option>'+
+    '<div><label>'+t('lbl_cost_price')+'</label><input type="number" id="pd-cost" value="'+(p?.cost_price||'')+'" placeholder="0.0000" step="0.0001" /></div>'+
+    '<div><label>'+t('lbl_pricing_unit')+'</label><select id="pd-pricing-unit">'+
+    '<option value="">'+t('ord_select')+'</option>'+
+    '<option value="m2"'+(p?.pricing_unit==='m2'?' selected':'')+'>'+t('pd_unit_m2')+'</option>'+
+    '<option value="m"'+(p?.pricing_unit==='m'?' selected':'')+'>'+t('pd_unit_m')+'</option>'+
     '</select></div>'+
-    '<div><label>幣別</label><select id="pd-currency">'+buildOptions(CURRENCY_OPTIONS,p?.currency)+'</select></div>'+
+    '<div><label>'+t('lbl_currency')+'</label><select id="pd-currency">'+buildOptions(CURRENCY_OPTIONS,p?.currency)+'</select></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>備註</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
-    '<div style="margin-bottom:10px"><label>顏色 / 變體清單 <span style="font-size:10px;font-weight:400;color:#aaa">（如 Yellow、Red… 同價格的顏色選項）</span></label>'+
+    '<div style="margin-bottom:10px"><label>'+t('lbl_notes')+'</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:10px"><label>'+t('pd_color_variants_label')+' <span style="font-size:10px;font-weight:400;color:#aaa">'+t('pd_color_hint')+'</span></label>'+
     '<div id="pd-color-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:24px">'+
-    (_pdColorVariants.length?_pdColorVariants.map((c,i)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#0F6E56;border:1px solid #b2dfdb;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(c)+'<button onclick="pdRemoveColor('+i+')" style="background:none;border:none;color:#0F6E56;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join(''):'<span style="font-size:11px;color:#ccc">尚未設定</span>')+
+    (_pdColorVariants.length?_pdColorVariants.map((cv,ci)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#0F6E56;border:1px solid #b2dfdb;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(cv)+'<button onclick="pdRemoveColor('+ci+')" style="background:none;border:none;color:#0F6E56;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join(''):'<span style="font-size:11px;color:#ccc">'+t('pd_not_set')+'</span>')+
     '</div>'+
-    '<div style="display:flex;gap:6px"><input id="pd-new-color" placeholder="輸入顏色名稱，按 Enter 新增" style="flex:1;font-size:12px" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pdAddColor()}" /><button class="btn btn-ghost btn-sm" onclick="pdAddColor()">+ 新增</button></div>'+
+    '<div style="display:flex;gap:6px"><input id="pd-new-color" placeholder="'+t('pd_color_input_ph')+'" style="flex:1;font-size:12px" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pdAddColor()}" /><button class="btn btn-ghost btn-sm" onclick="pdAddColor()">'+t('pd_add_variant')+'</button></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>印刷變體 <span style="font-size:10px;font-weight:400;color:#aaa">（可選的印刷方式，如 方格、直條…）</span></label>'+
+    '<div style="margin-bottom:10px"><label>'+t('pd_printing_variants_label')+' <span style="font-size:10px;font-weight:400;color:#aaa">'+t('pd_printing_hint')+'</span></label>'+
     '<div id="pd-printing-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:24px">'+
-    (_pdPrintingVariants.length?_pdPrintingVariants.map((c,i)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#F3EEF9;color:#7B5EA7;border:1px solid #C9B8E8;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(c)+'<button onclick="pdRemovePrinting('+i+')" style="background:none;border:none;color:#7B5EA7;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join(''):'<span style="font-size:11px;color:#ccc">尚未設定</span>')+
+    (_pdPrintingVariants.length?_pdPrintingVariants.map((pv,pi)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#F3EEF9;color:#7B5EA7;border:1px solid #C9B8E8;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(pv)+'<button onclick="pdRemovePrinting('+pi+')" style="background:none;border:none;color:#7B5EA7;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join(''):'<span style="font-size:11px;color:#ccc">'+t('pd_not_set')+'</span>')+
     '</div>'+
-    '<div style="display:flex;gap:6px"><input id="pd-new-printing" placeholder="輸入印刷方式，按 Enter 新增" style="flex:1;font-size:12px" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pdAddPrinting()}" /><button class="btn btn-ghost btn-sm" onclick="pdAddPrinting()">+ 新增</button></div>'+
+    '<div style="display:flex;gap:6px"><input id="pd-new-printing" placeholder="'+t('pd_printing_input_ph')+'" style="flex:1;font-size:12px" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pdAddPrinting()}" /><button class="btn btn-ghost btn-sm" onclick="pdAddPrinting()">'+t('pd_add_variant')+'</button></div>'+
     '</div>'+
     '<div class="divider"></div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>更新週期</label>'+
+    '<div><label>'+t('pd_review_cycle')+'</label>'+
     '<select id="pd-review-preset" onchange="(function(){var v=this.value;document.getElementById(\'pd-review-custom-wrap\').style.display=v===\'custom\'?\'block\':\'none\'}).call(this)">'+
-    '<option value="30"'+(_pdReviewPreset==='30'?' selected':'')+'>30 天（油價波動期）</option>'+
-    '<option value="60"'+(_pdReviewPreset==='60'?' selected':'')+'>60 天</option>'+
-    '<option value="90"'+(_pdReviewPreset==='90'?' selected':'')+'>90 天（預設）</option>'+
-    '<option value="180"'+(_pdReviewPreset==='180'?' selected':'')+'>180 天</option>'+
-    '<option value="365"'+(_pdReviewPreset==='365'?' selected':'')+'>365 天</option>'+
-    '<option value="custom"'+(_pdReviewPreset==='custom'?' selected':'')+'>自訂</option>'+
+    '<option value="30"'+(_pdReviewPreset==='30'?' selected':'')+'>'+t('pd_review_30')+'</option>'+
+    '<option value="60"'+(_pdReviewPreset==='60'?' selected':'')+'>'+t('pd_review_60')+'</option>'+
+    '<option value="90"'+(_pdReviewPreset==='90'?' selected':'')+'>'+t('pd_review_90')+'</option>'+
+    '<option value="180"'+(_pdReviewPreset==='180'?' selected':'')+'>'+t('pd_review_180')+'</option>'+
+    '<option value="365"'+(_pdReviewPreset==='365'?' selected':'')+'>'+t('pd_review_365')+'</option>'+
+    '<option value="custom"'+(_pdReviewPreset==='custom'?' selected':'')+'>'+t('pd_review_custom')+'</option>'+
     '</select>'+
     '<div id="pd-review-custom-wrap" style="margin-top:6px;display:'+(_pdReviewPreset==='custom'?'block':'none')+'">'+
-    '<input type="number" id="pd-review-custom" value="'+(_pdReviewPreset==='custom'?_pdReviewDays:'')+'" min="1" step="1" placeholder="輸入天數" />'+
+    '<input type="number" id="pd-review-custom" value="'+(_pdReviewPreset==='custom'?_pdReviewDays:'')+'" min="1" step="1" placeholder="'+t('pd_review_days_ph')+'" />'+
     '</div></div>'+
-    '<div><label>上次確認日期</label><input type="date" id="pd-reviewed" value="'+(p?.last_reviewed_at||new Date().toISOString().slice(0,10))+'" /></div>'+
+    '<div><label>'+t('lbl_last_reviewed')+'</label><input type="date" id="pd-reviewed" value="'+(p?.last_reviewed_at||new Date().toISOString().slice(0,10))+'" /></div>'+
     '</div>'+
     '<div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">'+
-    '<label style="margin:0;font-weight:500">上架狀態</label>'+
+    '<label style="margin:0;font-weight:500">'+t('pd_active_label')+'</label>'+
     '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">'+
     '<input type="checkbox" id="pd-active" '+(_isActive?'checked':'')+' style="display:none" />'+
-    '<span id="pd-active-track" onclick="(function(){var cb=document.getElementById(\'pd-active\');cb.checked=!cb.checked;var t=document.getElementById(\'pd-active-track\');var l=document.getElementById(\'pd-active-label\');var k=document.getElementById(\'pd-active-knob\');t.style.background=cb.checked?\'#0F6E56\':\'#ccc\';k.style.left=cb.checked?\'22px\':\'3px\';l.style.color=cb.checked?\'#0F6E56\':\'#aaa\';l.textContent=cb.checked?\'上架中\':\'已下架\'}).call(this)" '+
+    '<span id="pd-active-track" onclick="(function(){var cb=document.getElementById(\'pd-active\');cb.checked=!cb.checked;var trk=document.getElementById(\'pd-active-track\');var l=document.getElementById(\'pd-active-label\');var k=document.getElementById(\'pd-active-knob\');trk.style.background=cb.checked?\'#0F6E56\':\'#ccc\';k.style.left=cb.checked?\'22px\':\'3px\';l.style.color=cb.checked?\'#0F6E56\':\'#aaa\';l.textContent=cb.checked?'+JSON.stringify(t('pd_active_on'))+':'+JSON.stringify(t('pd_active_off'))+'}).call(this)" '+
     'style="display:inline-block;width:44px;height:24px;border-radius:6px;background:'+(_isActive?'#0F6E56':'#ccc')+';position:relative;transition:background 0.2s;cursor:pointer;flex-shrink:0">'+
     '<span style="position:absolute;top:3px;left:'+(_isActive?'22px':'3px')+';width:18px;height:18px;border-radius:50%;background:#fff;transition:left 0.2s;pointer-events:none" id="pd-active-knob"></span>'+
     '</span>'+
-    '<span id="pd-active-label" style="font-size:13px;color:'+(_isActive?'#0F6E56':'#aaa')+'">'+(_isActive?'上架中':'已下架')+'</span>'+
+    '<span id="pd-active-label" style="font-size:13px;color:'+(_isActive?'#0F6E56':'#aaa')+'">'+(_isActive?t('pd_active_on'):t('pd_active_off'))+'</span>'+
     '</label></div>'+
     '<div class="modal-foot">'+
-    '<button class="btn btn-primary" onclick="saveProduct('+(isEdit?p.id:'null')+')">'+( isEdit?'儲存':'新增')+'</button>'+
-    (isEdit?'<button class="btn btn-ghost" onclick="createInquiryFromProduct('+p.id+');closeModal(\'modal-product\')">🔄 重新詢價</button>':'')+
-    (isEdit?'<button class="btn btn-ghost" style="color:#A32D2D" onclick="deleteProduct('+p.id+',\''+p.product_name+'\')">刪除</button>':'')+
+    '<button class="btn btn-primary" onclick="saveProduct('+(isEdit?p.id:'null')+')">'+(isEdit?t('btn_save_info'):t('btn_add'))+'</button>'+
+    (isEdit?'<button class="btn btn-ghost" onclick="createInquiryFromProduct('+p.id+');closeModal(\'modal-product\')">'+t('pd_reinquiry')+'</button>':'')+
+    (isEdit?'<button class="btn btn-ghost" style="color:#A32D2D" onclick="deleteProduct('+p.id+',\''+p.product_name+'\')">'+t('btn_delete')+'</button>':'')+
     '</div>'
   document.getElementById('modal-product').classList.add('open')
 }
@@ -8569,7 +8796,7 @@ function _pdRenderColorChips(){
   const el=document.getElementById('pd-color-chips');if(!el)return
   el.innerHTML=_pdColorVariants.length
     ?_pdColorVariants.map((c,i)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#0F6E56;border:1px solid #b2dfdb;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(c)+'<button onclick="pdRemoveColor('+i+')" style="background:none;border:none;color:#0F6E56;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join('')
-    :'<span style="font-size:11px;color:#ccc">尚未設定</span>'
+    :'<span style="font-size:11px;color:#ccc">'+t('pd_not_set')+'</span>'
 }
 function pdAddColor(){
   const el=document.getElementById('pd-new-color')
@@ -8583,7 +8810,7 @@ function _pdRenderPrintingChips(){
   const el=document.getElementById('pd-printing-chips');if(!el)return
   el.innerHTML=_pdPrintingVariants.length
     ?_pdPrintingVariants.map((c,i)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#F3EEF9;color:#7B5EA7;border:1px solid #C9B8E8;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(c)+'<button onclick="pdRemovePrinting('+i+')" style="background:none;border:none;color:#7B5EA7;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join('')
-    :'<span style="font-size:11px;color:#ccc">尚未設定</span>'
+    :'<span style="font-size:11px;color:#ccc">'+t('pd_not_set')+'</span>'
 }
 function pdAddPrinting(){
   const el=document.getElementById('pd-new-printing')
@@ -8962,9 +9189,9 @@ function openCreateCustomerModal(prefill={}){
 }
 function openNewCustomerContact(customerId){
   const c=customers.find(x=>x.id===customerId)
-  openSubformModal('新增同公司聯絡人',
+  openSubformModal(t('ec_contact_title'),
     buildCustomerCreateForm('scc',{company:c?.company||'',country:c?.country||'TH',industry:c?.industry||''})+
-    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateCustomerFromModal(\'scc\',\'modal-subform\','+customerId+')">新增</button></div>'
+    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateCustomerFromModal(\'scc\',\'modal-subform\','+customerId+')">'+t('btn_add')+'</button></div>'
   )
   enableDirtyTracking('modal-subform-bd')
 }
@@ -9024,28 +9251,28 @@ function openEditCustomer(id){
   const c=customers.find(x=>x.id===id);if(!c)return
   _isDirty=false
   const companyContacts=customers.filter(x=>x.company===c.company)
-  document.getElementById('modal-customer-hd').innerHTML='<div style="font-size:14px;font-weight:600">客戶詳情</div><button class="modal-close" onclick="closeModal(\'modal-customer\')">×</button>'
+  document.getElementById('modal-customer-hd').innerHTML='<div style="font-size:14px;font-weight:600">'+t('cust_detail_title')+'</div><button class="modal-close" onclick="closeModal(\'modal-customer\')">×</button>'
   document.getElementById('modal-customer-bd').innerHTML=
-    (companyContacts.length>1?'<div style="font-size:11px;color:#888;margin-bottom:10px">此客戶共有 '+companyContacts.length+' 位聯絡人：'+companyContacts.map(contact=>'<button class="btn btn-ghost btn-sm" style="margin:0 4px 4px 0" onclick="openEditCustomer('+contact.id+')">'+contact.name+'</button>').join('')+'</div>':'')+
+    (companyContacts.length>1?'<div style="font-size:11px;color:#888;margin-bottom:10px">'+t('ec_multi_contacts').replace('{n}',companyContacts.length)+companyContacts.map(contact=>'<button class="btn btn-ghost btn-sm" style="margin:0 4px 4px 0" onclick="openEditCustomer('+contact.id+')">'+contact.name+'</button>').join('')+'</div>':'')+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>姓名 <span class="req">*</span></label><input id="ec-name" value="'+(c.name||'')+'" /></div>'+
-    '<div><label>公司 <span class="req">*</span></label><input id="ec-company" value="'+(c.company||'')+'" /></div>'+
-    '<div><label>Email</label><input id="ec-email" value="'+(c.email||'')+'" /></div>'+
-    '<div><label>電話</label><input id="ec-phone" value="'+(c.phone||'')+'" /></div>'+
-    '<div><label>國家</label><select id="ec-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,c.country)+'</select></div>'+
-    '<div><label>行業</label><input id="ec-industry" value="'+(c.industry||'')+'" /></div>'+
-    '<div style="grid-column:1/-1"><label>地址</label><textarea id="ec-address" rows="2" style="resize:vertical">'+(c.address||'')+'</textarea></div>'+
-    '<div><label>付款條件</label><select id="ec-payment-term"><option value="">— 選擇 —</option>'+PAYMENT_TERM_OPTIONS.map(t=>'<option value="'+t+'"'+(c.payment_term===t?' selected':'')+'>'+t+'</option>').join('')+'</select></div>'+
+    '<div><label>'+t('lbl_name')+' <span class="req">*</span></label><input id="ec-name" value="'+(c.name||'')+'" /></div>'+
+    '<div><label>'+t('lbl_company')+' <span class="req">*</span></label><input id="ec-company" value="'+(c.company||'')+'" /></div>'+
+    '<div><label>'+t('lbl_email')+'</label><input id="ec-email" value="'+(c.email||'')+'" /></div>'+
+    '<div><label>'+t('lbl_phone')+'</label><input id="ec-phone" value="'+(c.phone||'')+'" /></div>'+
+    '<div><label>'+t('lbl_country')+'</label><select id="ec-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,c.country)+'</select></div>'+
+    '<div><label>'+t('lbl_industry')+'</label><input id="ec-industry" value="'+(c.industry||'')+'" /></div>'+
+    '<div style="grid-column:1/-1"><label>'+t('lbl_address')+'</label><textarea id="ec-address" rows="2" style="resize:vertical">'+(c.address||'')+'</textarea></div>'+
+    '<div><label>'+t('ec_payment_term')+'</label><select id="ec-payment-term"><option value="">'+t('ord_select')+'</option>'+PAYMENT_TERM_OPTIONS.map(pt=>'<option value="'+pt+'"'+(c.payment_term===pt?' selected':'')+'>'+pt+'</option>').join('')+'</select></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>統一回顧週期（天）</label><input value="'+getCustomerReviewDays()+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
-    '<div><label>上次回顧日期</label><input type="date" id="ec-reviewed" value="'+(c.last_reviewed_at||'')+'" /></div>'+
+    '<div><label>'+t('ec_review_days')+'</label><input value="'+getCustomerReviewDays()+'" readonly style="background:#f8f8f5;color:#666" /></div>'+
+    '<div><label>'+t('ec_last_review')+'</label><input type="date" id="ec-reviewed" value="'+(c.last_reviewed_at||'')+'" /></div>'+
     '</div>'+
-    '<div style="margin-bottom:14px"><label>備註</label><textarea id="ec-notes">'+(c.notes||'')+'</textarea></div>'+
+    '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea id="ec-notes">'+(c.notes||'')+'</textarea></div>'+
     '<div class="modal-foot">'+
-    '<button class="btn btn-primary" onclick="saveCustomer('+id+')">儲存</button>'+
-    '<button class="btn btn-ghost" onclick="openNewCustomerContact('+id+')">＋ 新增同公司聯絡人</button>'+
-    '<button class="btn btn-ghost" onclick="markCustomerReviewed('+id+')">✓ 已回顧</button>'+
+    '<button class="btn btn-primary" onclick="saveCustomer('+id+')">'+t('btn_save_info')+'</button>'+
+    '<button class="btn btn-ghost" onclick="openNewCustomerContact('+id+')">'+t('ec_add_contact')+'</button>'+
+    '<button class="btn btn-ghost" onclick="markCustomerReviewed('+id+')">'+t('ec_mark_reviewed')+'</button>'+
     '</div>'
   enableDirtyTracking('modal-customer-bd')
   document.getElementById('modal-customer').classList.add('open')
@@ -9639,9 +9866,9 @@ function openCreateSupplierModal(prefill={}){
 }
 function openNewSupplierContact(supplierId){
   const s=suppliers.find(x=>x.id===supplierId)
-  openSubformModal('新增同公司聯絡人',
+  openSubformModal(t('ec_contact_title'),
     buildSupplierCreateForm('scs',{company:s?.company||'',country:s?.country||'TH'})+
-    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateSupplierFromModal(\'scs\',\'modal-subform\','+supplierId+')">新增</button></div>'
+    '<div class="modal-foot"><button class="btn btn-primary" onclick="submitCreateSupplierFromModal(\'scs\',\'modal-subform\','+supplierId+')">'+t('btn_add')+'</button></div>'
   )
   enableDirtyTracking('modal-subform-bd')
 }
@@ -9704,21 +9931,21 @@ function openEditSupplier(id){
   const s=suppliers.find(x=>x.id===id);if(!s)return
   _isDirty=false
   const companyContacts=suppliers.filter(x=>x.company===s.company)
-  document.getElementById('modal-supplier-hd').innerHTML='<div style="font-size:14px;font-weight:600">供應商詳情</div><button class="modal-close" onclick="closeModal(\'modal-supplier\')">×</button>'
+  document.getElementById('modal-supplier-hd').innerHTML='<div style="font-size:14px;font-weight:600">'+t('supp_detail_title')+'</div><button class="modal-close" onclick="closeModal(\'modal-supplier\')">×</button>'
   document.getElementById('modal-supplier-bd').innerHTML=
-    (companyContacts.length>1?'<div style="font-size:11px;color:#888;margin-bottom:10px">此供應商共有 '+companyContacts.length+' 位聯絡人：'+companyContacts.map(c=>'<button class="btn btn-ghost btn-sm" style="margin:0 4px 4px 0" onclick="openEditSupplier('+c.id+')">'+c.name+'</button>').join('')+'</div>':'')+
+    (companyContacts.length>1?'<div style="font-size:11px;color:#888;margin-bottom:10px">'+t('es_multi_contacts').replace('{n}',companyContacts.length)+companyContacts.map(c=>'<button class="btn btn-ghost btn-sm" style="margin:0 4px 4px 0" onclick="openEditSupplier('+c.id+')">'+c.name+'</button>').join('')+'</div>':'')+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>姓名 <span class="req">*</span></label><input id="es-name" value="'+(s.name||'')+'" /></div>'+
-    '<div><label>公司 <span class="req">*</span></label><input id="es-company" value="'+(s.company||'')+'" /></div>'+
-    '<div><label>國家 <span class="req">*</span></label><select id="es-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,getSupplierCountryValue(s.id))+'</select></div>'+
-    '<div><label>職務</label><input id="es-role" value="'+(s.role||'')+'" /></div>'+
-    '<div><label>Email <span class="req">*</span></label><input id="es-email" value="'+(s.email||'')+'" /></div>'+
-    '<div><label>電話</label><input id="es-phone" value="'+(s.phone||'')+'" /></div>'+
+    '<div><label>'+t('lbl_name')+' <span class="req">*</span></label><input id="es-name" value="'+(s.name||'')+'" /></div>'+
+    '<div><label>'+t('lbl_company')+' <span class="req">*</span></label><input id="es-company" value="'+(s.company||'')+'" /></div>'+
+    '<div><label>'+t('lbl_country')+' <span class="req">*</span></label><select id="es-country">'+buildOptionPairs(COUNTRY_OPTION_PAIRS,getSupplierCountryValue(s.id))+'</select></div>'+
+    '<div><label>'+t('lbl_role')+'</label><input id="es-role" value="'+(s.role||'')+'" /></div>'+
+    '<div><label>'+t('lbl_email')+' <span class="req">*</span></label><input id="es-email" value="'+(s.email||'')+'" /></div>'+
+    '<div><label>'+t('lbl_phone')+'</label><input id="es-phone" value="'+(s.phone||'')+'" /></div>'+
     '<div><label>LINE ID</label><input id="es-line" value="'+(s.line_id||'')+'" /></div>'+
     '<div><label>WhatsApp</label><input id="es-whatsapp" value="'+(s.whatsapp||'')+'" /></div>'+
-    '<div><label>專長產品</label><input id="es-specialty" value="'+(s.specialty||'')+'" /></div>'+
-    '<div><label>郵件稱謂</label><input id="es-salutation" value="'+(s.salutation||'')+'" placeholder="例：王哥、李總、David" /></div>'+
-    '</div><div class="modal-foot"><button class="btn btn-primary" onclick="saveSupplier('+id+')">儲存</button><button class="btn btn-ghost" onclick="openNewSupplierContact('+id+')">＋ 新增同公司聯絡人</button></div>'
+    '<div><label>'+t('es_specialty')+'</label><input id="es-specialty" value="'+(s.specialty||'')+'" /></div>'+
+    '<div><label>'+t('es_salutation')+'</label><input id="es-salutation" value="'+(s.salutation||'')+'" placeholder="'+t('es_salutation_ph')+'" /></div>'+
+    '</div><div class="modal-foot"><button class="btn btn-primary" onclick="saveSupplier('+id+')">'+t('btn_save_info')+'</button><button class="btn btn-ghost" onclick="openNewSupplierContact('+id+')">'+t('ec_add_contact')+'</button></div>'
   enableDirtyTracking('modal-supplier-bd')
   document.getElementById('modal-supplier').classList.add('open')
 }
