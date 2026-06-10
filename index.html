@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.12</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.13</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -5627,13 +5627,14 @@ async function submitCreatePurchaseFromOrder(){
   if(error){showToast(t('err_create')+error.message,'error');return}
   for(const oi of oItems){
     const prod=oi.product_id?products.find(p=>String(p.id)===String(oi.product_id)):null
+    const poUnit=(oi.customer_pricing_unit==='m'||oi.customer_pricing_unit==='m2')?'m':(oi.unit||null)
     await sb.from('purchase_order_items').insert({
       po_id:id,
       product_id:oi.product_id||null,
       product_name:oi.product_name,
       spec:oi.spec||null,
       qty:oi.qty,
-      unit:oi.unit,
+      unit:poUnit,
       unit_price:prod?.cost_price??oi.unit_price,
       currency:prod?.currency||oi.currency||o.currency,
       width_m:oi.width_m||prod?.width_m||null,
@@ -8581,7 +8582,7 @@ async function _executeQto(){
       })()
       const wm=parseFloat(resolvedWm||0)
       const varSel=_qoVariantSel[String(it.id)]
-      const prodUnit=_prod?.unit||(cpu==='m'||cpu==='m2'?'m':null)
+      const prodUnit=(cpu==='m'||cpu==='m2')?'m':(_prod?.unit||null)
       const makeRow=(spec,printing,qty)=>{
         const q=qty>0?qty:1
         const amt=cpu==='m2'&&wm>0?_up*wm*q:_up*q
