@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.10</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.11</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -4878,7 +4878,7 @@ async function submitOrderItem(){
   })
   if(error){showToast(t('err_add')+error.message,'error');return}
   const existingTotal=orderItems.filter(i=>i.order_id===selectedOrderId).reduce((s,i)=>s+_calcOiItemAmt(i),0)
-  await sb.from('orders').update({total_amount:parseFloat((existingTotal+amt).toFixed(4))}).eq('id',selectedOrderId)
+  await sb.from('orders').update({total_amount:parseFloat((existingTotal+amt).toFixed(2))}).eq('id',selectedOrderId)
   await loadOrders();_renderOrderModal();renderOrders();showToast('品項已新增')
 }
 
@@ -4887,7 +4887,7 @@ async function deleteOrderItem(itemId){
   if(error){showToast(t('err_del')+error.message,'error');return}
   const remaining=orderItems.filter(i=>i.order_id===selectedOrderId&&i.id!==itemId)
   const total=remaining.reduce((s,i)=>s+_calcOiItemAmt(i),0)
-  await sb.from('orders').update({total_amount:parseFloat(total.toFixed(4))}).eq('id',selectedOrderId)
+  await sb.from('orders').update({total_amount:parseFloat(total.toFixed(2))}).eq('id',selectedOrderId)
   await loadOrders();_renderOrderModal();renderOrders();showToast('品項已刪除')
 }
 
@@ -4971,7 +4971,7 @@ async function saveOrderItems(){
     const{error}=await sb.from('order_items').update(payload).eq('id',id)
     if(error){showToast(t('err_save')+error.message,'error');return}
   }
-  const newTotal=itms.reduce((s,i)=>s+_calcOiAmt(i),0)
+  const newTotal=parseFloat(itms.reduce((s,i)=>s+_calcOiAmt(i),0).toFixed(2))
   await sb.from('orders').update({total_amount:newTotal}).eq('id',selectedOrderId)
   _oiPending={}
   _isDirty=false
@@ -8596,7 +8596,7 @@ async function _executeQto(){
     })
     const{error:iErr}=await sb.from('order_items').insert(oiRows)
     if(iErr){showToast('品項寫入失敗：'+iErr.message,'error');return}
-    const total=oiRows.reduce((s,i)=>s+(i.amount||0),0)
+    const total=parseFloat(oiRows.reduce((s,i)=>s+(i.amount||0),0).toFixed(2))
     await sb.from('orders').update({total_amount:total}).eq('id',orderId)
   }
   await loadOrders()
