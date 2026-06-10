@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.7</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.8</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8582,16 +8582,18 @@ async function _executeQto(){
       const resolvedWm=it.width_m||(it.product_id?products.find(p=>p.id===it.product_id)?.width_m:null)||null
       const wm=parseFloat(resolvedWm||0)
       const varSel=_qoVariantSel[String(it.id)]
+      const prodUnit=(it.product_id?products.find(p=>String(p.id)===String(it.product_id))?.unit:null)||(cpu==='m'||cpu==='m2'?'m':null)
       const makeRow=(spec,printing,qty)=>{
         const q=qty>0?qty:1
         const amt=cpu==='m2'&&wm>0?_up*wm*q:_up*q
-        return{order_id:orderId,product_name:it.product,spec:spec||null,printing:printing||null,qty:q,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}
+        return{order_id:orderId,product_name:it.product,spec:spec||null,printing:printing||null,qty:q,unit:prodUnit,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}
       }
       if(varSel?.length){
         return varSel.map(({color,printing,qty})=>makeRow(color||null,printing||null,parseFloat(qty)||0))
       }
-      const amt=cpu==='m2'&&wm>0?_up*wm:_up
-      return[{order_id:orderId,product_name:it.product,spec:it.spec||null,printing:null,qty:1,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}]
+      const fallbackQty=parseFloat(it.qty)||1
+      const amt=cpu==='m2'&&wm>0?_up*wm*fallbackQty:_up*fallbackQty
+      return[{order_id:orderId,product_name:it.product,spec:it.spec||null,printing:null,qty:fallbackQty,unit:prodUnit,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}]
     })
     const{error:iErr}=await sb.from('order_items').insert(oiRows)
     if(iErr){showToast('品項寫入失敗：'+iErr.message,'error');return}
