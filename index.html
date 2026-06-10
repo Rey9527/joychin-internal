@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.5</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.6</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -4572,7 +4572,12 @@ function _renderOrderModal(){
       const missingWidth=cpu==='m2'&&wm===0
       html+='<div style="padding:10px 0;border-bottom:1px solid #f0f0eb;font-size:12px">'+
         '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">'+
-        '<div style="font-weight:500;color:#333">'+esc(it.product_name||'—')+(it.spec?' <span style="font-weight:400;color:#aaa">'+esc(it.spec)+'</span>':'')+'</div>'+
+        '<div>'+
+          '<div style="font-weight:500;color:#333">'+esc(it.product_name||'—')+'</div>'+
+          ((it.spec||it.printing)?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:3px">'+
+            (it.spec?'<span style="font-size:11px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;border-radius:10px;padding:1px 8px;font-weight:500">'+esc(it.spec)+'</span>':'')+
+            (it.printing?'<span style="font-size:11px;background:#F3EEF9;color:#7B5EA7;border:1px solid #C4B5FD;border-radius:10px;padding:1px 8px;font-weight:500">'+esc(tPrintingVariant(it.printing))+'</span>':'')+
+          '</div>':'')+'</div>'+
         (editMode?'<button style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0;flex-shrink:0" onclick="deleteOrderItem('+it.id+')">×</button>':'')+
         '</div>'+
         '<div style="font-size:11px;color:#888;margin-bottom:4px" id="oi-calc-'+it.id+'">'+fmtOiCalc(it)+'</div>'+
