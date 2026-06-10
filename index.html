@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.1</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.2</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8367,6 +8367,7 @@ async function newQuoteVersion(){
   showToast('新版本 v'+newV+' 已建立')
 }
 
+// _qoColorSelections: { quoteItemId: [{color, qty}] }
 let _qoColorSelections={}
 async function sendQuoteToOrder(){
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
@@ -8377,32 +8378,66 @@ async function sendQuoteToOrder(){
   })
   if(colorItems.length){
     _qoColorSelections={}
-    let html='<div style="font-size:12px;color:#666;margin-bottom:14px">以下產品有顏色選項，請為每項選擇顏色後建立訂單：</div>'
+    colorItems.forEach(it=>{_qoColorSelections[String(it.id)]=[]})
+    let html='<div style="font-size:12px;color:#666;margin-bottom:14px">可選多個顏色，每個顏色會成為獨立品項：</div>'
     colorItems.forEach(it=>{
       const p=products.find(x=>String(x.id)===String(it.product_id))
-      html+='<div style="margin-bottom:14px">'
-      html+='<label style="font-size:12px;font-weight:500;color:#333;margin-bottom:6px">'+esc(it.product)+'</label>'
-      html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px" id="qoc-btns-'+esc(String(it.id))+'">'
-      html+=p.color_variants.map(c=>'<button type="button" onclick="qocPick(\''+esc(String(it.id))+'\',\''+c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',this)" style="padding:2px 10px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>').join('')
+      const iid=String(it.id)
+      html+='<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f0f0eb">'
+      html+='<div style="font-size:12px;font-weight:500;color:#333;margin-bottom:8px">'+esc(it.product)+'</div>'
+      html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">'
+      html+=p.color_variants.map(c=>{
+        const cs=c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+        return '<button type="button" id="qoc-btn-'+iid+'-'+esc(c)+'" onclick="qocToggle(\''+iid+'\',\''+cs+'\',this)" style="padding:3px 12px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>'
+      }).join('')
       html+='</div>'
-      html+='<input type="text" id="qoc-txt-'+esc(String(it.id))+'" placeholder="或直接輸入顏色（選填）" style="font-size:12px" oninput="qocType(\''+esc(String(it.id))+'\',this.value)" />'
+      html+='<div id="qoc-rows-'+iid+'"></div>'
+      html+='<div style="display:flex;gap:6px;margin-top:6px">'
+      html+='<input type="text" id="qoc-custom-'+iid+'" placeholder="其他顏色..." style="font-size:12px;flex:1" />'
+      html+='<button type="button" class="btn btn-ghost btn-sm" onclick="qocAddCustom(\''+iid+'\')">加入</button>'
+      html+='</div>'
       html+='</div>'
     })
-    html+='<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-primary" onclick="qocConfirm()">建立訂單</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">取消</button></div>'
+    html+='<div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-primary" onclick="qocConfirm()">建立訂單</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">取消</button></div>'
     openSubformModal('選擇顏色變體',html)
     return
   }
   await _executeQto()
 }
-function qocPick(itemId,color,btn){
-  _qoColorSelections[itemId]=color
-  document.getElementById('qoc-btns-'+itemId)?.querySelectorAll('button').forEach(b=>{b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.color='#555'})
-  btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
-  const txt=document.getElementById('qoc-txt-'+itemId);if(txt)txt.value=color
+function qocToggle(iid,color,btn){
+  const sel=_qoColorSelections[iid]
+  const idx=sel.findIndex(x=>x.color===color)
+  if(idx>=0){
+    sel.splice(idx,1)
+    btn.style.background='#fff';btn.style.borderColor='#e5e5e0';btn.style.color='#555'
+    document.getElementById('qoc-row-'+iid+'-'+color.replace(/[^a-zA-Z0-9]/g,'_'))?.remove()
+  }else{
+    sel.push({color,qty:''})
+    btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
+    _qocAppendRow(iid,color)
+  }
 }
-function qocType(itemId,value){
-  _qoColorSelections[itemId]=value||null
-  document.getElementById('qoc-btns-'+itemId)?.querySelectorAll('button').forEach(b=>{b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.color='#555'})
+function qocAddCustom(iid){
+  const inp=document.getElementById('qoc-custom-'+iid);if(!inp)return
+  const color=inp.value.trim();if(!color)return
+  if(_qoColorSelections[iid].some(x=>x.color===color))return
+  _qoColorSelections[iid].push({color,qty:''})
+  inp.value=''
+  _qocAppendRow(iid,color)
+}
+function _qocAppendRow(iid,color){
+  const wrap=document.getElementById('qoc-rows-'+iid);if(!wrap)return
+  const rowId='qoc-row-'+iid+'-'+color.replace(/[^a-zA-Z0-9]/g,'_')
+  const div=document.createElement('div')
+  div.id=rowId
+  div.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:#f8fef8;border:1px solid #d4edda;border-radius:6px'
+  div.innerHTML='<span style="font-size:12px;font-weight:500;color:#0F6E56;flex:1">'+esc(color)+'</span>'+
+    '<input type="number" min="0" step="1" placeholder="數量（m）" style="width:120px;font-size:12px" oninput="_qocQtyChange(\''+iid+'\',\''+color.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',this.value)" />'
+  wrap.appendChild(div)
+}
+function _qocQtyChange(iid,color,val){
+  const entry=_qoColorSelections[iid]?.find(x=>x.color===color)
+  if(entry)entry.qty=val
 }
 async function qocConfirm(){closeModal('modal-subform');await _executeQto()}
 async function _executeQto(){
@@ -8425,7 +8460,7 @@ async function _executeQto(){
   })
   if(oErr){showToast('建立訂單失敗：'+oErr.message,'error');return}
   if(items.length){
-    const oiRows=items.map(it=>{
+    const oiRows=items.flatMap(it=>{
       const _up=(()=>{
         const cp=parseFloat(it.cost_price||0)
         const applyC=shouldApplyCustoms(it)
@@ -8444,10 +8479,17 @@ async function _executeQto(){
       const cpu=it.customer_pricing_unit||'m2'
       const resolvedWm=it.width_m||(it.product_id?products.find(p=>p.id===it.product_id)?.width_m:null)||null
       const wm=parseFloat(resolvedWm||0)
+      const colorSel=_qoColorSelections[String(it.id)]
+      const makeRow=(spec,qty)=>{
+        const q=qty>0?qty:1
+        const amt=cpu==='m2'&&wm>0?_up*wm*q:_up*q
+        return{order_id:orderId,product_name:it.product,spec:spec||null,qty:q,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}
+      }
+      if(colorSel?.length){
+        return colorSel.map(({color,qty})=>makeRow(color,parseFloat(qty)||0))
+      }
       const amt=cpu==='m2'&&wm>0?_up*wm:_up
-      const colorSpec=_qoColorSelections[String(it.id)]
-      const spec=colorSpec!=null?colorSpec:(it.spec||null)
-      return{order_id:orderId,product_name:it.product,spec,qty:1,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}
+      return[{order_id:orderId,product_name:it.product,spec:it.spec||null,qty:1,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}]
     })
     const{error:iErr}=await sb.from('order_items').insert(oiRows)
     if(iErr){showToast('品項寫入失敗：'+iErr.message,'error');return}
