@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.2</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.3</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8367,79 +8367,137 @@ async function newQuoteVersion(){
   showToast('新版本 v'+newV+' 已建立')
 }
 
-// _qoColorSelections: { quoteItemId: [{color, qty}] }
-let _qoColorSelections={}
+// _qoVariantSel: { quoteItemId: [{color, printing, qty}] }
+let _qoVariantSel={}
+let _qoProductCache={}  // { quoteItemId: product }
 async function sendQuoteToOrder(){
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
   const items=quoteItems.filter(i=>i.header_id===h.id)
-  const colorItems=items.filter(it=>{
+  const pickerItems=items.filter(it=>{
     const p=it.product_id&&products.find(x=>String(x.id)===String(it.product_id))
-    return p?.color_variants?.length
+    return p?.color_variants?.length||p?.printing_variants?.length
   })
-  if(colorItems.length){
-    _qoColorSelections={}
-    colorItems.forEach(it=>{_qoColorSelections[String(it.id)]=[]})
-    let html='<div style="font-size:12px;color:#666;margin-bottom:14px">可選多個顏色，每個顏色會成為獨立品項：</div>'
-    colorItems.forEach(it=>{
-      const p=products.find(x=>String(x.id)===String(it.product_id))
+  if(pickerItems.length){
+    _qoVariantSel={};_qoProductCache={}
+    pickerItems.forEach(it=>{
+      _qoVariantSel[String(it.id)]=[]
+      _qoProductCache[String(it.id)]=products.find(x=>String(x.id)===String(it.product_id))
+    })
+    let html='<div style="font-size:12px;color:#666;margin-bottom:14px">每個選項組合會成為獨立品項：</div>'
+    pickerItems.forEach(it=>{
+      const p=_qoProductCache[String(it.id)]
       const iid=String(it.id)
+      const hasColors=p?.color_variants?.length
+      const hasPrint=p?.printing_variants?.length
       html+='<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f0f0eb">'
       html+='<div style="font-size:12px;font-weight:500;color:#333;margin-bottom:8px">'+esc(it.product)+'</div>'
-      html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">'
-      html+=p.color_variants.map(c=>{
-        const cs=c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
-        return '<button type="button" id="qoc-btn-'+iid+'-'+esc(c)+'" onclick="qocToggle(\''+iid+'\',\''+cs+'\',this)" style="padding:3px 12px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>'
-      }).join('')
-      html+='</div>'
-      html+='<div id="qoc-rows-'+iid+'"></div>'
-      html+='<div style="display:flex;gap:6px;margin-top:6px">'
-      html+='<input type="text" id="qoc-custom-'+iid+'" placeholder="其他顏色..." style="font-size:12px;flex:1" />'
-      html+='<button type="button" class="btn btn-ghost btn-sm" onclick="qocAddCustom(\''+iid+'\')">加入</button>'
-      html+='</div>'
+      if(hasColors){
+        html+='<div style="font-size:11px;color:#888;margin-bottom:5px">顏色（可多選）：</div>'
+        html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'
+        html+=p.color_variants.map(c=>{
+          const cs=c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+          return '<button type="button" onclick="qovToggle(\''+iid+'\',\''+cs+'\',null,this)" style="padding:3px 12px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>'
+        }).join('')
+        html+='</div>'
+      }
+      if(hasPrint&&!hasColors){
+        html+='<div style="font-size:11px;color:#888;margin-bottom:5px">印刷方式（可多選）：</div>'
+        html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'
+        html+='<button type="button" onclick="qovToggle(\''+iid+'\',null,null,this)" style="padding:3px 12px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">無印刷</button>'
+        html+=p.printing_variants.map(pv=>{
+          const pvs=pv.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+          return '<button type="button" onclick="qovToggle(\''+iid+'\',null,\''+pvs+'\',this)" style="padding:3px 12px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(tPrintingVariant(pv))+'</button>'
+        }).join('')
+        html+='</div>'
+      }
+      html+='<div id="qov-rows-'+iid+'"></div>'
+      if(hasColors){
+        html+='<div style="display:flex;gap:6px;margin-top:4px">'
+        html+='<input type="text" id="qov-custom-'+iid+'" placeholder="其他顏色..." style="font-size:12px;flex:1" />'
+        html+='<button type="button" class="btn btn-ghost btn-sm" onclick="qovAddCustom(\''+iid+'\')">加入</button>'
+        html+='</div>'
+      }
       html+='</div>'
     })
-    html+='<div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-primary" onclick="qocConfirm()">建立訂單</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">取消</button></div>'
-    openSubformModal('選擇顏色變體',html)
+    html+='<div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-primary" onclick="qovConfirm()">建立訂單</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">取消</button></div>'
+    openSubformModal('選擇顏色 / 印刷',html)
     return
   }
   await _executeQto()
 }
-function qocToggle(iid,color,btn){
-  const sel=_qoColorSelections[iid]
-  const idx=sel.findIndex(x=>x.color===color)
+function _qovRowKey(color,printing){return (color||'_')+'\x00'+(printing===undefined?'':printing||'none')}
+function qovToggle(iid,color,printing,btn){
+  const sel=_qoVariantSel[iid]
+  const key=_qovRowKey(color,printing)
+  const idx=sel.findIndex(x=>_qovRowKey(x.color,x.printing)===key)
   if(idx>=0){
     sel.splice(idx,1)
     btn.style.background='#fff';btn.style.borderColor='#e5e5e0';btn.style.color='#555'
-    document.getElementById('qoc-row-'+iid+'-'+color.replace(/[^a-zA-Z0-9]/g,'_'))?.remove()
+    document.getElementById('qov-row-'+iid+'-'+key.replace(/[^a-zA-Z0-9]/g,'_'))?.remove()
   }else{
-    sel.push({color,qty:''})
+    sel.push({color,printing,qty:''})
     btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
-    _qocAppendRow(iid,color)
+    _qovAppendRow(iid,color,printing)
   }
 }
-function qocAddCustom(iid){
-  const inp=document.getElementById('qoc-custom-'+iid);if(!inp)return
+function qovAddCustom(iid){
+  const inp=document.getElementById('qov-custom-'+iid);if(!inp)return
   const color=inp.value.trim();if(!color)return
-  if(_qoColorSelections[iid].some(x=>x.color===color))return
-  _qoColorSelections[iid].push({color,qty:''})
-  inp.value=''
-  _qocAppendRow(iid,color)
+  const p=_qoProductCache[iid]
+  const hasPrint=p?.printing_variants?.length
+  if(hasPrint){
+    // add a row with no printing pre-selected; user picks in the row
+    if(_qoVariantSel[iid].some(x=>x.color===color&&x.printing===undefined))return
+    _qoVariantSel[iid].push({color,printing:undefined,qty:''})
+    inp.value=''
+    _qovAppendRow(iid,color,undefined)
+  }else{
+    if(_qoVariantSel[iid].some(x=>x.color===color))return
+    _qoVariantSel[iid].push({color,printing:null,qty:''})
+    inp.value=''
+    _qovAppendRow(iid,color,null)
+  }
 }
-function _qocAppendRow(iid,color){
-  const wrap=document.getElementById('qoc-rows-'+iid);if(!wrap)return
-  const rowId='qoc-row-'+iid+'-'+color.replace(/[^a-zA-Z0-9]/g,'_')
+function _qovAppendRow(iid,color,printing){
+  const wrap=document.getElementById('qov-rows-'+iid);if(!wrap)return
+  const key=_qovRowKey(color,printing)
+  const rowId='qov-row-'+iid+'-'+key.replace(/[^a-zA-Z0-9]/g,'_')
+  const p=_qoProductCache[iid]
+  const hasPrint=p?.printing_variants?.length
+  const label=(color||'無顏色')+(printing!==null&&printing!==undefined?' · '+tPrintingVariant(printing):'')
+  const cs=(color||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")
   const div=document.createElement('div')
   div.id=rowId
-  div.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:#f8fef8;border:1px solid #d4edda;border-radius:6px'
-  div.innerHTML='<span style="font-size:12px;font-weight:500;color:#0F6E56;flex:1">'+esc(color)+'</span>'+
-    '<input type="number" min="0" step="1" placeholder="數量（m）" style="width:120px;font-size:12px" oninput="_qocQtyChange(\''+iid+'\',\''+color.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',this.value)" />'
+  div.style.cssText='margin-bottom:6px;padding:8px 10px;background:#f8fef8;border:1px solid #d4edda;border-radius:6px'
+  let inner='<div style="display:flex;align-items:center;gap:8px;margin-bottom:'+(hasPrint&&printing===undefined?'8':'0')+'px">'
+  inner+='<span style="font-size:12px;font-weight:500;color:#0F6E56;flex:1">'+esc(label)+'</span>'
+  inner+='<input type="number" min="0" step="1" placeholder="數量（m）" style="width:110px;font-size:12px" oninput="_qovQtyChange(\''+iid+'\',\''+key.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',this.value)" />'
+  inner+='</div>'
+  if(hasPrint&&printing===undefined){
+    inner+='<div style="font-size:11px;color:#888;margin-bottom:4px">印刷方式：</div>'
+    inner+='<div style="display:flex;flex-wrap:wrap;gap:4px">'
+    inner+='<button type="button" onclick="_qovSetPrinting(\''+iid+'\',\''+key.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',null,this)" style="padding:2px 10px;border-radius:12px;border:2px solid #7B5EA7;background:#F3EEF9;font-size:11px;cursor:pointer;color:#7B5EA7">無</button>'
+    inner+=p.printing_variants.map(pv=>{
+      const pvs=pv.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+      return '<button type="button" onclick="_qovSetPrinting(\''+iid+'\',\''+key.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',\''+pvs+'\',this)" style="padding:2px 10px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(tPrintingVariant(pv))+'</button>'
+    }).join('')
+    inner+='</div>'
+  }
+  div.innerHTML=inner
   wrap.appendChild(div)
 }
-function _qocQtyChange(iid,color,val){
-  const entry=_qoColorSelections[iid]?.find(x=>x.color===color)
+function _qovSetPrinting(iid,key,printVal,btn){
+  const entry=_qoVariantSel[iid]?.find(x=>_qovRowKey(x.color,x.printing)===key)
+  if(entry)entry.printing=printVal
+  const row=document.getElementById('qov-row-'+iid+'-'+key.replace(/[^a-zA-Z0-9]/g,'_'))
+  row?.querySelectorAll('button').forEach(b=>{b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.borderWidth='1px';b.style.color='#555'})
+  btn.style.background='#F3EEF9';btn.style.borderColor='#7B5EA7';btn.style.borderWidth='2px';btn.style.color='#7B5EA7'
+}
+function _qovQtyChange(iid,key,val){
+  const entry=_qoVariantSel[iid]?.find(x=>_qovRowKey(x.color,x.printing)===key)
   if(entry)entry.qty=val
 }
-async function qocConfirm(){closeModal('modal-subform');await _executeQto()}
+async function qovConfirm(){closeModal('modal-subform');await _executeQto()}
 async function _executeQto(){
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
   const items=quoteItems.filter(i=>i.header_id===h.id)
@@ -8479,17 +8537,17 @@ async function _executeQto(){
       const cpu=it.customer_pricing_unit||'m2'
       const resolvedWm=it.width_m||(it.product_id?products.find(p=>p.id===it.product_id)?.width_m:null)||null
       const wm=parseFloat(resolvedWm||0)
-      const colorSel=_qoColorSelections[String(it.id)]
-      const makeRow=(spec,qty)=>{
+      const varSel=_qoVariantSel[String(it.id)]
+      const makeRow=(spec,printing,qty)=>{
         const q=qty>0?qty:1
         const amt=cpu==='m2'&&wm>0?_up*wm*q:_up*q
-        return{order_id:orderId,product_name:it.product,spec:spec||null,qty:q,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}
+        return{order_id:orderId,product_name:it.product,spec:spec||null,printing:printing||null,qty:q,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}
       }
-      if(colorSel?.length){
-        return colorSel.map(({color,qty})=>makeRow(color,parseFloat(qty)||0))
+      if(varSel?.length){
+        return varSel.map(({color,printing,qty})=>makeRow(color||null,printing||null,parseFloat(qty)||0))
       }
       const amt=cpu==='m2'&&wm>0?_up*wm:_up
-      return[{order_id:orderId,product_name:it.product,spec:it.spec||null,qty:1,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}]
+      return[{order_id:orderId,product_name:it.product,spec:it.spec||null,printing:null,qty:1,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}]
     })
     const{error:iErr}=await sb.from('order_items').insert(oiRows)
     if(iErr){showToast('品項寫入失敗：'+iErr.message,'error');return}
