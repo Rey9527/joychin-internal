@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.6</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.7</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -4551,7 +4551,7 @@ function _renderOrderModal(){
         '<div><label>'+t('lbl_qty')+' <span class="req">*</span></label><input id="oi-qty" type="number" min="0" step="0.01" oninput="refreshOiNewCalc()" /></div>'+
         '<div><label>'+t('lbl_unit')+'</label><select id="oi-unit"><option value="m">m</option><option value="m²">m²</option><option value="roll">roll</option><option value="kg">kg</option><option value="piece">piece</option></select></div>'+
         '<div><label>'+t('lbl_pricing_unit')+'</label><select id="oi-cpu" onchange="refreshOiNewCalc()"><option value="m2">m²</option><option value="m">m</option></select></div>'+
-        '<div><label>'+t('lbl_width_mm')+'</label><input id="oi-width-mm" type="number" min="0" step="1" placeholder="'+t('lbl_width_placeholder')+'" oninput="refreshOiNewCalc()" /></div>'+
+        '<div id="oi-width-mm-row"><label>'+t('lbl_width_mm')+'</label><input id="oi-width-mm" type="number" min="0" step="1" placeholder="'+t('lbl_width_placeholder')+'" oninput="refreshOiNewCalc()" /></div>'+
         '<div><label>'+t('lbl_unit_price')+'</label><input id="oi-price" type="number" min="0" step="0.0001" oninput="refreshOiNewCalc()" /></div>'+
         '<div><label>'+t('lbl_currency')+'</label><select id="oi-currency">'+buildOptions(CURRENCY_OPTIONS,o.currency)+'</select></div>'+
         '</div>'+
@@ -4835,6 +4835,8 @@ function refreshOiNewCalc(){
   const wm=wmMm/1000
   const cur=document.getElementById('oi-currency')?.value||''
   const el=document.getElementById('oi-new-calc')
+  const widthRow=document.getElementById('oi-width-mm-row')
+  if(widthRow)widthRow.style.display=cpu==='m2'?'':'none'
   if(!el)return
   if(!qty||!up){el.innerHTML='';return}
   let amt,str
