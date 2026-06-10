@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.4</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.5</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8426,19 +8426,36 @@ async function sendQuoteToOrder(){
   }
   await _executeQto()
 }
-function _qovRowKey(color,printing){return (color||'_')+'\x00'+(printing===undefined?'':printing||'none')}
+function _qovRowKey(color,printing){return (color||'__nc__')+'\x00'+(printing===null?'__none__':printing||'')}
+function _qovColorKeyStr(color){return (color||'_').replace(/[^a-zA-Z0-9]/g,'_')}
 function qovToggle(iid,color,printing,btn){
-  const sel=_qoVariantSel[iid]
-  const key=_qovRowKey(color,printing)
-  const idx=sel.findIndex(x=>_qovRowKey(x.color,x.printing)===key)
-  if(idx>=0){
-    sel.splice(idx,1)
-    btn.style.background='#fff';btn.style.borderColor='#e5e5e0';btn.style.color='#555'
-    document.getElementById('qov-row-'+iid+'-'+key.replace(/[^a-zA-Z0-9]/g,'_'))?.remove()
+  const colorKeyStr=_qovColorKeyStr(color)
+  if(printing===undefined){
+    // toggle color container (product has printing variants)
+    const box=document.getElementById('qov-colorbox-'+iid+'-'+colorKeyStr)
+    if(box){
+      const sel=_qoVariantSel[iid]
+      for(let i=sel.length-1;i>=0;i--){if(sel[i].color===color)sel.splice(i,1)}
+      box.remove()
+      btn.style.background='#fff';btn.style.borderColor='#e5e5e0';btn.style.color='#555'
+    }else{
+      btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
+      _qovAppendColorBox(iid,color)
+    }
   }else{
-    sel.push({color,printing,qty:''})
-    btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
-    _qovAppendRow(iid,color,printing)
+    // simple row (no printing variants)
+    const sel=_qoVariantSel[iid]
+    const rowId='qov-simplerow-'+iid+'-'+colorKeyStr
+    const idx=sel.findIndex(x=>x.color===color&&x.printing===null)
+    if(idx>=0){
+      sel.splice(idx,1)
+      btn.style.background='#fff';btn.style.borderColor='#e5e5e0';btn.style.color='#555'
+      document.getElementById(rowId)?.remove()
+    }else{
+      sel.push({color,printing:null,qty:''})
+      btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
+      _qovAppendSimpleRow(iid,color)
+    }
   }
 }
 function qovAddCustom(iid){
@@ -8446,53 +8463,72 @@ function qovAddCustom(iid){
   const color=inp.value.trim();if(!color)return
   const p=_qoProductCache[iid]
   const hasPrint=p?.printing_variants?.length
+  const colorKeyStr=_qovColorKeyStr(color)
   if(hasPrint){
-    // add a row with no printing pre-selected; user picks in the row
-    if(_qoVariantSel[iid].some(x=>x.color===color&&x.printing===undefined))return
-    _qoVariantSel[iid].push({color,printing:undefined,qty:''})
-    inp.value=''
-    _qovAppendRow(iid,color,undefined)
+    if(document.getElementById('qov-colorbox-'+iid+'-'+colorKeyStr))return
+    inp.value='';_qovAppendColorBox(iid,color)
   }else{
     if(_qoVariantSel[iid].some(x=>x.color===color))return
     _qoVariantSel[iid].push({color,printing:null,qty:''})
-    inp.value=''
-    _qovAppendRow(iid,color,null)
+    inp.value='';_qovAppendSimpleRow(iid,color)
   }
 }
-function _qovAppendRow(iid,color,printing){
+function _qovAppendColorBox(iid,color){
   const wrap=document.getElementById('qov-rows-'+iid);if(!wrap)return
-  const key=_qovRowKey(color,printing)
-  const rowId='qov-row-'+iid+'-'+key.replace(/[^a-zA-Z0-9]/g,'_')
   const p=_qoProductCache[iid]
-  const hasPrint=p?.printing_variants?.length
-  const label=(color||'無顏色')+(printing!==null&&printing!==undefined?' · '+tPrintingVariant(printing):'')
+  const colorKeyStr=_qovColorKeyStr(color)
   const cs=(color||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")
   const div=document.createElement('div')
-  div.id=rowId
-  div.style.cssText='margin-bottom:6px;padding:8px 10px;background:#f8fef8;border:1px solid #d4edda;border-radius:6px'
-  let inner='<div style="display:flex;align-items:center;gap:8px;margin-bottom:'+(hasPrint&&printing===undefined?'8':'0')+'px">'
-  inner+='<span style="font-size:12px;font-weight:500;color:#0F6E56;flex:1">'+esc(label)+'</span>'
-  inner+='<input type="number" min="0" step="1" placeholder="數量（m）" style="width:110px;font-size:12px" oninput="_qovQtyChange(\''+iid+'\',\''+key.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',this.value)" />'
+  div.id='qov-colorbox-'+iid+'-'+colorKeyStr
+  div.style.cssText='margin-bottom:8px;padding:8px 10px;background:#f8fef8;border:1px solid #d4edda;border-radius:6px'
+  let inner='<div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:6px">'+esc(color||'無顏色')+'</div>'
+  inner+='<div style="font-size:11px;color:#888;margin-bottom:4px">印刷方式（可多選）：</div>'
+  inner+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">'
+  inner+='<button type="button" onclick="_qovTogglePrintingCombo(\''+iid+'\',\''+cs+'\',null,this)" style="padding:2px 10px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">無印刷</button>'
+  inner+=p.printing_variants.map(pv=>{
+    const pvs=pv.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+    return '<button type="button" onclick="_qovTogglePrintingCombo(\''+iid+'\',\''+cs+'\',\''+pvs+'\',this)" style="padding:2px 10px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(tPrintingVariant(pv))+'</button>'
+  }).join('')
   inner+='</div>'
-  if(hasPrint&&printing===undefined){
-    inner+='<div style="font-size:11px;color:#888;margin-bottom:4px">印刷方式：</div>'
-    inner+='<div style="display:flex;flex-wrap:wrap;gap:4px">'
-    inner+='<button type="button" onclick="_qovSetPrinting(\''+iid+'\',\''+key.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',null,this)" style="padding:2px 10px;border-radius:12px;border:2px solid #7B5EA7;background:#F3EEF9;font-size:11px;cursor:pointer;color:#7B5EA7">無</button>'
-    inner+=p.printing_variants.map(pv=>{
-      const pvs=pv.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
-      return '<button type="button" onclick="_qovSetPrinting(\''+iid+'\',\''+key.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',\''+pvs+'\',this)" style="padding:2px 10px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(tPrintingVariant(pv))+'</button>'
-    }).join('')
-    inner+='</div>'
-  }
+  inner+='<div id="qov-combos-'+iid+'-'+colorKeyStr+'"></div>'
   div.innerHTML=inner
   wrap.appendChild(div)
 }
-function _qovSetPrinting(iid,key,printVal,btn){
-  const entry=_qoVariantSel[iid]?.find(x=>_qovRowKey(x.color,x.printing)===key)
-  if(entry)entry.printing=printVal
-  const row=document.getElementById('qov-row-'+iid+'-'+key.replace(/[^a-zA-Z0-9]/g,'_'))
-  row?.querySelectorAll('button').forEach(b=>{b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.borderWidth='1px';b.style.color='#555'})
-  btn.style.background='#F3EEF9';btn.style.borderColor='#7B5EA7';btn.style.borderWidth='2px';btn.style.color='#7B5EA7'
+function _qovAppendSimpleRow(iid,color){
+  const wrap=document.getElementById('qov-rows-'+iid);if(!wrap)return
+  const colorKeyStr=_qovColorKeyStr(color)
+  const key=_qovRowKey(color,null)
+  const keyEsc=key.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+  const div=document.createElement('div')
+  div.id='qov-simplerow-'+iid+'-'+colorKeyStr
+  div.style.cssText='margin-bottom:6px;padding:8px 10px;background:#f8fef8;border:1px solid #d4edda;border-radius:6px'
+  div.innerHTML='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:500;color:#0F6E56;flex:1">'+esc(color||'無顏色')+'</span><input type="number" min="0" step="1" placeholder="數量（m）" style="width:110px;font-size:12px" oninput="_qovQtyChange(\''+iid+'\',\''+keyEsc+'\',this.value)" /></div>'
+  wrap.appendChild(div)
+}
+function _qovTogglePrintingCombo(iid,color,printVal,btn){
+  const sel=_qoVariantSel[iid]
+  const colorKeyStr=_qovColorKeyStr(color)
+  const key=_qovRowKey(color,printVal)
+  const comboId='qov-combo-'+iid+'-'+key.replace(/[^a-zA-Z0-9]/g,'_')
+  const idx=sel.findIndex(x=>x.color===color&&x.printing===printVal)
+  if(idx>=0){
+    sel.splice(idx,1)
+    btn.style.background='#fff';btn.style.borderColor='#e5e5e0';btn.style.borderWidth='1px';btn.style.color='#555'
+    document.getElementById(comboId)?.remove()
+  }else{
+    sel.push({color,printing:printVal,qty:''})
+    btn.style.background='#F3EEF9';btn.style.borderColor='#7B5EA7';btn.style.borderWidth='2px';btn.style.color='#7B5EA7'
+    const combosDiv=document.getElementById('qov-combos-'+iid+'-'+colorKeyStr)
+    if(combosDiv){
+      const keyEsc=key.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+      const row=document.createElement('div')
+      row.id=comboId
+      row.style.cssText='display:flex;align-items:center;gap:8px;margin-top:4px;padding:4px 8px;background:#fff;border-radius:4px'
+      const label=printVal===null?'無印刷':tPrintingVariant(printVal)
+      row.innerHTML='<span style="font-size:11px;color:#7B5EA7;flex:1">'+esc(label)+'</span><input type="number" min="0" step="1" placeholder="數量（m）" style="width:110px;font-size:12px" oninput="_qovQtyChange(\''+iid+'\',\''+keyEsc+'\',this.value)" />'
+      combosDiv.appendChild(row)
+    }
+  }
 }
 function _qovQtyChange(iid,key,val){
   const entry=_qoVariantSel[iid]?.find(x=>_qovRowKey(x.color,x.printing)===key)
