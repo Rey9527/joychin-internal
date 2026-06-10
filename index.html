@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.1</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8367,7 +8367,45 @@ async function newQuoteVersion(){
   showToast('新版本 v'+newV+' 已建立')
 }
 
+let _qoColorSelections={}
 async function sendQuoteToOrder(){
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
+  const items=quoteItems.filter(i=>i.header_id===h.id)
+  const colorItems=items.filter(it=>{
+    const p=it.product_id&&products.find(x=>String(x.id)===String(it.product_id))
+    return p?.color_variants?.length
+  })
+  if(colorItems.length){
+    _qoColorSelections={}
+    let html='<div style="font-size:12px;color:#666;margin-bottom:14px">以下產品有顏色選項，請為每項選擇顏色後建立訂單：</div>'
+    colorItems.forEach(it=>{
+      const p=products.find(x=>String(x.id)===String(it.product_id))
+      html+='<div style="margin-bottom:14px">'
+      html+='<label style="font-size:12px;font-weight:500;color:#333;margin-bottom:6px">'+esc(it.product)+'</label>'
+      html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px" id="qoc-btns-'+esc(String(it.id))+'">'
+      html+=p.color_variants.map(c=>'<button type="button" onclick="qocPick(\''+esc(String(it.id))+'\',\''+c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\',this)" style="padding:2px 10px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>').join('')
+      html+='</div>'
+      html+='<input type="text" id="qoc-txt-'+esc(String(it.id))+'" placeholder="或直接輸入顏色（選填）" style="font-size:12px" oninput="qocType(\''+esc(String(it.id))+'\',this.value)" />'
+      html+='</div>'
+    })
+    html+='<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-primary" onclick="qocConfirm()">建立訂單</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">取消</button></div>'
+    openSubformModal('選擇顏色變體',html)
+    return
+  }
+  await _executeQto()
+}
+function qocPick(itemId,color,btn){
+  _qoColorSelections[itemId]=color
+  document.getElementById('qoc-btns-'+itemId)?.querySelectorAll('button').forEach(b=>{b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.color='#555'})
+  btn.style.background='#e8f5e9';btn.style.borderColor='#0F6E56';btn.style.color='#0F6E56'
+  const txt=document.getElementById('qoc-txt-'+itemId);if(txt)txt.value=color
+}
+function qocType(itemId,value){
+  _qoColorSelections[itemId]=value||null
+  document.getElementById('qoc-btns-'+itemId)?.querySelectorAll('button').forEach(b=>{b.style.background='#fff';b.style.borderColor='#e5e5e0';b.style.color='#555'})
+}
+async function qocConfirm(){closeModal('modal-subform');await _executeQto()}
+async function _executeQto(){
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
   const items=quoteItems.filter(i=>i.header_id===h.id)
   const cust=customers.find(c=>c.company===h.customer)
@@ -8407,7 +8445,9 @@ async function sendQuoteToOrder(){
       const resolvedWm=it.width_m||(it.product_id?products.find(p=>p.id===it.product_id)?.width_m:null)||null
       const wm=parseFloat(resolvedWm||0)
       const amt=cpu==='m2'&&wm>0?_up*wm:_up
-      return{order_id:orderId,product_name:it.product,spec:it.spec||null,qty:1,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}
+      const colorSpec=_qoColorSelections[String(it.id)]
+      const spec=colorSpec!=null?colorSpec:(it.spec||null)
+      return{order_id:orderId,product_name:it.product,spec,qty:1,unit:it.moq||null,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}
     })
     const{error:iErr}=await sb.from('order_items').insert(oiRows)
     if(iErr){showToast('品項寫入失敗：'+iErr.message,'error');return}
