@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.8</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.9</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8563,26 +8563,26 @@ async function _executeQto(){
   if(oErr){showToast('建立訂單失敗：'+oErr.message,'error');return}
   if(items.length){
     const oiRows=items.flatMap(it=>{
+      const _prod=it.product_id?products.find(p=>String(p.id)===String(it.product_id)):null
+      const cpu=it.customer_pricing_unit||_prod?.customer_pricing_unit||_prod?.pricing_unit||'m'
+      const resolvedWm=cpu==='m2'?(it.width_m||_prod?.width_m||null):null
       const _up=(()=>{
         const cp=parseFloat(it.cost_price||0)
         const applyC=shouldApplyCustoms(it)
         const afterC=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
         const pu=it.pricing_unit||''
-        const cpuF=it.customer_pricing_unit||'m2'
-        const wmF=parseFloat(it.width_m||(it.product_id?products.find(p=>p.id===it.product_id)?.width_m:0)||0)
+        const wmF=parseFloat(resolvedWm||0)
         let normC=afterC
-        if(pu==='m2'&&cpuF==='m'&&wmF>0)normC=afterC*wmF
-        else if(pu==='m'&&cpuF==='m2'&&wmF>0)normC=afterC/wmF
+        if(pu==='m2'&&cpu==='m'&&wmF>0)normC=afterC*wmF
+        else if(pu==='m'&&cpu==='m2'&&wmF>0)normC=afterC/wmF
         const fresh=parseFloat((normC*(1+parseFloat(it.margin_pct||0)/100)).toFixed(4))
         if(it.final_price==null)return fresh
         const stored=parseFloat(it.final_price)
         return Math.abs(stored-fresh)<0.005?fresh:stored
       })()
-      const cpu=it.customer_pricing_unit||'m2'
-      const resolvedWm=it.width_m||(it.product_id?products.find(p=>p.id===it.product_id)?.width_m:null)||null
       const wm=parseFloat(resolvedWm||0)
       const varSel=_qoVariantSel[String(it.id)]
-      const prodUnit=(it.product_id?products.find(p=>String(p.id)===String(it.product_id))?.unit:null)||(cpu==='m'||cpu==='m2'?'m':null)
+      const prodUnit=_prod?.unit||(cpu==='m'||cpu==='m2'?'m':null)
       const makeRow=(spec,printing,qty)=>{
         const q=qty>0?qty:1
         const amt=cpu==='m2'&&wm>0?_up*wm*q:_up*q
