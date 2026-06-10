@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.11</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.12</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -3459,7 +3459,7 @@ function renderOrders(){
       (o.tracking_no?' · 📦 '+o.tracking_no:'')+
       '</div></div>'+
       '<div style="text-align:right;flex-shrink:0">'+
-      (o.total_amount?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+Number(o.total_amount).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:4})+' '+(o.currency||'')+'</div>':'')+
+      (o.total_amount?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+Number(o.total_amount).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+(o.currency||'')+'</div>':'')+
       '<div style="font-size:11px;color:#aaa">'+itms.length+' 品項</div>'+
       '</div></div>'
   }).join('')
@@ -4597,7 +4597,7 @@ function _renderOrderModal(){
         )+'</div>'
     })
     html+='<div style="display:flex;justify-content:flex-end;align-items:center;padding:8px 0">'+
-      '<span style="font-size:13px;font-weight:600;color:#0F6E56" id="oi-total-display">Total '+fmtP(total)+' '+(o.currency||'')+'</span>'+
+      '<span style="font-size:13px;font-weight:600;color:#0F6E56" id="oi-total-display">Total '+parseFloat(total).toFixed(2)+' '+(o.currency||'')+'</span>'+
       '</div>'
   } else {
     html+='<div style="font-size:12px;color:#aaa;padding:8px 0">'+t('ord_no_items')+'</div>'
@@ -4956,7 +4956,7 @@ function _refreshOiTotal(){
   const o=orders.find(x=>x.id===selectedOrderId)
   const total=itms.reduce((s,i)=>s+_calcOiAmt(i),0)
   const el=document.getElementById('oi-total-display')
-  if(el)el.textContent='Total '+fmtP(total)+' '+(o?.currency||'')
+  if(el)el.textContent='Total '+parseFloat(total).toFixed(2)+' '+(o?.currency||'')
 }
 async function saveOrderItems(){
   const itms=orderItems.filter(i=>i.order_id===selectedOrderId)
