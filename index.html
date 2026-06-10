@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.14</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.15</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -5574,6 +5574,7 @@ async function addPurchaseItemDirect(item){
   showToast('品項已加入')
 }
 
+function _resolvePoUnit(oi){const pr=oi.product_id?products.find(p=>String(p.id)===String(oi.product_id)):null;const am=v=>v==='m'||v==='m2';return(am(oi.customer_pricing_unit)||am(pr?.pricing_unit)||am(pr?.customer_pricing_unit)||oi.unit==='roll'||oi.unit==='m')?'m':(oi.unit||null)}
 function createPurchaseFromOrder(orderId){
   const o=orders.find(x=>x.id===orderId)
   if(!o)return
@@ -5583,7 +5584,7 @@ function createPurchaseFromOrder(orderId){
   const supOpts=suppliers.slice().sort((a,b)=>a.company.localeCompare(b.company,'zh-TW')).map(s=>'<option value="'+s.id+'"'+(String(s.id)===String(o.supplier_id||'')?' selected':'')+'>'+esc(s.company)+'</option>').join('')
   const itemRows=oItems.map(oi=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0f0eb;font-size:12px">'+
     '<span>'+esc(oi.product_name||'—')+(oi.spec?' <span style="color:#aaa">'+esc(oi.spec)+'</span>':'')+'</span>'+
-    '<span style="color:#666;white-space:nowrap;margin-left:12px">'+(oi.qty||'')+(oi.unit?' '+oi.unit:'')+'</span>'+
+    '<span style="color:#666;white-space:nowrap;margin-left:12px">'+(oi.qty||'')+' '+(_resolvePoUnit(oi)||'')+'</span>'+
     '</div>').join('')
   const body=
     '<div style="margin-bottom:12px"><label>品項</label><div style="background:#f8f8f5;border:1px solid #e5e5e0;border-radius:4px;padding:8px 12px">'+itemRows+'</div></div>'+
@@ -5627,8 +5628,7 @@ async function submitCreatePurchaseFromOrder(){
   if(error){showToast(t('err_create')+error.message,'error');return}
   for(const oi of oItems){
     const prod=oi.product_id?products.find(p=>String(p.id)===String(oi.product_id)):null
-    const _anyMeter=(v)=>v==='m'||v==='m2'
-    const poUnit=(_anyMeter(oi.customer_pricing_unit)||_anyMeter(prod?.pricing_unit)||_anyMeter(prod?.customer_pricing_unit))?'m':(oi.unit||null)
+    const poUnit=_resolvePoUnit(oi)
     await sb.from('purchase_order_items').insert({
       po_id:id,
       product_id:oi.product_id||null,
