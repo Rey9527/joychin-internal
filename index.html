@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.9</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.10</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8577,8 +8577,7 @@ async function _executeQto(){
         else if(pu==='m'&&cpu==='m2'&&wmF>0)normC=afterC/wmF
         const fresh=parseFloat((normC*(1+parseFloat(it.margin_pct||0)/100)).toFixed(4))
         if(it.final_price==null)return fresh
-        const stored=parseFloat(it.final_price)
-        return Math.abs(stored-fresh)<0.005?fresh:stored
+        return parseFloat(it.final_price)
       })()
       const wm=parseFloat(resolvedWm||0)
       const varSel=_qoVariantSel[String(it.id)]
