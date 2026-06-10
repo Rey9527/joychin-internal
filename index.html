@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.3</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.4</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -8396,7 +8396,8 @@ async function sendQuoteToOrder(){
         html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'
         html+=p.color_variants.map(c=>{
           const cs=c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
-          return '<button type="button" onclick="qovToggle(\''+iid+'\',\''+cs+'\',null,this)" style="padding:3px 12px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>'
+          const printArg=hasPrint?'undefined':'null'
+          return '<button type="button" onclick="qovToggle(\''+iid+'\',\''+cs+'\','+printArg+',this)" style="padding:3px 12px;border-radius:12px;border:1px solid #e5e5e0;background:#fff;font-size:11px;cursor:pointer;color:#555">'+esc(c)+'</button>'
         }).join('')
         html+='</div>'
       }
