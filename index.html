@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.16</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.17</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -2341,7 +2341,7 @@ const _QUO_KEY={draft:'q_draft',sent:'q_sent',sample_pending:'q_sample_pending',
 function inqSObj(s){const o=sObj(s,INQ_STATUS);return{...o,label:t(_INQ_KEY[s])||o.label||s}}
 function quoSObj(s){const o=sObj(s,QUO_STATUS);return{...o,label:t(_QUO_KEY[s])||o.label||s}}
 
-let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteItems=[],settings={},products=[]
+let inquiries=[],documents=[],suppliers=[],customers=[],quoteHeaders=[],quoteItems=[],settings={},products=[],hsCodes=[]
 let productViewMode=localStorage.getItem('productViewMode')||'grid'
 let _productTypeFilter=''
 const PRODUCT_TYPES=['Brown','Yellow','White','Film','Other']
@@ -2418,7 +2418,7 @@ async function init(){
       document.getElementById('nav-purchases').style.display='flex'
     }
   }
-  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadQuoteChanges(),loadSettings(),loadProducts(),loadSamples(),loadOrders(),loadShipments(),loadUsers(),loadUserGroups(),loadPurchaseOrders(),loadComplaints()])
+  await Promise.all([loadInquiries(),loadDocuments(),loadSuppliers(),loadCustomers(),loadQuotes(),loadQuoteChanges(),loadSettings(),loadProducts(),loadHsCodes(),loadSamples(),loadOrders(),loadShipments(),loadUsers(),loadUserGroups(),loadPurchaseOrders(),loadComplaints()])
   if(currentUser&&!isManager()&&hasPermission('manage_users')){
     document.getElementById('nav-users_mgmt').style.display='flex'
   }
@@ -2483,6 +2483,10 @@ async function loadProducts(){
   const{data}=await sb.from('products').select('*').order('product_name')
   products=data||[]
   updateProductOverdueAlert()
+}
+async function loadHsCodes(){
+  const{data}=await sb.from('hs_codes').select('*').order('code')
+  hsCodes=data||[]
 }
 async function loadSamples(){
   const[{data:s},{data:ri},{data:so}]=await Promise.all([
@@ -7022,14 +7026,16 @@ async function _execSendToQuote(inqId){
   const rawCost=priceParts.amount?parseFloat(priceParts.amount):null
   const rawCur=priceParts.currency||'USD'
   const linkedProduct=i.from_product_id?products.find(p=>p.id===i.from_product_id):null
+  const _linkedHs=linkedProduct?.hs_code?hsCodes.find(h=>h.code===linkedProduct.hs_code):null
+  const _customsPct=_linkedHs!=null?parseFloat(_linkedHs.import_tax_pct||0):parseFloat(settings.default_customs_fee_pct||7.5)
   const newItemBase={
     product:i.product,spec:i.spec||null,supplier_id:inquirySupplier?.id||null,
     product_id:i.from_product_id||null,
     cost_price:rawCost,cost_currency:rawCur,
-    customs_fee_pct:parseFloat(settings.default_customs_fee_pct||7.5),
+    customs_fee_pct:_customsPct,
     apply_customs:supplierNeedsCustoms(inquirySupplier?.id||null),
     margin_pct:parseFloat(settings.default_margin_pct||20),
-    final_price:rawCost?(parseFloat(calcQuote(rawCost,settings.default_customs_fee_pct||7.5,settings.default_margin_pct||20,supplierNeedsCustoms(inquirySupplier?.id||null)).final.toFixed(4))):null,
+    final_price:rawCost?(parseFloat(calcQuote(rawCost,_customsPct,settings.default_margin_pct||20,supplierNeedsCustoms(inquirySupplier?.id||null)).final.toFixed(4))):null,
     moq:i.moq||null,lead_time:i.lead_time||null,
     width_m:linkedProduct?.width_m??null,
     pricing_unit:linkedProduct?.pricing_unit||null,
@@ -8652,7 +8658,65 @@ function renderSettingsContent(targetId='settings-panel'){
     '</div>'+
     '<div style="font-size:11px;color:#888">pending / asked 狀態下，超過提醒天數標黃，超過超時天數標紅並列入待追詢提醒。</div>'+
     '</div>'+
-    '<div class="modal-foot"><button class="btn btn-primary" onclick="saveSettings()">儲存設定</button></div>'
+    '<div class="modal-foot"><button class="btn btn-primary" onclick="saveSettings()">儲存設定</button></div>'+
+    '<div class="card" style="margin-top:12px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+    '<div class="section-title" style="margin-bottom:0">HS 編碼管理（進口稅分類）</div>'+
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'hs-add-row\').style.display=document.getElementById(\'hs-add-row\').style.display===\'none\'?\'grid\':\'none\'">+ 新增</button>'+
+    '</div>'+
+    '<div id="hs-add-row" style="display:none;grid-template-columns:1fr 2fr 1fr auto;gap:8px;margin-bottom:10px;align-items:end">'+
+    '<div><label>HS 編碼</label><input id="hs-new-code" placeholder="e.g. 3920.10" /></div>'+
+    '<div><label>說明</label><input id="hs-new-desc" placeholder="e.g. PE Film" /></div>'+
+    '<div><label>進口稅率 %</label><input id="hs-new-pct" type="number" min="0" max="100" step="0.1" placeholder="0.0" /></div>'+
+    '<div><button class="btn btn-primary btn-sm" onclick="addHsCode()" style="margin-top:auto">新增</button></div>'+
+    '</div>'+
+    '<div id="hs-list">'+renderHsCodeList()+'</div>'+
+    '</div>'
+}
+function renderHsCodeList(){
+  if(!hsCodes.length)return '<div style="font-size:12px;color:#aaa;padding:8px 0">尚無 HS 編碼，點「+ 新增」建立</div>'
+  return '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+    '<thead><tr style="border-bottom:1px solid #e5e5e0">'+
+    '<th style="text-align:left;padding:6px 8px;color:#888;font-weight:500">HS 編碼</th>'+
+    '<th style="text-align:left;padding:6px 8px;color:#888;font-weight:500">說明</th>'+
+    '<th style="text-align:right;padding:6px 8px;color:#888;font-weight:500">稅率 %</th>'+
+    '<th style="width:60px"></th></tr></thead><tbody>'+
+    hsCodes.map(h=>'<tr style="border-bottom:1px solid #f0f0eb" id="hs-row-'+esc(h.code)+'">'+
+      '<td style="padding:6px 8px;font-weight:500;color:#333">'+esc(h.code)+'</td>'+
+      '<td style="padding:6px 8px;color:#555">'+esc(h.description||'—')+'</td>'+
+      '<td style="padding:6px 8px;text-align:right;color:#0F6E56;font-weight:600">'+parseFloat(h.import_tax_pct||0)+'%</td>'+
+      '<td style="padding:6px 4px;text-align:right">'+
+        '<button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px" onclick="editHsCode(\''+esc(h.code)+'\')">編輯</button>'+
+      '</td></tr>').join('')+
+    '</tbody></table>'
+}
+async function addHsCode(){
+  const code=document.getElementById('hs-new-code')?.value.trim()
+  const desc=document.getElementById('hs-new-desc')?.value.trim()
+  const pct=parseFloat(document.getElementById('hs-new-pct')?.value||0)
+  if(!code){showToast('請填寫 HS 編碼','error');return}
+  const{error}=await sb.from('hs_codes').insert({code,description:desc||null,import_tax_pct:pct})
+  if(error){showToast('新增失敗：'+error.message,'error');return}
+  await loadHsCodes()
+  document.getElementById('hs-new-code').value=''
+  document.getElementById('hs-new-desc').value=''
+  document.getElementById('hs-new-pct').value=''
+  document.getElementById('hs-add-row').style.display='none'
+  document.getElementById('hs-list').innerHTML=renderHsCodeList()
+  showToast('HS 編碼已新增')
+}
+async function editHsCode(code){
+  const h=hsCodes.find(x=>x.code===code);if(!h)return
+  const newDesc=prompt('說明：',h.description||'')
+  if(newDesc===null)return
+  const newPct=parseFloat(prompt('進口稅率 %：',h.import_tax_pct??0))
+  if(isNaN(newPct))return
+  const{error}=await sb.from('hs_codes').update({description:newDesc||null,import_tax_pct:newPct}).eq('code',code)
+  if(error){showToast('更新失敗：'+error.message,'error');return}
+  await sb.from('products').update({customs_fee_pct:newPct}).eq('hs_code',code)
+  await loadHsCodes();await loadProducts()
+  document.getElementById('hs-list').innerHTML=renderHsCodeList()
+  showToast('HS 編碼已更新，已同步所有相關產品稅率')
 }
 
 function renderSettingsTab(){
@@ -9249,6 +9313,16 @@ function openProductModal(id){
     '</select></div>'+
     '<div><label>'+t('lbl_currency')+'</label><select id="pd-currency">'+buildOptions(CURRENCY_OPTIONS,p?.currency||getSettingValue('default_cost_currency','THB'))+'</select></div>'+
     '</div>'+
+    '<div class="grid-2" style="margin-bottom:10px">'+
+    '<div><label>HS 編碼（進口稅分類）</label>'+
+    '<select id="pd-hs-code" onchange="pdHsCodeChange()">'+
+    '<option value="">— 不設定 —</option>'+
+    hsCodes.map(h=>'<option value="'+esc(h.code)+'"'+(p?.hs_code===h.code?' selected':'')+'>'+esc(h.code)+(h.description?' · '+esc(h.description):'')+'</option>').join('')+
+    '</select>'+
+    '<div id="pd-hs-rate" style="font-size:11px;color:#0F6E56;margin-top:3px">'+
+    (p?.hs_code?(()=>{const hh=hsCodes.find(x=>x.code===p.hs_code);return hh?'進口稅率：'+parseFloat(hh.import_tax_pct||0)+'%':''})()):'')+'</div></div>'+
+    '<div></div>'+
+    '</div>'+
     '<div style="margin-bottom:10px"><label>'+t('lbl_notes')+'</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
     '<div style="margin-bottom:10px"><label>'+t('pd_color_variants_label')+' <span style="font-size:10px;font-weight:400;color:#aaa">'+t('pd_color_hint')+'</span></label>'+
     '<div id="pd-color-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:24px">'+
@@ -9311,6 +9385,13 @@ function _pdRenderColorChips(){
     ?_pdColorVariants.map((c,i)=>'<span style="display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#0F6E56;border:1px solid #b2dfdb;border-radius:12px;padding:2px 10px;font-size:11px">'+esc(c)+'<button onclick="pdRemoveColor('+i+')" style="background:none;border:none;color:#0F6E56;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:3px">×</button></span>').join('')
     :'<span style="font-size:11px;color:#ccc">'+t('pd_not_set')+'</span>'
 }
+function pdHsCodeChange(){
+  const code=document.getElementById('pd-hs-code')?.value
+  const el=document.getElementById('pd-hs-rate')
+  if(!el)return
+  const h=code?hsCodes.find(x=>x.code===code):null
+  el.textContent=h?'進口稅率：'+parseFloat(h.import_tax_pct||0)+'%':''
+}
 function pdAddColor(){
   const el=document.getElementById('pd-new-color')
   const val=(el?.value||'').trim();if(!val)return
@@ -9358,7 +9439,8 @@ async function saveProduct(id){
     total_weight:parseFloat(document.getElementById('pd-total-weight')?.value)||null,
     thickness_um:parseFloat(document.getElementById('pd-thickness-um')?.value)||null,
     color_variants:_pdColorVariants.length?_pdColorVariants:null,
-    printing_variants:_pdPrintingVariants.length?_pdPrintingVariants:null
+    printing_variants:_pdPrintingVariants.length?_pdPrintingVariants:null,
+    hs_code:document.getElementById('pd-hs-code')?.value||null
   }
   let error
   if(id){({error}=await sb.from('products').update(data).eq('id',id))}
