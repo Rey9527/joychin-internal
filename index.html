@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.21</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.22</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -7636,12 +7636,13 @@ function _qiUpdateEffCost(it){
   el.textContent=cp>0?(applyC?t('qi_landed_cost')+fmtP(eff):fmtP(cp))+' '+(it.cost_currency||''):''
 }
 function _qiNormCost(it){
+  const catProd=it.product_id?products.find(p=>String(p.id)===String(it.product_id)):null
   const cp=parseFloat(it.cost_price||0)
   const applyC=shouldApplyCustoms(it)
   const afterC=applyC?cp*(1+parseFloat(it.customs_fee_pct||0)/100):cp
   const pu=it.pricing_unit||''
   const cpu=it.customer_pricing_unit||''
-  const wm=parseFloat(it.width_m||0)
+  const wm=parseFloat(it.width_m??catProd?.width_m??0)
   if(pu==='m2'&&cpu==='m'&&wm>0)return afterC*wm
   if(pu==='m'&&cpu==='m2'&&wm>0)return afterC/wm
   return afterC
@@ -7692,10 +7693,12 @@ function openQuoteItemModal(itemId){
     '<div id="qi-modal-mgn" style="font-size:10px;margin-top:3px;color:'+mgnColor+'">'+t('qi_margin')+mgn.toFixed(2)+'%</div>'+
     '</div>'+
     '<div><label style="display:flex;justify-content:space-between;align-items:center"><span>'+t('qi_width')+'</span>'+
-    (it.product_id?'<span style="font-size:10px;color:#aaa">'+t('qi_from_catalog')+'</span>':(editable?'<span style="font-size:10px;color:#aaa">mm</span>':''))+'</label>'+
-    (it.product_id||!editable
+    (editable
+      ?'<span style="font-size:10px;color:#aaa">'+(it.width_m!=null&&catProd?.width_m!=null?'標準 '+Math.round(catProd.width_m*1000)+'mm':it.width_m==null&&catProd?.width_m!=null?t('qi_from_catalog'):'mm')+'</span>'
+      :'')+'</label>'+
+    (!editable
       ?'<input type="text" value="'+(dispWidthM!=null?Math.round(dispWidthM*1000)+'mm':'—')+'"'+ro+' />'
-      :'<input type="number" id="qi-modal-width" value="'+(it.width_m!=null?Math.round(it.width_m*1000):'')+'" placeholder="e.g. 3200" step="1" min="0" onchange="qiModalWidthChange(parseFloat(this.value)||0)" />'
+      :'<input type="number" id="qi-modal-width" value="'+(dispWidthM!=null?Math.round(dispWidthM*1000):'')+'" placeholder="e.g. 1070" step="1" min="0" onchange="qiModalWidthChange(parseFloat(this.value)||0)" />'
     )+'</div>'+
     '<div><label>'+t('qi_pricing_unit_cost')+'<span class="req">*</span></label><select '+(editable?'onchange="qiModalChange(\'pricing_unit\',this.value)"':dis)+'>'+
     '<option value="">—</option>'+
@@ -8165,6 +8168,7 @@ function confirmNewPendingItem(){
   const fp=fpVal?parseFloat(parseFloat(fpVal).toFixed(4)):null
   const costNorm=_npiNormCost()
   const mgn=costNorm>0&&fp!=null?Math.round((fp/costNorm-1)*10000)/100:null
+  const _npiWmMm=parseFloat(document.getElementById('npi-wm')?.value||0)
   _pendingQuoteItems.push({
     ..._draftNewItem,
     _key:++_qPendingItemSeq,
@@ -8172,6 +8176,7 @@ function confirmNewPendingItem(){
     final_price:fp,margin_pct:mgn,
     pricing_unit:document.getElementById('npi-pu')?.value||null,
     customer_pricing_unit:document.getElementById('npi-cpu')?.value||null,
+    width_m:_npiWmMm>0?_npiWmMm/1000:null,
     moq:document.getElementById('npi-moq')?.value||null,
     lead_time:document.getElementById('npi-lead')?.value||null
   })
@@ -9526,7 +9531,7 @@ async function saveProduct(id){
   }
 
   if(id&&existing&&existing.width_m!==data.width_m){
-    await sb.from('quote_items').update({width_m:data.width_m}).eq('product_id',parseInt(id))
+    await sb.from('quote_items').update({width_m:data.width_m}).eq('product_id',parseInt(id)).is('width_m',null)
   }
 
   if(id&&costChanged){
