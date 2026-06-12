@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.20</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.21</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -7318,6 +7318,7 @@ function renderQuoteModalBd(){
   const footHtml=
     '<div style="display:flex;gap:8px">'+
     '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 Export PDF</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="duplicateQuote()" title="複製為全新草稿報價單">⧉ 複製</button>'+
     (editable?'<button class="btn btn-primary btn-sm" onclick="saveQuote()">'+t('q_save_draft')+'</button>':'')+
     (h.status==='accepted'?'<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">'+t('q_send_to_order')+'</button>':'')+
     '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">'+t('btn_close')+'</button>'+
@@ -8419,6 +8420,32 @@ async function newQuoteVersion(){
   await loadQuotes();selectedQuoteId=newId;_qPendingItems={};_qPendingHeader={}
   renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
   showToast('新版本 v'+newV+' 已建立')
+}
+
+async function duplicateQuote(){
+  const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
+  const items=quoteItems.filter(it=>it.header_id===h.id)
+  const now=new Date()
+  const yy=now.getFullYear()
+  const mm=String(now.getMonth()+1).padStart(2,'0')
+  const dd=String(now.getDate()).padStart(2,'0')
+  const seq=String(quoteHeaders.length+1).padStart(3,'0')
+  const newId='QUO-D-'+yy+mm+dd+'-'+seq+'-v1'
+  const{error}=await sb.from('quote_headers').insert({
+    id:newId,inquiry_id:null,customer:h.customer,supplier:h.supplier,
+    version:1,status:'draft',notes:h.notes||null,source:'direct',
+    incoterm:h.incoterm||null,port:h.port||null,
+    ship_from:h.ship_from||null,payment_term:h.payment_term||null
+  })
+  if(error){showToast('複製失敗：'+error.message,'error');return}
+  if(items.length){
+    const newItems=items.map(({id:_,...rest})=>({...rest,header_id:newId}))
+    const{error:e2}=await sb.from('quote_items').insert(newItems)
+    if(e2){showToast('品項複製失敗：'+e2.message,'error');return}
+  }
+  await loadQuotes();selectedQuoteId=newId;_qPendingItems={};_qPendingHeader={}
+  renderQuotes();renderQuoteModalHd();renderQuoteModalBd()
+  showToast('已複製為新報價單 '+newId)
 }
 
 // _qoVariantSel: { quoteItemId: [{color, printing, qty}] }
