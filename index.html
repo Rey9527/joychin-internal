@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.19</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.20</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -9359,7 +9359,7 @@ function openProductModal(id){
     hsCodes.map(h=>'<option value="'+esc(h.code)+'"'+(p?.hs_code===h.code?' selected':'')+'>'+esc(h.code)+(h.description?' · '+esc(h.description):'')+'</option>').join('')+
     '</select>'+
     '<div id="pd-hs-rate" style="font-size:11px;color:#0F6E56;margin-top:3px">'+
-    (p?.hs_code?(()=>{const hh=hsCodes.find(x=>x.code===p.hs_code);return hh?t('pd_hs_rate_prefix')+parseFloat(hh.import_tax_pct||0)+'%':''})()):'')+'</div></div>'+
+    (p?.hs_code?(()=>{const hh=hsCodes.find(x=>x.code===p.hs_code);return hh?t('pd_hs_rate_prefix')+parseFloat(hh.import_tax_pct||0)+'%':''})():'')+'</div></div>'+
     '<div></div>'+
     '</div>'+
     '<div style="margin-bottom:10px"><label>'+t('lbl_notes')+'</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
