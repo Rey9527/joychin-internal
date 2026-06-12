@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.18</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.19</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -1397,6 +1397,11 @@ const I18N={
     toast_items_added:'已加入 {n} 筆品項',
     confirm_del_group:'確定要刪除群組「{name}」嗎？',
     confirm_del_group_members:'\n（{n} 位成員將移除群組）',
+    pd_hs_label:'HS 編碼（進口稅分類）',pd_hs_rate_prefix:'進口稅率：',
+    hs_no_code:'未設定 HS 編碼',hs_tax_rate:'稅率',
+    settings_hs_title:'HS 編碼管理（進口稅分類）',settings_hs_code:'HS 編碼',
+    settings_hs_desc:'說明',settings_hs_pct:'進口稅率 %',
+    settings_hs_empty:'尚無 HS 編碼，點「+ 新增」建立',
   },
   en:{
     nav_sales:'Sales',nav_contacts:'Contacts',nav_products:'Products',nav_settings:'Settings',
@@ -1686,6 +1691,11 @@ const I18N={
     toast_items_added:'{n} items added',
     confirm_del_group:'Delete group "{name}"?',
     confirm_del_group_members:'\n({n} members will be removed from the group)',
+    pd_hs_label:'HS Code (Import Tax Class)',pd_hs_rate_prefix:'Import tax rate: ',
+    hs_no_code:'No HS code set',hs_tax_rate:'Tax rate',
+    settings_hs_title:'HS Code Management (Import Tax)',settings_hs_code:'HS Code',
+    settings_hs_desc:'Description',settings_hs_pct:'Import Tax %',
+    settings_hs_empty:'No HS codes yet. Click "+ Add" to create one.',
   },
   th:{
     nav_sales:'ขาย',nav_contacts:'รายชื่อ',nav_products:'สินค้า',nav_settings:'ตั้งค่า',
@@ -1975,6 +1985,11 @@ const I18N={
     toast_items_added:'เพิ่ม {n} รายการแล้ว',
     confirm_del_group:'ลบกลุ่ม "{name}" ใช่ไหม?',
     confirm_del_group_members:'\n({n} สมาชิกจะถูกลบออกจากกลุ่ม)',
+    pd_hs_label:'รหัส HS (ประเภทภาษีนำเข้า)',pd_hs_rate_prefix:'อัตราภาษีนำเข้า: ',
+    hs_no_code:'ยังไม่ได้ตั้งค่ารหัส HS',hs_tax_rate:'อัตราภาษี',
+    settings_hs_title:'จัดการรหัส HS (ภาษีนำเข้า)',settings_hs_code:'รหัส HS',
+    settings_hs_desc:'คำอธิบาย',settings_hs_pct:'อัตราภาษี %',
+    settings_hs_empty:'ยังไม่มีรหัส HS กดปุ่ม "+ เพิ่ม" เพื่อสร้าง',
   }
 }
 let _lang=localStorage.getItem('joychin_lang')||'zh'
@@ -5421,8 +5436,8 @@ function openPurchaseModal(id, prefill={}){
       return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px solid #F0E0C4">'+
         '<span style="flex:1">'+esc(i.product_name||'—')+(i.spec?' <span style="color:#aaa">'+esc(i.spec)+'</span>':'')+' </span>'+
         (_hc?'<span style="background:#fff;border:1px solid #E2B36D;border-radius:3px;padding:2px 6px;font-size:11px;white-space:nowrap">HS '+esc(_hc.code)+'</span>'+
-             '<span style="color:#854F0B;font-size:11px;white-space:nowrap;margin-left:4px">稅率 '+parseFloat(_hc.import_tax_pct||0)+'%</span>':
-             '<span style="font-size:11px;color:#aaa">— 未設定 HS 編碼</span>')+
+             '<span style="color:#854F0B;font-size:11px;white-space:nowrap;margin-left:4px">'+t('hs_tax_rate')+' '+parseFloat(_hc.import_tax_pct||0)+'%</span>':
+             '<span style="font-size:11px;color:#aaa">— '+t('hs_no_code')+'</span>')+
         '</div>'
     }).join('')
     html+='<div class="divider"></div><div style="margin:12px 0;padding:12px;background:#FFF8EF;border:1px solid #E2B36D;border-radius:6px">'+
@@ -8685,25 +8700,25 @@ function renderSettingsContent(targetId='settings-panel'){
     '<div class="modal-foot"><button class="btn btn-primary" onclick="saveSettings()">儲存設定</button></div>'+
     '<div class="card" style="margin-top:12px">'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
-    '<div class="section-title" style="margin-bottom:0">HS 編碼管理（進口稅分類）</div>'+
+    '<div class="section-title" style="margin-bottom:0">'+t('settings_hs_title')+'</div>'+
     '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'hs-add-row\').style.display=document.getElementById(\'hs-add-row\').style.display===\'none\'?\'grid\':\'none\'">+ 新增</button>'+
     '</div>'+
     '<div id="hs-add-row" style="display:none;grid-template-columns:1fr 2fr 1fr auto;gap:8px;margin-bottom:10px;align-items:end">'+
-    '<div><label>HS 編碼</label><input id="hs-new-code" placeholder="e.g. 3920.10" /></div>'+
-    '<div><label>說明</label><input id="hs-new-desc" placeholder="e.g. PE Film" /></div>'+
-    '<div><label>進口稅率 %</label><input id="hs-new-pct" type="number" min="0" max="100" step="0.1" placeholder="0.0" /></div>'+
+    '<div><label>'+t('settings_hs_code')+'</label><input id="hs-new-code" placeholder="e.g. 3920.10" /></div>'+
+    '<div><label>'+t('settings_hs_desc')+'</label><input id="hs-new-desc" placeholder="e.g. PE Film" /></div>'+
+    '<div><label>'+t('settings_hs_pct')+'</label><input id="hs-new-pct" type="number" min="0" max="100" step="0.1" placeholder="0.0" /></div>'+
     '<div><button class="btn btn-primary btn-sm" onclick="addHsCode()" style="margin-top:auto">新增</button></div>'+
     '</div>'+
     '<div id="hs-list">'+renderHsCodeList()+'</div>'+
     '</div>'
 }
 function renderHsCodeList(){
-  if(!hsCodes.length)return '<div style="font-size:12px;color:#aaa;padding:8px 0">尚無 HS 編碼，點「+ 新增」建立</div>'
+  if(!hsCodes.length)return '<div style="font-size:12px;color:#aaa;padding:8px 0">'+t('settings_hs_empty')+'</div>'
   return '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
     '<thead><tr style="border-bottom:1px solid #e5e5e0">'+
-    '<th style="text-align:left;padding:6px 8px;color:#888;font-weight:500">HS 編碼</th>'+
-    '<th style="text-align:left;padding:6px 8px;color:#888;font-weight:500">說明</th>'+
-    '<th style="text-align:right;padding:6px 8px;color:#888;font-weight:500">稅率 %</th>'+
+    '<th style="text-align:left;padding:6px 8px;color:#888;font-weight:500">'+t('settings_hs_code')+'</th>'+
+    '<th style="text-align:left;padding:6px 8px;color:#888;font-weight:500">'+t('settings_hs_desc')+'</th>'+
+    '<th style="text-align:right;padding:6px 8px;color:#888;font-weight:500">'+t('settings_hs_pct')+'</th>'+
     '<th style="width:60px"></th></tr></thead><tbody>'+
     hsCodes.map(h=>'<tr style="border-bottom:1px solid #f0f0eb" id="hs-row-'+esc(h.code)+'">'+
       '<td style="padding:6px 8px;font-weight:500;color:#333">'+esc(h.code)+'</td>'+
@@ -9338,13 +9353,13 @@ function openProductModal(id){
     '<div><label>'+t('lbl_currency')+'</label><select id="pd-currency">'+buildOptions(CURRENCY_OPTIONS,p?.currency||getSettingValue('default_cost_currency','THB'))+'</select></div>'+
     '</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
-    '<div><label>HS 編碼（進口稅分類）</label>'+
+    '<div><label>'+t('pd_hs_label')+'</label>'+
     '<select id="pd-hs-code" onchange="pdHsCodeChange()">'+
     '<option value="">— 不設定 —</option>'+
     hsCodes.map(h=>'<option value="'+esc(h.code)+'"'+(p?.hs_code===h.code?' selected':'')+'>'+esc(h.code)+(h.description?' · '+esc(h.description):'')+'</option>').join('')+
     '</select>'+
     '<div id="pd-hs-rate" style="font-size:11px;color:#0F6E56;margin-top:3px">'+
-    (p?.hs_code?(()=>{const hh=hsCodes.find(x=>x.code===p.hs_code);return hh?'進口稅率：'+parseFloat(hh.import_tax_pct||0)+'%':''})()):'')+'</div></div>'+
+    (p?.hs_code?(()=>{const hh=hsCodes.find(x=>x.code===p.hs_code);return hh?t('pd_hs_rate_prefix')+parseFloat(hh.import_tax_pct||0)+'%':''})()):'')+'</div></div>'+
     '<div></div>'+
     '</div>'+
     '<div style="margin-bottom:10px"><label>'+t('lbl_notes')+'</label><textarea id="pd-notes" placeholder="規格說明、注意事項...">'+(p?.notes||'')+'</textarea></div>'+
@@ -9414,7 +9429,7 @@ function pdHsCodeChange(){
   const el=document.getElementById('pd-hs-rate')
   if(!el)return
   const h=code?hsCodes.find(x=>x.code===code):null
-  el.textContent=h?'進口稅率：'+parseFloat(h.import_tax_pct||0)+'%':''
+  el.textContent=h?t('pd_hs_rate_prefix')+parseFloat(h.import_tax_pct||0)+'%':''
 }
 function pdAddColor(){
   const el=document.getElementById('pd-new-color')
