@@ -232,7 +232,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.17</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.18</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -5413,6 +5413,26 @@ function openPurchaseModal(id, prefill={}){
     (items.length?'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:600;color:#0F6E56">'+t('lbl_total')+' '+items.reduce((s,i)=>{const q=parseFloat(i.qty||i.quantity||0)||0;const pr=(i.product_id?products.find(x=>String(x.id)===String(i.product_id)):null)||products.find(x=>x.product_name===i.product_name&&(x.spec||null)===(i.spec||null))||null;const up=pr?.cost_price!=null?parseFloat(pr.cost_price):(parseFloat(i.unit_price||i.price||0)||0);const wm=parseFloat(i.width_m||pr?.width_m||0);const pu=i.pricing_unit||pr?.pricing_unit||null;return s+(pu==='m2'&&wm>0?q*up*wm:q*up)},0).toFixed(2)+' '+(p?.currency||items[0]?.currency||'')+'</div>':'')
     )+'</div></div>'
   }
+  if(supplierNeedsCustoms(prefillSupplierId)){
+    const _poItemList=p?purchaseOrderItems.filter(i=>i.po_id===p.id):(window._pendingPurchaseItems||[])
+    const _hsRows=_poItemList.map(i=>{
+      const _pr=i.product_id?products.find(pr=>String(pr.id)===String(i.product_id)):null
+      const _hc=_pr?.hs_code?hsCodes.find(h=>h.code===_pr.hs_code):null
+      return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px solid #F0E0C4">'+
+        '<span style="flex:1">'+esc(i.product_name||'—')+(i.spec?' <span style="color:#aaa">'+esc(i.spec)+'</span>':'')+' </span>'+
+        (_hc?'<span style="background:#fff;border:1px solid #E2B36D;border-radius:3px;padding:2px 6px;font-size:11px;white-space:nowrap">HS '+esc(_hc.code)+'</span>'+
+             '<span style="color:#854F0B;font-size:11px;white-space:nowrap;margin-left:4px">稅率 '+parseFloat(_hc.import_tax_pct||0)+'%</span>':
+             '<span style="font-size:11px;color:#aaa">— 未設定 HS 編碼</span>')+
+        '</div>'
+    }).join('')
+    html+='<div class="divider"></div><div style="margin:12px 0;padding:12px;background:#FFF8EF;border:1px solid #E2B36D;border-radius:6px">'+
+      '<div style="font-size:13px;font-weight:600;color:#854F0B;margin-bottom:8px">⚠ 進口報關提醒<br><span style="font-size:9px;opacity:0.65;font-weight:400">Import Customs Reminder · การแจ้งศุลกากรนำเข้า</span></div>'+
+      (_hsRows||'<div style="font-size:12px;color:#aaa;padding:4px 0">—</div>')+
+      '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer">'+
+      '<input type="checkbox" id="pp-customs-confirmed"'+(p?.customs_confirmed?' checked':'')+' onchange="_isDirty=true" style="width:auto">'+
+      '<span style="font-size:12px;color:#854F0B">已確認報關資料 · Customs details confirmed · ยืนยันข้อมูลศุลกากร</span></label>'+
+      '</div>'
+  }
   if(!isNew){
     html+='<div style="margin:12px 0 4px"><div class="section-title" style="margin-bottom:6px">'+t('po_status_section')+'</div>'+
     '<div class="status-btns">'+PURCHASE_STATUS.map(s=>{const isCurrent=p.status===s.id;return '<button class="status-btn" style="background:'+(isCurrent?s.bg:'transparent')+';color:'+(isCurrent?s.color:'#aaa')+';border-color:'+(isCurrent?s.color:'#e5e5e0')+';'+(isCurrent?'font-weight:600':'')+'" '+(isCurrent?'disabled':'onclick="updatePurchaseStatusDirect(\''+s.id+'\')"')+'>'+s.label+'</button>'}).join('')+'</div></div>'
@@ -5528,6 +5548,8 @@ async function createPurchaseOrder(){
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value||'USD')
   assignIfPresent(payload,'notes',document.getElementById('pp-notes')?.value?.trim())
   assignIfPresent(payload,'supplier_instructions',document.getElementById('pp-supplier-instr')?.value?.trim())
+  const _ccElNew=document.getElementById('pp-customs-confirmed')
+  if(_ccElNew!=null)payload.customs_confirmed=_ccElNew.checked
   const{error}=await sb.from('purchase_orders').insert(payload)
   if(error){showToast(t('err_create')+error.message,'error');return}
   const po=await sb.from('purchase_orders').select('*').eq('id',id).single()
@@ -5669,6 +5691,8 @@ async function savePurchaseOrder(){
   assignIfPresent(payload,'currency',document.getElementById('pp-currency')?.value)
   assignIfPresent(payload,'notes',document.getElementById('pp-notes')?.value?.trim())
   assignIfPresent(payload,'supplier_instructions',document.getElementById('pp-supplier-instr')?.value?.trim())
+  const _ccEl=document.getElementById('pp-customs-confirmed')
+  if(_ccEl!=null)payload.customs_confirmed=_ccEl.checked
   const{error}=await sb.from('purchase_orders').update(payload).eq('id',selectedPurchaseId)
   if(error){showToast(t('err_save')+error.message,'error');return}
   _isDirty=false
