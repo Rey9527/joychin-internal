@@ -7519,15 +7519,19 @@ async function generateQuotePDF(headerId){
   doc.setDrawColor(...LG);doc.line(ML,y,PW-MR,y);y+=2
   // Items table header
   const C_NO=8,C_ITEM=80,C_UNIT=34,C_QTY=20,C_AMT=CW-C_NO-C_ITEM-C_UNIT-C_QTY
-  doc.setFillColor(234,243,222);doc.rect(ML,y,CW,6,'F')
-  sf('bold',7,DG)
-  let cx=ML
-  doc.text('NO.',cx+C_NO/2,y+4,{align:'center'});cx+=C_NO
-  doc.text('ITEM / DESCRIPTION',cx+1,y+4);cx+=C_ITEM
-  doc.text('UNIT PRICE',cx+C_UNIT-1,y+4,{align:'right'});cx+=C_UNIT
-  doc.text('QTY',cx+C_QTY/2,y+4,{align:'center'});cx+=C_QTY
-  doc.text('AMOUNT',cx+C_AMT-1,y+4,{align:'right'})
-  y+=6
+  const itemTextW=C_ITEM-2
+  const drawItemHeader=()=>{
+    doc.setFillColor(234,243,222);doc.rect(ML,y,CW,6,'F')
+    sf('bold',7,DG)
+    let cx=ML
+    doc.text('NO.',cx+C_NO/2,y+4,{align:'center'});cx+=C_NO
+    doc.text('ITEM / DESCRIPTION',cx+1,y+4);cx+=C_ITEM
+    doc.text('UNIT PRICE',cx+C_UNIT-1,y+4,{align:'right'});cx+=C_UNIT
+    doc.text('QTY',cx+C_QTY/2,y+4,{align:'center'});cx+=C_QTY
+    doc.text('AMOUNT',cx+C_AMT-1,y+4,{align:'right'})
+    y+=6
+  }
+  drawItemHeader()
   // Items rows
   let total=0
   const cur=(items[0]?.cost_currency)||'USD'
@@ -7540,11 +7544,24 @@ async function generateQuotePDF(headerId){
     const unitSuffix=cpu==='m2'?' /m²':cpu==='m'?' /m':it.unit?' /'+it.unit:''
     const amount=cpu==='m2'&&wm>0?fp*wm*qty:qty>0?fp*qty:0
     total+=amount
-    const rowH=it.spec?11:8
+    sf('bold',8,D)
+    const productLines=doc.splitTextToSize(String(it.product||'—'),itemTextW)
+    sf('normal',7,G)
+    const specLines=it.spec?doc.splitTextToSize(String(it.spec),itemTextW):[]
+    const productLineH=3.8,specLineH=3.5
+    const rowH=Math.max(8,4+(productLines.length*productLineH)+(specLines.length?1+specLines.length*specLineH:0))
+    if(y+rowH>PH-32){
+      doc.addPage()
+      y=14
+      drawItemHeader()
+    }
     if(idx%2===1){doc.setFillColor(250,250,248);doc.rect(ML,y,CW,rowH,'F')}
     cx=ML;sf('normal',8,D);doc.text(String(idx+1),cx+C_NO/2,y+5,{align:'center'});cx+=C_NO
-    sf('bold',8,D);doc.text(it.product||'—',cx+1,y+5)
-    if(it.spec){sf('normal',7,G);doc.text(it.spec,cx+1,y+9)}
+    sf('bold',8,D);productLines.forEach((line,i)=>doc.text(line,cx+1,y+5+i*productLineH))
+    if(specLines.length){
+      const specY=y+5+(productLines.length*productLineH)+1
+      sf('normal',7,G);specLines.forEach((line,i)=>doc.text(line,cx+1,specY+i*specLineH))
+    }
     cx+=C_ITEM
     sf('normal',7.5,D);doc.text(fmtP(fp)+' '+cur+unitSuffix,cx+C_UNIT-1,y+5,{align:'right'});cx+=C_UNIT
     doc.text(qty>0?String(qty):'—',cx+C_QTY/2,y+5,{align:'center'});cx+=C_QTY
