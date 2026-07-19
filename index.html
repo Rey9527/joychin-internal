@@ -243,7 +243,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.13.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.14.0</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -2437,6 +2437,7 @@ let orders=[],orderItems=[],orderCoaDocs=[]
 let shipments=[],shipmentPurchaseOrders=[],shipmentItems=[]
 let purchaseOrders=[],purchaseOrderItems=[],purchaseOrderOrderLinks=[]
 let inventoryTransactions=[],receivingBatches=[],receivingBatchItems=[],receivingAllocations=[],procurementShortfalls=[],purchaseDocumentEvents=[]
+let inquiryAttachments=[],inquiryEvents=[]
 let inventoryOpsAvailable=false
 let quoteChanges=[]
 let selectedInqId=null,selectedQuoteId=null,selectedSampleId=null,selectedOrderId=null,selectedShipmentId=null,selectedPurchaseId=null,selectedTaskId=null,activeTab='inquiry',showTpl=false
@@ -2569,14 +2570,14 @@ async function init(){
     el.dispatchEvent(new Event('input',{bubbles:true}))
   },{passive:false})
 }
-async function loadInquiries(){const{data}=await sb.from('inquiries').select('*').order('created_at',{ascending:false});inquiries=data||[];updateOverdueAlert()}
+async function loadInquiries(){const{data}=await sb.rpc('app_list_inquiries');inquiries=data||[];updateOverdueAlert()}
 async function loadDocuments(){const{data}=await sb.from('documents').select('*').order('product');documents=data||[]}
 async function loadSuppliers(){const{data}=await sb.from('suppliers').select('*').order('company');suppliers=data||[]}
 async function loadCustomers(){const{data}=await sb.from('customers').select('*').order('company');customers=data||[]}
 async function loadQuotes(){
   const[{data:h},{data:it}]=await Promise.all([
     sb.from('quote_headers').select('*').order('created_at',{ascending:false}),
-    sb.from('quote_items').select('*')
+    sb.rpc('app_list_quote_items')
   ])
   quoteHeaders=h||[];quoteItems=it||[]
 }
@@ -2590,7 +2591,7 @@ async function loadSettings(){
   ;(data||[]).forEach(r=>settings[r.key]=r.value)
 }
 async function loadProducts(){
-  const{data}=await sb.from('products').select('*').order('product_name')
+  const{data}=await sb.rpc('app_list_products')
   products=data||[]
   updateProductOverdueAlert()
 }
@@ -4216,7 +4217,7 @@ async function saveShipmentReceive(shipmentId,useExplicit){
     const related=updates.find(u=>String(u.product_id)===productId)
     let error
     if(inventoryOpsAvailable){
-      ;({error}=await sb.rpc('post_inventory_transaction',{
+      ;({error}=await sb.rpc('app_post_inventory_transaction',{
         p_occurred_on:new Date().toISOString().slice(0,10),p_movement_type:'supplier_receipt',p_product_id:parseInt(productId,10),
         p_quantity:related?.delta_qty||delta,p_unit:related?.unit||prod?.inventory_unit||getInventoryUnit(),p_base_quantity:delta,p_base_unit:prod?.inventory_unit||getInventoryUnit(),
         p_customer_id:null,p_supplier_id:purchaseOrders.find(po=>String(po.id)===String(related?.po_id))?.supplier_id||null,p_order_id:null,p_purchase_order_id:related?.po_id||null,
@@ -4224,7 +4225,7 @@ async function saveShipmentReceive(shipmentId,useExplicit){
       }))
     }else{
       const nextStock=(parseFloat(prod?.stock_qty)||0)+delta
-      ;({error}=await sb.from('products').update({stock_qty:nextStock}).eq('id',productId))
+      ;({error}=await sb.rpc('app_set_product_stock',{p_product_id:productId,p_new_quantity:nextStock,p_note:'船運到貨入庫'}))
     }
     if(error){showToast('更新產品庫存失敗：'+error.message,'error');return}
   }
@@ -5909,7 +5910,7 @@ async function carryShortfallToPurchase(shortfallId,purchaseOrderId){
   if(!shortfall||!po||shortfall.status!=='carry_forward'){showToast('這筆短交已被處理','error');return}
   if(String(shortfall.supplier_id)!==String(po.supplier_id)){showToast('短交供應商與採購單不一致','error');return}
   if(!confirm('將「'+shortfall.product_name+'」短交 '+shortfall.shortage_qty+' '+shortfall.unit+' 帶入採購單 '+po.id+'？'))return
-  const{error}=await sb.rpc('carry_shortfall_to_purchase',{p_shortfall_id:shortfall.id,p_purchase_order_id:po.id,p_created_by:currentUser?.name||null})
+  const{error}=await sb.rpc('app_carry_shortfall_to_purchase',{p_shortfall_id:shortfall.id,p_purchase_order_id:po.id,p_created_by:currentUser?.name||null})
   if(error){showToast('帶入短交失敗：'+error.message,'error');return}
   await Promise.all([loadPurchaseOrders(),loadInventoryOperations()]);renderPurchaseOrders();openPurchaseModal(po.id);renderDashboard();logActivity('短交帶入下次採購','purchase',po.id,'SHORT-'+shortfall.id);showToast('短交數量已帶入 '+po.id)
 }
@@ -6168,7 +6169,7 @@ async function submitArrival(itemId){
       const deltaRolls=poQtyToRolls(arrived,item.unit||'m',prod)
       if(deltaRolls===null){showToast('注意：'+prod.product_name+' 未設每卷米數，庫存未自動更新','error')}
       else{
-        await sb.from('products').update({stock_qty:(parseFloat(prod.stock_qty)||0)+deltaRolls}).eq('id',item.product_id)
+        await sb.rpc('app_set_product_stock',{p_product_id:item.product_id,p_new_quantity:(parseFloat(prod.stock_qty)||0)+deltaRolls,p_note:'採購到貨更新'})
       }
       await loadProducts()
     }
@@ -6955,12 +6956,119 @@ async function createInquiry(){
     if(/column|schema cache/i.test(error.message||'')){showToast('新詢價欄位尚未套用至資料庫，請先執行 2026-07-19 migration','error');return}
     showToast(t('err_create')+error.message,'error');return
   }
+  const eventRows=newInqs.flatMap(inq=>[
+    {inquiry_id:inq.id,event_type:'created',event_at:inq.asked_at||new Date().toISOString(),channel:inq.source_channel,title:'收到客戶詢價',detail:inq.source_reference||null,created_by:currentUser?.name||null},
+    {inquiry_id:inq.id,event_type:'contacted_supplier',event_at:inq.asked_at||new Date().toISOString(),channel:inq.source_channel,title:'詢問供應商：'+inq.supplier,detail:inq.product,created_by:currentUser?.name||null}
+  ])
+  await sb.from('inquiry_events').insert(eventRows)
   newInqs.forEach(inq=>logActivity('新增詢價','inquiry',inq.id,''))
   await loadInquiries();hideNewInqForm();populateFilterCustomers();renderInquiries()
   selectedInqId=newInqs[0].id;openInqModal(newInqs[0].id)
 }
 
-async function openInqModal(id){selectedInqId=id;showTpl=false;_pendingInq={};await loadSuppliers();renderInqModalHd();renderInqModalBd();document.getElementById('modal-inq').classList.add('open')}
+async function openInqModal(id){
+  selectedInqId=id;showTpl=false;_pendingInq={}
+  await Promise.all([loadSuppliers(),loadInquiryTimeline(id)])
+  renderInqModalHd();renderInqModalBd();document.getElementById('modal-inq').classList.add('open')
+}
+
+async function loadInquiryTimeline(inquiryId){
+  const[{data:attachments},{data:events}]=await Promise.all([
+    sb.from('inquiry_attachments').select('*').eq('inquiry_id',inquiryId).order('created_at',{ascending:false}),
+    sb.from('inquiry_events').select('*').eq('inquiry_id',inquiryId).order('event_at',{ascending:false})
+  ])
+  inquiryAttachments=attachments||[]
+  inquiryEvents=events||[]
+}
+
+function inquiryTimelineHtml(i){
+  const kindLabel={source:'客戶原始詢價',supplier_request:'詢問供應商',supplier_reply:'供應商回覆',other:'其他'}
+  const eventIcon={created:'＋',contacted_supplier:'↗',supplier_reply:'↙',status_changed:'●',details_updated:'✎',attachment_added:'📎',attachment_removed:'×',note:'•'}
+  const linkedAttachmentIds=new Set(inquiryEvents.map(e=>e.attachment_id).filter(Boolean))
+  const rows=inquiryEvents.map(e=>({at:e.event_at||e.created_at,html:
+    '<div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid #f2f2ed">'+
+    '<div style="width:22px;height:22px;border-radius:50%;background:#edf7f3;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">'+(eventIcon[e.event_type]||'•')+'</div>'+
+    '<div style="min-width:0;flex:1"><div style="font-size:12px;color:#333">'+escapeHtml(e.title||e.event_type)+'</div>'+
+    (e.detail?'<div style="font-size:11px;color:#777;white-space:pre-wrap">'+escapeHtml(e.detail)+'</div>':'')+
+    '<div style="font-size:10px;color:#aaa;margin-top:2px">'+escapeHtml((e.event_at||e.created_at||'').replace('T',' ').slice(0,16))+(e.channel?' · '+escapeHtml(e.channel):'')+(e.created_by?' · '+escapeHtml(e.created_by):'')+'</div></div></div>'
+  }))
+  inquiryAttachments.filter(a=>!linkedAttachmentIds.has(a.id)).forEach(a=>rows.push({at:a.created_at,html:
+    '<div style="padding:7px 0;border-bottom:1px solid #f2f2ed;font-size:12px">📎 '+escapeHtml(kindLabel[a.attachment_kind]||'附件')+' · '+escapeHtml(a.file_name)+'</div>'
+  }))
+  rows.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')))
+  const attachmentList=inquiryAttachments.length?inquiryAttachments.map(a=>
+    '<div class="doc-row" style="padding:7px 9px">'+
+    '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escapeHtml(a.file_name)+'</div>'+
+    '<div style="font-size:10px;color:#aaa">'+escapeHtml(kindLabel[a.attachment_kind]||'附件')+(a.source_channel?' · '+escapeHtml(a.source_channel):'')+(a.note?' · '+escapeHtml(a.note):'')+'</div></div>'+
+    '<button class="btn btn-ghost btn-sm" onclick="openInquiryAttachment(\''+escapeHtml(a.file_url)+'\')">開啟</button>'+
+    '<button class="btn btn-ghost btn-sm" style="color:#A32D2D" onclick="deleteInquiryAttachment('+a.id+',\''+escapeHtml(a.file_url)+'\')">刪除</button></div>'
+  ).join(''):'<div style="font-size:11px;color:#aaa">尚無附件</div>'
+  return '<div class="divider"></div><div class="section-title">詢價脈絡與附件</div>'+
+    '<div style="padding:10px;background:#f8f8f5;border:1px solid #e5e5e0;border-radius:5px;margin-bottom:10px">'+
+    '<div style="display:grid;grid-template-columns:1fr 130px 120px;gap:6px;margin-bottom:6px">'+
+    '<input id="inq-attachment-file" type="file" multiple accept="image/*,.pdf,.xls,.xlsx,.csv,.txt" style="height:auto">'+
+    '<select id="inq-attachment-kind"><option value="source">客戶原始詢價</option><option value="supplier_request">詢問供應商</option><option value="supplier_reply">供應商回覆</option><option value="other">其他</option></select>'+
+    '<select id="inq-attachment-channel">'+['line','email','phone','other'].map(c=>'<option value="'+c+'"'+((i.source_channel||'line')===c?' selected':'')+'>'+c.toUpperCase()+'</option>').join('')+'</select></div>'+
+    '<div style="display:flex;gap:6px"><input id="inq-attachment-note" placeholder="附件備註（選填）"><button class="btn btn-primary btn-sm" onclick="uploadInquiryAttachments()" style="white-space:nowrap">上傳附件</button></div></div>'+
+    '<div style="margin-bottom:10px">'+attachmentList+'</div>'+
+    '<div style="max-height:220px;overflow-y:auto">'+(rows.map(r=>r.html).join('')||'<div style="font-size:11px;color:#aaa">尚無時間軸記錄</div>')+'</div>'
+}
+
+async function recordInquiryEvent(eventType,title,detail='',channel=null,attachmentId=null){
+  if(!selectedInqId)return
+  const{error}=await sb.from('inquiry_events').insert({
+    inquiry_id:selectedInqId,event_type:eventType,title,detail:detail||null,
+    channel:channel||null,attachment_id:attachmentId||null,created_by:currentUser?.name||currentUser?.email||null
+  })
+  if(error)console.error('[inquiry event]',error.message)
+}
+
+function inquiryAttachmentMime(file){
+  if(file.type)return file.type
+  const ext=(file.name.split('.').pop()||'').toLowerCase()
+  return({pdf:'application/pdf',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',csv:'text/csv',txt:'text/plain',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp'})[ext]||''
+}
+
+async function uploadInquiryAttachments(){
+  const files=[...(document.getElementById('inq-attachment-file')?.files||[])]
+  if(!files.length){showToast('請先選擇附件','error');return}
+  if(files.some(f=>f.size>15728640)){showToast('單一附件不可超過 15 MB','error');return}
+  const kind=document.getElementById('inq-attachment-kind')?.value||'other'
+  const channel=document.getElementById('inq-attachment-channel')?.value||'other'
+  const note=document.getElementById('inq-attachment-note')?.value.trim()||null
+  for(const file of files){
+    const mime=inquiryAttachmentMime(file)
+    if(!mime){showToast(file.name+' 的檔案格式不支援','error');return}
+    const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').replace(/__+/g,'_')
+    const filePath=selectedInqId+'/'+Date.now()+'-'+safeName
+    const{error:uploadError}=await sb.storage.from('inquiry-attachments').upload(filePath,file,{contentType:mime,upsert:false})
+    if(uploadError){showToast('上傳失敗：'+uploadError.message,'error');return}
+    const{data:attachment,error:dbError}=await sb.from('inquiry_attachments').insert({
+      inquiry_id:selectedInqId,file_name:file.name,file_url:filePath,file_type:mime,file_size:file.size,
+      attachment_kind:kind,source_channel:channel,note,created_by:currentUser?.name||null
+    }).select().single()
+    if(dbError){await sb.storage.from('inquiry-attachments').remove([filePath]);showToast('附件記錄失敗：'+dbError.message,'error');return}
+    await recordInquiryEvent('attachment_added','新增附件：'+file.name,note,channel,attachment.id)
+  }
+  await loadInquiryTimeline(selectedInqId);renderInqModalBd();showToast('附件已上傳')
+}
+
+async function openInquiryAttachment(filePath){
+  const{data,error}=await sb.storage.from('inquiry-attachments').createSignedUrl(filePath,3600)
+  if(error){showToast('無法開啟附件：'+error.message,'error');return}
+  window.open(data.signedUrl,'_blank')
+}
+
+async function deleteInquiryAttachment(id,filePath){
+  if(!confirm('確定刪除此附件？'))return
+  const attachment=inquiryAttachments.find(a=>a.id===id)
+  const{error:storageError}=await sb.storage.from('inquiry-attachments').remove([filePath])
+  if(storageError){showToast('刪除附件失敗：'+storageError.message,'error');return}
+  const{error}=await sb.from('inquiry_attachments').delete().eq('id',id)
+  if(error){showToast('刪除記錄失敗：'+error.message,'error');return}
+  await recordInquiryEvent('attachment_removed','刪除附件：'+(attachment?.file_name||id),'',attachment?.source_channel||null,null)
+  await loadInquiryTimeline(selectedInqId);renderInqModalBd();showToast('附件已刪除')
+}
 function closeModal(id){
   const closeNow=()=>{
     _isDirty=false
@@ -7102,6 +7210,7 @@ function renderInqModalBd(){
     '</div>'+
     '<div style="font-size:11px;font-weight:500;color:#666;margin-bottom:6px">'+t('inq_update_status')+'</div>'+
     '<div class="status-btns">'+INQ_STATUS.map(s=>{const lb=t(_INQ_KEY[s.id])||s.label;return '<button class="status-btn" style="background:'+(i.status===s.id?s.bg:'transparent')+';color:'+(i.status===s.id?s.color:'#aaa')+';border-color:'+(i.status===s.id?s.color:'#e5e5e0')+'" onclick="updateInqStatus(\''+s.id+'\')">'+lb+'</button>'}).join('')+'</div>'+
+    inquiryTimelineHtml(i)+
     '<div class="divider"></div>'+
     '<div class="section-title">'+t('inq_supplier_reply')+'</div>'+
     '<div class="grid-2" style="margin-bottom:10px">'+
@@ -7110,15 +7219,15 @@ function renderInqModalBd(){
     '<div><label>'+t('inq_moq')+'</label><input value="'+(i.moq||'')+'" placeholder="'+t('inq_moq_ph')+'" oninput="inqFieldChange(\'moq\',this.value)" /></div>'+
     '<div><label>'+t('inq_raw_material')+'</label><input value="'+(i.raw_material||t('inq_raw_default'))+'" oninput="inqFieldChange(\'raw_material\',this.value)" /></div>'+
     '</div>'+
-    '<div style="margin-bottom:10px"><label>'+t('inq_supplier_price')+'</label><div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px"><div><input type="number" value="'+supplierPriceParts.amount+'" placeholder="'+t('inq_cost_amount_ph')+'" step="0.0001" oninput="inqPriceChange()" id="inq-supplier-price-amount" /></div><div><select id="inq-supplier-price-currency" onchange="inqPriceChange()">'+buildOptions(CURRENCY_OPTIONS,supplierPriceParts.currency)+'</select></div><div><select id="inq-supplier-price-unit" onchange="inqPriceChange()"><option value="">'+t('inq_unit_select')+'</option>'+['m²','m','roll','kg','piece','sheet'].map(u=>'<option value="'+u+'"'+(supplierPriceParts.unit===u?' selected':'')+'>'+u+'</option>').join('')+'</select></div></div></div>'+
+    (hasPermission('view_cost')?'<div style="margin-bottom:10px"><label>'+t('inq_supplier_price')+'</label><div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px"><div><input type="number" value="'+supplierPriceParts.amount+'" placeholder="'+t('inq_cost_amount_ph')+'" step="0.0001" oninput="inqPriceChange()" id="inq-supplier-price-amount" /></div><div><select id="inq-supplier-price-currency" onchange="inqPriceChange()">'+buildOptions(CURRENCY_OPTIONS,supplierPriceParts.currency)+'</select></div><div><select id="inq-supplier-price-unit" onchange="inqPriceChange()"><option value="">'+t('inq_unit_select')+'</option>'+['m²','m','roll','kg','piece','sheet'].map(u=>'<option value="'+u+'"'+(supplierPriceParts.unit===u?' selected':'')+'>'+u+'</option>').join('')+'</select></div></div></div>':'')+
     '<div style="margin-bottom:14px"><label>'+t('lbl_notes')+'</label><textarea oninput="inqFieldChange(\'remarks\',this.value)">'+escapeHtml(i.remarks||'')+'</textarea></div>'+
     '<div class="modal-foot" style="justify-content:space-between;align-items:center;margin-bottom:12px">'+
     '<button class="btn btn-primary btn-sm" onclick="saveInquiry()">'+t('btn_save_info')+'</button>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
     '<button class="btn btn-ghost btn-sm" onclick="toggleTpl()">'+(showTpl?t('inq_toggle_tpl_hide'):t('inq_toggle_tpl_show'))+'</button>'+
-    (i.supplier_price?'<button class="btn btn-ghost btn-sm" onclick="openAddInqToProduct(\''+i.id+'\')">'+t('inq_to_catalog')+'</button>':'')+
-    (i.supplier_price&&i.from_product_id?'<button class="btn btn-ghost btn-sm" onclick="updateProductCostFromInquiry(\''+i.id+'\')">'+t('inq_update_cost')+'</button>':'')+
-    (i.supplier_price?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="sendToQuote(\''+i.id+'\')">'+t('inq_send_to_quote')+'</button>':'')+
+    (hasPermission('view_cost')&&i.supplier_price?'<button class="btn btn-ghost btn-sm" onclick="openAddInqToProduct(\''+i.id+'\')">'+t('inq_to_catalog')+'</button>':'')+
+    (hasPermission('view_cost')&&i.supplier_price&&i.from_product_id?'<button class="btn btn-ghost btn-sm" onclick="updateProductCostFromInquiry(\''+i.id+'\')">'+t('inq_update_cost')+'</button>':'')+
+    (hasPermission('view_cost')&&i.supplier_price?'<button class="btn btn-ghost btn-sm" style="color:#3B6D11;border-color:#3B6D11" onclick="sendToQuote(\''+i.id+'\')">'+t('inq_send_to_quote')+'</button>':'')+
     '</div>'+
     '</div>'+
     (showTpl?buildTpl(i,sup):'')
@@ -7233,9 +7342,11 @@ function toggleTpl(){showTpl=!showTpl;renderInqModalBd()}
 function copyTpl(){navigator.clipboard.writeText(window._tpl||'').then(()=>showToast('已複製，可貼到 Email 或 WhatsApp')).catch(()=>showToast('複製失敗，請手動複製','error'))}
 
 async function updateInqStatus(status){
+  const previous=inquiries.find(x=>x.id===selectedInqId)?.status||''
   await sb.from('inquiries').update({status}).eq('id',selectedInqId)
+  await recordInquiryEvent('status_changed','詢價狀態更新',previous+' → '+status)
   logActivity('更新詢價狀態','inquiry',selectedInqId,status)
-  await loadInquiries();renderInquiries();renderInqModalBd();renderInqModalHd()
+  await Promise.all([loadInquiries(),loadInquiryTimeline(selectedInqId)]);renderInquiries();renderInqModalBd();renderInqModalHd()
 }
 async function updateInqField(field,value){
   await sb.from('inquiries').update({[field]:value}).eq('id',selectedInqId)
@@ -7256,9 +7367,10 @@ async function saveInquiry(){
   if(!Object.keys(_pendingInq).length){showToast('沒有變更');return}
   const{error}=await sb.from('inquiries').update(_pendingInq).eq('id',selectedInqId)
   if(error){showToast(t('err_save')+error.message,'error');return}
+  await recordInquiryEvent('details_updated','更新詢價資料',Object.keys(_pendingInq).join(', '))
   logActivity('更新詢價資料','inquiry',selectedInqId,Object.keys(_pendingInq).join(', '))
   _pendingInq={}
-  await loadInquiries();renderInquiries();renderInqModalBd();renderInqModalHd()
+  await Promise.all([loadInquiries(),loadInquiryTimeline(selectedInqId)]);renderInquiries();renderInqModalBd();renderInqModalHd()
   showToast('已儲存')
 }
 async function saveInquirySupplierPrice(){
@@ -7475,9 +7587,9 @@ function renderQuoteModalBd(){
       '</div>'+
       '<div style="font-size:11px;color:#888;white-space:nowrap">'+wmmStr+'</div>'+
       '<div style="text-align:right;white-space:nowrap">'+
-      (cp>0?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+fmtP(fp)+' '+cur+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">'+t('q_no_cost')+'</div>')+
+      (fp!=null?'<div style="font-size:13px;font-weight:600;color:#0F6E56">'+fmtP(fp)+' '+(it.cost_currency||getSettingValue('default_quote_currency','THB'))+(cpu==='m2'?' /m²':cpu==='m'?' /m':'')+'</div>':'<div style="font-size:11px;color:#aaa">尚未設定客戶價格</div>')+
       '</div>'+
-      '<div style="font-size:10px;font-weight:500;color:'+mgnColor+';background:'+mgnColor+'18;padding:2px 6px;border-radius:4px;white-space:nowrap">'+(cp>0?mgn.toFixed(1)+'%':'—')+'</div>'+
+      (hasPermission('view_cost')?'<div style="font-size:10px;font-weight:500;color:'+mgnColor+';background:'+mgnColor+'18;padding:2px 6px;border-radius:4px;white-space:nowrap">'+(cp>0?mgn.toFixed(1)+'%':'—')+'</div>':'')+
       (editable?'<button onclick="event.stopPropagation();removeQuoteItem(\''+it.id+'\')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;flex-shrink:0">×</button>':'')+
       '</div>'
   }).join('')
@@ -7573,7 +7685,7 @@ function renderQuoteModalBd(){
     '<button class="btn btn-ghost btn-sm" onclick="generateQuotePDF(selectedQuoteId)">📄 Export PDF</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="duplicateQuote()" title="複製為全新草稿報價單">⧉ 複製</button>'+
     (editable?'<button class="btn btn-primary btn-sm" onclick="saveQuote()">'+t('q_save_draft')+'</button>':'')+
-    (h.status==='accepted'?'<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">'+t('q_send_to_order')+'</button>':'')+
+    (h.status==='accepted'&&hasPermission('view_cost')?'<button class="btn btn-blue btn-sm" onclick="sendQuoteToOrder()">'+t('q_send_to_order')+'</button>':'')+
     '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'modal-quote\')">'+t('btn_close')+'</button>'+
     '</div>'
 
@@ -8731,27 +8843,31 @@ async function duplicateQuote(){
 // _qoVariantSel: { quoteItemId: [{color, printing, qty}] }
 let _qoVariantSel={}
 let _qoProductCache={}  // { quoteItemId: product }
+let _qoIncluded={}
+let _qoBaseQty={}
 async function sendQuoteToOrder(){
+  if(!hasPermission('view_cost')){showToast('需要成本權限才能將報價轉為訂單與採購單','error');return}
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
+  const existingOrder=orders.find(o=>o.quote_header_id===h.id)
+  if(existingOrder){showToast('此報價已轉為訂單 '+existingOrder.id,'error');return}
   const items=quoteItems.filter(i=>i.header_id===h.id)
-  const pickerItems=items.filter(it=>{
-    const p=it.product_id&&products.find(x=>String(x.id)===String(it.product_id))
-    return p?.color_variants?.length||p?.printing_variants?.length
-  })
-  if(pickerItems.length){
-    _qoVariantSel={};_qoProductCache={}
-    pickerItems.forEach(it=>{
+  if(!items.length){showToast('報價沒有可轉換品項','error');return}
+  {
+    _qoVariantSel={};_qoProductCache={};_qoIncluded={};_qoBaseQty={}
+    items.forEach(it=>{
       _qoVariantSel[String(it.id)]=[]
       _qoProductCache[String(it.id)]=products.find(x=>String(x.id)===String(it.product_id))
+      _qoIncluded[String(it.id)]=true
+      _qoBaseQty[String(it.id)]=parseFloat(it.qty)||1
     })
-    let html='<div style="font-size:12px;color:#666;margin-bottom:14px">每個選項組合會成為獨立品項：</div>'
-    pickerItems.forEach(it=>{
+    let html='<div class="alert-info" style="margin-bottom:14px">勾選客戶接受的品項。建立訂單後，系統會依品項供應商自動拆成不同採購單。</div>'
+    items.forEach(it=>{
       const p=_qoProductCache[String(it.id)]
       const iid=String(it.id)
       const hasColors=p?.color_variants?.length
       const hasPrint=p?.printing_variants?.length
       html+='<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f0f0eb">'
-      html+='<div style="font-size:12px;font-weight:500;color:#333;margin-bottom:8px">'+esc(it.product)+'</div>'
+      html+='<label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:#333;margin-bottom:8px"><input type="checkbox" checked style="width:auto;height:auto" onchange="_qoIncluded[\''+iid+'\']=this.checked">'+esc(it.product)+(it.spec?' — '+esc(it.spec):'')+'</label>'
       if(hasColors){
         html+='<div style="font-size:11px;color:#888;margin-bottom:5px">顏色（可多選）：</div>'
         html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'
@@ -8772,6 +8888,9 @@ async function sendQuoteToOrder(){
         }).join('')
         html+='</div>'
       }
+      if(!hasColors&&!hasPrint){
+        html+='<div style="display:flex;align-items:center;gap:8px"><label style="margin:0">客戶接受數量</label><input type="number" min="0.001" step="0.001" value="'+_qoBaseQty[iid]+'" style="width:130px" oninput="_qoBaseQty[\''+iid+'\']=parseFloat(this.value)||0"></div>'
+      }
       html+='<div id="qov-rows-'+iid+'"></div>'
       if(hasColors){
         html+='<div style="display:flex;gap:6px;margin-top:4px">'
@@ -8782,10 +8901,9 @@ async function sendQuoteToOrder(){
       html+='</div>'
     })
     html+='<div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-primary" onclick="qovConfirm()">建立訂單</button><button class="btn btn-ghost" onclick="closeModal(\'modal-subform\')">取消</button></div>'
-    openSubformModal('選擇顏色 / 印刷',html)
+    openSubformModal('確認客戶接受品項',html)
     return
   }
-  await _executeQto()
 }
 function _qovRowKey(color,printing){return (color||'__nc__')+'\x00'+(printing===null?'__none__':printing||'')}
 function _qovColorKeyStr(color){return (color||'_').replace(/[^a-zA-Z0-9]/g,'_')}
@@ -8895,10 +9013,27 @@ function _qovQtyChange(iid,key,val){
   const entry=_qoVariantSel[iid]?.find(x=>_qovRowKey(x.color,x.printing)===key)
   if(entry)entry.qty=val
 }
-async function qovConfirm(){closeModal('modal-subform');await _executeQto()}
+async function qovConfirm(){
+  const selected=Object.keys(_qoIncluded).filter(id=>_qoIncluded[id])
+  if(!selected.length){showToast('請至少勾選一個客戶接受的品項','error');return}
+  for(const id of selected){
+    const p=_qoProductCache[id]
+    const hasVariants=p?.color_variants?.length||p?.printing_variants?.length
+    if(!hasVariants&&!(_qoBaseQty[id]>0)){
+      showToast('客戶接受數量必須大於 0','error');return
+    }
+    if(hasVariants&&!_qoVariantSel[id]?.length){
+      showToast('請為「'+(quoteItems.find(x=>String(x.id)===id)?.product||'品項')+'」選擇至少一個顏色／印刷組合','error');return
+    }
+    if(hasVariants&&_qoVariantSel[id].some(x=>!(parseFloat(x.qty)>0))){
+      showToast('每個已選顏色／印刷組合都必須填寫大於 0 的數量','error');return
+    }
+  }
+  closeModal('modal-subform');await _executeQto()
+}
 async function _executeQto(){
   const h=quoteHeaders.find(x=>x.id===selectedQuoteId);if(!h)return
-  const items=quoteItems.filter(i=>i.header_id===h.id)
+  const items=quoteItems.filter(i=>i.header_id===h.id&&_qoIncluded[String(i.id)]!==false)
   const cust=customers.find(c=>c.company===h.customer)
   const sup=suppliers.find(s=>s.company===h.supplier)
   await loadOrders()
@@ -8939,23 +9074,27 @@ async function _executeQto(){
       const makeRow=(spec,printing,qty)=>{
         const q=qty>0?qty:1
         const amt=cpu==='m2'&&wm>0?_up*wm*q:_up*q
-        return{order_id:orderId,product_name:it.product,spec:spec||null,printing:printing||null,qty:q,unit:prodUnit,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}
+        return{order_id:orderId,product_id:it.product_id||null,product_name:it.product,spec:spec||null,printing:printing||null,qty:q,unit:prodUnit,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4)),supplier_id:it.supplier_id||_prod?.supplier_id||null,supplier_cost:it.cost_price||_prod?.cost_price||null,supplier_currency:it.cost_currency||_prod?.currency||null}
       }
       if(varSel?.length){
         return varSel.map(({color,printing,qty})=>makeRow(color||null,printing||null,parseFloat(qty)||0))
       }
-      const fallbackQty=parseFloat(it.qty)||1
+      const fallbackQty=_qoBaseQty[String(it.id)]||parseFloat(it.qty)||1
       const amt=cpu==='m2'&&wm>0?_up*wm*fallbackQty:_up*fallbackQty
-      return[{order_id:orderId,product_name:it.product,spec:it.spec||null,printing:null,qty:fallbackQty,unit:prodUnit,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4))}]
+      return[{order_id:orderId,product_id:it.product_id||null,product_name:it.product,spec:it.spec||null,printing:null,qty:fallbackQty,unit:prodUnit,unit_price:_up,currency:it.cost_currency||'USD',width_m:resolvedWm,pricing_unit:it.pricing_unit||null,customer_pricing_unit:cpu,amount:parseFloat(amt.toFixed(4)),supplier_id:it.supplier_id||_prod?.supplier_id||null,supplier_cost:it.cost_price||_prod?.cost_price||null,supplier_currency:it.cost_currency||_prod?.currency||null}]
     })
     const{error:iErr}=await sb.from('order_items').insert(oiRows)
     if(iErr){showToast('品項寫入失敗：'+iErr.message,'error');return}
     const total=parseFloat(oiRows.reduce((s,i)=>s+(i.amount||0),0).toFixed(2))
     await sb.from('orders').update({total_amount:total}).eq('id',orderId)
   }
-  await loadOrders()
+  const{data:procurement,error:procurementError}=await sb.rpc('create_purchase_orders_for_order',{p_order_id:orderId,p_created_by:currentUser?.name||null})
+  if(procurementError)showToast('訂單已建立，但自動拆採購單失敗：'+procurementError.message,'error')
+  await Promise.all([loadOrders(),loadPurchaseOrders()])
   closeModal('modal-quote')
-  showToast('訂單已建立')
+  const poCount=procurement?.purchase_order_count||0
+  const missing=procurement?.unassigned_item_count||0
+  showToast('訂單已建立'+(poCount?'，並拆成 '+poCount+' 張採購單':'')+(missing?'；'+missing+' 個品項待補供應商':''))
   setTimeout(()=>{switchTab('orders');setTimeout(()=>openOrderModal(orderId),80)},200)
 }
 
@@ -9446,7 +9585,7 @@ async function saveInventoryAdjustments(){
   confirmModal(t('confirm_update_inventory').replace('{n}',updates.length).replace('{summary}',summary),async()=>{
     const now=new Date().toISOString()
     for(const u of updates){
-      const{error}=await sb.from('products').update({stock_qty:u.newQty}).eq('id',u.p.id)
+      const{error}=await sb.rpc('app_set_product_stock',{p_product_id:u.p.id,p_new_quantity:u.newQty,p_note:'庫存盤點調整'})
       if(error){showToast(t('err_update')+error.message,'error');return}
       const{error:logErr}=await sb.from('inventory_logs').insert({product_id:u.p.id,change_qty:u.change,qty_before:u.qtyBefore,qty_after:u.newQty,note:u.note,source:'manual',created_by:currentUser?.auth_id||null})
       if(logErr){showToast(t('err_inv_log')+logErr.message,'error');return}
@@ -9643,7 +9782,7 @@ async function saveStockMovement(){
   if(type==='customer_shipment'&&!customerId){showToast('客戶出貨必須選擇客戶','error');return}
   const allowNegative=!!document.getElementById('sm-negative')?.checked
   if(allowNegative&&!note){showToast('負庫存例外必須填寫原因','error');return}
-  const{error}=await sb.rpc('post_inventory_transaction',{
+  const{error}=await sb.rpc('app_post_inventory_transaction',{
     p_occurred_on:document.getElementById('sm-date')?.value,
     p_movement_type:type,p_product_id:productId,p_quantity:rawType==='stocktake'?baseQty:qty,p_unit:rawType==='stocktake'?baseUnit:unit,
     p_base_quantity:baseQty,p_base_unit:baseUnit,p_customer_id:customerId,
@@ -9741,7 +9880,7 @@ async function saveReceivingMatches(batchId){
   }
   const allowOver=!!document.getElementById('rmatch-over')?.checked
   for(const e of entries){
-    const{error}=await sb.rpc('allocate_receiving_item',{p_receiving_batch_item_id:e.item.id,p_purchase_order_item_id:e.poItemId,p_accepted_qty:e.accepted,p_damaged_qty:e.damaged,p_base_quantity:e.accepted>0?e.base:null,p_base_unit:e.accepted>0?e.baseUnit:null,p_note:e.note,p_created_by:currentUser?.name||null,p_allow_over_receipt:allowOver})
+    const{error}=await sb.rpc('app_allocate_receiving_item',{p_receiving_batch_item_id:e.item.id,p_purchase_order_item_id:e.poItemId,p_accepted_qty:e.accepted,p_damaged_qty:e.damaged,p_base_quantity:e.accepted>0?e.base:null,p_base_unit:e.accepted>0?e.baseUnit:null,p_note:e.note,p_created_by:currentUser?.name||null,p_allow_over_receipt:allowOver})
     if(error){showToast('到貨配對失敗：'+error.message,'error');return}
   }
   closeModal('modal-receiving-batch');await Promise.all([loadInventoryOperations(),loadPurchaseOrders(),loadProducts()]);renderStockFlow();renderDashboard();showToast('到貨已配對並正式入庫')

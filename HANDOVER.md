@@ -10,16 +10,18 @@ Internal business management system for JOY CHIN PSA Incorporation Co., Ltd. (�
 - **Database:** Supabase (PostgreSQL)
 - **Deployment:** Vercel (auto-deploy from GitHub)
 - **Repository:** git@github.com:Rey9527/joychin-internal.git
-- **Version:** v0.13.0 (Beta)
+- **Version:** v0.14.0 (Beta)
 
 ## Completed Modules
 
 - Supabase Auth login & user management (admin / manager / user / supplier / customer)
 - PostgreSQL RLS company isolation and private Storage policies
 - Unified inventory transaction ledger, mixed-receiving allocation and shortfall carry-forward
-- Inquiry management (詢價) with supplier message templates
+- Cost-field masking and write protection for products, quotations and inquiries
+- Inquiry management (詢價) with supplier message templates, private attachments and contact timeline
 - Quotation management (報價) with cost/markup/customs calculation, version history via `quote_changes`
-- Order management (訂單) from quotation or manual entry
+- Order management (訂單) from quotation or manual entry, including accepted-item selection
+- Automatic supplier-split purchase orders after accepted quotation conversion
 - Purchase order management (採購單) with shopping-cart style flow, supplier-based filtering
 - Sample management (樣品) with incoming/outgoing tracking and inventory
 - Product catalog (產品目錄) with cost tracking, review reminders, stock level monitoring
