@@ -48,6 +48,18 @@ Important columns / 重要欄位:
 - `from_product_id`
 - `created_at`
 - `updated_at`
+- `inquiry_group_id`
+- `customer_id`
+- `customer_is_unregistered`
+- `requested_qty`
+- `requested_unit`
+- `is_development`
+- `target_price`
+- `target_currency`
+- `source_channel`
+- `source_reference`
+- `asked_at`
+- `promised_reply_date`
 
 ### documents
 Used for the technical document library.  
@@ -118,6 +130,42 @@ Important columns / 重要欄位:
 - `meters_per_roll`
 - `width_m`
 - `pricing_unit`
+- `inventory_unit`
+- `kg_per_m`
+- `conversion_note`
+
+### inventory_transactions
+Append-only inventory ledger used for supplier receipts, customer shipments,
+returns, samples, write-offs, stocktakes, and reversals. Customer shipments
+must identify a customer; a missing order is retained as `needs_link_review`.
+
+### inventory_lots
+Optional lot/roll-level quantities for products whose actual roll length,
+weight, supplier, or cost must remain distinguishable.
+
+### receiving_batches / receiving_batch_items
+Fast intake for supplier deliveries that mix several purchase orders or cannot
+be matched immediately. Unmatched batches do not automatically become usable
+inventory.
+
+### receiving_allocations
+Allows one physical receiving line to be split across multiple purchase-order
+items. Each accepted allocation points to the inventory transaction generated
+by `allocate_receiving_item()`; damaged quantities never increase usable stock.
+
+### procurement_shortfalls
+Stores supplier short deliveries with a default `carry_forward` state so the
+remaining quantity is suggested on the next purchase rather than silently lost.
+`carry_shortfall_to_purchase()` adds the remainder to a matching supplier PO and
+updates the shortfall in one database transaction.
+
+### purchase_document_events
+Records when a purchase document was downloaded, sent, or resent, including the
+operator and timestamp.
+
+### inquiry_attachments
+Stores metadata for LINE screenshots, supplier quotations, email files, and
+other inquiry evidence. The storage bucket/policies must be deployed separately.
 
 ### samples
 Used for sample inventory, incoming requests, and outgoing shipments.  

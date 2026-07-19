@@ -7,7 +7,7 @@ Internal HTML app for JOY CHIN internal workflow management.
 - `Beta`
 
 ## 目前版本 / Current Version
-- `v0.6.0`
+- `v0.13.0`
 
 ## 專案說明 / Project Overview
 這個專案目前是一個單檔 HTML 應用，主要用於管理詢價、報價、樣品、工作追蹤、訂單、採購、客戶、供應商、產品與文件。  
@@ -27,6 +27,8 @@ This project is currently a single-file HTML application used to manage inquirie
 - 訂單管理
 - 採購單管理（含採購選購流程）
 - 使用者管理（含登入權限控制）
+- Supabase Auth 登入、角色／跨公司 RLS 與私有附件權限
+- 統一庫存流向台帳、混單到貨配對與供應商短交承接
 - 儀表板（自動掃描待追蹤項目）
 - 客訴管理（含折讓單追蹤）
 
@@ -50,5 +52,5 @@ At this stage, the database is not being split into a separate new project.
   `schema.sql` was copied from Supabase Schema Visualizer as a reference backup.
 - 這份 SQL 不保證可以直接執行。  
   This SQL is not guaranteed to be directly executable.
-- 後續 schema 變更應記錄在 `supabase` 資料夾。  
-  Future schema changes should be documented in the `supabase` folder.
+- 可執行的 schema 變更記錄在 `supabase/migrations`，並先在隔離資料庫驗證。
+  Executable schema changes live in `supabase/migrations` and are verified in an isolated database first.
