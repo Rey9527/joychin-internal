@@ -2522,6 +2522,7 @@ async function init(){
     }
   }
   applyI18n()
+  if(currentUser)document.getElementById('sidebar-user-email').textContent=currentUser.email||currentUser.name||'已登入'
   if(isSupplierAccount()){
     switchTab('supplier-portal',false)
   } else if(isCustomerAccount()){

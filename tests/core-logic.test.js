@@ -133,6 +133,14 @@ test('assistant dashboard exposes operational shortcuts', () => {
   assert.match(body, /補齊待辦資料/)
 })
 
+test('language refresh preserves the signed-in user shown in the sidebar', () => {
+  const body = extractFunction('init')
+  const translationAt = body.indexOf('applyI18n()')
+  const userRefreshAt = body.indexOf("document.getElementById('sidebar-user-email').textContent", translationAt)
+  assert.notEqual(translationAt, -1)
+  assert.ok(userRefreshAt > translationAt)
+})
+
 test('mixed receiving supports split allocation and atomic inventory posting', () => {
   const ui = extractFunction('saveReceivingMatches')
   assert.match(ui, /allocate_receiving_item/)
