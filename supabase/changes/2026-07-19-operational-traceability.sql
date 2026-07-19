@@ -394,14 +394,14 @@ begin
 
   insert into public.purchase_order_items(
     po_id,product_id,product_name,spec,qty,unit,unit_price,currency,amount,
-    notes,rolls_qty,width_m,pricing_unit,ref_order_id,received_qty
+    notes,width_m,pricing_unit,ref_order_id,received_qty
   ) values (
     v_target_po.id,v_short.product_id,v_short.product_name,v_source_item.spec,
     v_short.shortage_qty,v_short.unit,v_source_item.unit_price,
     coalesce(v_source_item.currency,v_target_po.currency),
     case when v_source_item.unit_price is null then null else v_source_item.unit_price*v_short.shortage_qty end,
-    '短交自動帶入 #SHORT-'||v_short.id,v_source_item.rolls_qty,
-    v_source_item.width_m,v_source_item.pricing_unit,v_source_item.ref_order_id,0
+    '短交自動帶入 #SHORT-'||v_short.id,v_source_item.width_m,
+    v_source_item.pricing_unit,v_source_item.ref_order_id,0
   ) returning * into v_new_item;
 
   update public.procurement_shortfalls

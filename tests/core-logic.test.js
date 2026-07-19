@@ -166,6 +166,7 @@ test('supplier shortfall can be carried to the next purchase atomically', () => 
   assert.match(migration, /create or replace function public\.carry_shortfall_to_purchase/)
   assert.match(migration, /status='added_to_next_po'/)
   assert.match(migration, /Target purchase order can no longer accept items/)
+  assert.doesNotMatch(migration, /v_source_item\.rolls_qty/)
 })
 
 test('new order item calculation displays the selected currency', () => {
