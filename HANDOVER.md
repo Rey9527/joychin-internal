@@ -10,11 +10,13 @@ Internal business management system for JOY CHIN PSA Incorporation Co., Ltd. (�
 - **Database:** Supabase (PostgreSQL)
 - **Deployment:** Vercel (auto-deploy from GitHub)
 - **Repository:** git@github.com:Rey9527/joychin-internal.git
-- **Version:** v0.3.0 (Beta)
+- **Version:** v0.13.0 (Beta)
 
 ## Completed Modules
 
-- Login & user management (email + password, role-based: manager / assistant)
+- Supabase Auth login & user management (admin / manager / user / supplier / customer)
+- PostgreSQL RLS company isolation and private Storage policies
+- Unified inventory transaction ledger, mixed-receiving allocation and shortfall carry-forward
 - Inquiry management (詢價) with supplier message templates
 - Quotation management (報價) with cost/markup/customs calculation, version history via `quote_changes`
 - Order management (訂單) from quotation or manual entry
@@ -44,8 +46,7 @@ Internal business management system for JOY CHIN PSA Incorporation Co., Ltd. (�
 
 ### Low Priority
 
-- Multi-language support — lang-en.js already exists in the repository with English translations. Needs to be integrated into the UI with a language switcher.
-- Supabase Auth integration (currently using plain `password_hash` in `users` table — security risk)
+- Continue completing untranslated strings in the existing Chinese / English / Thai language switcher.
 
 ## Database Tables
 
@@ -62,7 +63,7 @@ See `dependency-map.md` for full column list. Key tables:
 - Single HTML file is now 5000+ lines, making AI-assisted edits increasingly inefficient. Migration to React Vite recommended.
 - `orders` table mixes `customer` (text) and `customer_id` (bigint) — should be unified to `customer_id` only
 - `quote_headers` uses `customer` and `supplier` as text fields, not foreign keys — causes issues for dashboard analytics
-- Login uses plain text `password_hash` stored in Supabase — should migrate to Supabase Auth
+- Legacy login has been migrated to Supabase Auth; `password_hash` is cleared by the lockdown migration after linkage validation.
 - `purchase_orders` previously assumed `ref_id` and `supplier` text columns — now uses `supplier_id` correctly
 - Some existing `order_items` and `quote_items` records have null `product_id`, `width_m`, or `customer_pricing_unit` due to historical data before these fields were added
 
@@ -92,7 +93,7 @@ See `dependency-map.md` for full column list. Key tables:
 ## Recommended Next Steps for Engineer
 
 1. Migrate to React Vite, keeping Supabase as-is
-2. Implement Supabase Auth to replace current `password_hash` login
+2. Continue role regression tests whenever RLS policies or external portals change
 3. Build Edge Function for weekly email report (pg_cron trigger → query orders/products `updated_at` → Resend)
 4. Build Edge Function for LINE Bot webhook
 5. Fix foreign key consistency in `orders` and `quote_headers` tables

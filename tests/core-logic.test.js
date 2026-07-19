@@ -112,7 +112,7 @@ test('customer shipments require a customer and preserve missing order linkage',
   const movementBody = extractFunction('saveStockMovement')
   assert.match(movementBody, /客戶出貨必須選擇客戶/)
   assert.match(movementBody, /post_inventory_transaction/)
-  const migration = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'changes', '2026-07-19-operational-traceability.sql'), 'utf8')
+  const migration = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'migrations', '20260719030000_operational_traceability.sql'), 'utf8')
   assert.match(migration, /needs_link_review boolean not null default false/)
   assert.match(migration, /movement_type='customer_shipment' and p_order_id is null/)
 })
@@ -145,7 +145,7 @@ test('mixed receiving supports split allocation and atomic inventory posting', (
   const ui = extractFunction('saveReceivingMatches')
   assert.match(ui, /allocate_receiving_item/)
   assert.match(ui, /分配超過剩餘到貨量/)
-  const migration = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'changes', '2026-07-19-operational-traceability.sql'), 'utf8')
+  const migration = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'migrations', '20260719030000_operational_traceability.sql'), 'utf8')
   assert.match(migration, /create table if not exists public\.receiving_allocations/)
   assert.match(migration, /create or replace function public\.allocate_receiving_item/)
   assert.match(migration, /Allocation exceeds physical received quantity/)
@@ -162,7 +162,7 @@ test('unlinked customer shipment can be linked without changing stock again', ()
 test('supplier shortfall can be carried to the next purchase atomically', () => {
   const body = extractFunction('carryShortfallToPurchase')
   assert.match(body, /carry_shortfall_to_purchase/)
-  const migration = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'changes', '2026-07-19-operational-traceability.sql'), 'utf8')
+  const migration = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'migrations', '20260719030000_operational_traceability.sql'), 'utf8')
   assert.match(migration, /create or replace function public\.carry_shortfall_to_purchase/)
   assert.match(migration, /status='added_to_next_po'/)
   assert.match(migration, /Target purchase order can no longer accept items/)
@@ -173,4 +173,41 @@ test('new order item calculation displays the selected currency', () => {
   const body = extractFunction('refreshNoiCalc')
   assert.match(body, /esc\(cur\)/)
   assert.doesNotMatch(body, /THB<\/strong>/)
+})
+
+test('login delegates password verification to Supabase Auth', () => {
+  const login = extractFunction('doLogin')
+  const restore = extractFunction('checkAuth')
+  assert.match(login, /auth\.signInWithPassword/)
+  assert.match(login, /loadSignedInProfile/)
+  assert.match(restore, /auth\.getSession/)
+  assert.doesNotMatch(html, /data\.password_hash\s*!==/)
+  assert.doesNotMatch(html, /select\('password_hash'\)/)
+  assert.doesNotMatch(html, /update\(\{password_hash:/)
+})
+
+test('account administration uses a trusted Edge Function', () => {
+  for (const name of ['createUser', 'saveUserDetail', 'submitResetUserPassword', 'toggleUserActive', 'deleteUser']) {
+    assert.match(extractFunction(name), /callUserAdmin/)
+  }
+  assert.match(extractFunction('submitChangePassword'), /auth\.updateUser/)
+})
+
+test('RLS lockdown removes anonymous and cross-company access', () => {
+  const migration = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'migrations', '20260719040000_auth_lockdown.sql'), 'utf8')
+  assert.match(migration, /revoke all on all tables in schema public from anon/)
+  assert.match(migration, /users_select_self_or_manager/)
+  assert.match(migration, /suppliers_external_self/)
+  assert.match(migration, /customers_external_self/)
+  assert.match(migration, /drop policy if exists "allow all" on storage\.objects/)
+  assert.match(migration, /joychin_documents_internal/)
+  assert.match(migration, /update public\.users set password_hash=null/)
+})
+
+test('external writes use scoped security-definer workflows', () => {
+  assert.match(extractFunction('_spSubmitShipment'), /supplier_create_shipment/)
+  assert.match(extractFunction('submitShipFeedback'), /customer_submit_sample_feedback/)
+  const migration = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'migrations', '20260719040000_auth_lockdown.sql'), 'utf8')
+  assert.match(migration, /Shipment item is outside the supplier account/)
+  assert.match(migration, /Sample shipment is outside the customer account/)
 })

@@ -1,4 +1,4 @@
--- JOY CHIN operational traceability foundation
+-- JOY CHIN operational traceability foundation migration.
 -- Review in a non-production project before applying. This migration does not
 -- change users.password_hash or the current login flow.
 

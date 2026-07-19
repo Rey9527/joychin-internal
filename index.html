@@ -243,7 +243,7 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.12.22</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.13.0</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -2132,7 +2132,8 @@ const TASK_MODULE_OPTION_PAIRS=[
 
 function sanitizeUserSession(user){
   if(!user)return null
-  const{password_hash,...safeUser}=user
+  const safeUser={}
+  USER_SAFE_COLUMNS.split(',').forEach(key=>{if(user[key]!==undefined)safeUser[key]=user[key]})
   safeUser.role=normalizeUserRole(safeUser.role)
   return safeUser
 }
@@ -2326,40 +2327,29 @@ async function doLogin(){
     return
   }
   
-  const{data,error}=await sb.from('users').select('*').eq('email',email).maybeSingle()
-  
-  if(error){
-    document.getElementById('login-email-error').textContent='錯誤: '+error.message
-    document.getElementById('login-email-error').style.display='block'
-    return
-  }
-  
-  if(!data){
-    document.getElementById('login-email-error').textContent='查無此帳號'
-    document.getElementById('login-email-error').style.display='block'
-    return
-  }
-  
-  if(data.is_active===false){
-    document.getElementById('login-email-error').textContent='此帳號已停用，請聯絡管理員'
-    document.getElementById('login-email-error').style.display='block'
-    return
-  }
-  
-  if(data.password_hash!==password){
-    document.getElementById('login-password-error').textContent='密碼錯誤'
+  const authEmail=await resolveAuthEmail(email)
+  const{data:authData,error:authError}=await sb.auth.signInWithPassword({email:authEmail,password})
+  if(authError||!authData.user){
+    document.getElementById('login-password-error').textContent='帳號或密碼錯誤'
     document.getElementById('login-password-error').style.display='block'
     return
   }
-  
-  persistCurrentUser(data)
+  const{data:profile,error:profileError}=await loadSignedInProfile(authData.user.id)
+  if(profileError||!profile||profile.is_active===false){
+    await sb.auth.signOut()
+    document.getElementById('login-email-error').textContent=profile?.is_active===false?'此帳號已停用，請聯絡管理員':'帳號尚未完成系統綁定'
+    document.getElementById('login-email-error').style.display='block'
+    return
+  }
+  persistCurrentUser(profile)
   document.getElementById('login-page').style.display='none'
   document.getElementById('main-app').style.display='flex'
   logActivity('登入','auth','','')
   init()
 }
 
-function logout(){
+async function logout(){
+  await sb.auth.signOut()
   clearCurrentUser()
   document.getElementById('sidebar-user-email').textContent='未登入'
   document.getElementById('main-app').style.display='none'
@@ -2368,10 +2358,17 @@ function logout(){
   document.getElementById('login-password').value=''
 }
 
-function checkAuth(){
-  const saved=sessionStorage.getItem(SESSION_USER_KEY)
-  if(saved){
-    currentUser=JSON.parse(saved)
+async function checkAuth(){
+  const{data:{session}}=await sb.auth.getSession()
+  if(session?.user){
+    const{data:profile}=await loadSignedInProfile(session.user.id)
+    if(profile?.is_active)persistCurrentUser(profile)
+    else{
+      await sb.auth.signOut()
+      clearCurrentUser()
+    }
+  }else clearCurrentUser()
+  if(currentUser){
     document.getElementById('login-page').style.display='none'
     document.getElementById('main-app').style.display='flex'
     init()
@@ -2381,9 +2378,31 @@ function checkAuth(){
   }
 }
 
-const SB_URL='https://ckgjcwhlusksqbqvvbma.supabase.co'
+const IS_LOCAL_APP=['127.0.0.1','localhost','::1'].includes(location.hostname)
+const SB_URL=IS_LOCAL_APP?'http://127.0.0.1:54321':'https://ckgjcwhlusksqbqvvbma.supabase.co'
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZ2pjd2hsdXNrc3FicXZ2Ym1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MDMzNzUsImV4cCI6MjA5MjA3OTM3NX0.GQtWWNP_Gd4Zx6S3nNoukVIY8cUXCiGmIe_G9Lyy7fc'
-const sb=supabase.createClient(SB_URL,SB_KEY)
+const LOCAL_SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
+const sb=supabase.createClient(SB_URL,IS_LOCAL_APP?LOCAL_SB_KEY:SB_KEY)
+const USER_SAFE_COLUMNS='id,email,name,role,is_active,created_at,group_id,linked_company,auth_id,auth_email'
+
+async function resolveAuthEmail(login){
+  const normalized=String(login||'').trim().toLowerCase()
+  if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized))return normalized
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(normalized))
+  const hash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('')
+  return 'legacy-'+hash.slice(0,32)+'@auth.joychin.local'
+}
+
+function loadSignedInProfile(authId){
+  return sb.from('users').select(USER_SAFE_COLUMNS).eq('auth_id',authId).maybeSingle()
+}
+
+async function callUserAdmin(body){
+  const{data,error}=await sb.functions.invoke('admin-users',{body})
+  if(error)throw new Error(data?.error||error.message||'帳號管理服務失敗')
+  if(data?.error)throw new Error(data.error)
+  return data
+}
 
 const INQ_STATUS=[
   {id:'pending',label:'待詢供應商',color:'#854F0B',bg:'#FAEEDA'},
@@ -3011,7 +3030,10 @@ async function submitSampleShipment(){
 async function submitShipFeedback(shipId){
   const status=document.getElementById('smfbs-'+shipId)?.value
   const feedback=document.getElementById('smfbt-'+shipId)?.value.trim()||null
-  const{error}=await sb.from('sample_shipments_out').update({status,feedback}).eq('id',shipId)
+  const result=isCustomerAccount()
+    ?await sb.rpc('customer_submit_sample_feedback',{p_sample_shipment_id:shipId,p_status:status,p_feedback:feedback})
+    :await sb.from('sample_shipments_out').update({status,feedback}).eq('id',shipId)
+  const{error}=result
   if(error){showToast(t('err_save')+error.message,'error');return}
   await loadSamples();_renderSampleModal();renderSamples();showToast('回饋已登記')
 }
@@ -10495,7 +10517,7 @@ function hasPermission(key){
 }
 
 async function loadUsers(){
-  const{data}=await sb.from('users').select('*').order('created_at',{ascending:false})
+  const{data}=await sb.from('users').select(USER_SAFE_COLUMNS).order('created_at',{ascending:false})
   users=(data||[]).map(u=>({...u,role:normalizeUserRole(u.role)}))
 }
 
@@ -10537,11 +10559,10 @@ async function createUser(){
   const linkedCo=(role==='supplier'||role==='customer')?document.getElementById('nu-linked-company')?.value:''
   if((role==='supplier'||role==='customer')&&!linkedCo){showToast('請選擇綁定公司','error');return}
   const groupId=document.getElementById('nu-group')?.value
-  const insertPayload={email,name,role:normalizeUserRole(role),password_hash:password,is_active:true}
+  const insertPayload={action:'create',email,name,role:normalizeUserRole(role),password,is_active:true}
   if(groupId)insertPayload.group_id=parseInt(groupId)
   if(linkedCo)insertPayload.linked_company=linkedCo
-  const{error}=await sb.from('users').insert(insertPayload)
-  if(error){showToast(t('err_add')+error.message,'error');return}
+  try{await callUserAdmin(insertPayload)}catch(error){showToast(t('err_add')+error.message,'error');return}
   await loadUsers()
   closeModal('modal-new-user')
   renderUsersMgmt()
@@ -10640,8 +10661,7 @@ async function saveUserDetail(userId){
     const linkedCo=document.getElementById('ud-linked-company')?.value||null
     patch.linked_company=linkedCo
   }
-  const{error}=await sb.from('users').update(patch).eq('id',userId)
-  if(error){showToast(t('err_save')+error.message,'error');return}
+  try{await callUserAdmin({action:'update',user_id:userId,...patch})}catch(error){showToast(t('err_save')+error.message,'error');return}
   if(isSelf)persistCurrentUser({...currentUser,...patch})
   await loadUsers()
   if(isSelf&&currentUser){
@@ -10673,19 +10693,12 @@ async function submitChangePassword(){
   const newPwd=document.getElementById('cp-new')?.value||''
   const confirm=document.getElementById('cp-confirm')?.value||''
   if(!cur||!newPwd||!confirm){showToast('請填寫所有欄位','error');return}
-  let currentPassword=currentUser?.password_hash
-  if(!currentPassword){
-    const{data,error:fetchError}=await sb.from('users').select('password_hash').eq('id',currentUser.id).maybeSingle()
-    if(fetchError){showToast('驗證目前密碼失敗：'+fetchError.message,'error');return}
-    currentPassword=data?.password_hash||''
-  }
-  if(cur!==currentPassword){showToast('目前密碼不正確','error');return}
   if(newPwd!==confirm){showToast('新密碼與確認密碼不一致','error');return}
   if(newPwd.length<4){showToast('密碼至少需要 4 個字元','error');return}
-  const{error}=await sb.from('users').update({password_hash:newPwd}).eq('id',currentUser.id)
+  const{error:verifyError}=await sb.auth.signInWithPassword({email:currentUser.auth_email||await resolveAuthEmail(currentUser.email),password:cur})
+  if(verifyError){showToast('目前密碼不正確','error');return}
+  const{error}=await sb.auth.updateUser({password:newPwd})
   if(error){showToast(t('err_update')+error.message,'error');return}
-  persistCurrentUser({...currentUser,password_hash:newPwd})
-  await loadUsers()
   closeModal('modal-change-pwd')
   showToast('密碼已更新')
 }
@@ -10711,8 +10724,7 @@ async function submitResetUserPassword(){
   const newPwd=(document.getElementById('rp-new')?.value||'').trim()
   if(!newPwd){showToast('請輸入新密碼','error');return}
   if(newPwd.length<4){showToast('密碼至少需要 4 個字元','error');return}
-  const{error}=await sb.from('users').update({password_hash:newPwd}).eq('id',_resetPwdUserId)
-  if(error){showToast('重設失敗：'+error.message,'error');return}
+  try{await callUserAdmin({action:'reset_password',user_id:_resetPwdUserId,password:newPwd})}catch(error){showToast('重設失敗：'+error.message,'error');return}
   await loadUsers()
   closeModal('modal-reset-pwd')
   showToast('密碼已重設')
@@ -10721,8 +10733,7 @@ async function submitResetUserPassword(){
 async function toggleUserActive(userId,currentActive){
   const action=currentActive?t('user_deactivate'):t('user_activate')
   confirmModal(t('confirm_user_action').replace('{action}',action),async()=>{
-    const{error}=await sb.from('users').update({is_active:!currentActive}).eq('id',userId)
-    if(error){showToast(t('err_update')+error.message,'error');return}
+    try{await callUserAdmin({action:'set_active',user_id:userId,is_active:!currentActive})}catch(error){showToast(t('err_update')+error.message,'error');return}
     await loadUsers()
     renderUsersMgmt()
     logActivity('變更使用者狀態','user',String(userId),action)
@@ -10732,8 +10743,7 @@ async function toggleUserActive(userId,currentActive){
 
 async function deleteUser(userId,userName){
   confirmModal(t('confirm_del_user').replace('{name}',userName),async()=>{
-    const{error}=await sb.from('users').delete().eq('id',userId)
-    if(error){showToast(t('err_del')+error.message,'error');return}
+    try{await callUserAdmin({action:'delete',user_id:userId})}catch(error){showToast(t('err_del')+error.message,'error');return}
     await loadUsers()
     renderUsersMgmt()
     logActivity('刪除使用者','user',String(userId),userName)
@@ -11360,11 +11370,25 @@ async function _spSubmitShipment(){
   if(!_spDraftEtd){showToast('請填寫 ETD','error');return}
   if(!_spStagedItems.length){showToast('請選擇至少一項產品','error');return}
   const shipNo=generateShipmentNo()
+  if(isSupplierAccount()){
+    const items=_spStagedItems.map(itemId=>{
+      const poItem=purchaseOrderItems.find(i=>i.id===itemId)
+      return{po_item_id:itemId,qty:_spStagedQtys[itemId]??poItem?.qty}
+    })
+    const{error}=await sb.rpc('supplier_create_shipment',{
+      p_shipment_no:shipNo,p_etd:_spDraftEtd,p_eta:_spDraftEta||null,
+      p_vessel_name:_spDraftVessel||null,p_items:items
+    })
+    if(error){showToast('建立失敗：'+error.message,'error');return}
+    _spStagedItems=[];_spStagedQtys={};_spDraftEtd='';_spDraftEta='';_spDraftVessel=''
+    await loadShipments();_renderSpTabBar();_renderSpContent();showToast('船運 '+shipNo+' 已建立')
+    return
+  }
   const{data:sh,error:shErr}=await sb.from('shipments').insert({shipment_no:shipNo,status:'planned',etd:_spDraftEtd,eta:_spDraftEta||null,vessel_name:_spDraftVessel||null}).select().single()
   if(shErr){showToast('建立失敗：'+shErr.message,'error');return}
   const uniquePoIds=new Set(_spStagedItems.map(id=>{const i=purchaseOrderItems.find(x=>x.id===id);return i?String(i.po_id):null}).filter(Boolean))
   for(const poId of uniquePoIds){
-    await sb.from('shipment_purchase_orders').insert({shipment_id:sh.id,purchase_order_id:parseInt(poId)}).catch(()=>{})
+    await sb.from('shipment_purchase_orders').insert({shipment_id:sh.id,purchase_order_id:poId}).catch(()=>{})
   }
   for(const itemId of _spStagedItems){
     const poItem=purchaseOrderItems.find(i=>i.id===itemId)
