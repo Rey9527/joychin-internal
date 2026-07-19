@@ -262,3 +262,14 @@ test('inquiry attachments use a private bucket and an auditable timeline', () =>
   assert.match(migration, /joychin_inquiry_attachments_internal/)
   assert.match(migration, /public\.app_is_internal\(\)/)
 })
+
+test('modern interface keeps a consistent responsive design system', () => {
+  assert.match(html, /--jc-primary: #13715a/)
+  assert.match(html, /\.sidebar \{[\s\S]*width: 244px/)
+  assert.match(html, /\.nav-item\.active[\s\S]*linear-gradient/)
+  assert.match(html, /\.assistant-action-icon[\s\S]*width: 48px/)
+  assert.match(html, /button:focus-visible/)
+  assert.match(html, /@media \(max-width: 680px\)[\s\S]*\.assistant-action-grid/)
+  assert.match(html, /#login-page > div::before/)
+  assert.match(html, /Beta v0\.15\.0/)
+})
