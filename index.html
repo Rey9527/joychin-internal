@@ -127,6 +127,13 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .conversion-summary { grid-column:1/-1; border:1px solid #cfe4db; border-radius:10px; padding:10px 12px; background:#f1f8f5; color:#315e4e; font-size:12px; line-height:1.55; }
 .conversion-summary.manual { background:#fffaf0; border-color:#ead69a; color:#765c12; }
 .stock-primary-action { min-height:46px; padding:0 20px; font-size:14px; font-weight:750; box-shadow:0 8px 20px rgba(19,113,90,.22); }
+.role-preview-control { display:none; align-items:center; gap:7px; padding:4px 6px 4px 10px; border:1px solid #d7e5df; border-radius:10px; background:#f6faf8; }
+.role-preview-control label { margin:0; color:#52635b; font-size:11px; white-space:nowrap; }
+.role-preview-control select { width:auto; min-width:120px; padding:6px 28px 6px 9px; border-radius:7px; border-color:#bfd3ca; background-color:#fff; font-size:12px; }
+.role-preview-banner { display:none; align-items:center; justify-content:space-between; gap:12px; padding:9px 20px; color:#714f05; background:#fff7d6; border-bottom:1px solid #ead58a; font-size:12px; line-height:1.45; }
+.role-preview-banner strong { color:#5d4208; }
+.role-preview-banner button { border:0; background:transparent; color:#725b1d; text-decoration:underline; cursor:pointer; font:inherit; white-space:nowrap; }
+body.role-preview-active .preview-write-action { opacity:.46 !important; cursor:not-allowed !important; }
 .movement-direction-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .movement-direction-btn { min-height:58px; border:1px solid var(--jc-border-strong,#cbd7d1); border-radius:12px; background:#fff; color:#46534d; cursor:pointer; font:inherit; font-weight:700; text-align:left; padding:10px 14px; transition:.15s ease; }
 .movement-direction-btn span { display:block; margin-top:2px; color:#7a8781; font-size:11px; font-weight:450; }
@@ -546,6 +553,10 @@ label { margin-bottom: 6px; color: #52635c; font-size: 11px; font-weight: 650; }
   .topbar-title { font-size: 16px; }
   #hamburger-btn { width: 40px; height: 40px; margin-right: 5px; border-radius: 10px; background: #f0f4f2; }
   #user-info { display: none !important; }
+  .role-preview-control { padding:3px; }
+  .role-preview-control label { display:none; }
+  .role-preview-control select { min-width:108px; max-width:126px; padding:7px 24px 7px 8px; font-size:12px !important; }
+  .role-preview-banner { padding:9px 14px; align-items:flex-start; }
   #logout-btn { min-height: 38px; }
   .content { padding: 16px 14px calc(28px + env(safe-area-inset-bottom)); }
   .card { padding: 16px; border-radius: 14px; }
@@ -615,7 +626,7 @@ label { margin-bottom: 6px; color: #52635c; font-size: 11px; font-weight: 650; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.17.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.18.0</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -693,9 +704,23 @@ label { margin-bottom: 6px; color: #52635c; font-size: 11px; font-weight: 650; }
       <button class="btn btn-ghost btn-sm" id="pshop-mobile-cart-btn" onclick="openMobileCart()" style="display:none"><i data-lucide="shopping-cart" style="width:13px;height:13px;margin-right:4px;vertical-align:-2px"></i><span id="pshop-mobile-cart-count">0</span> 項</button>
       <button class="btn btn-ghost btn-sm" id="pshop-back-btn" onclick="pshopLeave()" style="display:none">← 返回採購單</button>
       <div id="overdue-alert" style="display:none"></div>
+      <div id="role-preview-control" class="role-preview-control">
+        <label for="role-preview-select">預覽視角</label>
+        <select id="role-preview-select" onchange="setRolePreview(this.value)" data-preview-allow="true">
+          <option value="">我的管理員視角</option>
+          <option value="manager">主管</option>
+          <option value="user">助理／員工</option>
+          <option value="supplier">供應商</option>
+          <option value="customer">客戶</option>
+        </select>
+      </div>
       <div id="user-info" style="font-size:11px;color:#888;display:none"></div>
       <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none" onclick="logout()" data-i18n="btn_logout">登出</button>
     </div>
+  </div>
+  <div id="role-preview-banner" class="role-preview-banner">
+    <span>👁 <strong id="role-preview-label"></strong>預覽中｜唯讀模式，不會變更正式資料；這不是實際帳號權限測試。</span>
+    <button type="button" onclick="setRolePreview('')" data-preview-allow="true">返回我的視角</button>
   </div>
   <div class="content">
 
@@ -2458,6 +2483,7 @@ function confirmModal(msg,onConfirm){
 }
 
 let currentUser=null
+let previewRole=null
 
 const SESSION_USER_KEY='currentUser'
 const SESSION_ACTIVE_TAB_KEY='activeTab'
@@ -2519,8 +2545,13 @@ function userRoleLabel(role){
 function userRoleColor(role){
   return ({admin:'#A32D2D',manager:'#185FA5',user:'#666',supplier:'#854F0B',customer:'#0F6E56'})[normalizeUserRole(role)]||'#666'
 }
-function isSupplierAccount(){return currentUser?.role==='supplier'}
-function isCustomerAccount(){return currentUser?.role==='customer'}
+function isActualAdmin(){return currentUser?.role==='admin'}
+function effectiveUserRole(){return isActualAdmin()&&previewRole?previewRole:currentUser?.role}
+function isPreviewMode(){return !!(isActualAdmin()&&previewRole)}
+function isSupplierAccount(){return effectiveUserRole()==='supplier'}
+function isCustomerAccount(){return effectiveUserRole()==='customer'}
+function isActualSupplierAccount(){return currentUser?.role==='supplier'}
+function isActualCustomerAccount(){return currentUser?.role==='customer'}
 function isExternalAccount(){return isSupplierAccount()||isCustomerAccount()}
 
 function persistCurrentUser(user){
@@ -2530,11 +2561,13 @@ function persistCurrentUser(user){
 
 function clearCurrentUser(){
   currentUser=null
+  previewRole=null
   sessionStorage.removeItem(SESSION_USER_KEY)
 }
 
 function isManager(){
-  return !!(currentUser&&(currentUser.role==='admin'||currentUser.role==='manager'))
+  const role=effectiveUserRole()
+  return role==='admin'||role==='manager'
 }
 
 function canAccessPurchases(){
@@ -2753,7 +2786,25 @@ const IS_LOCAL_APP=['127.0.0.1','localhost','::1'].includes(location.hostname)
 const SB_URL=IS_LOCAL_APP?'http://127.0.0.1:54321':'https://ckgjcwhlusksqbqvvbma.supabase.co'
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZ2pjd2hsdXNrc3FicXZ2Ym1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MDMzNzUsImV4cCI6MjA5MjA3OTM3NX0.GQtWWNP_Gd4Zx6S3nNoukVIY8cUXCiGmIe_G9Lyy7fc'
 const LOCAL_SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
-const sb=supabase.createClient(SB_URL,IS_LOCAL_APP?LOCAL_SB_KEY:SB_KEY)
+const PREVIEW_READ_RPCS=new Set(['app_list_inquiries','app_list_quote_items','app_list_products'])
+let _previewBlockNoticeAt=0
+function previewSafeFetch(input,init={}){
+  const req=input instanceof Request?input:null
+  const url=String(req?.url||input||'')
+  const method=String(init.method||req?.method||'GET').toUpperCase()
+  if(isPreviewMode()&&!['GET','HEAD','OPTIONS'].includes(method)){
+    const rpcName=(url.match(/\/rest\/v1\/rpc\/([^?]+)/)||[])[1]
+    const safeAuth=/\/auth\/v1\/(token|logout)(?:\?|$)/.test(url)
+    const safeSignedUrl=/\/storage\/v1\/object\/sign\//.test(url)
+    if(!safeAuth&&!safeSignedUrl&&!PREVIEW_READ_RPCS.has(rpcName)){
+      const now=Date.now()
+      if(now-_previewBlockNoticeAt>1200){_previewBlockNoticeAt=now;setTimeout(()=>showToast('角色預覽為唯讀模式，未送出任何變更','error'),0)}
+      return Promise.resolve(new Response(JSON.stringify({message:'Role preview is read-only'}),{status:403,headers:{'Content-Type':'application/json'}}))
+    }
+  }
+  return fetch(input,init)
+}
+const sb=supabase.createClient(SB_URL,IS_LOCAL_APP?LOCAL_SB_KEY:SB_KEY,{global:{fetch:previewSafeFetch}})
 const USER_SAFE_COLUMNS='id,email,name,role,is_active,created_at,group_id,linked_company,auth_id,auth_email'
 
 async function resolveAuthEmail(login){
@@ -2891,6 +2942,7 @@ async function init(){
     document.getElementById('user-info').textContent=currentUser.name+' ('+userRoleLabel(currentUser.role)+')'
     document.getElementById('logout-btn').style.display='block'
     document.getElementById('sidebar-user-email').textContent=currentUser.email||currentUser.name||'已登入'
+    document.getElementById('role-preview-control').style.display=isActualAdmin()?'flex':'none'
     if(isManager()){
       document.getElementById('nav-users_mgmt').style.display='flex'
       document.getElementById('nav-settings').style.display='flex'
@@ -7061,7 +7113,63 @@ async function confirmShopOrder(){
 // ── end 採購選購 ──────────────────────────────────────────
 
 const TAB_LABELS={dashboard:1,inquiry:1,quotes:1,samples:1,complaints:1,orders:1,shipments:1,customers:1,suppliers_mgmt:1,products:1,'stock-flow':1,docs:1,users_mgmt:1,settings:1,purchases:1,'purchase-shop':1,'customer-portal':1,'supplier-portal':1}
+const ROLE_TAB_ACCESS={
+  admin:Object.keys(TAB_LABELS),
+  manager:Object.keys(TAB_LABELS),
+  user:['dashboard','inquiry','quotes','samples','complaints','orders','shipments','customers','suppliers_mgmt','products','stock-flow','docs','purchases','purchase-shop'],
+  supplier:['supplier-portal'],
+  customer:['customer-portal']
+}
+function canRoleAccessTab(tab,role=effectiveUserRole()){
+  return !!ROLE_TAB_ACCESS[role]?.includes(tab)
+}
+function resetPortalPreviewSelectors(){
+  ;[['sp-supplier-sel','sp-company-label','— 選擇供應商 —'],['cp-customer-sel','cp-company-label','— 選擇客戶 —']].forEach(([selectId,labelId,placeholder])=>{
+    document.getElementById(labelId)?.remove()
+    const sel=document.getElementById(selectId)
+    if(!sel)return
+    sel.disabled=false
+    sel.style.display=''
+    sel.innerHTML='<option value="">'+placeholder+'</option>'
+  })
+}
+function applyRoleNavigation(){
+  const allowed=new Set(ROLE_TAB_ACCESS[effectiveUserRole()]||[])
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    const tab=el.id.replace(/^nav-/,'')
+    el.style.display=allowed.has(tab)?'flex':'none'
+  })
+  document.querySelectorAll('.nav-section').forEach(section=>section.style.display=isExternalAccount()?'none':'block')
+}
+function updateRolePreviewUi(){
+  const active=isPreviewMode()
+  document.body.classList.toggle('role-preview-active',active)
+  const banner=document.getElementById('role-preview-banner')
+  if(banner)banner.style.display=active?'flex':'none'
+  const label=document.getElementById('role-preview-label')
+  if(label)label.textContent=userRoleLabel(previewRole)+'視角'
+  const select=document.getElementById('role-preview-select')
+  if(select)select.value=previewRole||''
+  const info=document.getElementById('user-info')
+  if(info&&currentUser)info.textContent=currentUser.name+' ('+(active?'管理員本人 · 預覽 '+userRoleLabel(previewRole):userRoleLabel(currentUser.role))+')'
+}
+function setRolePreview(role){
+  if(!isActualAdmin())return
+  const next=['manager','user','supplier','customer'].includes(role)?role:null
+  previewRole=next
+  document.querySelectorAll('.modal-overlay.open').forEach(el=>el.classList.remove('open'))
+  resetPortalPreviewSelectors()
+  applyRoleNavigation()
+  updateRolePreviewUi()
+  const target=next==='supplier'?'supplier-portal':next==='customer'?'customer-portal':'dashboard'
+  switchTab(target,false)
+  showToast(next?'已切換為'+userRoleLabel(next)+'唯讀預覽':'已返回管理員視角')
+}
 function switchTab(tab,save=true){
+  if(!canRoleAccessTab(tab)){
+    showToast('目前角色無法查看此功能','error')
+    tab=isSupplierAccount()?'supplier-portal':isCustomerAccount()?'customer-portal':'dashboard'
+  }
   if(tab==='settings'&&!hasPermission('view_settings')){
     showToast('只有管理者可以查看系統設定','error')
     tab='inquiry'
@@ -11135,7 +11243,7 @@ async function loadUserGroups(){
 
 function hasPermission(key){
   if(!currentUser) return false
-  const r=currentUser.role
+  const r=effectiveUserRole()
   if(r==='admin'||r==='manager') return true
   const grp=userGroups.find(g=>String(g.id)===String(currentUser.group_id))
   return !!(grp?.permissions?.[key])
@@ -12041,7 +12149,7 @@ function renderSupplierPortal(){
   const el=document.getElementById('supplier-portal-list')
   if(!el)return
   const sel=document.getElementById('sp-supplier-sel')
-  if(isSupplierAccount()){
+  if(isActualSupplierAccount()){
     // external supplier account: lock to their company, hide selector
     const co=currentUser.linked_company||''
     if(sel){sel.innerHTML='<option value="'+esc(co)+'">'+esc(co)+'</option>';sel.value=co;sel.disabled=true;sel.style.display='none'}
@@ -12073,7 +12181,7 @@ function renderCustomerPortal(){
   const countEl=document.getElementById('cp-item-count')
   if(!el)return
   const sel=document.getElementById('cp-customer-sel')
-  if(isCustomerAccount()){
+  if(isActualCustomerAccount()){
     const co=currentUser.linked_company||''
     if(sel){sel.innerHTML='<option value="'+esc(co)+'">'+esc(co)+'</option>';sel.value=co;sel.disabled=true;sel.style.display='none'}
     const wrap=sel?.parentElement
@@ -12180,6 +12288,18 @@ document.addEventListener('wheel',function(e){
   e.target.dispatchEvent(new Event('input',{bubbles:true}))
   e.target.dispatchEvent(new Event('change',{bubbles:true}))
 },{passive:false})
+document.addEventListener('click',function(e){
+  if(!isPreviewMode())return
+  const target=e.target.closest('button,[role="button"],input[type="submit"]')
+  if(!target||target.matches('[data-preview-allow],.nav-item,.modal-close,.inline-overlay-close,#hamburger-btn,#logout-btn'))return
+  const handler=target.getAttribute('onclick')||''
+  const safe=/^(switchTab|closeModal|closeSidebar|toggleSidebar|render|open[A-Z]|pshopLeave|setLang|clearFilters|applyFilterDrawer|resetCurrentFilterDrawer|_spSwitchTab|_spAddItem)\b/.test(handler.trim())
+  if(safe)return
+  e.preventDefault()
+  e.stopImmediatePropagation()
+  target.classList.add('preview-write-action')
+  showToast('角色預覽為唯讀模式，未執行此動作','error')
+},true)
 </script>
 <script src="lang-en.js"></script>
 </body>
