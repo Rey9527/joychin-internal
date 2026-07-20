@@ -5,6 +5,7 @@ const test = require('node:test')
 const vm = require('node:vm')
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8')
+const workflowSpec = fs.readFileSync(path.join(__dirname, '..', 'WORKFLOW-SPEC.md'), 'utf8')
 
 function extractFunction(name) {
   const start = html.indexOf(`function ${name}(`)
@@ -308,4 +309,14 @@ test('stock movement product selector includes search and conversion guidance', 
   assert.match(body, /換算後庫存異動量/)
   assert.match(extractFunction('stockProductPickerRows'), /product_code/)
   assert.match(extractFunction('updateStockMovementConversion'), /conversion-summary manual/)
+})
+
+test('product development rules preserve usability and release requirements', () => {
+  assert.match(workflowSpec, /產品開發與上線驗收準則/)
+  assert.match(workflowSpec, /訪談正常流程時必須同時詢問邊緣案例/)
+  assert.match(workflowSpec, /會持續增長的主檔選單，必須可搜尋/)
+  assert.match(workflowSpec, /公司型選單必須以公司去重/)
+  assert.match(workflowSpec, /只有產品具有可靠換算係數時才可自動換算/)
+  assert.match(workflowSpec, /桌面與手機實際操作主要流程/)
+  assert.match(workflowSpec, /直接呼叫 API 時也必須受到相同限制/)
 })
