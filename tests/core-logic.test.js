@@ -119,7 +119,8 @@ test('shipment receiving synchronizes inventory and purchase status', () => {
 
 test('customer shipments require a customer and preserve missing order linkage', () => {
   const movementBody = extractFunction('saveStockMovement')
-  assert.match(movementBody, /客戶出貨必須選擇客戶/)
+  assert.match(movementBody, /\['customer_shipment','customer_return'\]\.includes\(type\)&&!customerId/)
+  assert.match(movementBody, /\['supplier_receipt','supplier_return'\]\.includes\(type\)&&!supplierId/)
   assert.match(movementBody, /app_post_inventory_transaction/)
   const migration = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'migrations', '20260719030000_operational_traceability.sql'), 'utf8')
   assert.match(migration, /needs_link_review boolean not null default false/)
@@ -139,6 +140,7 @@ test('assistant dashboard exposes operational shortcuts', () => {
   assert.match(body, /登記客戶詢價/)
   assert.match(body, /供應商到貨/)
   assert.match(body, /客戶出貨/)
+  assert.match(body, /openStockMovementModal\(\\'customer_shipment\\',true\)/)
   assert.match(body, /補齊待辦資料/)
 })
 
@@ -280,7 +282,7 @@ test('modern interface keeps a consistent responsive design system', () => {
   assert.match(html, /button:focus-visible/)
   assert.match(html, /@media \(max-width: 680px\)[\s\S]*\.assistant-action-grid/)
   assert.match(html, /#login-page > div::before/)
-  assert.match(html, /Beta v0\.16\.0/)
+  assert.match(html, /Beta v0\.17\.0/)
 })
 
 test('stock movement converts physical units into the product inventory unit', () => {
@@ -309,6 +311,19 @@ test('stock movement product selector includes search and conversion guidance', 
   assert.match(body, /換算後庫存異動量/)
   assert.match(extractFunction('stockProductPickerRows'), /product_code/)
   assert.match(extractFunction('updateStockMovementConversion'), /conversion-summary manual/)
+})
+
+test('stock movement starts with direction and keeps specialized shortcuts fixed', () => {
+  const stockPage = html.slice(html.indexOf('<!-- 庫存流向 -->'), html.indexOf('<!-- 客訴管理 -->'))
+  assert.match(stockPage, /stock-primary-action[^>]*onclick="openStockMovementModal\(\)"[^>]*>＋ 新增庫存異動/)
+  assert.doesNotMatch(stockPage, /一般入庫/)
+  assert.doesNotMatch(stockPage, /openStockMovementModal\('customer_shipment'\)/)
+  const modalBody = extractFunction('openStockMovementModal')
+  assert.match(modalBody, /第一步：庫存方向/)
+  assert.match(modalBody, /第二步：異動原因/)
+  assert.match(modalBody, /isLocked/)
+  const directionBody = extractFunction('stockMovementDirectionChanged')
+  assert.match(directionBody, /STOCK_MOVEMENT_REASONS\[direction\]/)
 })
 
 test('product development rules preserve usability and release requirements', () => {

@@ -126,6 +126,14 @@ label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
 .field-help { font-size:11px; color:#6b7a73; line-height:1.5; margin-top:5px; }
 .conversion-summary { grid-column:1/-1; border:1px solid #cfe4db; border-radius:10px; padding:10px 12px; background:#f1f8f5; color:#315e4e; font-size:12px; line-height:1.55; }
 .conversion-summary.manual { background:#fffaf0; border-color:#ead69a; color:#765c12; }
+.stock-primary-action { min-height:46px; padding:0 20px; font-size:14px; font-weight:750; box-shadow:0 8px 20px rgba(19,113,90,.22); }
+.movement-direction-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.movement-direction-btn { min-height:58px; border:1px solid var(--jc-border-strong,#cbd7d1); border-radius:12px; background:#fff; color:#46534d; cursor:pointer; font:inherit; font-weight:700; text-align:left; padding:10px 14px; transition:.15s ease; }
+.movement-direction-btn span { display:block; margin-top:2px; color:#7a8781; font-size:11px; font-weight:450; }
+.movement-direction-btn:hover { border-color:#278c6f; background:#fbfefc; }
+.movement-direction-btn.active.in { color:#116149; border-color:#278c6f; background:#eaf7f1; box-shadow:0 0 0 2px rgba(39,140,111,.12); }
+.movement-direction-btn.active.out { color:#9f2d25; border-color:#d97970; background:#fff1f0; box-shadow:0 0 0 2px rgba(180,35,24,.09); }
+.movement-fixed-type { min-height:44px; display:flex; align-items:center; padding:9px 12px; border:1px solid #cfe4db; border-radius:10px; background:#f1f8f5; color:#245d49; font-weight:700; }
 #hamburger-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; color: #1a1a1a; line-height: 1; flex-shrink: 0; margin-right: 10px; }
 #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 299; }
 #sidebar-overlay.open { display: block; }
@@ -607,7 +615,7 @@ label { margin-bottom: 6px; color: #52635c; font-size: 11px; font-weight: 650; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.16.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.17.0</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -807,10 +815,9 @@ label { margin-bottom: 6px; color: #52635c; font-size: 11px; font-weight: 650; }
     <div id="tab-stock-flow" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap">
         <div><div style="font-size:16px;font-weight:700">庫存流向台帳</div><div id="stock-flow-summary" style="font-size:11px;color:#888;margin-top:3px"></div></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-primary stock-primary-action" onclick="openStockMovementModal()">＋ 新增庫存異動</button>
           <button class="btn btn-ghost" onclick="openReceivingBatchModal()">📥 混單到貨</button>
-          <button class="btn btn-primary" onclick="openStockMovementModal('customer_shipment')">📤 客戶出貨</button>
-          <button class="btn btn-ghost" onclick="openStockMovementModal('supplier_receipt')">＋ 一般入庫</button>
           <button class="btn btn-ghost" onclick="openStocktakeModal()">盤點</button>
         </div>
       </div>
@@ -3442,7 +3449,7 @@ function renderAssistantDashboard(){
     '<div class="assistant-action-grid">'+
       '<button class="assistant-action" onclick="showNewInqForm()"><span class="assistant-action-icon">💬</span><span><span class="assistant-action-title">登記客戶詢價</span><span class="assistant-action-note">LINE 詢價、未登記客戶及新產品開發</span></span></button>'+
       '<button class="assistant-action" onclick="switchTab(\'stock-flow\');setTimeout(openReceivingBatchModal,60)"><span class="assistant-action-icon">📥</span><span><span class="assistant-action-title">供應商到貨</span><span class="assistant-action-note">先登記混單與數量，之後再配對採購單</span></span></button>'+
-      '<button class="assistant-action" onclick="switchTab(\'stock-flow\');setTimeout(()=>openStockMovementModal(\'customer_shipment\'),60)"><span class="assistant-action-icon">🚚</span><span><span class="assistant-action-title">客戶出貨</span><span class="assistant-action-note">一批一位客戶，訂單可後補但會提醒</span></span></button>'+
+      '<button class="assistant-action" onclick="switchTab(\'stock-flow\');setTimeout(()=>openStockMovementModal(\'customer_shipment\',true),60)"><span class="assistant-action-icon">🚚</span><span><span class="assistant-action-title">客戶出貨</span><span class="assistant-action-note">一批一位客戶，訂單可後補但會提醒</span></span></button>'+
       '<button class="assistant-action" onclick="switchTab(\'samples\')"><span class="assistant-action-icon">🧪</span><span><span class="assistant-action-title">樣品管理</span><span class="assistant-action-note">樣品入庫、寄出及客戶回饋</span></span></button>'+
       '<button class="assistant-action" onclick="switchTab(\'purchases\')"><span class="assistant-action-icon">🛒</span><span><span class="assistant-action-title">採購作業</span><span class="assistant-action-note">按供應商分單並保留客戶訂單來源</span></span></button>'+
       '<button class="assistant-action" onclick="switchTab(\'stock-flow\')"><span class="assistant-action-icon">🔗</span><span><span class="assistant-action-title">補齊待辦資料</span><span class="assistant-action-note">待辨識到貨 '+unidentified+' · 待補訂單 '+unlinked+'</span></span></button>'+
@@ -10023,6 +10030,10 @@ const STOCK_MOVEMENT_LABELS={
   sample_in:'樣品入庫',sample_out:'樣品出庫',free_issue:'免費贈送',company_use:'公司自用',scrap:'報廢',
   stocktake_gain:'盤盈',stocktake_loss:'盤虧',opening_balance:'期初',reversal:'沖銷'
 }
+const STOCK_MOVEMENT_REASONS={
+  in:['supplier_receipt','customer_return','sample_in'],
+  out:['customer_shipment','supplier_return','sample_out','free_issue','company_use','scrap']
+}
 const STOCK_UNITS=['roll','m','m²','kg','box','pc']
 
 function renderStockFlow(){
@@ -10099,20 +10110,22 @@ async function saveStockOrderLink(transactionId){
   closeModal('modal-stock-movement');await loadInventoryOperations();renderStockFlow();renderDashboard();logActivity('補綁出貨訂單','inventory',String(transactionId),order.id);showToast('已補綁訂單 '+order.id)
 }
 
-function openStockMovementModal(defaultType='customer_shipment'){
+function openStockMovementModal(defaultType=null,lockType=false){
   if(!inventoryOpsAvailable){showToast('請先套用庫存台帳資料庫 migration','error');return}
   const isStocktake=defaultType==='stocktake'
-  const title=isStocktake?'盤點實際庫存':(STOCK_MOVEMENT_LABELS[defaultType]||'庫存異動')
+  const isLocked=!isStocktake&&lockType&&!!STOCK_MOVEMENT_LABELS[defaultType]
+  const title=isStocktake?'盤點實際庫存':(isLocked?STOCK_MOVEMENT_LABELS[defaultType]:'新增庫存異動')
   document.getElementById('modal-stock-movement-title').textContent=title
-  const typePairs=Object.entries(STOCK_MOVEMENT_LABELS).filter(([k])=>!['stocktake_gain','stocktake_loss','opening_balance','reversal'].includes(k))
   const customerOpts=customers.map(c=>'<option value="'+c.id+'">'+escapeHtml(c.company)+'</option>').join('')
   const supplierOpts=uniqueSupplierOptions()
+  const fixedDirection=STOCK_MOVEMENT_REASONS.in.includes(defaultType)?'增加庫存':'減少庫存'
   const bd=document.getElementById('modal-stock-movement-bd')
   bd.innerHTML=
-    '<div class="alert-info">'+(isStocktake?'輸入實際盤點數量，系統會自動建立盤盈或盤虧。':'出貨必須選客戶；訂單可暫時不選，但會列入紅色待補清單。')+'</div>'+
+    '<div id="sm-flow-help" class="alert-info">'+(isStocktake?'輸入實際盤點數量，系統會自動建立盤盈或盤虧。':isLocked?'此快速入口已固定為「'+fixedDirection+' · '+escapeHtml(STOCK_MOVEMENT_LABELS[defaultType])+'」，直接填寫資料即可。':'先選擇要增加或減少庫存，系統再提供對應的異動原因。')+'</div>'+
+    (!isStocktake&&!isLocked?'<div style="margin-bottom:12px"><label>第一步：庫存方向 <span class="req">*</span></label><div class="movement-direction-grid"><button id="sm-direction-in" type="button" class="movement-direction-btn in" onclick="stockMovementDirectionChanged(\'in\')">＋ 增加庫存<span>到貨、客戶退貨、樣品入庫</span></button><button id="sm-direction-out" type="button" class="movement-direction-btn out" onclick="stockMovementDirectionChanged(\'out\')">－ 減少庫存<span>出貨、退回、贈送、自用、報廢</span></button></div></div>':'')+
     '<div class="grid-2">'+
       '<div><label>實際日期</label><input id="sm-date" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
-      (isStocktake?'<input id="sm-type" type="hidden" value="stocktake">':'<div><label>異動類型</label><select id="sm-type" onchange="stockMovementTypeChanged()">'+typePairs.map(([v,l])=>'<option value="'+v+'"'+(v===defaultType?' selected':'')+'>'+l+'</option>').join('')+'</select></div>')+
+      (isStocktake?'<input id="sm-type" type="hidden" value="stocktake">':isLocked?'<div><label>異動原因</label><div class="movement-fixed-type">'+escapeHtml(STOCK_MOVEMENT_LABELS[defaultType])+'</div><input id="sm-type" type="hidden" value="'+escapeHtml(defaultType)+'"></div>':'<div id="sm-type-wrap"><label>第二步：異動原因 <span class="req">*</span></label><select id="sm-type" onchange="stockMovementTypeChanged()" disabled><option value="">— 請先選增加或減少 —</option></select></div>')+
       '<div style="grid-column:1/-1"><label>產品 <span class="req">*</span></label><input id="sm-product" type="hidden"><button type="button" class="search-select-btn" onclick="openStockProductPicker()"><span id="sm-product-display" class="search-select-placeholder">搜尋或選擇產品</span><span aria-hidden="true">⌕</span></button><div id="sm-product-meta" class="field-help">選好產品後會顯示目前庫存與換算規則</div></div>'+
       '<div><label>'+(isStocktake?'實際盤點數量':'現場收到／出貨數量')+'</label><input id="sm-qty" type="number" min="0" step="0.001" inputmode="decimal" oninput="updateStockMovementConversion()"></div>'+
       '<div><label>現場使用的單位</label><select id="sm-unit" onchange="updateStockMovementConversion()">'+STOCK_UNITS.map(u=>'<option>'+u+'</option>').join('')+'</select></div>'+
@@ -10121,7 +10134,7 @@ function openStockMovementModal(defaultType='customer_shipment'){
       '<div id="sm-conversion-summary" class="conversion-summary">請先選擇產品，再輸入現場數量。</div>'+
       '<div id="sm-customer-wrap"><label>客戶 <span class="req">*</span></label><select id="sm-customer"><option value="">— 選擇客戶 —</option>'+customerOpts+'</select></div>'+
       '<div id="sm-order-wrap"><label>客戶訂單（可後補）</label><select id="sm-order"><option value="">— 尚未建立／稍後補 —</option>'+orders.filter(o=>o.status!=='cancelled').map(o=>'<option value="'+escapeHtml(o.id)+'">'+escapeHtml(o.id)+' · '+escapeHtml(o.customer||'')+'</option>').join('')+'</select></div>'+
-      '<div id="sm-supplier-wrap"><label>供應商</label><select id="sm-supplier"><option value="">— 選擇供應商 —</option>'+supplierOpts+'</select></div>'+
+      '<div id="sm-supplier-wrap"><label>供應商 <span class="req">*</span></label><select id="sm-supplier"><option value="">— 選擇供應商 —</option>'+supplierOpts+'</select></div>'+
       '<div id="sm-po-wrap"><label>採購單</label><select id="sm-po"><option value="">— 選填 —</option>'+purchaseOrders.map(po=>'<option value="'+escapeHtml(po.id)+'">'+escapeHtml(po.accounting_no||po.id)+'</option>').join('')+'</select></div>'+
     '</div><div style="margin-top:10px"><label>備註／換算依據</label><textarea id="sm-note" placeholder="例如：1000m = 1卷；客戶 LINE 臨時叫貨"></textarea></div>'+
     (isManager()?'<label style="display:flex;align-items:center;gap:7px;margin-top:10px"><input id="sm-negative" type="checkbox" style="width:auto;height:auto">主管例外允許負庫存（必須填原因）</label>':'')+
@@ -10131,6 +10144,15 @@ function openStockMovementModal(defaultType='customer_shipment'){
 }
 
 function openStocktakeModal(){openStockMovementModal('stocktake')}
+function stockMovementDirectionChanged(direction){
+  if(!STOCK_MOVEMENT_REASONS[direction])return
+  ;['in','out'].forEach(value=>{const btn=document.getElementById('sm-direction-'+value);if(btn){btn.classList.toggle('active',value===direction);btn.setAttribute('aria-pressed',value===direction?'true':'false')}})
+  const type=document.getElementById('sm-type')
+  if(type){type.disabled=false;type.innerHTML=STOCK_MOVEMENT_REASONS[direction].map(value=>'<option value="'+value+'">'+escapeHtml(STOCK_MOVEMENT_LABELS[value])+'</option>').join('')}
+  const help=document.getElementById('sm-flow-help')
+  if(help)help.textContent=direction==='in'?'增加庫存：請選擇貨物進入庫存的原因。':'減少庫存：請選擇貨物離開庫存的原因。'
+  stockMovementTypeChanged()
+}
 function stockMovementProductChanged(){
   const p=products.find(x=>String(x.id)===document.getElementById('sm-product')?.value)
   const unit=p?.inventory_unit||getInventoryUnit()
@@ -10217,10 +10239,16 @@ function stockMovementTypeChanged(){
   const supplier=type==='supplier_receipt'||type==='supplier_return'
   ;['sm-customer-wrap','sm-order-wrap'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=customer?'block':'none'})
   ;['sm-supplier-wrap','sm-po-wrap'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=supplier?'block':'none'})
+  const help=document.getElementById('sm-flow-help')
+  if(help&&type==='customer_shipment')help.textContent='客戶出貨必須選擇客戶；訂單可暫時不選，但會列入紅色待補清單。'
+  else if(help&&type==='customer_return')help.textContent='客戶退回的貨先進隔離狀態，不會直接變成可用庫存。'
+  else if(help&&type==='supplier_receipt')help.textContent='直接入庫適合已辨識的單一品項；供應商混單或數量不符請改用「混單到貨」。'
+  else if(help&&type==='supplier_return')help.textContent='退回供應商會減少庫存，請選擇供應商並留下退貨原因。'
 }
 
 async function saveStockMovement(){
   const rawType=document.getElementById('sm-type')?.value
+  if(!rawType){showToast('請先選擇增加或減少庫存，再選擇異動原因','error');return}
   const productId=parseInt(document.getElementById('sm-product')?.value||'',10)
   const p=products.find(x=>x.id===productId)
   const qty=parseFloat(document.getElementById('sm-qty')?.value||'')
@@ -10239,14 +10267,16 @@ async function saveStockMovement(){
   }else if(!Number.isFinite(baseQty)||baseQty<=0){showToast('請填寫折合庫存數量；單位不同時不可猜測換算','error');return}
   if(rawType!=='stocktake'&&document.getElementById('sm-base-qty')?.dataset.manual==='true'&&unit!==baseUnit&&!note){showToast('人工換算時請在備註填寫換算依據','error');return}
   const customerId=parseInt(document.getElementById('sm-customer')?.value||'',10)||null
-  if(type==='customer_shipment'&&!customerId){showToast('客戶出貨必須選擇客戶','error');return}
+  if(['customer_shipment','customer_return'].includes(type)&&!customerId){showToast('請選擇這筆異動所屬的客戶','error');return}
+  const supplierId=parseInt(document.getElementById('sm-supplier')?.value||'',10)||null
+  if(['supplier_receipt','supplier_return'].includes(type)&&!supplierId){showToast('請選擇這筆異動所屬的供應商','error');return}
   const allowNegative=!!document.getElementById('sm-negative')?.checked
   if(allowNegative&&!note){showToast('負庫存例外必須填寫原因','error');return}
   const{error}=await sb.rpc('app_post_inventory_transaction',{
     p_occurred_on:document.getElementById('sm-date')?.value,
     p_movement_type:type,p_product_id:productId,p_quantity:rawType==='stocktake'?baseQty:qty,p_unit:rawType==='stocktake'?baseUnit:unit,
     p_base_quantity:baseQty,p_base_unit:baseUnit,p_customer_id:customerId,
-    p_supplier_id:parseInt(document.getElementById('sm-supplier')?.value||'',10)||null,
+    p_supplier_id:supplierId,
     p_order_id:document.getElementById('sm-order')?.value||null,p_purchase_order_id:document.getElementById('sm-po')?.value||null,
     p_note:note,p_created_by:currentUser?.name||currentUser?.email||null,p_allow_negative:allowNegative
   })
