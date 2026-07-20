@@ -37,9 +37,12 @@ function extractFunction(name) {
 const sandbox = {
   products: [{ id: 1, width_m: 1.07 }],
   suppliers: [
-    { id: 2, country: 'CN' },
-    { id: 3, country: 'TH' }
-  ]
+    { id: 2, country: 'CN', company: 'Joy Paper Co Ltd', name: 'Amy' },
+    { id: 3, country: 'TH', company: 'Local Paper', name: 'Somchai' },
+    { id: 4, country: 'TH', company: ' Joy  Paper Co Ltd ', name: 'Ben' }
+  ],
+  getInventoryUnit: () => 'roll',
+  escapeHtml: value => String(value)
 }
 vm.createContext(sandbox)
 for (const name of [
@@ -49,7 +52,12 @@ for (const name of [
   '_qiNormCost',
   '_qiMarginPct',
   '_qiFinalPrice',
-  'poQtyToRolls'
+  'poQtyToRolls',
+  'supplierCompanyKey',
+  'uniqueSupplierCompanies',
+  'uniqueSupplierOptions',
+  'uniqueSupplierCompanyNames',
+  'stockMovementConversion'
 ]) {
   vm.runInContext(extractFunction(name), sandbox)
 }
@@ -271,5 +279,33 @@ test('modern interface keeps a consistent responsive design system', () => {
   assert.match(html, /button:focus-visible/)
   assert.match(html, /@media \(max-width: 680px\)[\s\S]*\.assistant-action-grid/)
   assert.match(html, /#login-page > div::before/)
-  assert.match(html, /Beta v0\.15\.0/)
+  assert.match(html, /Beta v0\.16\.0/)
+})
+
+test('stock movement converts physical units into the product inventory unit', () => {
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(sandbox.stockMovementConversion(1000, 'm', { inventory_unit: 'roll', meters_per_roll: 1000 }))),
+    { quantity: 1, unit: 'roll', reason: '依米數' }
+  )
+  assert.ok(Math.abs(sandbox.stockMovementConversion(1070, 'm²', { inventory_unit: 'roll', width_m: 1.07, meters_per_roll: 1000 }).quantity - 1) < 1e-9)
+  assert.equal(sandbox.stockMovementConversion(2, 'roll', { inventory_unit: 'roll' }).quantity, 2)
+  assert.equal(sandbox.stockMovementConversion(500, 'kg', { inventory_unit: 'roll' }), null)
+})
+
+test('company-level supplier selectors collapse duplicate contact rows', () => {
+  const companies = sandbox.uniqueSupplierCompanies()
+  assert.equal(companies.length, 2)
+  assert.deepEqual(JSON.parse(JSON.stringify(companies.map(x => x._company_label))), ['Joy Paper Co Ltd', 'Local Paper'])
+  assert.equal((sandbox.uniqueSupplierOptions().match(/Joy Paper Co Ltd/g) || []).length, 1)
+  assert.equal(sandbox.uniqueSupplierCompanies(4).find(x => x._company_label.trim() === 'Joy  Paper Co Ltd').id, 4)
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.uniqueSupplierCompanyNames())), ['Joy Paper Co Ltd', 'Local Paper'])
+})
+
+test('stock movement product selector includes search and conversion guidance', () => {
+  const body = extractFunction('openStockMovementModal')
+  assert.match(body, /openStockProductPicker/)
+  assert.match(body, /現場收到／出貨數量/)
+  assert.match(body, /換算後庫存異動量/)
+  assert.match(extractFunction('stockProductPickerRows'), /product_code/)
+  assert.match(extractFunction('updateStockMovementConversion'), /conversion-summary manual/)
 })
