@@ -282,7 +282,18 @@ test('modern interface keeps a consistent responsive design system', () => {
   assert.match(html, /button:focus-visible/)
   assert.match(html, /@media \(max-width: 680px\)[\s\S]*\.assistant-action-grid/)
   assert.match(html, /#login-page > div::before/)
-  assert.match(html, /Beta v0\.17\.0/)
+  assert.match(html, /Beta v0\.18\.0/)
+})
+
+test('admin role preview changes perspective without changing identity and blocks writes', () => {
+  assert.match(html, /function effectiveUserRole\(\)/)
+  assert.match(html, /isActualAdmin\(\)&&previewRole/)
+  assert.match(html, /function setRolePreview\(role\)/)
+  assert.match(html, /角色預覽為唯讀模式/)
+  assert.match(html, /previewSafeFetch/)
+  assert.match(html, /Role preview is read-only/)
+  assert.match(html, /const ROLE_TAB_ACCESS=/)
+  assert.match(html, /這不是實際帳號權限測試/)
 })
 
 test('stock movement converts physical units into the product inventory unit', () => {
