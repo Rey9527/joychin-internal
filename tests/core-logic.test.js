@@ -282,7 +282,13 @@ test('modern interface keeps a consistent responsive design system', () => {
   assert.match(html, /button:focus-visible/)
   assert.match(html, /@media \(max-width: 680px\)[\s\S]*\.assistant-action-grid/)
   assert.match(html, /#login-page > div::before/)
-  assert.match(html, /Beta v0\.18\.0/)
+  assert.match(html, /Beta v0\.18\.1/)
+})
+
+test('mobile Safari uses document scrolling instead of a fixed nested scroll area', () => {
+  assert.match(html, /@media \(max-width: 680px\)[\s\S]*#main-app \{ position: relative; inset: auto;[\s\S]*height: auto; min-height: 100dvh; overflow: visible;/)
+  assert.match(html, /@media \(max-width: 680px\)[\s\S]*\.content \{ flex: 0 0 auto; min-height: auto; overflow: visible;/)
+  assert.match(html, /html, body \{ min-height: 100%; height: auto; overflow-x: hidden; overflow-y: auto;/)
 })
 
 test('admin role preview changes perspective without changing identity and blocks writes', () => {
