@@ -282,13 +282,26 @@ test('modern interface keeps a consistent responsive design system', () => {
   assert.match(html, /button:focus-visible/)
   assert.match(html, /@media \(max-width: 680px\)[\s\S]*\.assistant-action-grid/)
   assert.match(html, /#login-page > div::before/)
-  assert.match(html, /Beta v0\.18\.1/)
+  assert.match(html, /Beta v0\.19\.0/)
 })
 
 test('mobile Safari uses document scrolling instead of a fixed nested scroll area', () => {
   assert.match(html, /@media \(max-width: 680px\)[\s\S]*#main-app \{ position: relative; inset: auto;[\s\S]*height: auto; min-height: 100dvh; overflow: visible;/)
   assert.match(html, /@media \(max-width: 680px\)[\s\S]*\.content \{ flex: 0 0 auto; min-height: auto; overflow: visible;/)
   assert.match(html, /html, body \{ min-height: 100%; height: auto; overflow-x: hidden; overflow-y: auto;/)
+})
+
+test('browser back and edge swipe follow the in-app navigation hierarchy', () => {
+  const initBody = extractFunction('initializeAppNavigationHistory')
+  const popBody = extractFunction('handleAppHistoryPopState')
+  const switchBody = extractFunction('switchTab')
+  assert.match(initBody, /history\.replaceState\(appHistoryState\(homeTab\)/)
+  assert.match(initBody, /history\.pushState\(appHistoryState\(initialTab\)/)
+  assert.match(popBody, /modal-overlay\.open\[id\^="modal-"\]/)
+  assert.match(popBody, /closeModal\(openModal\.id\)/)
+  assert.match(popBody, /switchTab\(target,false\)/)
+  assert.match(switchBody, /history\.pushState\(appHistoryState\(tab\)/)
+  assert.match(extractFunction('appHomeTab'), /supplier-portal[\s\S]*customer-portal[\s\S]*dashboard/)
 })
 
 test('admin role preview changes perspective without changing identity and blocks writes', () => {
