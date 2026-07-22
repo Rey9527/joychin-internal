@@ -630,7 +630,7 @@ label { margin-bottom: 6px; color: #52635c; font-size: 11px; font-weight: 650; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.18.1</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.19.0</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
@@ -2869,6 +2869,9 @@ let quoteChanges=[]
 let selectedInqId=null,selectedQuoteId=null,selectedSampleId=null,selectedOrderId=null,selectedShipmentId=null,selectedPurchaseId=null,selectedTaskId=null,activeTab='inquiry',showTpl=false
 let _pendingInq={}
 let _isDirty=false
+let _appHistoryReady=false
+let _appHistoryHandling=false
+let _appHistoryListenerInstalled=false
 let _dbCustomerRange='thisMonth'
 let _qPendingItems={},_qPendingHeader={}
 let _pendingQuoteItems=[],_qPendingItemSeq=0,_draftNewItem=null
@@ -2975,13 +2978,15 @@ async function init(){
   } else if(isCustomerAccount()){
     switchTab('customer-portal',false)
   } else {
-    const savedTab=sessionStorage.getItem(SESSION_ACTIVE_TAB_KEY)
+    const historyTab=history.state?.joychinApp?history.state.tab:null
+    const savedTab=historyTab||sessionStorage.getItem(SESSION_ACTIVE_TAB_KEY)
     if(savedTab&&TAB_LABELS[savedTab]){
       switchTab(savedTab,false)
     } else {
       switchTab('dashboard',false)
     }
   }
+  initializeAppNavigationHistory()
   enhanceNumericInputs()
   document.addEventListener('wheel',e=>{
     const el=document.activeElement
@@ -7124,6 +7129,39 @@ const ROLE_TAB_ACCESS={
   supplier:['supplier-portal'],
   customer:['customer-portal']
 }
+function appHomeTab(){
+  return isSupplierAccount()?'supplier-portal':isCustomerAccount()?'customer-portal':'dashboard'
+}
+function appHistoryState(tab=activeTab){return{joychinApp:true,tab}}
+function initializeAppNavigationHistory(){
+  const initialTab=activeTab
+  const homeTab=appHomeTab()
+  history.replaceState(appHistoryState(homeTab),'',location.href)
+  if(initialTab!==homeTab)history.pushState(appHistoryState(initialTab),'',location.href)
+  _appHistoryReady=true
+  if(!_appHistoryListenerInstalled){
+    window.addEventListener('popstate',handleAppHistoryPopState)
+    _appHistoryListenerInstalled=true
+  }
+}
+function handleAppHistoryPopState(event){
+  if(!currentUser)return
+  const openModals=[...document.querySelectorAll('.modal-overlay.open[id^="modal-"]')]
+  const openModal=openModals[openModals.length-1]
+  if(openModal){
+    closeModal(openModal.id)
+    history.pushState(appHistoryState(activeTab),'',location.href)
+    return
+  }
+  const target=event.state?.joychinApp&&TAB_LABELS[event.state.tab]?event.state.tab:null
+  if(!target)return
+  _appHistoryHandling=true
+  switchTab(target,false)
+  sessionStorage.setItem(SESSION_ACTIVE_TAB_KEY,activeTab)
+  history.replaceState(appHistoryState(activeTab),'',location.href)
+  _appHistoryHandling=false
+  window.scrollTo({top:0,behavior:'auto'})
+}
 function canRoleAccessTab(tab,role=effectiveUserRole()){
   return !!ROLE_TAB_ACCESS[role]?.includes(tab)
 }
@@ -7170,6 +7208,7 @@ function setRolePreview(role){
   showToast(next?'已切換為'+userRoleLabel(next)+'唯讀預覽':'已返回管理員視角')
 }
 function switchTab(tab,save=true){
+  const previousTab=activeTab
   if(!canRoleAccessTab(tab)){
     showToast('目前角色無法查看此功能','error')
     tab=isSupplierAccount()?'supplier-portal':isCustomerAccount()?'customer-portal':'dashboard'
@@ -7180,6 +7219,10 @@ function switchTab(tab,save=true){
   }
   activeTab=tab
   if(save)sessionStorage.setItem(SESSION_ACTIVE_TAB_KEY,tab)
+  if(_appHistoryReady&&!_appHistoryHandling){
+    if(save&&previousTab!==tab)history.pushState(appHistoryState(tab),'',location.href)
+    else if(!save)history.replaceState(appHistoryState(tab),'',location.href)
+  }
   Object.keys(TAB_LABELS).forEach(k=>{
     const el=document.getElementById('tab-'+k);if(el)el.style.display=k===tab?'block':'none'
     const nav=document.getElementById('nav-'+k);if(nav)nav.classList.toggle('active',k===tab)
