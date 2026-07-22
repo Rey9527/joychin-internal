@@ -545,6 +545,10 @@ label { margin-bottom: 6px; color: #52635c; font-size: 11px; font-weight: 650; }
   .assistant-action-grid { grid-template-columns: repeat(2,minmax(180px,1fr)); }
 }
 @media (max-width: 680px) {
+  html, body { min-height: 100%; height: auto; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #main-app { position: relative; inset: auto; width: 100%; height: auto; min-height: 100dvh; overflow: visible; align-items: stretch; }
+  .main { width: 100%; min-height: 100dvh; height: auto; overflow: visible; }
+  .content { flex: 0 0 auto; min-height: auto; overflow: visible; -webkit-overflow-scrolling: auto; }
   .sidebar { width: min(84vw, 304px); padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
   .sidebar-logo { padding: 22px 20px 16px; }
   .sidebar-nav { padding: 10px 10px 28px; }
@@ -626,7 +630,7 @@ label { margin-bottom: 6px; color: #52635c; font-size: 11px; font-weight: 650; }
   <div class="sidebar-logo">
     <h1>JOY CHIN PSA</h1>
     <p>Release Liner Business System<br><span style="font-size:10px;opacity:0.8">ระบบธุรกิจกระดาษรองพิมพ์</span></p>
-    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.18.0</span></div>
+    <div style="margin-top:8px"><span class="badge" style="background:#FAEEDA;color:#854F0B;border:1px solid #E2B36D">Beta v0.18.1</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section" data-i18n="nav_sales">業務</div>
