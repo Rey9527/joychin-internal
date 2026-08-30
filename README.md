@@ -16,6 +16,9 @@ This project is currently a single-file HTML application used to manage inquirie
 ## 主要檔案 / Main File
 - `index.html`
 
+## 重建與整合規格 / Rebuild & Integration Specs
+- [JOY CHIN AI 營運助手 API 串接規格 v1](JOY_CHIN_API_Integration_Spec_v1.md) — 現況差距、Phase 1 唯讀 API 與後續受控 AI 整合邊界
+
 ## 已完成模組 / Completed Modules
 - 詢價管理
 - 報價管理
